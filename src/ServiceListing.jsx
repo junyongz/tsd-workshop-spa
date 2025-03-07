@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Badge, Button, Card, Col, Container, ListGroup, ListGroupItem, Row, Stack, Table } from 'react-bootstrap';
+import { Badge, Button, Card, Col, Container, ListGroup, ListGroupItem, Row, Stack } from 'react-bootstrap';
 import Pagination from 'react-bootstrap/Pagination';
 import ServiceDialog from './ServiceDialog';
 import getPaginationItems from './getPaginationItems';

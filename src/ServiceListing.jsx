@@ -139,7 +139,7 @@ function ServiceListing({services=[], filteredServices=[], keywordSearch = () =>
                         <Stack direction="horizontal">
                           <Col>{vvv.itemDescription}</Col>
                           <Col className='text-sm-end col-2'><Badge pill>{vvv.quantity > 0 && `${vvv.quantity} ${vvv.unit} @ $${vvv.unitPrice?.toFixed(2)}`}</Badge></Col>
-                          <Col className='text-sm-end col-2'>{vvv.migratedIndicator ? <Badge pill>$ {vvv.totalPrice}</Badge> : <HoverPilledBadge onRemove={() => removeTransaction(vvv.index)}>$ {vvv.totalPrice}</HoverPilledBadge> }</Col>
+                          <Col className='text-sm-end col-2'>{vvv.migratedIndicator || vvv.completionDate ? <Badge pill>$ {vvv.totalPrice}</Badge> : <HoverPilledBadge onRemove={() => removeTransaction(vvv.index)}>$ {vvv.totalPrice}</HoverPilledBadge> }</Col>
                         </Stack>
                       </ListGroupItem>)
                     }

@@ -21,3 +21,10 @@
 7. Access right
 8. Search pill badge holders (autocomplete, DONE)
 9. Search by Date
+10. Exception handling
+
+## Bigger plan
+
+1. Websocket for on-the-fly update of the state
+2. Websocket for the backend status
+3. Electron based app

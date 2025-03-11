@@ -13,6 +13,7 @@ import { Typeahead } from 'react-bootstrap-typeahead';
  */
 
 function App() {
+  const apiUrl = process.env.REACT_APP_API_URL
   const services = useRef()
   const [filteredServices, setFilteredServices] = useState()
   
@@ -25,7 +26,7 @@ function App() {
   const filterTimeoutRef = useRef()
 
   useEffect(() => {
-    fetch('http://localhost:8080/vehicles', {mode: 'cors'})
+    fetch(`${apiUrl}/vehicles`, {mode: 'cors'})
     .then(res => {
       return res.json() 
     })
@@ -42,7 +43,7 @@ function App() {
       console.error('There was an error fetching the vehicles:', error);
     });
 
-    fetch('http://localhost:8080/spare-parts', {mode: 'cors'})
+    fetch(`${apiUrl}/spare-parts`, {mode: 'cors'})
     .then(res => {
       return res.json() 
     })
@@ -102,7 +103,7 @@ function App() {
 
   useEffect(() => {
     // Fetch data from your API endpoint
-    fetch('http://localhost:8080/transactions', {mode: 'cors'})
+    fetch(`${apiUrl}/transactions`, {mode: 'cors'})
     .then(res => {
       return res.json() 
     })

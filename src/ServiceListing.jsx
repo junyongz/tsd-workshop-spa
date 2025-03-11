@@ -21,7 +21,7 @@ const chunkArray = (array, size) => {
 };
 
 function ServiceListing({services=[], filteredServices=[], keywordSearch = () => {}, vehicles, setVehicles, spareParts}) {
-
+  const apiUrl = process.env.REACT_APP_API_URL
   const [showModal, setShowModal] = useState(false)
   const serviceTransaction = useRef()
 
@@ -47,7 +47,7 @@ function ServiceListing({services=[], filteredServices=[], keywordSearch = () =>
   }
 
   const onNewServiceCreated = (newTrx=[]) => {
-    fetch('http://localhost:8080/transactions', {
+    fetch(`${apiUrl}/transactions`, {
       method: 'POST', 
       body: JSON.stringify(newTrx), 
       headers: {
@@ -62,7 +62,7 @@ function ServiceListing({services=[], filteredServices=[], keywordSearch = () =>
   }
 
   const removeTransaction = (index) => {
-    fetch(`http://localhost:8080/transactions/${index}`, {
+    fetch(`h${apiUrl}/transactions/${index}`, {
       method: 'DELETE', 
       headers: {
         'Content-type': 'application/json'
@@ -79,7 +79,7 @@ function ServiceListing({services=[], filteredServices=[], keywordSearch = () =>
   }
 
   const completeAllServices = (newTrxs) => {
-    fetch('http://localhost:8080/transactions?op=COMPLETE', {
+    fetch(`${apiUrl}/transactions?op=COMPLETE`, {
       method: 'POST', 
       body: JSON.stringify(newTrxs), 
       headers: {

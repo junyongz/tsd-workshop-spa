@@ -1,17 +1,17 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Modal, Button, Container, Col, Row, FormLabel, Badge } from "react-bootstrap";
 import { Typeahead } from "react-bootstrap-typeahead";
 import Form from "react-bootstrap/Form";
 
-function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles, setVehicles, spareParts}) {
-    const [items, setItems] = useState([{partName: 'Choose one ...', quantity: 1, unit: 'pc', unitPrice: 0}])
+function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles, setVehicles, spareParts, orders=[], suppliers=[]}) {
+    const [items, setItems] = useState([{partName: 'Choose one ...', quantity: 1, unit: 'pc', unitPrice: 0, selectedSpareParts: []}])
     const [validated, setValidated] = useState(false)
     const formRef = useRef()
     
     const [selectedVehicles, setSelectedVehicles] = useState(trx?.current?.vehicleNo ? [vehicles.find(veh => veh.vehicleNo === trx.current.vehicleNo)] : [])
 
     const handleClose = () => {
-        setItems([{partName: 'Choose one ...', quantity: 1, unit: 'pc', unitPrice: 0}])
+        setItems([{partName: 'Choose one ...', quantity: 1, unit: 'pc', unitPrice: 0, selectedSpareParts:[]}])
         setValidated(false)
         setShow(false)
     }
@@ -19,28 +19,31 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles, set
     const addNewItem = () => {
         setValidated(false)
         setItems(prev => {
-            return [...prev, {partName: 'Choose one ...', quantity: 1, unit: 'pc', unitPrice: 0}]
+            return [...prev, {partName: 'Choose one ...', quantity: 1, unit: 'pc', unitPrice: 0, selectedSpareParts:[]}]
         })
     }
 
-    const updateSparePartMeta = ([sparePart], i) => {
+    const afterChooseSparePart = ([sparePart], i) => {
         setItems(prevs => {
-            prevs[i] = {...sparePart, quantity: 1}
-            return [...prevs]
+            const newItems = [...prevs]
+            newItems[i] = {...prevs[i], ...sparePart, quantity: 1, selectedSpareParts: (sparePart && [sparePart]) || []}
+            return newItems
         })
     }
 
     const updatePriceByQuantity = (val, i) => {
         setItems(prevs => {
-            prevs[i] = {...prevs[i], quantity: val}
-            return [...prevs]
+            const newItems = [...prevs]
+            newItems[i] = {...newItems[i], quantity: val}
+            return newItems
         })
     }
 
     const updatePriceByUnitPrice = (val, i) => {
         setItems(prevs => {
-            prevs[i] = {...prevs[i], unitPrice: val}
-            return [...prevs]
+            const newItems = [...prevs]
+            newItems[i] = {...newItems[i], unitPrice: val}
+            return newItems
         })
     }
 
@@ -48,6 +51,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles, set
         if (veh) {
             if (vehicles.findIndex(v => v.vehicleNo === veh?.vehicleNo) === -1) {
                 setVehicles(prevs => [...prevs, {vehicleNo: veh.vehicleNo}])
+                // TODO: api to add new vehicle, but for now internally only
             }
             setSelectedVehicles([veh])
         }
@@ -62,27 +66,18 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles, set
             setValidated(true)
             return
         }
-        const itemDescriptions = nativeForm['partName'].length === undefined ? [nativeForm['partName']] 
-            : Array.from(nativeForm['partName'])
 
-        const formQuantity = nativeForm['quantity'].length === undefined ? [nativeForm['quantity']] 
-            : Array.from(nativeForm['quantity'])
-
-        const formUnits = nativeForm['unit'].length === undefined ? [nativeForm['unit']] 
-            : Array.from(nativeForm['unit'])
-
-        const formUnitPrices = nativeForm['unitPrice'].length === undefined ? [nativeForm['unitPrice']] 
-            : Array.from(nativeForm['unitPrice'])
-
-        onNewServiceCreated(itemDescriptions.map((v, i) => {
+        onNewServiceCreated(items.map((v, i) => {
             return {
                 creationDate: trx?.current?.creationDate,
                 vehicleNo: nativeForm[0].value,
-                quantity: formQuantity[i].value,
-                unit: formUnits[i].value,
-                unitPrice: parseFloat(formUnitPrices[i].value),
-                itemDescription: v.value,
-                totalPrice: formQuantity[i].value * formUnitPrices[i].value
+                quantity: v.quantity,
+                unit: v.unit,
+                unitPrice: parseFloat(v.unitPrice),
+                itemDescription: v.partName,
+                totalPrice: v.quantity * v.unitPrice,
+                orderId: v.selectedSpareParts[0].orderId,
+                supplierId: v.selectedSpareParts[0].supplierId,
             }
         }))
         handleClose()
@@ -122,7 +117,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles, set
                         </Row>
                         <Row>
                             <Col className="text-sm-end">
-                                <Button size="sm" onClick={addNewItem}>New</Button>
+                                <Button size="sm" onClick={addNewItem}>Add More</Button>
                             </Col>
                         </Row>
                         
@@ -137,22 +132,27 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles, set
                                     inputProps={{required:true, name: 'partName'}}
                                     labelKey='partName'
                                     options={spareParts}
-                                    onChange={(opts) => updateSparePartMeta(opts, i)}
+                                    onChange={(opts) => afterChooseSparePart(opts, i)}
                                     placeholder="Find a spare part..."
-                                    renderMenuItemChildren={(option) => 
-                                        <div>
+                                    renderMenuItemChildren={(option) => {
+                                        const order = orders.find(o => o.id === option.orderId)
+                                        const supplier = suppliers.find(s => s.id === option.supplierId)
+                                        return <div>
                                             <div>{option.partName}</div>
                                             {/** TODO: to add supplier info later on */} 
-                                            <small className="text-secondary">Unit Price: {option?.unitPrice} per {option?.unit}</small>
+                                            <small className="text-secondary">{option.unitPrice} per {option.unit} / Remaining: {order?.quantity} / Supplier: {supplier.supplierName} </small>
                                         </div>
+                                        }
                                     }
+                                    clearButton
+                                    selected={v.selectedSpareParts}
                                     />                                
                                 </Form.Group>
                                 <Form.Group as={Col} className="mb-3 col-2" controlId="quantity">
-                                    <Form.Control onChange={(e) => updatePriceByQuantity(e.target.value, i)} required type="number" name="quantity" placeholder="Quantity" value={v?.quantity}/>
+                                    <Form.Control onChange={(e) => updatePriceByQuantity(e.target.value, i)} required type="number" name="quantity" min="1" max={(v.selectedSpareParts[0] && orders.find(o => o.id === v.selectedSpareParts[0].orderId).quantity) || 0} placeholder="Quantity" value={v?.quantity}/>
                                 </Form.Group>
                                 <Form.Group as={Col} className="mb-3 col-4" controlId="unitPrice">
-                                    <Form.Control onChange={(e) => updatePriceByUnitPrice(e.target.value, i)} required type="number" step="0.01" name="unitPrice" placeholder="Price $" value={v?.unitPrice} />
+                                    <Form.Control onChange={(e) => updatePriceByUnitPrice(e.target.value, i)} required type="number" step="0.10" name="unitPrice" placeholder="Price $" value={v?.unitPrice} />
                                 </Form.Group>
                             </Row>
                             <Row>
@@ -162,7 +162,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles, set
                                     <Form.Control required type="text" name="unit" placeholder="Unit" value={v?.unit}/>
                                 </Col>
                                 <Col className="mb-3 col-4">
-                                    <FormLabel><Badge pill>$ {v?.quantity * v?.unitPrice}</Badge></FormLabel>
+                                    <FormLabel><Badge pill>$ {(v?.quantity * v?.unitPrice) || 0}</Badge></FormLabel>
                                 </Col>
                             </Row>
                         </div>

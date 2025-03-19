@@ -15,7 +15,7 @@ const HoverPilledBadge = ({ onRemove, children }) => {
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         onClick={() => isHovered && onRemove()} // Only trigger onRemove when showing the "X"
-        style={{ cursor: 'pointer' }}
+        role="button"
       >
         {isHovered ? 'x' : children}
       </Badge>

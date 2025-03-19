@@ -1,10 +1,13 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import React, { useEffect, useState, useRef } from 'react';
+import { Route, Routes, NavLink, useLocation } from 'react-router-dom';
 import ServiceListing from './ServiceListing';
-import ServiceDetail from './ServiceDetail';
-import { Col, Container, Form, Navbar, Row } from 'react-bootstrap';
+import { Badge, Col, Container, Form, Row } from 'react-bootstrap';
 import ServiceTransactions from './ServiceTransactions';
 import { Typeahead } from 'react-bootstrap-typeahead';
+import SuppliersSpareParts from './suppliers/SuppliersSpareParts';
+import fetchSpareParts from './spare-parts/fetchSpareParts';
+
+import './App.css'
 
 /***
  * Date: {
@@ -13,57 +16,29 @@ import { Typeahead } from 'react-bootstrap-typeahead';
  */
 
 function App() {
+  const location = useLocation()
   const apiUrl = process.env.REACT_APP_API_URL
+
+  // the services and orders from supplier
   const services = useRef()
   const [filteredServices, setFilteredServices] = useState()
+
+  const orders = useRef()
+  const [filteredOrders, setFilteredOrders] = useState()
   
+  // search box
   const [searchOptions, setSearchOptions] = useState([])
   const [selectedSearchOptions, setSelectedSearchOptions] = useState([])
 
+  // domain data
+  const [suppliers, setSuppliers] = useState([])
   const [vehicles, setVehicles] = useState([])
   const [spareParts, setSpareParts] = useState([])
   
   const filterTimeoutRef = useRef()
 
-  useEffect(() => {
-    fetch(`${apiUrl}/vehicles`, {mode: 'cors'})
-    .then(res => {
-      return res.json() 
-    })
-    .then(response => {
-        setVehicles(response)
-        setSearchOptions(prevs => 
-          [...prevs, ...response
-            .filter(v => prevs.findIndex(pv => pv.name === v.vehicleNo) === -1)
-            .map(veh => {return {name: veh.vehicleNo}})
-          ]
-        )
-    })
-    .catch(error => {
-      console.error('There was an error fetching the vehicles:', error);
-    });
-
-    fetch(`${apiUrl}/spare-parts`, {mode: 'cors'})
-    .then(res => {
-      return res.json() 
-    })
-    .then(response => {
-        setSpareParts(response.filter(sp => sp.addAllowed))
-        setSearchOptions(prevs => 
-          [...prevs, ...response
-            .filter(v => prevs.findIndex(pv => pv.name === v.partName) === -1)
-            .map(sp => {return {name: sp.partName}})
-          ]
-        )
-    })
-    .catch(error => {
-      console.error('There was an error fetching the spare parts:', error);
-    });
-  }, []);
-
-
   const doFilterServices = (options=[]) => {
-    if (services) {
+    if (services.current) {
       const searchedFilteredServices = []
       for (const v of services.current.entriedServices()) {
         const vehicleItemsForV0 = {}
@@ -86,6 +61,19 @@ function App() {
       searchedFilteredServices.sort((left, right) => left[0] < right[0])
       setFilteredServices(searchedFilteredServices)
     }
+
+    if (orders.current) {
+      const searchedFilteredOrders = []
+      for (const order of orders.current) {
+        if (options.some(val => 
+            order.partName.toUpperCase().includes(val.name.toUpperCase()) || 
+            order.notes?.toUpperCase().includes(val.name.toUpperCase()))) {
+          searchedFilteredOrders.push(order)
+        }
+      }
+      setFilteredOrders(searchedFilteredOrders)
+    }
+
     setSelectedSearchOptions(options)
   }
 
@@ -93,6 +81,7 @@ function App() {
     if (!options || options.length === 0) {
       clearTimeout(filterTimeoutRef.current)
       setFilteredServices(services.current.entriedServices())
+      setFilteredOrders(orders.current)
       setSelectedSearchOptions([])
       return
     }
@@ -102,30 +91,75 @@ function App() {
   }
 
   useEffect(() => {
-    // Fetch data from your API endpoint
     fetch(`${apiUrl}/transactions`, {mode: 'cors'})
-    .then(res => {
-      return res.json() 
-    })
-    .then(response => {
-      services.current = new ServiceTransactions(response)
-      setFilteredServices(services.current.entriedServices())
-    })
-    .catch(error => {
-      console.error('There was an error fetching the services:', error);
-    });
+      .then(res => {
+        return res.json() 
+      })
+      .then(response => {
+        services.current = new ServiceTransactions(response)
+        setFilteredServices(services.current.entriedServices())
+      })
+      .catch(error => {
+        console.error('There was an error fetching the services:', error);
+      });
+
+    fetch(`${apiUrl}/supplier-spare-parts`, {mode: 'cors'})
+      .then(res => {
+        return res.json() 
+      })
+      .then(response => {
+        orders.current = response
+        setFilteredOrders(response)
+      })
+      .catch(error => {
+        console.error('There was an error fetching the upplier-spare-parts:', error);
+      });
+
+    fetch(`${apiUrl}/vehicles`, {mode: 'cors'})
+      .then(res => {
+        return res.json() 
+      })
+      .then(response => {
+          setVehicles(response)
+          setSearchOptions(prevs => 
+            [...prevs, ...response
+              .filter(v => prevs.findIndex(pv => pv.name === v.vehicleNo) === -1)
+              .map(veh => {return {name: veh.vehicleNo}})
+            ]
+          )
+      })
+      .catch(error => {
+        console.error('There was an error fetching the vehicles:', error);
+      });
+
+    fetchSpareParts(apiUrl, setSpareParts, setSearchOptions)
+
+    fetch(`${apiUrl}/suppliers`, {mode: 'cors'})
+      .then(res => {
+        return res.json() 
+      })
+      .then(response => {
+          setSuppliers(response)
+      })
+      .catch(error => {
+        console.error('There was an error fetching the spare parts:', error);
+      });
   }, []);
 
-  if (!filteredServices) {
+  if (!filteredServices && !filteredOrders) {
     return (<div>Loading...</div>)
   }
 
   return (
     <div className="App">
-        <Container className='my-3'>
+        <Container fluid className='position-fixed z-2 top-0 mt-0 pt-3 bg-white'>
           <Row>
             <Col sm="2">
-              <h3>TSD Workshop</h3>
+              <h3>TSD</h3>
+            </Col>
+            <Col sm="2" className='text-sm-end'>
+              { location.pathname === '/' && <NavLink className={'btn btn-outline-primary'} to="/suppliers">Suppliers {selectedSearchOptions.length > 0 && <Badge pill>{filteredOrders.length}</Badge>}</NavLink> }
+              { location.pathname === '/suppliers' && <NavLink className={'btn btn-outline-primary'} to="/">Services {selectedSearchOptions.length > 0 && <Badge pill>{filteredServices.length}</Badge>}</NavLink> }
             </Col>
             <Col>
               <Form.Group>
@@ -142,7 +176,7 @@ function App() {
             </Col>
           </Row>
         </Container>
-      <Router>
+        <div className="nav-spacer bg-white z-1"></div>
         <Routes>
           <Route exact path="/" element={
             <ServiceListing services={services}
@@ -158,11 +192,20 @@ function App() {
                   doFilterServices(selectedSearchOptions)}
                 }
               }
+              orders={orders.current}
+              suppliers={suppliers}
             />
           } />
-          <Route path="/service/:id" element={<ServiceDetail />} />
+          <Route path="/suppliers" element={
+            <SuppliersSpareParts filteredOrders={filteredOrders} 
+              setFilteredOrders={setFilteredOrders} 
+              orders={orders.current} 
+              suppliers={suppliers} 
+              spareParts={spareParts} 
+              vehicles={vehicles}
+              doFetchSpareParts={fetchSpareParts.bind(null, apiUrl, setSpareParts, setSearchOptions)}
+            />} />
         </Routes>
-      </Router>
     </div>
   );
 }

@@ -12,7 +12,13 @@ import { chunkArray } from './utils/arrayUtils';
  *  vehicle: [transactions]
  * }
  */
-function ServiceListing({services=[], filteredServices=[], keywordSearch = () => {}, vehicles, setVehicles, spareParts, orders=[], suppliers=[]}) {
+function ServiceListing({services=[], filteredServices=[], 
+    keywordSearch = () => {}, refreshSparePartUsages=() => {}, 
+    refreshSpareParts=() => {},
+    vehicles, setVehicles, spareParts, sparePartUsages=[],
+    orders=[], suppliers=[],
+    onNewVehicleCreated=() => {}, setLoading=()=>{}}) {
+
   const apiUrl = process.env.REACT_APP_API_URL
   const [showModal, setShowModal] = useState(false)
   const serviceTransaction = useRef()
@@ -39,34 +45,45 @@ function ServiceListing({services=[], filteredServices=[], keywordSearch = () =>
   }
 
   const onNewServiceCreated = (newTrx=[]) => {
-    fetch(`${apiUrl}/transactions`, {
-      method: 'POST', 
-      body: JSON.stringify(newTrx), 
-      headers: {
-        'Content-type': 'application/json'
-      }
+    setLoading(true)
+    requestAnimationFrame(() => {
+      fetch(`${apiUrl}/transactions`, {
+        method: 'POST', 
+        body: JSON.stringify(newTrx), 
+        headers: {
+          'Content-type': 'application/json'
+        }
+      })
+      .then(res => res.json())
+      .then(trxs => {
+        services.current.addNewTransaction(trxs)
+        keywordSearch()
+      })
+      .then(() => refreshSparePartUsages())
+      .then(() => setLoading(false))
     })
-    .then(res => res.json())
-    .then(trxs => {
-      services.current.addNewTransaction(trxs)
-      keywordSearch()
-    })
+    
   }
 
   const removeTransaction = (index) => {
-    fetch(`${apiUrl}/transactions/${index}`, {
-      method: 'DELETE', 
-      headers: {
-        'Content-type': 'application/json'
-      }
-    })
-    .then(res => res.json())
-    .then(count => {
-      if (count !== 1) {
-        throw Error("should have 1 record deleted")
-      }
-      services.current.removeTransaction(index)
-      keywordSearch()
+    setLoading(true)
+    requestAnimationFrame(() => {
+      fetch(`${apiUrl}/transactions/${index}`, {
+        method: 'DELETE', 
+        headers: {
+          'Content-type': 'application/json'
+        }
+      })
+      .then(res => res.json())
+      .then(count => {
+        if (count !== 1) {
+          throw Error("should have 1 record deleted")
+        }
+        services.current.removeTransaction(index)
+        keywordSearch()
+      })
+      .then(() => Promise.all([refreshSpareParts(), refreshSparePartUsages()]))
+      .then(() => setLoading(false))
     })
   }
 
@@ -92,7 +109,9 @@ function ServiceListing({services=[], filteredServices=[], keywordSearch = () =>
         vehicles={vehicles} setVehicles={setVehicles} 
         spareParts={spareParts}
         orders={orders}
-        suppliers={suppliers}></ServiceDialog>
+        suppliers={suppliers}
+        sparePartUsages={sparePartUsages}
+        onNewVehicleCreated={onNewVehicleCreated}></ServiceDialog>
       <Row>
         <Col>
           <Pagination>
@@ -106,9 +125,9 @@ function ServiceListing({services=[], filteredServices=[], keywordSearch = () =>
 
       {
         chunkedItems[activePage - 1]?.map((v, i) =>
-          <div key={activePage + '' + i}className={i % 2 === 0 ? 'rounded-2 p-3 mb-3 bg-body-secondary': 'rounded-2 p-3 mb-3 bg-light'}>
+          <div key={v.index} className={i % 2 === 0 ? 'rounded-2 p-3 mb-3 bg-body-secondary': 'rounded-2 p-3 mb-3 bg-light'}>
             <Row>
-              <Col><h3 key={i}><i class="bi bi-calendar-event pe-1"></i>{v[0]}</h3></Col>
+              <Col><h3 key={i}><i className="bi bi-calendar-event pe-1"></i>{v[0]}</h3></Col>
               <Col className={'text-sm-end'}><Button variant="dark" onClick={() => addNewServiceTransaction(v[0])}><i className="bi bi-calendar-event me-2"></i>Add Service</Button></Col>
             </Row>
           { Object.entries(v[1]).map((vv, ii) =>
@@ -117,7 +136,7 @@ function ServiceListing({services=[], filteredServices=[], keywordSearch = () =>
                 <Row>
                   <Col><h5>{vv[0]}</h5> <CompletionLabel creationDate={v[0]} completionDate={vv[1][0].completionDate} onCompletion={() => completeAllServices(vv[1])}></CompletionLabel></Col>
                   { false && <Col className={'text-sm-end col-4'}><Badge pill><i className="bi bi-person-fill-gear me-1"></i>{'Tan Chwee Seng'}</Badge></Col> }
-                  <Col sm="2" className={'text-sm-end'}>
+                  <Col sm="4" className={'text-sm-end'}>
                     <h4><span className="border border-1 border-primary border-opacity-50 rounded-2 px-3 py-1">$ {vv[1].reduce((prev, curr) => prev += curr.totalPrice, 0).toFixed(2)}</span></h4>
                   </Col>
                 </Row>

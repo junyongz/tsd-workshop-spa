@@ -28,3 +28,4 @@
 1. Websocket for on-the-fly update of the state
 2. Websocket for the backend status
 3. Electron based app
+4. Spare parts forecasting based on mileage (KM)

@@ -2,7 +2,7 @@ import { useRef, useState, useTransition } from "react";
 import { Button, Col, Container, Form, InputGroup, ListGroup, Modal, Row } from "react-bootstrap";
 import { Typeahead } from "react-bootstrap-typeahead";
 
-function AddSparePartsDialog({isShow, setShowDialog, suppliers=[], spareParts=[], onSaveNewOrders}) {
+function AddSparePartsDialog({isShow, setShowDialog, orders=[], suppliers=[], spareParts=[], onSaveNewOrders}) {
     const formRef = useRef()
     const [validated, setValidated] = useState(false)
 
@@ -26,6 +26,7 @@ function AddSparePartsDialog({isShow, setShowDialog, suppliers=[], spareParts=[]
         setValidated(false)
     }
 
+    // TODO: to use the state object instead of form one
     const saveChange = () => {
         const nativeForm = formRef.current
         if (nativeForm.checkValidity() === false) {
@@ -75,7 +76,7 @@ function AddSparePartsDialog({isShow, setShowDialog, suppliers=[], spareParts=[]
     }
 
     const removeItem = (i) => {
-        // you shouldn't change the "prevs" state, such as prevs.splice, it would case 2-times rendering
+        // you shouldn't change the "prevs" state, such as prevs.splice, it would cause 2-times rendering
         setItems(prevs => {
             const newItems = [...prevs]
             newItems.splice(i, 1)
@@ -136,10 +137,14 @@ function AddSparePartsDialog({isShow, setShowDialog, suppliers=[], spareParts=[]
         })
     }
 
+    const findOrderById = (id=0) => {
+        return orders.find(o => o.id === id)
+    }
+
     return (
         <Modal show={isShow} onHide={handleClose} onShow={dialogOpened} size="lg">
             <Modal.Header closeButton>
-            <Modal.Title>Adding New Spare Parts</Modal.Title>
+            <Modal.Title><i className="bi bi-tools"></i> Adding New Spare Parts</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <Container>
@@ -147,29 +152,35 @@ function AddSparePartsDialog({isShow, setShowDialog, suppliers=[], spareParts=[]
                         <Row className="mb-3">
                             <Col sm="4">
                                 <InputGroup>
-                                    <InputGroup.Text><i class="bi bi-calendar-event"></i></InputGroup.Text>
+                                    <InputGroup.Text><i className="bi bi-calendar-event"></i></InputGroup.Text>
                                     <Form.Control required type="date" name="invoiceDate"></Form.Control>
                                 </InputGroup>
                             </Col>
-                            <Col sm="5">
-                                <Typeahead
-                                    inputProps={{required:true, name:'supplier'}}
-                                    id="supplier-select"
-                                    labelKey='supplierName'
-                                    options={suppliers}
-                                    onChange={(supplier) => afterChooseSupplier(supplier)}
-                                    placeholder="Choose a supplier..."
-                                    selected={selectedSupplier}
-                                    clearButton
-                                    />
+                            <Col sm="4">
+                                <InputGroup>
+                                    <InputGroup.Text><i className="bi bi-shop"></i></InputGroup.Text>
+                                    <Typeahead
+                                        inputProps={{required:true, name:'supplier'}}
+                                        id="supplier-select"
+                                        labelKey='supplierName'
+                                        options={suppliers}
+                                        onChange={(supplier) => afterChooseSupplier(supplier)}
+                                        placeholder="Choose a supplier..."
+                                        selected={selectedSupplier}
+                                        clearButton
+                                        />
+                                </InputGroup>
                             </Col>
                             <Col className="text-sm-end">
-                                <Form.Control type="text" required name="deliveryOrderNo" placeholder="Key in DO. number"></Form.Control>
+                                <InputGroup>
+                                    <InputGroup.Text><i className="bi bi-file-earmark-spreadsheet"></i></InputGroup.Text>
+                                    <Form.Control type="text" required name="deliveryOrderNo" placeholder="Key in DO. #"></Form.Control>
+                                </InputGroup>
                             </Col>
                         </Row>
                         <Row className="my-3">
                             <Col className="text-sm-end">
-                                <Button size="sm" onClick={addNewItem}>More</Button>
+                                <Button size="sm" onClick={addNewItem}>Add More</Button>
                             </Col>
                         </Row>
                         
@@ -179,6 +190,8 @@ function AddSparePartsDialog({isShow, setShowDialog, suppliers=[], spareParts=[]
                                 <Row>
                                     <Col xs="1"><span onClick={() => removeItem(i)} role="button"><i className="bi bi-x-lg text-danger"></i></span></Col>
                                     <Form.Group as={Col} className="mb-3 col-4" controlId="itemCode">
+                                        <InputGroup>
+                                        <InputGroup.Text><i className="bi bi-123"></i></InputGroup.Text>
                                         <Typeahead
                                             inputProps={{name: 'itemCode'}}
                                             labelKey='itemCode'
@@ -189,25 +202,29 @@ function AddSparePartsDialog({isShow, setShowDialog, suppliers=[], spareParts=[]
                                             allowNew
                                             selected={v.selectedItemCode}
                                             />
+                                        </InputGroup>
                                     </Form.Group>
                                     <Form.Group as={Col} className="mb-3" controlId="sparePart">
-                                    <Typeahead
-                                        inputProps={{required:true, name: 'partName'}}
-                                        labelKey='partName'
-                                        options={sparePartsSelection}
-                                        onChange={(opts) => afterChooseSparePart(opts, i)}
-                                        placeholder="Find a spare part..."
-                                        renderMenuItemChildren={(option) => 
-                                            <div>
-                                                <div>{option.partName}</div>
-                                                {/** TODO: to add supplier info later on */} 
-                                                <small className="text-secondary">Unit Price: {option?.unitPrice} per {option?.unit} | Order: {option?.orderId}</small>
-                                            </div>
-                                        }
-                                        clearButton
-                                        allowNew
-                                        selected={v.selectedSparePart}
-                                        />                                
+                                        <InputGroup>
+                                        <InputGroup.Text><i className="bi bi-tools"></i></InputGroup.Text>
+                                        <Typeahead
+                                            inputProps={{required:true, name: 'partName'}}
+                                            labelKey='partName'
+                                            options={sparePartsSelection}
+                                            onChange={(opts) => afterChooseSparePart(opts, i)}
+                                            placeholder="Find a existing one as template"
+                                            renderMenuItemChildren={(option) => 
+                                                <div>
+                                                    <div>{option.partName}</div>
+                                                    {/** TODO: to add supplier info later on */} 
+                                                    <small className="text-secondary">${option?.unitPrice} per {option?.unit} | <i className="bi bi-calendar-event"></i> {findOrderById(option.orderId).invoiceDate}</small>
+                                                </div>
+                                            }
+                                            clearButton
+                                            allowNew
+                                            selected={v.selectedSparePart}
+                                            />
+                                        </InputGroup>
                                     </Form.Group>
                                 </Row>
                                 <Row>
@@ -216,7 +233,7 @@ function AddSparePartsDialog({isShow, setShowDialog, suppliers=[], spareParts=[]
                                         <Form.Control onChange={(e) => updatePriceByQuantity(e.target.value, i)} required type="number" name="quantity" placeholder="Quantity" value={v?.quantity}/>
                                     </Col>
                                     <Col sm="2" className="mb-3">
-                                        <Form.Control required type="text" name="unit" placeholder="Unit" value={v?.unit}/>
+                                        <Form.Control required type="text" name="unit" placeholder="Unit" defaultValue={v?.unit}/>
                                     </Col>
                                     <Col sm="2">
                                         <Form.Control onChange={(e) => updatePriceByUnitPrice(e.target.value, i)} required type="number" step="0.1" name="unitPrice" placeholder="Price $" value={v?.unitPrice} />

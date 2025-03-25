@@ -57,7 +57,7 @@ function App() {
           }
 
           for (const item of items) {
-            if (options.some(val => item.itemDescription.toUpperCase().includes(val.name.toUpperCase()))) {
+            if (options.some(val => item.partName.toUpperCase().includes(val.name.toUpperCase()))) {
               vehicleItemsForV0[veh] = items
             }
           }

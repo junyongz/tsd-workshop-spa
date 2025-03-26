@@ -57,7 +57,8 @@ function App() {
           }
 
           for (const item of items) {
-            if (options.some(val => item.partName.toUpperCase().includes(val.name.toUpperCase()))) {
+            if (options.some(val => item.partName?.toUpperCase().includes(val.name.toUpperCase())) ||
+            options.some(val => item.itemDescription?.toUpperCase().includes(val.name.toUpperCase())) ) {
               vehicleItemsForV0[veh] = items
             }
           }
@@ -168,29 +169,11 @@ function App() {
       })
   }
 
-  const refreshSparePartUsages = () => {
-    setLoading(true)
-    requestAnimationFrame(async () => {
-      fetchSparePartUsages(apiUrl, setSparePartUsages)
-        .then( () => setLoading(false) )
-    })
-  }
+  const refreshSparePartUsages = () => fetchSparePartUsages(apiUrl, setSparePartUsages)
 
-  const refreshSpareParts = () => {
-    setLoading(true)
-    requestAnimationFrame(async () => {
-      fetchSpareParts(apiUrl, setSpareParts, setSearchOptions)
-        .then( () => setLoading(false) )
-    })
-  }
+  const refreshSpareParts = () => fetchSpareParts(apiUrl, setSpareParts, setSearchOptions)
 
-  const refreshServices = () => {
-    setLoading(true)
-    requestAnimationFrame(async () => {
-      fetchServices(apiUrl, services, setFilteredServices)
-        .then( () => setLoading(false) )
-    })
-  }
+  const refreshServices = () => fetchServices(apiUrl, services, setFilteredServices)
 
   return (
     <div className="App">
@@ -205,8 +188,8 @@ function App() {
               <h3>TSD</h3>
             </Col>
             <Col sm="2" className='text-sm-end'>
-              { location.pathname === '/' && <NavLink className={'btn btn-outline-primary'} to="/suppliers"><i className="bi bi-shop"></i> Suppliers {selectedSearchOptions.length > 0 && <Badge pill>{filteredOrders.length}</Badge>}</NavLink> }
-              { location.pathname === '/suppliers' && <NavLink className={'btn btn-outline-primary'} to="/"><i className="bi bi-file-earmark-text-fill"></i> Services {selectedSearchOptions.length > 0 && <Badge pill>{filteredServices.length}</Badge>}</NavLink> }
+              { location.pathname === '/' && <NavLink className={'btn btn-outline-primary'} to="/orders"><i className="bi bi-shop"></i> Suppliers {selectedSearchOptions.length > 0 && <Badge pill>{filteredOrders.length}</Badge>}</NavLink> }
+              { location.pathname === '/orders' && <NavLink className={'btn btn-outline-primary'} to="/"><i className="bi bi-file-earmark-text-fill"></i> Services {selectedSearchOptions.length > 0 && <Badge pill>{filteredServices.length}</Badge>}</NavLink> }
             </Col>
             {!searchByDate &&
             <Col>
@@ -265,7 +248,7 @@ function App() {
               setLoading={setLoading}
             />
           } />
-          <Route path="/suppliers" element={
+          <Route path="/orders" element={
             <SuppliersSpareParts filteredOrders={filteredOrders} 
               setFilteredOrders={setFilteredOrders} 
               orders={orders.current} 
@@ -278,6 +261,7 @@ function App() {
               refreshServices={refreshServices}
               onNewVehicleCreated={onNewVehicleCreated}
               setLoading={setLoading}
+              selectedSearchOptions={selectedSearchOptions}
             />} />
         </Routes>
     </div>

@@ -166,7 +166,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles, set
                                             return <div>
                                                 <div>{option.partName}</div>
                                                 {/** TODO: to add supplier info later on */} 
-                                                <small className="text-secondary">${option.unitPrice} per {option.unit} / {quantityLeft} left / <i className="bi bi-shop"></i> {supplier.supplierName} </small>
+                                                <small className="text-secondary">${option.unitPrice} / {quantityLeft} left / <i className="bi bi-shop"></i> {supplier.supplierName} / {order.invoiceDate}</small>
                                             </div>
                                             }
                                         }

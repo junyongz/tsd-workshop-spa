@@ -1,12 +1,12 @@
-import { useState } from "react"
-import { Container, ListGroup, ListGroupItem, Row, Col, Stack, Pagination, Button, Badge, Nav, Offcanvas, Spinner, ButtonGroup } from "react-bootstrap"
+import { useEffect, useState } from "react"
+import { Container, ListGroup, ListGroupItem, Row, Col, Stack, Pagination, Button, Badge, Nav, Offcanvas, Spinner, ButtonGroup, OverlayTrigger, Popover } from "react-bootstrap"
 import getPaginationItems from "../utils/getPaginationItems"
 import { chunkArray } from "../utils/arrayUtils"
 import AddSparePartsDialog from "./AddSparePartsDialog"
 import SparePartsUsageDialog from "./SparePartsUsageDialog"
 import remainingQuantity from "../utils/quantityUtils"
 
-function SuppliersSpareParts({filteredOrders=[], setFilteredOrders, 
+function SuppliersSpareParts({filteredOrders=[], setFilteredOrders, selectedSearchOptions=[],
     orders=[], suppliers=[], spareParts=[], vehicles=[], sparePartUsages=[],
     refreshSpareParts=() => {}, refreshSparePartUsages=() =>{}, refreshServices=()=>{},
     onNewVehicleCreated=() => {}, setLoading=()=>{}}) {
@@ -34,31 +34,35 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
 
     const filterOrderBySupplier = (supplier) => {
         if (!selectedSupplier) {
-            setFilteredOrders(orders.filter(s => s.supplierId === supplier.id))
+            setFilteredOrders(filteredOrders.filter(s => s.supplierId === supplier.id))
             setSelectedSupplier(supplier.id)
         }
         else {
-            setFilteredOrders(orders)
+            setFilteredOrders(filteredOrders)
             setSelectedSupplier()
         }
     }
 
     const onSaveNewOrders = (newOrders=[], callback=() => {}) => {
-        fetch(`${apiUrl}/supplier-spare-parts`, {
-            method: 'POST',
-            body: JSON.stringify(newOrders),
-            mode: 'cors',
-            headers: {
-                'Content-type': 'application/json'
-            }
-        })
-        .then(res => res.json())
-        .then(response => {
-            orders.push(...response)
-            orders.sort((a, b) => a.invoiceDate < b.invoiceDate)
-            setFilteredOrders((selectedSupplier && orders.filter(s => s.supplierId === selectedSupplier.id)) || orders)
-            refreshSpareParts()
-            callback && callback()
+        setLoading(true)
+        requestAnimationFrame(() => {
+            fetch(`${apiUrl}/supplier-spare-parts`, {
+                method: 'POST',
+                body: JSON.stringify(newOrders),
+                mode: 'cors',
+                headers: {
+                    'Content-type': 'application/json'
+                }
+            })
+            .then(res => res.json())
+            .then(response => {
+                orders.push(...response)
+                orders.sort((a, b) => a.invoiceDate < b.invoiceDate)
+                setFilteredOrders((selectedSupplier && orders.filter(s => s.supplierId === selectedSupplier.id)) || orders)
+            })
+            .then(() => refreshSpareParts())
+            .then(() => callback && callback())
+            .then(() => setLoading(false))
         })
     }
 
@@ -74,33 +78,45 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
                 }
             })
             .then(res => res.json())
-            .then(() => Promise.all[refreshSparePartUsages(),
-                refreshServices()])
+            .then(() => Promise.all([refreshSparePartUsages(),
+                refreshServices()]))
             .then(() => setLoading(false))
         })
     }
 
     const removeOrder = (order) => {
-        fetch(`${apiUrl}/supplier-spare-parts/${order.id}`, {
-            method: 'DELETE',
-            mode: 'cors',
-            headers: {
-                'Content-type': 'application/json'
-            }
-        })
-        .then(res => {
-            if (!res.ok) {
-                throw `failed to delete order ${JSON.stringify(order)}`
-            }
-        })
-        .then(_ => {
-            orders.splice(orders.findIndex(o => o.id === order.id), 1)
-            setFilteredOrders((selectedSupplier && orders.filter(s => s.supplierId === selectedSupplier.id)) || orders)
-            refreshSparePartUsages()
-            refreshSpareParts()
-            refreshServices()
+        setLoading(true)
+        requestAnimationFrame(() => {
+            fetch(`${apiUrl}/supplier-spare-parts/${order.id}`, {
+                method: 'DELETE',
+                mode: 'cors',
+                headers: {
+                    'Content-type': 'application/json'
+                }
+            })
+            .then(res => {
+                if (!res.ok) {
+                    throw `failed to delete order ${JSON.stringify(order)}`
+                }
+            })
+            .then(_ => {
+                orders.splice(orders.findIndex(o => o.id === order.id), 1)
+                setFilteredOrders((selectedSupplier && orders.filter(s => s.supplierId === selectedSupplier.id)) || orders)
+                return Promise.all([refreshSparePartUsages(),
+                refreshSpareParts(),
+                refreshServices()])
+            })
+            .then(() => setLoading(false))
         })
     }
+
+    useEffect(() => {
+        if (selectedSearchOptions.length > 0) {
+            setSelectedSupplier()
+        }
+
+        return () => setSelectedSupplier()
+    }, [selectedSearchOptions])
 
     return (
         <Container>
@@ -130,7 +146,7 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
                     <Button variant='success' onClick={() => setShowDialog(!showDialog)}><i className="bi bi-plus-circle-fill me-2"></i>Add New</Button>
                 </Col>
             </Row>
-            <Row>
+            {selectedSearchOptions.length === 0 && <Row>
                 <Col>
                 <ButtonGroup>
                     <Button variant="link" onClick={() => setShowSuppliers(true)}>{ selectedSupplier ? `Showing for ${suppliers.find(v => v.id === selectedSupplier).supplierName}` : 'Showing All'}</Button>                </ButtonGroup>
@@ -151,7 +167,7 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
                         </Offcanvas.Body>
                     </Offcanvas>
                 </Col>
-            </Row>
+            </Row> }
             <Row className="mb-3">
                 <Col>
                     <ListGroup>
@@ -188,8 +204,19 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
                                             }
                                     </div></Col>
                                     <Col sm="1" className="text-sm-end">
-                                        {!v.sheetName && <span onClick={() => removeOrder(v)} role="button"><i className="bi bi-x-lg text-danger"></i>&nbsp;</span>}
-                                        <i role="button" className="bi bi-pencil" onClick={() => recordUsage(v)}></i>
+                                        {!v.sheetName && 
+                                        <OverlayTrigger trigger="click" placement="left" overlay={
+                                            <Popover>
+                                            <Popover.Header as="h3">Are you sure?</Popover.Header>
+                                            <Popover.Body>
+                                                <a role="button" href="#" className="link-danger link-underline-opacity-25 link-underline-opacity-100-hover" onClick={() => removeOrder(v)}>Yes</a>
+                                            </Popover.Body>
+                                            </Popover>
+                                        }>
+                                            <span role="button"><i className="bi bi-x-lg text-danger"></i>&nbsp;</span>
+                                        </OverlayTrigger>
+                                        }
+                                        <i role="button" className="bi bi-truck" onClick={() => recordUsage(v)}></i>
                                     </Col>
                                 </Stack>
                             </ListGroupItem>

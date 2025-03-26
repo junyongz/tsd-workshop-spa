@@ -1,6 +1,6 @@
 import { useRef, useState } from "react"
 import { Container, Form, Modal, Row, Col, Button, InputGroup } from "react-bootstrap"
-import { Input, Typeahead } from "react-bootstrap-typeahead"
+import { Typeahead } from "react-bootstrap-typeahead"
 
 function SparePartsUsageDialog({isShow, setShowDialog, vehicles, 
     usageSpareParts, setUsageSpareParts, onSaveNewSparePartUsage,
@@ -9,7 +9,7 @@ function SparePartsUsageDialog({isShow, setShowDialog, vehicles,
     const formRef = useRef()
     const [validated, setValidated] = useState(false)
     const [selectedVehicles, setSelectedVehicles] = useState([])
-    const [remaining, setRemaining] = useState(usageSpareParts.quantity)
+    const [remaining, setRemaining] = useState(usageSpareParts.remaining)
 
     const [records, setRecords] = useState(1)
 
@@ -22,7 +22,7 @@ function SparePartsUsageDialog({isShow, setShowDialog, vehicles,
     }
 
     const updateRemaining = (qty) => {
-        setRemaining(usageSpareParts.quantity - qty)
+        setRemaining(usageSpareParts.remaining - qty)
     }
 
     const saveChange = () => {
@@ -63,7 +63,7 @@ function SparePartsUsageDialog({isShow, setShowDialog, vehicles,
     }
 
     return (
-        <Modal show={isShow} onHide={handleClose} onShow={() => setRemaining(usageSpareParts.quantity)} size="lg">
+        <Modal show={isShow} onHide={handleClose} onShow={() => setRemaining(usageSpareParts.remaining)} size="lg">
             <Modal.Header closeButton>
             <Modal.Title>
                 <div><i className="bi bi-tools"></i> {usageSpareParts.partName}, tinggal lagi: {remaining} {usageSpareParts.unit}</div>
@@ -102,7 +102,7 @@ function SparePartsUsageDialog({isShow, setShowDialog, vehicles,
                                     </InputGroup>
                                     </Col>
                                     <Col sm="2">
-                                        <Form.Control onChange={(e) => updateRemaining(e.target.value)} required type="number" name="quantity" disabled={!usageSpareParts.quantity || usageSpareParts.quantity === 0} max={usageSpareParts.quantity || 0} min={1}></Form.Control>
+                                        <Form.Control onChange={(e) => updateRemaining(e.target.value)} required type="number" name="quantity" disabled={!usageSpareParts.remaining || usageSpareParts.remaining === 0} max={usageSpareParts.remaining || 0} min={1}></Form.Control>
                                     </Col>
                                 </Row>
                             

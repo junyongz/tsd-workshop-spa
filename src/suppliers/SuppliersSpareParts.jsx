@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { Container, ListGroup, ListGroupItem, Row, Col, Stack, Pagination, Button, Badge, Nav, Offcanvas, Spinner, ButtonGroup, OverlayTrigger, Popover } from "react-bootstrap"
 import getPaginationItems from "../utils/getPaginationItems"
 import { chunkArray } from "../utils/arrayUtils"
 import AddSparePartsDialog from "./AddSparePartsDialog"
 import SparePartsUsageDialog from "./SparePartsUsageDialog"
 import remainingQuantity from "../utils/quantityUtils"
+import NoteTakingDialog from "./NoteTakingDialog"
 
 function SuppliersSpareParts({filteredOrders=[], setFilteredOrders, selectedSearchOptions=[],
     orders=[], suppliers=[], spareParts=[], vehicles=[], sparePartUsages=[],
@@ -17,6 +18,10 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders, selectedSear
     const totalPages = chunkedItems.length;
 
     const [showDialog, setShowDialog] = useState(false)
+    
+    const [showNoteDialog, setShowNoteDialog] = useState(false)
+    const [noteSparePart, setNoteSparePart] = useState()
+
     const [showUsageDialog, setShowUsageDialog] = useState(false)
     const [usageSpareParts, setUsageSpareParts] = useState()
 
@@ -28,8 +33,13 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders, selectedSear
     }
 
     const recordUsage = (v) => {
-        setUsageSpareParts({...v, quantity: remainingQuantity(v, sparePartUsages), supplierName: findSupplier(v.supplierId).supplierName})
+        setUsageSpareParts({...v, remaining: remainingQuantity(v, sparePartUsages), supplierName: findSupplier(v.supplierId).supplierName})
         setShowUsageDialog(true)
+    }
+
+    const recordNote = (v) => {
+        setNoteSparePart({...v, remaining: remainingQuantity(v, sparePartUsages), supplierName: findSupplier(v.supplierId).supplierName})
+        setShowNoteDialog(true)
     }
 
     const filterOrderBySupplier = (supplier) => {
@@ -62,7 +72,7 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders, selectedSear
             })
             .then(() => refreshSpareParts())
             .then(() => callback && callback())
-            .then(() => setLoading(false))
+            .finally(() => setLoading(false))
         })
     }
 
@@ -80,7 +90,7 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders, selectedSear
             .then(res => res.json())
             .then(() => Promise.all([refreshSparePartUsages(),
                 refreshServices()]))
-            .then(() => setLoading(false))
+            .finally(() => setLoading(false))
         })
     }
 
@@ -106,7 +116,31 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders, selectedSear
                 refreshSpareParts(),
                 refreshServices()])
             })
-            .then(() => setLoading(false))
+            .finally(() => setLoading(false))
+        })
+    }
+
+    const onUpdateOrder = (order) => {
+        setLoading(true)
+        requestAnimationFrame(() => {
+            fetch(`${apiUrl}/supplier-spare-parts`, {
+                method: 'POST',
+                mode: 'cors',
+                headers: {
+                    'Content-type': 'application/json'
+                },
+                body: JSON.stringify([order])
+            })
+            .then(res => {
+                if (!res.ok) {
+                    throw `failed to delete order ${JSON.stringify(order)}`
+                }
+            })
+            .then(_ => {
+                orders[orders.findIndex(o => o.id === order.id)] = order
+                setFilteredOrders((selectedSupplier && orders.filter(s => s.supplierId === selectedSupplier.id)) || orders)
+            })
+            .finally(() => setLoading(false))
         })
     }
 
@@ -126,7 +160,13 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders, selectedSear
                     suppliers={suppliers}
                     spareParts={spareParts}
                     orders={orders}
-                    onSaveNewOrders={onSaveNewOrders}></AddSparePartsDialog>
+                    onSaveNewOrders={onSaveNewOrders}
+                ></AddSparePartsDialog>
+                { noteSparePart && <NoteTakingDialog isShow={showNoteDialog} 
+                    setShowDialog={setShowNoteDialog} 
+                    noteSparePart={noteSparePart}
+                    onUpdateOrder={onUpdateOrder}
+                ></NoteTakingDialog> }
                 { usageSpareParts && <SparePartsUsageDialog isShow={showUsageDialog}
                     setShowDialog={setShowUsageDialog} 
                     vehicles={vehicles}
@@ -134,7 +174,7 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders, selectedSear
                     setUsageSpareParts={setUsageSpareParts}
                     onSaveNewSparePartUsage={onSaveNewSparePartUsage}
                     onNewVehicleCreated={onNewVehicleCreated}
-                    ></SparePartsUsageDialog> }
+                ></SparePartsUsageDialog> }
             </Row>
             <Row>
                 <Col>
@@ -196,8 +236,13 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders, selectedSear
                                             <Col><Badge>{v.quantity} {v.unit} @ each ${v.unitPrice}</Badge>{remainingQuantity(v, sparePartUsages) < v.quantity && <Badge bg={remainingQuantity(v, sparePartUsages) === 0 ? 'danger' : 'warning' }>{remainingQuantity(v, sparePartUsages)} left</Badge>}</Col>
                                         </Row>                                    
                                     </Col>
-                                    <Col sm="3"><div>
-                                    {v.notes && <span>{v.notes}</span>}
+                                    <Col sm="3"><div><i role="button" className="bi bi-pencil" onClick={() => recordNote(v)}></i>&nbsp;
+                                    {v.notes && <span>{v.notes.split(/\r\n|\n|\r/).map((line, index) => (
+                                                        <React.Fragment key={index}>
+                                                        {line}
+                                                        <br />
+                                                        </React.Fragment>
+                                                    ))}</span>}
                                     {sparePartUsages.findIndex(spu => spu.orderId === v.id) >= 0 
                                         && sparePartUsages.filter(spu => spu.orderId === v.id)
                                             .map(spu => <span style={{display: 'block'}}>Used by {spu.vehicleNo} @ {spu.usageDate}</span>)

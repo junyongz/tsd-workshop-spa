@@ -60,7 +60,7 @@ function ServiceListing({services=[], filteredServices=[],
         keywordSearch()
       })
       .then(() => refreshSparePartUsages())
-      .then(() => setLoading(false))
+      .finally(() => setLoading(false))
     })
     
   }
@@ -83,7 +83,7 @@ function ServiceListing({services=[], filteredServices=[],
         keywordSearch()
       })
       .then(() => Promise.all([refreshSpareParts(), refreshSparePartUsages()]))
-      .then(() => setLoading(false))
+      .finally(() => setLoading(false))
     })
   }
 

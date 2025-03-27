@@ -29,7 +29,7 @@ function NoteTakingDialog({isShow, setShowDialog, onUpdateOrder=()=>{}, noteSpar
         <Modal show={isShow} onHide={handleClose} onShow={dialogOpened} size="lg">
             <Modal.Header closeButton>
             <Modal.Title>
-                <div><i className="bi bi-card-text"></i> {noteSparePart.partName} ({noteSparePart.quantity} left)</div>
+                <div><i className="bi bi-card-text"></i> {noteSparePart.partName} ({noteSparePart.remaining} left)</div>
                 <div className="text-body-secondary fs-6">Order {noteSparePart.deliveryOrderNo} from {noteSparePart.supplierName} @ {noteSparePart.invoiceDate} </div>
             </Modal.Title>
             </Modal.Header>
@@ -48,11 +48,8 @@ function NoteTakingDialog({isShow, setShowDialog, onUpdateOrder=()=>{}, noteSpar
                 </Container>
             </Modal.Body>
             <Modal.Footer>
-            <Button variant="secondary" onClick={handleClose}>
-                Close
-            </Button>
             <Button variant="primary" onClick={saveChange}>
-                Save Changes
+                <i className="bi bi-save2 me-2"></i>Save
             </Button>
             </Modal.Footer>
         </Modal>

@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Modal, Button, Container, Col, Row, FormLabel, Badge, ListGroup, InputGroup } from "react-bootstrap";
+import { Modal, Button, Container, Col, Row, FormLabel, Badge, ListGroup, InputGroup, Nav } from "react-bootstrap";
 import { Typeahead } from "react-bootstrap-typeahead";
 import Form from "react-bootstrap/Form";
 import remainingQuantity from "./utils/quantityUtils";
@@ -103,7 +103,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles, set
     }
 
     return (
-        <Modal show={isShow} onHide={handleClose} onShow={changeSelectedVehicle} size="lg">
+        <Modal show={isShow} onHide={handleClose} onShow={changeSelectedVehicle} backdrop="static" onEscapeKeyDown={(e) => e.preventDefault()} size="xl">
             <Modal.Header closeButton>
             <Modal.Title><i className="bi bi-file-earmark-text-fill"></i> Service at {trx?.current?.creationDate}</Modal.Title>
             </Modal.Header>
@@ -130,13 +130,18 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles, set
                         </Row>
                         <Row>
                             <Col className="text-sm-end">
-                                <Button size="sm" onClick={addNewItem}>Add More</Button>
+                                <Button size="sm" onClick={addNewItem}><i className="bi bi-plus-circle-fill me-2"></i>Add More</Button>
                             </Col>
                         </Row>
                         
-                        <div>
-                            <label>Spart parts</label>
-                        </div>
+                        <Nav variant="pills" defaultActiveKey="spareParts" className="mb-1">
+                            <Nav.Item>
+                                <Nav.Link eventKey={'spareParts'}>Spare Parts</Nav.Link>
+                            </Nav.Item>
+                            <Nav.Item>
+                                <Nav.Link disabled eventKey={'workmanship'}>Workmanship</Nav.Link>
+                            </Nav.Item>
+                        </Nav>
                         <ListGroup>
                         {items?.map((v, i) =>
                         <ListGroup.Item key={i}>
@@ -145,7 +150,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles, set
                                 <span onClick={() => removeItem(i)} role="button"><i className="bi bi-x-lg text-danger"></i></span>
                                 </Col>
                                 
-                                <Form.Group as={Col} className="mb-3 col-7" controlId="spareParts">
+                                <Form.Group as={Col} className="mb-3 col-6" controlId="spareParts">
                                     <InputGroup>
                                     <InputGroup.Text><i className="bi bi-tools"></i></InputGroup.Text>
                                     <Typeahead
@@ -176,35 +181,30 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles, set
                                     </InputGroup>
                                 </Form.Group>
                                 <Form.Group as={Col} className="mb-3 col-2" controlId="quantity">
-                                    <Form.Control onChange={(e) => updatePriceByQuantity(e.target.value, i)} required type="number" name="quantity" min="1" max={(v.selectedSpareParts[0] && orders.find(o => o.id === v.selectedSpareParts[0].orderId).quantity) || 0} placeholder="Quantity" value={v?.quantity}/>
+                                    <InputGroup>
+                                        <Form.Control onChange={(e) => updatePriceByQuantity(e.target.value, i)} required type="number" name="quantity" min="1" max={(v.selectedSpareParts[0] && orders.find(o => o.id === v.selectedSpareParts[0].orderId).quantity) || 0} placeholder="Quantity" value={v?.quantity}/>
+                                        <InputGroup.Text>{v?.unit}</InputGroup.Text>
+                                    </InputGroup>
                                 </Form.Group>
                                 <Form.Group as={Col} className="mb-3 col-2" controlId="unitPrice">
-                                    <Form.Control onChange={(e) => updatePriceByUnitPrice(e.target.value, i)} required type="number" step="0.10" name="unitPrice" placeholder="Price $" value={v?.unitPrice} />
+                                    <InputGroup>
+                                        <InputGroup.Text><i className="bi bi-currency-dollar"></i></InputGroup.Text>
+                                        <Form.Control onChange={(e) => updatePriceByUnitPrice(e.target.value, i)} required type="number" step="0.10" name="unitPrice" placeholder="Price $" value={v?.unitPrice} />
+                                    </InputGroup>
                                 </Form.Group>
-                            </Row>
-                            <Row>
-                                <Col className="mb-3">
-                                </Col>
-                                <Col className="mb-3 col-2" controlId="unit">
-                                    <Form.Control required type="text" name="unit" placeholder="Unit" value={v?.unit}/>
-                                </Col>
-                                <Col className="mb-3 col-2">
+                                <Col className="text-sm-end align-items-center">
                                     <FormLabel><Badge pill>$ {(v?.quantity * v?.unitPrice) || 0}</Badge></FormLabel>
                                 </Col>
                             </Row>
                         </ListGroup.Item>
                         )}
-                        </ListGroup>
-                        
+                        </ListGroup>                        
                     </Form>
                 </Container>
             </Modal.Body>
             <Modal.Footer>
-            <Button variant="secondary" onClick={handleClose}>
-                Close
-            </Button>
             <Button variant="primary" onClick={saveChange}>
-                Save Changes
+                <i className="bi bi-save2 me-2"></i>Save
             </Button>
             </Modal.Footer>
         </Modal>

@@ -6,6 +6,7 @@ import getPaginationItems from './utils/getPaginationItems';
 import HoverPilledBadge from './components/HoverPilledBadge';
 import CompletionLabel from './components/CompletionLabel';
 import { chunkArray } from './utils/arrayUtils';
+import { clearState } from './autoRefreshWorker';
 
 /***
  * Date: {
@@ -60,6 +61,7 @@ function ServiceListing({services=[], filteredServices=[],
         keywordSearch()
       })
       .then(() => refreshSparePartUsages())
+      .then(() => clearState())
       .finally(() => setLoading(false))
     })
     
@@ -83,23 +85,33 @@ function ServiceListing({services=[], filteredServices=[],
         keywordSearch()
       })
       .then(() => Promise.all([refreshSpareParts(), refreshSparePartUsages()]))
+      .then(() => clearState())
       .finally(() => setLoading(false))
     })
   }
 
   const completeAllServices = (newTrxs) => {
-    fetch(`${apiUrl}/transactions?op=COMPLETE`, {
-      method: 'POST', 
-      body: JSON.stringify(newTrxs), 
-      headers: {
-        'Content-type': 'application/json'
-      }
+    setLoading(true)
+    requestAnimationFrame(() => {
+      fetch(`${apiUrl}/transactions?op=COMPLETE`, {
+        method: 'POST', 
+        body: JSON.stringify(newTrxs), 
+        headers: {
+          'Content-type': 'application/json'
+        }
+      })
+      .then(res => res.json())
+      .then(trxs => {
+        services.current.updateTransaction(trxs)
+        keywordSearch()
+      })
+      .then(() => clearState())
+      .finally(() => setLoading(false))
     })
-    .then(res => res.json())
-    .then(trxs => {
-      services.current.updateTransaction(trxs)
-      keywordSearch()
-    })
+  }
+
+  const findOrder = (orderId) => {
+    return orders.find(o => o.id === orderId)
   }
 
   return (
@@ -155,14 +167,17 @@ function ServiceListing({services=[], filteredServices=[],
                 <Row>
                   <Col className="p-0">
                     <ListGroup>
-                    {vv[1].map((vvv, iii) => 
-                      <ListGroupItem key={vvv.index}>
+                    {vv[1].map((vvv, iii) => {
+                      const order = findOrder(vvv.orderId)
+
+                      return <ListGroupItem key={vvv.index}>
                         <Stack direction="horizontal">
-                          <Col>{vvv.itemDescription}</Col>
+                          <Col>{vvv.itemDescription} { order && <small className="text-secondary"><i className="bi bi-shop"></i>{suppliers.find(s => s.id === vvv.supplierId).supplierName} <i className="bi bi-calendar-event"></i>{order.invoiceDate}</small> }</Col>
                           <Col className='text-sm-end col-2'><Badge pill>{vvv.quantity > 0 && vvv.unitPrice && `${vvv.quantity} ${vvv.unit} @ $${vvv.unitPrice?.toFixed(2)}`}</Badge></Col>
                           <Col className='text-sm-end col-2'>{vvv.migratedIndicator || vvv.completionDate ? <Badge pill>$ {vvv.totalPrice}</Badge> : <HoverPilledBadge onRemove={() => removeTransaction(vvv.index)}>$ {vvv.totalPrice}</HoverPilledBadge> }</Col>
                         </Stack>
-                      </ListGroupItem>)
+                      </ListGroupItem>
+                      })
                     }
                     </ListGroup>
                   </Col>

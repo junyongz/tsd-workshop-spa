@@ -12,6 +12,7 @@ import fetchVehicles from './vehicles/fetchVehicles';
 import fetchSuppliers from './suppliers/fetchSuppliers';
 import fetchSparePartUsages from './spare-parts/fetchSparePartUsages';
 import fetchServices from './fetchServices';
+import autoRefreshWorker from './autoRefreshWorker';
 
 /***
  * Date: {
@@ -130,50 +131,66 @@ function App() {
     setFilteredOrders(orders.current)
   }
 
-  useEffect(() => {
-      setLoading(true)
-      requestAnimationFrame(async () => {
-        Promise.all([
-          fetchServices(apiUrl, services, setFilteredServices),
-
-          fetchSupplierSpareParts(apiUrl, orders, setFilteredOrders),
-          fetchSparePartUsages(apiUrl, setSparePartUsages),
-      
-          fetchVehicles(apiUrl, setVehicles, setSearchOptions),
-          fetchSpareParts(apiUrl, setSpareParts, setSearchOptions),
-          fetchSuppliers(apiUrl, setSuppliers)
-        ])
-        .then( () => setLoading(false) )
-      })
-  }, []);
-
   const onNewVehicleCreated = (vehicleNo) => {
-      if (!/([A-Z]{1,3})\s([\d]{1,4})(\s([A-Z]{1,2}))?/.test(vehicleNo)) {
-        alert('Wrong vehicle no format')
-        return
-      }
+    if (!/([A-Z]{1,3})\s([\d]{1,4})(\s([A-Z]{1,2}))?/.test(vehicleNo)) {
+      alert('Wrong vehicle no format')
+      return
+    }
 
-      fetch(`${apiUrl}/vehicles`, {
-          method: 'POST',
-          body: JSON.stringify({
-            vehicleNo: vehicleNo,
-          }),
-          mode: 'cors',
-          headers: {
-              'Content-type': 'application/json'
-          }
-      })
-      .then(res => res.json())
-      .then(_ => {
-        fetchVehicles(apiUrl, setVehicles, setSearchOptions)
-      })
-  }
+    fetch(`${apiUrl}/vehicles`, {
+        method: 'POST',
+        body: JSON.stringify({
+          vehicleNo: vehicleNo,
+        }),
+        mode: 'cors',
+        headers: {
+            'Content-type': 'application/json'
+        }
+    })
+    .then(res => res.json())
+    .then(_ => {
+      fetchVehicles(apiUrl, setVehicles, setSearchOptions)
+    })
+}
 
   const refreshSparePartUsages = () => fetchSparePartUsages(apiUrl, setSparePartUsages)
 
   const refreshSpareParts = () => fetchSpareParts(apiUrl, setSpareParts, setSearchOptions)
 
   const refreshServices = () => fetchServices(apiUrl, services, setFilteredServices)
+
+  const refreshSupplierSpareParts = () => fetchSupplierSpareParts(apiUrl, orders, setFilteredOrders)
+
+  useEffect(() => {
+      setLoading(true)
+      requestAnimationFrame(async () => {
+        Promise.all([
+          refreshServices(),
+
+          refreshSupplierSpareParts(),
+          refreshSparePartUsages(),
+      
+          fetchVehicles(apiUrl, setVehicles, setSearchOptions),
+          refreshSpareParts(),
+          fetchSuppliers(apiUrl, setSuppliers)
+        ])
+        .then( () => setLoading(false) )
+      })
+
+      const fetchStatsTimer = setInterval(() => {
+        autoRefreshWorker(setLoading, 
+          {
+            'mig_data': refreshServices,
+            'mig_supplier_spare_parts': refreshSupplierSpareParts,
+            'mig_spare_parts': refreshSpareParts,
+            'spare_part_usages': refreshSparePartUsages,
+          }
+        )
+      }, 30000)
+
+      return  () => clearInterval(fetchStatsTimer);
+      
+  }, []);
 
   return (
     <div className="App">
@@ -262,6 +279,7 @@ function App() {
               onNewVehicleCreated={onNewVehicleCreated}
               setLoading={setLoading}
               selectedSearchOptions={selectedSearchOptions}
+              filterServices={filterServices}
             />} />
         </Routes>
     </div>

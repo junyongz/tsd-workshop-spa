@@ -6,8 +6,10 @@ import AddSparePartsDialog from "./AddSparePartsDialog"
 import SparePartsUsageDialog from "./SparePartsUsageDialog"
 import remainingQuantity from "../utils/quantityUtils"
 import NoteTakingDialog from "./NoteTakingDialog"
+import { clearState } from "../autoRefreshWorker"
 
-function SuppliersSpareParts({filteredOrders=[], setFilteredOrders, selectedSearchOptions=[],
+function SuppliersSpareParts({filteredOrders=[], setFilteredOrders, 
+    selectedSearchOptions=[], filterServices=() => {},
     orders=[], suppliers=[], spareParts=[], vehicles=[], sparePartUsages=[],
     refreshSpareParts=() => {}, refreshSparePartUsages=() =>{}, refreshServices=()=>{},
     onNewVehicleCreated=() => {}, setLoading=()=>{}}) {
@@ -45,10 +47,15 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders, selectedSear
     const filterOrderBySupplier = (supplier) => {
         if (!selectedSupplier) {
             setFilteredOrders(filteredOrders.filter(s => s.supplierId === supplier.id))
-            setSelectedSupplier(supplier.id)
+            setSelectedSupplier(supplier)
         }
         else {
-            setFilteredOrders(filteredOrders)
+            if (selectedSearchOptions.length > 0) {
+                filterServices(selectedSearchOptions)
+            }
+            else {
+                setFilteredOrders(orders)
+            }
             setSelectedSupplier()
         }
     }
@@ -72,6 +79,7 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders, selectedSear
             })
             .then(() => refreshSpareParts())
             .then(() => callback && callback())
+            .then(() => clearState())
             .finally(() => setLoading(false))
         })
     }
@@ -88,8 +96,8 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders, selectedSear
                 }
             })
             .then(res => res.json())
-            .then(() => Promise.all([refreshSparePartUsages(),
-                refreshServices()]))
+            .then(() => Promise.all([refreshSparePartUsages(), refreshServices()]))
+            .then(() => clearState())
             .finally(() => setLoading(false))
         })
     }
@@ -116,6 +124,7 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders, selectedSear
                 refreshSpareParts(),
                 refreshServices()])
             })
+            .then(() => clearState())
             .finally(() => setLoading(false))
         })
     }
@@ -140,6 +149,7 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders, selectedSear
                 orders[orders.findIndex(o => o.id === order.id)] = order
                 setFilteredOrders((selectedSupplier && orders.filter(s => s.supplierId === selectedSupplier.id)) || orders)
             })
+            .then(() => clearState())
             .finally(() => setLoading(false))
         })
     }
@@ -189,13 +199,13 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders, selectedSear
             {selectedSearchOptions.length === 0 && <Row>
                 <Col>
                 <ButtonGroup>
-                    <Button variant="link" onClick={() => setShowSuppliers(true)}>{ selectedSupplier ? `Showing for ${suppliers.find(v => v.id === selectedSupplier).supplierName}` : 'Showing All'}</Button>                </ButtonGroup>
+                    <Button variant="link" onClick={() => setShowSuppliers(true)}>{ selectedSupplier ? `Showing for ${suppliers.find(v => v.id === selectedSupplier.id).supplierName}` : 'Showing All'}</Button>                </ButtonGroup>
                     <Offcanvas show={showSuppliers} placement="top" onHide={() => setShowSuppliers(false)}>
                         <Offcanvas.Header closeButton>
                         <Offcanvas.Title><i className="bi bi-shop"></i> Suppliers</Offcanvas.Title>
                         </Offcanvas.Header>
                         <Offcanvas.Body>
-                            <Nav variant="underline" defaultActiveKey={selectedSupplier} activeKey={selectedSupplier}>
+                            <Nav variant="underline" defaultActiveKey={selectedSupplier?.id} activeKey={selectedSupplier?.id}>
                                 {
                                     suppliers.map((v, i) => 
                                         <Nav.Item key={i}>
@@ -245,7 +255,7 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders, selectedSear
                                                     ))}</span>}
                                     {sparePartUsages.findIndex(spu => spu.orderId === v.id) >= 0 
                                         && sparePartUsages.filter(spu => spu.orderId === v.id)
-                                            .map(spu => <span style={{display: 'block'}}>Used by {spu.vehicleNo} @ {spu.usageDate}</span>)
+                                            .map(spu => <span style={{display: 'block'}}>Used by {spu.vehicleNo} <Badge pill>{spu.quantity}</Badge> <i className="bi bi-calendar-event"></i> {spu.usageDate}</span>)
                                             }
                                     </div></Col>
                                     <Col sm="1" className="text-sm-end">

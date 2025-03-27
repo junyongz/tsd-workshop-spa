@@ -142,21 +142,21 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], suppliers=[], sp
     }
 
     return (
-        <Modal show={isShow} onHide={handleClose} onShow={dialogOpened} size="lg">
-            <Modal.Header closeButton>
+        <Modal show={isShow} onHide={handleClose} onShow={dialogOpened} backdrop="static" onEscapeKeyDown={(e) => e.preventDefault()} size="xl">
+            <Modal.Header closeButton closeVariant="danger">
             <Modal.Title><i className="bi bi-tools"></i> Adding New Spare Parts</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <Container>
                     <Form ref={formRef} validated={validated}>
                         <Row className="mb-3">
-                            <Col sm="4">
+                            <Col sm="3">
                                 <InputGroup>
                                     <InputGroup.Text><i className="bi bi-calendar-event"></i></InputGroup.Text>
                                     <Form.Control required type="date" name="invoiceDate"></Form.Control>
                                 </InputGroup>
                             </Col>
-                            <Col sm="4">
+                            <Col sm="5">
                                 <InputGroup>
                                     <InputGroup.Text><i className="bi bi-shop"></i></InputGroup.Text>
                                     <Typeahead
@@ -180,7 +180,7 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], suppliers=[], sp
                         </Row>
                         <Row className="my-3">
                             <Col className="text-sm-end">
-                                <Button size="sm" onClick={addNewItem}>Add More</Button>
+                                <Button size="sm" onClick={addNewItem}><i className="bi bi-plus-circle-fill me-2"></i>Add More</Button>
                             </Col>
                         </Row>
                         
@@ -228,17 +228,20 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], suppliers=[], sp
                                     </Form.Group>
                                 </Row>
                                 <Row>
-                                    <Col sm="4"></Col>
+                                    <Col sm="5"></Col>
                                     <Col sm="2">
-                                        <Form.Control onChange={(e) => updatePriceByQuantity(e.target.value, i)} required type="number" name="quantity" placeholder="Quantity" value={v?.quantity}/>
+                                        <Form.Control onChange={(e) => updatePriceByQuantity(e.target.value, i)} required type="number" min="0" name="quantity" placeholder="Quantity" value={v?.quantity}/>
                                     </Col>
-                                    <Col sm="2" className="mb-3">
+                                    <Col sm="1" className="mb-3">
                                         <Form.Control required type="text" name="unit" placeholder="Unit" defaultValue={v?.unit}/>
                                     </Col>
                                     <Col sm="2">
-                                        <Form.Control onChange={(e) => updatePriceByUnitPrice(e.target.value, i)} required type="number" step="0.1" name="unitPrice" placeholder="Price $" value={v?.unitPrice} />
+                                        <InputGroup>
+                                            <InputGroup.Text><i className="bi bi-currency-dollar"></i></InputGroup.Text>
+                                            <Form.Control onChange={(e) => updatePriceByUnitPrice(e.target.value, i)} required type="number" min="0" step="0.1" name="unitPrice" placeholder="Price $" value={v?.unitPrice} />
+                                        </InputGroup>
                                     </Col>
-                                    <Col className="mb-3">
+                                    <Col className="mb-3 text-sm-end">
                                         <p className="fs-4">${(v.quantity && v.unitPrice && v.quantity * v.unitPrice) || 0}</p>
                                     </Col>
                                 </Row>
@@ -250,11 +253,8 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], suppliers=[], sp
                 </Container>
             </Modal.Body>
             <Modal.Footer>
-            <Button variant="secondary" onClick={handleClose}>
-                Close
-            </Button>
             <Button variant="primary" onClick={saveChange} disabled={isPending}>
-                Save Changes
+                <i className="bi bi-save2 me-2"></i>Save
             </Button>
             </Modal.Footer>
         </Modal>

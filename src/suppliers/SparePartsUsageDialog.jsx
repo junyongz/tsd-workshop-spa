@@ -1,6 +1,6 @@
 import { useRef, useState } from "react"
 import { Container, Form, Modal, Row, Col, Button, InputGroup } from "react-bootstrap"
-import { Typeahead } from "react-bootstrap-typeahead"
+import { Input, Typeahead } from "react-bootstrap-typeahead"
 
 function SparePartsUsageDialog({isShow, setShowDialog, vehicles, 
     usageSpareParts, setUsageSpareParts, onSaveNewSparePartUsage,
@@ -101,8 +101,11 @@ function SparePartsUsageDialog({isShow, setShowDialog, vehicles,
                                             />
                                     </InputGroup>
                                     </Col>
-                                    <Col sm="2">
+                                    <Col sm="3">
+                                        <InputGroup>
                                         <Form.Control onChange={(e) => updateRemaining(e.target.value)} required type="number" name="quantity" disabled={!usageSpareParts.remaining || usageSpareParts.remaining === 0} max={usageSpareParts.remaining || 0} min={1}></Form.Control>
+                                        <InputGroup.Text>{usageSpareParts.unit}</InputGroup.Text>
+                                        </InputGroup>
                                     </Col>
                                 </Row>
                             
@@ -112,11 +115,8 @@ function SparePartsUsageDialog({isShow, setShowDialog, vehicles,
                 </Container>
             </Modal.Body>
             <Modal.Footer>
-                <Button variant="secondary" onClick={handleClose}>
-                    Close
-                </Button>
                 <Button variant="primary" onClick={saveChange}>
-                    Save Changes
+                <i className="bi bi-save2 me-2"></i>Save
                 </Button>
             </Modal.Footer>
         </Modal>

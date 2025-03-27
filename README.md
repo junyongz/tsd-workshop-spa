@@ -6,7 +6,7 @@
 2. Allow to add new spare parts to existing date or vehicle
 3. Not allowed to touch migrated data (based on the 1st record only)
 4. Allow auto complete for vehicle and spare parts (need clean up)
-5. Allow to search by vehicle and spare parts
+5. Allow to search by vehicle, spare parts and date
 6. Allow to complete the service(s)
 
 ## Work In-Progress
@@ -20,8 +20,7 @@
 6. Search by 'Or' condition, eg. multiple days, car and spare parts together (only or condition, DONE)
 7. Access right
 8. Search pill badge holders (autocomplete, DONE)
-9. Search by Date
-10. Exception handling
+9. Exception handling
 
 ## Bigger plan
 

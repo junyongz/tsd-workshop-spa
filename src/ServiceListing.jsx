@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Badge, Button, Card, Col, Container, ListGroup, ListGroupItem, Row, Stack } from 'react-bootstrap';
+import { Badge, Button, ButtonGroup, Card, Col, Container, ListGroup, ListGroupItem, Row, Stack } from 'react-bootstrap';
 import Pagination from 'react-bootstrap/Pagination';
 import ServiceDialog from './ServiceDialog';
 import getPaginationItems from './utils/getPaginationItems';
@@ -7,13 +7,15 @@ import HoverPilledBadge from './components/HoverPilledBadge';
 import CompletionLabel from './components/CompletionLabel';
 import { chunkArray } from './utils/arrayUtils';
 import { clearState } from './autoRefreshWorker';
+import OrderTooltip from './services/OrderTooltip';
+import YearMonthView from './services/YearMonthView';
 
 /***
  * Date: {
  *  vehicle: [transactions]
  * }
  */
-function ServiceListing({services=[], filteredServices=[], 
+function ServiceListing({services, filteredServices=[], 
     keywordSearch = () => {}, refreshSparePartUsages=() => {}, 
     refreshSpareParts=() => {},
     vehicles, setVehicles, spareParts, sparePartUsages=[],
@@ -27,6 +29,12 @@ function ServiceListing({services=[], filteredServices=[],
   const [activePage, setActivePage] = useState(1)
   const chunkedItems = chunkArray(filteredServices, 14)
   const totalPages = chunkedItems.length;
+
+  const [yearMonthView, setYearMonthView] = useState(false)
+
+  const viewByYearMonth = () => {
+    setYearMonthView(true)
+  }
 
   const addNewServiceTransaction = (creationDate) => {
     serviceTransaction.current = {
@@ -116,6 +124,10 @@ function ServiceListing({services=[], filteredServices=[],
 
   return (
     <Container>
+    {
+      yearMonthView && <YearMonthView services={services} suppliers={suppliers} orders={orders} backToService={() => setYearMonthView(false)}></YearMonthView>
+    }
+    { !yearMonthView && <Container>
       <ServiceDialog isShow={showModal} setShow={setShowModal} trx={serviceTransaction} 
         onNewServiceCreated={onNewServiceCreated} 
         vehicles={vehicles} setVehicles={setVehicles} 
@@ -130,8 +142,11 @@ function ServiceListing({services=[], filteredServices=[],
           { getPaginationItems(activePage, setActivePage, totalPages, 10) }
           </Pagination>
         </Col>
-        <Col className={'text-sm-end col-2'}>
-          <Button variant='success' onClick={() => addNewServiceTransaction(new Date().toISOString().split('T')[0])}><i className="bi bi-plus-circle-fill me-2"></i>Add New</Button>
+        <Col className={'text-sm-end'}>
+          <ButtonGroup>
+            <Button variant='secondary' onClick={() => viewByYearMonth()}><i className="bi bi-calendar-event me-2"></i>Calendar View</Button>
+            <Button variant='success' onClick={() => addNewServiceTransaction(new Date().toISOString().split('T')[0])}><i className="bi bi-plus-circle-fill me-2"></i>Add New</Button>
+          </ButtonGroup>
         </Col>
       </Row>
 
@@ -169,10 +184,11 @@ function ServiceListing({services=[], filteredServices=[],
                     <ListGroup>
                     {vv[1].map((vvv, iii) => {
                       const order = findOrder(vvv.orderId)
+                      const supplier = suppliers.find(s => s.id === vvv.supplierId)
 
                       return <ListGroupItem key={vvv.index}>
                         <Stack direction="horizontal">
-                          <Col>{vvv.itemDescription} { order && <small className="text-secondary"><i className="bi bi-shop"></i>{suppliers.find(s => s.id === vvv.supplierId).supplierName} <i className="bi bi-calendar-event"></i>{order.invoiceDate}</small> }</Col>
+                          <Col>{vvv.itemDescription} { order && <div><OrderTooltip order={order} supplier={supplier} /></div> }</Col>
                           <Col className='text-sm-end col-2'><Badge pill>{vvv.quantity > 0 && vvv.unitPrice && `${vvv.quantity} ${vvv.unit} @ $${vvv.unitPrice?.toFixed(2)}`}</Badge></Col>
                           <Col className='text-sm-end col-2'>{vvv.migratedIndicator || vvv.completionDate ? <Badge pill>$ {vvv.totalPrice}</Badge> : <HoverPilledBadge onRemove={() => removeTransaction(vvv.index)}>$ {vvv.totalPrice}</HoverPilledBadge> }</Col>
                         </Stack>
@@ -192,6 +208,7 @@ function ServiceListing({services=[], filteredServices=[],
       <Pagination>
         { getPaginationItems(activePage, setActivePage, totalPages, 10) }
       </Pagination>
+    </Container> }
     </Container>
   );
 }

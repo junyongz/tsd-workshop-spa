@@ -42,6 +42,29 @@ class ServiceTransactions {
     entriedServices() {
         return Object.entries(this.formattedTransactions)
     }
+
+    // {vehicle: []}
+    filterByYearMonthGroupByVehicle(year=2025, month=0) {
+        const matchedYearMonthTrxs = this.transactions.filter(trx => {
+            const creationDate = new Date(trx.creationDate)
+            if (creationDate.getFullYear() === year && creationDate.getMonth() === month) {
+                return true
+            }
+            return false
+        })
+
+        const formattedTrxs = {}
+        matchedYearMonthTrxs.forEach(trx => {
+            const vehTrxs = formattedTrxs[trx.vehicleNo] || []
+            vehTrxs.push(trx)
+            formattedTrxs[trx.vehicleNo] = vehTrxs
+        })
+        return formattedTrxs
+    }
+
+    availableYears() {
+        return Array.from(new Set(this.transactions.map(trx => new Date(trx.creationDate).getFullYear()))).sort((a, b) => b - a)
+    }
 }
 
 export default ServiceTransactions

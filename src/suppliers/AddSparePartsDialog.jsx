@@ -1,16 +1,16 @@
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { Button, Col, Container, Form, InputGroup, ListGroup, Modal, Row } from "react-bootstrap";
 import { Typeahead } from "react-bootstrap-typeahead";
 
-function AddSparePartsDialog({isShow, setShowDialog, orders=[], suppliers=[], spareParts=[], onSaveNewOrders}) {
+function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder, suppliers=[], spareParts=[], onSaveNewOrders}) {
     const formRef = useRef()
     const [validated, setValidated] = useState(false)
 
     const [isPending, startTransition] = useTransition();
 
-    const defaultItem = {itemCode: '', partName: 'Choose one ...', quantity: 1, unit: 'pc', unitPrice: 0, selectedItemCode: [], selectedSparePart: []};
+    const defaultItem = {itemCode: '', partName: 'Choose one ...', quantity: 0, unit: 'pc', unitPrice: 0, selectedItemCode: [], selectedSparePart: []};
 
-    const [items, setItems] = useState([defaultItem])
+    const [items, setItems] = useState(existingOrder || [defaultItem])
 
     const [selectedSupplier, setSelectedSupplier] = useState([])
     const [sparePartsSelection, setSparePartsSelection] = useState(spareParts)
@@ -141,6 +141,14 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], suppliers=[], sp
         return orders.find(o => o.id === id)
     }
 
+    useEffect(() => {
+        if (existingOrder && existingOrder.length > 0) {
+            setItems(existingOrder.map(v => {
+                return {...v, selectedItemCode: (v.itemCode && [{itemCode: v.itemCode}]) || [], selectedSparePart: [{partName: v.partName}]}
+            }))
+        }
+    }, [existingOrder])
+
     return (
         <Modal show={isShow} onHide={handleClose} onShow={dialogOpened} backdrop="static" onEscapeKeyDown={(e) => e.preventDefault()} size="xl">
             <Modal.Header closeButton closeVariant="danger">
@@ -189,7 +197,7 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], suppliers=[], sp
                             <ListGroup.Item>
                                 <Row>
                                     <Col xs="1"><span onClick={() => removeItem(i)} role="button"><i className="bi bi-x-lg text-danger"></i></span></Col>
-                                    <Form.Group as={Col} className="mb-3 col-4" controlId="itemCode">
+                                    <Form.Group as={Col} className="mb-3 col-3" controlId="itemCode">
                                         <InputGroup>
                                         <InputGroup.Text><i className="bi bi-123"></i></InputGroup.Text>
                                         <Typeahead
@@ -230,7 +238,7 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], suppliers=[], sp
                                 <Row>
                                     <Col sm="5"></Col>
                                     <Col sm="2">
-                                        <Form.Control onChange={(e) => updatePriceByQuantity(e.target.value, i)} required type="number" min="0" name="quantity" placeholder="Quantity" value={v?.quantity}/>
+                                        <Form.Control onChange={(e) => updatePriceByQuantity(e.target.value, i)} required type="number" min="1" name="quantity" placeholder="Quantity" value={v?.quantity}/>
                                     </Col>
                                     <Col sm="1" className="mb-3">
                                         <Form.Control required type="text" name="unit" placeholder="Unit" defaultValue={v?.unit}/>

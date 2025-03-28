@@ -25,6 +25,7 @@ function App() {
   const apiUrl = process.env.REACT_APP_API_URL
 
   const [loading, setLoading] = useState(false)
+  const [loadingTime, setLoadingTime] = useState(0)
 
   // the services and orders from supplier
   const services = useRef()
@@ -192,14 +193,26 @@ function App() {
       
   }, []);
 
+  useEffect(() => {
+    let loadingTimer 
+    if (loading) {
+      loadingTimer = setInterval(() => {
+        setLoadingTime(val => val + 49)
+      }, 49)
+    }
+
+    return () => { clearInterval(loadingTimer); setLoadingTime(0) }
+  }, [loading])
+
   return (
-    <div className="App">
+    <div>
         {loading && (
           <div className="loading-overlay">
-            <Spinner animation="border" variant="primary" />
+            <Spinner animation="border" variant="primary">{loadingTime}</Spinner>
           </div>
         )}
-        <Container fluid className={'position-fixed z-2 top-0 mt-0 py-3 bg-white' + (loading ? ' blurred ' : '')}>
+        <div id="content" className={(loading ? ' blurred ' : '')}>
+        <Container fluid className={'position-fixed z-2 top-0 mt-0 py-3 bg-white'}>
           <Row>
             <Col sm="2">
               <h3>TSD</h3>
@@ -215,6 +228,8 @@ function App() {
               <InputGroup.Text><i className="bi bi-truck"></i></InputGroup.Text>
               <InputGroup.Text><i className="bi bi-tools"></i></InputGroup.Text>
                 <Typeahead
+                    allowNew
+                    newSelectionPrefix="Search for... "
                     id="search-multiple"
                     labelKey="name"
                     multiple
@@ -282,6 +297,7 @@ function App() {
               filterServices={filterServices}
             />} />
         </Routes>
+        </div>
     </div>
   );
 }

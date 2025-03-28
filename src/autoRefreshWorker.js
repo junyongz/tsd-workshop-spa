@@ -12,7 +12,6 @@ export default function autoRefreshWorker(setLoading, refresherByTableName) {
             }
         })
     
-        console.log('how many promises will be promised?', promises)
         if (promises.length > 0) {
             setLoading(true)
             requestAnimationFrame(() => {

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react"
-import { Container, ListGroup, ListGroupItem, Row, Col, Stack, Pagination, Button, Badge, Nav, Offcanvas, Spinner, ButtonGroup, OverlayTrigger, Popover } from "react-bootstrap"
+import { Container, ListGroup, ListGroupItem, Row, Col, Stack, Pagination, Button, Badge, Nav, Offcanvas, ButtonGroup, OverlayTrigger, Popover } from "react-bootstrap"
 import getPaginationItems from "../utils/getPaginationItems"
 import { chunkArray } from "../utils/arrayUtils"
 import AddSparePartsDialog from "./AddSparePartsDialog"
@@ -7,6 +7,7 @@ import SparePartsUsageDialog from "./SparePartsUsageDialog"
 import remainingQuantity from "../utils/quantityUtils"
 import NoteTakingDialog from "./NoteTakingDialog"
 import { clearState } from "../autoRefreshWorker"
+import SparePartNotes from "./SparePartNotes"
 
 function SuppliersSpareParts({filteredOrders=[], setFilteredOrders, 
     selectedSearchOptions=[], filterServices=() => {},
@@ -20,6 +21,7 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
     const totalPages = chunkedItems.length;
 
     const [showDialog, setShowDialog] = useState(false)
+    const [existingOrder, setExistingOrder] = useState()
     
     const [showNoteDialog, setShowNoteDialog] = useState(false)
     const [noteSparePart, setNoteSparePart] = useState()
@@ -42,6 +44,12 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
     const recordNote = (v) => {
         setNoteSparePart({...v, remaining: remainingQuantity(v, sparePartUsages), supplierName: findSupplier(v.supplierId).supplierName})
         setShowNoteDialog(true)
+    }
+
+    const viewOrder = (no, e) => {
+        e.preventDefault()
+        setExistingOrder(orders.filter(o => o.deliveryOrderNo === no))
+        setShowDialog(true)
     }
 
     const filterOrderBySupplier = (supplier) => {
@@ -170,6 +178,7 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
                     suppliers={suppliers}
                     spareParts={spareParts}
                     orders={orders}
+                    existingOrder={existingOrder}
                     onSaveNewOrders={onSaveNewOrders}
                 ></AddSparePartsDialog>
                 { noteSparePart && <NoteTakingDialog isShow={showNoteDialog} 
@@ -230,13 +239,14 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
                                     <Col sm="1"></Col>
                                 </Stack>
                             </ListGroupItem>
-                    { (!filteredOrders || filteredOrders.length === 0) && <ListGroupItem><Spinner animation="border" role="status"></Spinner></ListGroupItem> }        
+                    { (!filteredOrders || filteredOrders.length === 0) && <ListGroupItem>...</ListGroupItem> }        
                     { filteredOrders && filteredOrders.length > 0 &&
                         chunkedItems[activePage - 1]?.map(v => 
                             <ListGroupItem key={v.id}>
                                 <Stack direction="horizontal">
                                     <Col>{v.invoiceDate}</Col>
-                                    <Col>{findSupplier(v.supplierId).supplierName} <div><span>{v.deliveryOrderNo}</span></div></Col>
+                                    <Col>{findSupplier(v.supplierId).supplierName} <div>{ false && <a className="link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover" href="#"
+                                        onClick={(e) => viewOrder(v.deliveryOrderNo, e)}>{v.deliveryOrderNo}</a>}{v.deliveryOrderNo}</div></Col>
                                     <Col sm="5">
                                         <Row>
                                             <Col><Badge bg="info" pill>{v.itemCode}</Badge></Col>
@@ -246,18 +256,7 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
                                             <Col><Badge>{v.quantity} {v.unit} @ each ${v.unitPrice}</Badge>{remainingQuantity(v, sparePartUsages) < v.quantity && <Badge bg={remainingQuantity(v, sparePartUsages) === 0 ? 'danger' : 'warning' }>{remainingQuantity(v, sparePartUsages)} left</Badge>}</Col>
                                         </Row>                                    
                                     </Col>
-                                    <Col sm="3"><div><i role="button" className="bi bi-pencil" onClick={() => recordNote(v)}></i>&nbsp;
-                                    {v.notes && <span>{v.notes.split(/\r\n|\n|\r/).map((line, index) => (
-                                                        <React.Fragment key={index}>
-                                                        {line}
-                                                        <br />
-                                                        </React.Fragment>
-                                                    ))}</span>}
-                                    {sparePartUsages.findIndex(spu => spu.orderId === v.id) >= 0 
-                                        && sparePartUsages.filter(spu => spu.orderId === v.id)
-                                            .map(spu => <span style={{display: 'block'}}>Used by {spu.vehicleNo} <Badge pill>{spu.quantity}</Badge> <i className="bi bi-calendar-event"></i> {spu.usageDate}</span>)
-                                            }
-                                    </div></Col>
+                                    <Col sm="3"><SparePartNotes order={v} onNoteClick={() => recordNote(v)} sparePartUsages={sparePartUsages}></SparePartNotes></Col>
                                     <Col sm="1" className="text-sm-end">
                                         {!v.sheetName && 
                                         <OverlayTrigger trigger="click" placement="left" overlay={

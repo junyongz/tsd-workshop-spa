@@ -5,10 +5,6 @@ function NoteTakingDialog({isShow, setShowDialog, onUpdateOrder=()=>{}, noteSpar
     const formRef = useRef()
     const [validated, setValidated] = useState(false)
 
-    const dialogOpened = () => {
-
-    }
-
     const handleClose = () => {
         setValidated(false)
         setShowDialog(false)
@@ -26,7 +22,7 @@ function NoteTakingDialog({isShow, setShowDialog, onUpdateOrder=()=>{}, noteSpar
     }
 
     return (
-        <Modal show={isShow} onHide={handleClose} onShow={dialogOpened} size="lg">
+        <Modal show={isShow} onHide={handleClose} size="lg">
             <Modal.Header closeButton>
             <Modal.Title>
                 <div><i className="bi bi-card-text"></i> {noteSparePart.partName} ({noteSparePart.remaining} left)</div>
@@ -40,7 +36,7 @@ function NoteTakingDialog({isShow, setShowDialog, onUpdateOrder=()=>{}, noteSpar
                             <Col>
                                 <InputGroup>
                                     <InputGroup.Text><i className="bi bi-pencil"></i></InputGroup.Text>
-                                    <Form.Control as="textarea" required name="notes" rows={5} defaultValue={noteSparePart.notes}></Form.Control>
+                                    <Form.Control as="textarea" name="notes" rows={5} defaultValue={noteSparePart.notes}></Form.Control>
                                 </InputGroup>
                             </Col>
                         </Row>    

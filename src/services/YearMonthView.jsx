@@ -1,6 +1,7 @@
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Badge, Button, ButtonGroup, Card, Col, Container, Dropdown, DropdownButton, ListGroup, ListGroupItem, Row, Stack } from "react-bootstrap"
 import OrderTooltip from "./OrderTooltip"
+import { ScrollSpy } from "bootstrap"
 
 function YearMonthView({services, suppliers=[], orders=[], backToService}) {
     const currentDate = new Date()
@@ -15,6 +16,20 @@ function YearMonthView({services, suppliers=[], orders=[], backToService}) {
 
         return {vehicle: veh, amount: trxs.reduce((pv, cv) => pv + (cv.totalPrice || 0), 0).toFixed(2)}
     }).sort((a, b) => b.amount - a.amount)
+
+    const scrollSpyDataZoneRef = useRef()
+    const scrollSpyNavZoneRef = useRef()
+    useEffect(() => {
+        const scrollSpy = new ScrollSpy(scrollSpyDataZoneRef.current, {
+          target: scrollSpyNavZoneRef.current,
+          smoothScroll: true,
+          rootMargin: '0px 0px -40%'
+        });
+    
+        return () => {
+          scrollSpy.dispose();
+        };
+      }, []);    
 
     return (
         <Container>
@@ -51,37 +66,48 @@ function YearMonthView({services, suppliers=[], orders=[], backToService}) {
                 </Card>
             </Row>
             <Row>
-            {
-                sortedKeys.map(veh => {
-                    const values = trxsGroupByVehicles[veh]
-                
-                    return (
-                    <ListGroup key={veh}>
-                        <Card className={'mb-2'}>
-                            <Card.Header>
-                                <Stack direction="horizontal">
-                                    <Col className="fs-5 fw-bold">{veh}</Col><Col className='text-sm-end'><Badge>${amountByVehicles.find(a => a.vehicle === veh).amount}</Badge></Col>
-                                </Stack>
-                            </Card.Header>    
-                            <Card.Body>
-                                {values.map(trx => {
-                                    const order = orders.find(o => o.id === trx.orderId)
-                                    const supplier = suppliers.find(s => s.id === trx.supplierId)
-
-                                    return <ListGroupItem key={trx.index}>
+                <Col xs="2" ref={scrollSpyNavZoneRef}>
+                    <ListGroup className="position-sticky top-0">
+                    {
+                        sortedKeys.map(veh => 
+                            <ListGroup.Item action href={'#vehicle-' + veh.replace(' ', '')}>{veh} <Badge pill>${amountByVehicles.find(a => a.vehicle === veh).amount}</Badge></ListGroup.Item>
+                        )
+                    }
+                    </ListGroup>
+                </Col>
+                <Col id="vehicle-items" ref={scrollSpyDataZoneRef}>
+                    {
+                        sortedKeys.map(veh => {
+                            const values = trxsGroupByVehicles[veh]
+                        
+                            return (
+                            <ListGroup key={veh} id={'vehicle-' + veh.replace(' ', '')}>
+                                <Card className={'mb-2'}>
+                                    <Card.Header>
                                         <Stack direction="horizontal">
-                                            <Col>{trx.creationDate}</Col>
-                                            <Col xs="8">{trx.itemDescription} { order && <div><OrderTooltip order={order} supplier={supplier} /></div> }</Col>
-                                            <Col className='text-sm-end'><Badge pill>{trx.quantity > 0 && trx.unitPrice && `${trx.quantity} ${trx.unit} @ $${trx.unitPrice?.toFixed(2)}`}</Badge></Col>
-                                            <Col className='text-sm-end'>$ {trx.totalPrice?.toFixed(2) || 0}</Col>
+                                            <Col className="fs-5 fw-bold">{veh}</Col><Col className='text-sm-end'><Badge>${amountByVehicles.find(a => a.vehicle === veh).amount}</Badge></Col>
                                         </Stack>
-                                    </ListGroupItem>
-                                })}
-                            </Card.Body>
-                        </Card>
-                    </ListGroup>)
-                })
-            }
+                                    </Card.Header>    
+                                    <Card.Body>
+                                        {values.map(trx => {
+                                            const order = orders.find(o => o.id === trx.orderId)
+                                            const supplier = suppliers.find(s => s.id === trx.supplierId)
+
+                                            return <ListGroupItem key={trx.index}>
+                                                <Stack direction="horizontal">
+                                                    <Col>{trx.creationDate}</Col>
+                                                    <Col xs="8">{trx.itemDescription} { order && <div><OrderTooltip order={order} supplier={supplier} /></div> }</Col>
+                                                    <Col className='text-sm-end'><Badge pill>{trx.quantity > 0 && trx.unitPrice && `${trx.quantity} ${trx.unit} @ $${trx.unitPrice?.toFixed(2)}`}</Badge></Col>
+                                                    <Col className='text-sm-end'>$ {trx.totalPrice?.toFixed(2) || 0}</Col>
+                                                </Stack>
+                                            </ListGroupItem>
+                                        })}
+                                    </Card.Body>
+                                </Card>
+                            </ListGroup>)
+                        })
+                    }
+                </Col>
             </Row>
         </Container>
     )

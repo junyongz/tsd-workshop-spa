@@ -152,7 +152,7 @@ function ServiceListing({services, filteredServices=[],
 
       {
         chunkedItems[activePage - 1]?.map((v, i) =>
-          <div key={v.index} className={i % 2 === 0 ? 'rounded-2 p-3 mb-3 bg-body-secondary': 'rounded-2 p-3 mb-3 bg-light'}>
+          <div key={v.index} className="rounded-2 p-3 mb-3">
             <Row>
               <Col><h3 key={i}><i className="bi bi-calendar-event pe-1"></i>{v[0]}</h3></Col>
               <Col className={'text-sm-end'}><Button variant="dark" onClick={() => addNewServiceTransaction(v[0])}><i className="bi bi-calendar-event me-2"></i>Add Service</Button></Col>

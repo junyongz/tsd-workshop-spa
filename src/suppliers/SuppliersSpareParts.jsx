@@ -166,8 +166,10 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
         if (selectedSearchOptions.length > 0) {
             setSelectedSupplier()
         }
-
-        return () => setSelectedSupplier()
+        else {
+            // as good as changing from some search option to no option at all, so just set all
+            setFilteredOrders(orders)
+        }
     }, [selectedSearchOptions])
 
     return (
@@ -207,8 +209,7 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
             </Row>
             {selectedSearchOptions.length === 0 && <Row>
                 <Col>
-                <ButtonGroup>
-                    <Button variant="link" onClick={() => setShowSuppliers(true)}>{ selectedSupplier ? `Showing for ${suppliers.find(v => v.id === selectedSupplier.id).supplierName}` : 'Showing All'}</Button>                </ButtonGroup>
+                    <Button variant="link" onClick={() => setShowSuppliers(true)}>{ selectedSupplier ? `Showing for ${suppliers.find(v => v.id === selectedSupplier.id).supplierName}` : 'Showing All'}</Button>
                     <Offcanvas show={showSuppliers} placement="top" onHide={() => setShowSuppliers(false)}>
                         <Offcanvas.Header closeButton>
                         <Offcanvas.Title><i className="bi bi-shop"></i> Suppliers</Offcanvas.Title>

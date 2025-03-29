@@ -212,7 +212,7 @@ function App() {
           </div>
         )}
         <div id="content" className={(loading ? ' blurred ' : '')}>
-        <Container fluid className={'position-fixed z-2 top-0 mt-0 py-3 bg-white'}>
+        <Container fluid className="my-3">
           <Row>
             <Col sm="2">
               <h3>TSD</h3>
@@ -255,7 +255,6 @@ function App() {
             }
           </Row>
         </Container>
-        <div className="nav-spacer bg-white z-1"></div>
         <Routes>
           <Route exact path="/" element={
             <ServiceListing services={services}

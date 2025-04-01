@@ -29,7 +29,7 @@ function YearMonthView({services, suppliers=[], orders=[], backToService}) {
         return () => {
           scrollSpy.dispose();
         };
-      }, []);    
+      }, [year, month]);    
 
     return (
         <Container>

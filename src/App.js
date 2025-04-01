@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Route, Routes, NavLink, useLocation } from 'react-router-dom';
 import ServiceListing from './ServiceListing';
-import { Badge, Col, Container, Form, InputGroup, Row, Spinner } from 'react-bootstrap';
+import { Badge, Col, Container, Form, InputGroup, Row, Spinner, Toast, ToastContainer } from 'react-bootstrap';
 import { Typeahead } from 'react-bootstrap-typeahead';
 import SuppliersSpareParts from './suppliers/SuppliersSpareParts';
 import fetchSpareParts from './spare-parts/fetchSpareParts';
@@ -13,6 +13,7 @@ import fetchSuppliers from './suppliers/fetchSuppliers';
 import fetchSparePartUsages from './spare-parts/fetchSparePartUsages';
 import fetchServices from './fetchServices';
 import autoRefreshWorker from './autoRefreshWorker';
+import ServiceTransactions from './ServiceTransactions';
 
 /***
  * Date: {
@@ -28,13 +29,26 @@ function App() {
   const [loadingTime, setLoadingTime] = useState(0)
 
   // the services and orders from supplier
-  const services = useRef()
+  const services = useRef(new ServiceTransactions([]))
   const [filteredServices, setFilteredServices] = useState()
 
   const orders = useRef()
   const [filteredOrders, setFilteredOrders] = useState()
 
   const [sparePartUsages, setSparePartUsages] = useState([])
+
+  // toast box for notification
+  const [showToastBox, setShowToastBox] = useState(false)
+  const [toastBoxMessage, setToastBoxMessage] = useState()
+
+  const showToastMessage = (msg) => {
+    try {
+      setToastBoxMessage(msg)
+    }
+    finally {
+      setShowToastBox(true)
+    }
+  }
   
   // search box
   const [searchOptions, setSearchOptions] = useState([])
@@ -154,7 +168,7 @@ function App() {
     })
 }
 
-  const refreshSparePartUsages = () => fetchSparePartUsages(apiUrl, setSparePartUsages)
+  const refreshSparePartUsages = () => fetchSparePartUsages(apiUrl, setSparePartUsages, showToastMessage)
 
   const refreshSpareParts = () => fetchSpareParts(apiUrl, setSpareParts, setSearchOptions)
 
@@ -214,6 +228,16 @@ function App() {
         <div id="content" className={(loading ? ' blurred ' : '')}>
         <Container fluid className="my-3">
           <Row>
+              <ToastContainer className="p-3" position={'top-left'} style={{ zIndex: 3 }}>
+                <Toast bg="warning" show={showToastBox} onClose={() => setShowToastBox(false)}>
+                  <Toast.Header>
+                    <strong className="me-auto">Warning</strong>
+                  </Toast.Header>
+                  <Toast.Body>{toastBoxMessage}</Toast.Body>
+                </Toast>
+              </ToastContainer>
+          </Row>
+          <Row>
             <Col sm="2">
               <h3>TSD</h3>
             </Col>
@@ -263,7 +287,7 @@ function App() {
               spareParts={spareParts}
               filteredServices={filteredServices}
               keywordSearch={() => {
-                if (selectedSearchOptions && selectedSearchOptions.length == 0) {
+                if (selectedSearchOptions && selectedSearchOptions.length === 0) {
                   setFilteredServices(services.current.entriedServices()) 
                 }
                 else {

@@ -1,4 +1,4 @@
-export default async function fetchSparePartUsages(apiUrl, setSparePartUsages) {
+export default async function fetchSparePartUsages(apiUrl, setSparePartUsages, showToastMessage) {
 
     return fetch(`${apiUrl}/spare-part-utilizations`, {mode: 'cors'})
         .then(res => res.json())
@@ -6,7 +6,10 @@ export default async function fetchSparePartUsages(apiUrl, setSparePartUsages) {
             setSparePartUsages(response)
         })
         .catch(error => {
-        console.error('There was an error fetching the spare parts:', error);
+            if (showToastMessage) {
+                showToastMessage('There was an error fetching the spare parts:' + error)
+            }
+            console.error('There was an error fetching the spare parts:', error);
         });
 
 }

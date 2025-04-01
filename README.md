@@ -8,6 +8,8 @@
 4. Allow auto complete for vehicle and spare parts (need clean up)
 5. Allow to search by vehicle, spare parts and date
 6. Allow to complete the service(s)
+7. Allow to add new vehicle
+8. One glance view of all vehicle and repair cost by month
 
 ## Work In-Progress
 

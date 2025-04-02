@@ -35,9 +35,9 @@ function YearMonthView({services, suppliers=[], orders=[], backToService}) {
         <Container>
             <Row className="mb-3">
                 <Stack direction="horizontal">
-                    <DropdownButton className="me-3" as={ButtonGroup} title={year} variant="success" >
+                    <DropdownButton id="dropdown-year" className="me-3" as={ButtonGroup} title={year} variant="success" >
                         { services.current.availableYears().map(
-                            v => <Dropdown.Item onClick={() => setYear(v)} eventKey={v}>{v}</Dropdown.Item> )
+                            v => <Dropdown.Item key={v} onClick={() => setYear(v)} eventKey={v}>{v}</Dropdown.Item> )
                         }
                     </DropdownButton>
 
@@ -45,7 +45,7 @@ function YearMonthView({services, suppliers=[], orders=[], backToService}) {
                         {
                             ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                             'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map((v, i) => 
-                                <Button variant={month === i ? 'outline-primary' : 'primary'} onClick={() => setMonth(i)}>{v}</Button>
+                                <Button key={v} variant={month === i ? 'outline-primary' : 'primary'} onClick={() => setMonth(i)}>{v}</Button>
                             )
                         }
                     </ButtonGroup>
@@ -58,10 +58,10 @@ function YearMonthView({services, suppliers=[], orders=[], backToService}) {
             <Row className="mb-3">
                 <Card>
                     <Card.Body>
-                        Trucks <Badge bg="secondary">{Object.keys(trxsGroupByVehicles).length}</Badge>&nbsp;
-                        Amount: <Badge bg="secondary">$ {Object.values(trxsGroupByVehicles).flat().reduce((pv, cv) => pv + (cv.totalPrice || 0), 0).toFixed(2)}</Badge>&nbsp;
-                        Items (Estimated): <Badge bg="secondary">{Object.values(trxsGroupByVehicles).flat().length}</Badge>&nbsp;
-                        {amountByVehicles.length > 0 && <span>Top 3: { [0,1,2].map(v => <Badge bg="secondary" className="me-2">{ amountByVehicles[v]?.vehicle } <Badge>${amountByVehicles[v]?.amount}</Badge></Badge>) }</span> }
+                        <span>Trucks</span> <Badge bg="secondary">{Object.keys(trxsGroupByVehicles).length}</Badge>&nbsp;
+                        <span>Amount</span> <Badge bg="secondary">$ {Object.values(trxsGroupByVehicles).flat().reduce((pv, cv) => pv + (cv.totalPrice || 0), 0).toFixed(2)}</Badge>&nbsp;
+                        <span>Items (Estimated)</span> <Badge bg="secondary">{Object.values(trxsGroupByVehicles).flat().length}</Badge>&nbsp;
+                        {amountByVehicles.length > 0 && <span>Top 3: { [0,1,2].map(v => <Badge key={v} bg="secondary" className="me-2">{ amountByVehicles[v]?.vehicle } <Badge>${amountByVehicles[v]?.amount}</Badge></Badge>) }</span> }
                     </Card.Body>
                 </Card>
             </Row>
@@ -70,7 +70,7 @@ function YearMonthView({services, suppliers=[], orders=[], backToService}) {
                     <ListGroup className="position-sticky top-0">
                     {
                         sortedKeys.map(veh => 
-                            <ListGroup.Item action href={'#vehicle-' + veh.replace(' ', '')}>{veh} <Badge pill>${amountByVehicles.find(a => a.vehicle === veh).amount}</Badge></ListGroup.Item>
+                            <ListGroup.Item key={veh.replace(' ', '')} action href={'#vehicle-' + veh.replace(' ', '')}>{veh} <Badge pill>${amountByVehicles.find(a => a.vehicle === veh).amount}</Badge></ListGroup.Item>
                         )
                     }
                     </ListGroup>

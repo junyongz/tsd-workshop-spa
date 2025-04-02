@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { Button, Col, Container, Form, InputGroup, ListGroup, Modal, Row } from "react-bootstrap";
 import { Typeahead } from "react-bootstrap-typeahead";
 
-function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder, suppliers=[], spareParts=[], onSaveNewOrders}) {
+function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[], suppliers=[], spareParts=[], onSaveNewOrders}) {
     const formRef = useRef()
     const [validated, setValidated] = useState(false)
 
@@ -250,11 +250,12 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder, s
                                         </InputGroup>
                                     </Col>
                                     <Col className="mb-3 text-sm-end">
-                                        <p className="fs-4">${(v.quantity && v.unitPrice && v.quantity * v.unitPrice) || 0}</p>
+                                        <p className="fs-4">$ {(v.quantity && v.unitPrice && v.quantity * v.unitPrice) || 0}</p>
                                     </Col>
                                 </Row>
                             </ListGroup.Item>
                         )}
+                        <ListGroup.Item key={'total'}><Col className="text-sm-end fs-4">$ {items?.reduce((pv, cv) => pv + ((cv.quantity && cv.unitPrice && cv.quantity * cv.unitPrice) || 0), 0)}</Col></ListGroup.Item>
                         </ListGroup>
                         
                     </Form>

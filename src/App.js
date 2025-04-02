@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { Route, Routes, NavLink, useLocation } from 'react-router-dom';
 import ServiceListing from './ServiceListing';
 import { Badge, Col, Container, Form, InputGroup, Row, Spinner, Toast, ToastContainer } from 'react-bootstrap';
@@ -168,13 +168,13 @@ function App() {
     })
 }
 
-  const refreshSparePartUsages = () => fetchSparePartUsages(apiUrl, setSparePartUsages, showToastMessage)
+  const refreshSparePartUsages = useCallback(() => fetchSparePartUsages(apiUrl, setSparePartUsages, showToastMessage), [apiUrl])
 
-  const refreshSpareParts = () => fetchSpareParts(apiUrl, setSpareParts, setSearchOptions)
+  const refreshSpareParts = useCallback(() => fetchSpareParts(apiUrl, setSpareParts, setSearchOptions), [apiUrl])
 
-  const refreshServices = () => fetchServices(apiUrl, services, setFilteredServices)
+  const refreshServices = useCallback(() => fetchServices(apiUrl, services, setFilteredServices), [apiUrl])
 
-  const refreshSupplierSpareParts = () => fetchSupplierSpareParts(apiUrl, orders, setFilteredOrders)
+  const refreshSupplierSpareParts = useCallback(() => fetchSupplierSpareParts(apiUrl, orders, setFilteredOrders), [apiUrl])
 
   useEffect(() => {
       setLoading(true)
@@ -205,7 +205,7 @@ function App() {
 
       return  () => clearInterval(fetchStatsTimer);
       
-  }, []);
+  }, [refreshServices, refreshSupplierSpareParts, refreshSparePartUsages, refreshSpareParts, apiUrl]);
 
   useEffect(() => {
     let loadingTimer 

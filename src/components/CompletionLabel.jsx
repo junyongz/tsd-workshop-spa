@@ -9,7 +9,7 @@ const CompletionLabel = ({creationDate, completionDate, onCompletion}) => {
     }
 
     return (
-        <label className="text-body-secondary fs-6">Completed on {creationDate != completionDate ? completionDate : 'same day'}</label>
+        <label className="text-body-secondary fs-6">Completed on {creationDate !== completionDate ? completionDate : 'same day'}</label>
     )
 }
 

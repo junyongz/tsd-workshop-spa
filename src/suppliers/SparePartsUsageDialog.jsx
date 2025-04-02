@@ -1,6 +1,6 @@
 import { useRef, useState } from "react"
 import { Container, Form, Modal, Row, Col, Button, InputGroup } from "react-bootstrap"
-import { Input, Typeahead } from "react-bootstrap-typeahead"
+import { Typeahead } from "react-bootstrap-typeahead"
 
 function SparePartsUsageDialog({isShow, setShowDialog, vehicles, 
     usageSpareParts, setUsageSpareParts, onSaveNewSparePartUsage,

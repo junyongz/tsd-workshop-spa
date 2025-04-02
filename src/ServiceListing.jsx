@@ -173,7 +173,7 @@ function ServiceListing({services, filteredServices=[],
                 <Row className='mb-3'>
                   <Col></Col>
                   <Col sm="2" className={'text-sm-end'}>
-                  {(!vv[1][0].migratedIndicator || !vv[1][0].migratedIndicator == 'Y') && 
+                  {(!vv[1][0].migratedIndicator || !vv[1][0].migratedIndicator === 'Y') && 
                     <Button size="sm" variant='secondary' onClick={() => addNewItemForVehicle(v[0], vv[0])}>
                       <i className="bi bi-truck-front-fill me-2"></i>Add Item</Button>
                     }

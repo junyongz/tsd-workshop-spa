@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react"
-import { Container, ListGroup, ListGroupItem, Row, Col, Stack, Pagination, Button, Badge, Nav, Offcanvas, ButtonGroup, OverlayTrigger, Popover } from "react-bootstrap"
+import { Container, ListGroup, ListGroupItem, Row, Col, Stack, Pagination, Button, Badge, Nav, Offcanvas, OverlayTrigger, Popover } from "react-bootstrap"
 import getPaginationItems from "../utils/getPaginationItems"
 import { chunkArray } from "../utils/arrayUtils"
 import AddSparePartsDialog from "./AddSparePartsDialog"

@@ -25,7 +25,7 @@ class ServiceTransactions {
 
     updateTransaction(newTrx = []) {
         newTrx.forEach(tt => 
-            this.transactions[this.transactions.findIndex(t => t.index == tt.index)] = tt
+            this.transactions[this.transactions.findIndex(t => t.index === tt.index)] = tt
         )
         this.formatTransactions()        
     }

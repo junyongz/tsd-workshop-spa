@@ -87,7 +87,7 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
     const afterChooseSupplier = ([supplier]) => {
         if (supplier) {
             setSelectedSupplier([supplier])
-            setSparePartsSelection((spareParts.filter(sp => sp.supplierId == supplier.id)) || spareParts)
+            setSparePartsSelection((spareParts.filter(sp => sp.supplierId === supplier.id)) || spareParts)
         }
         else {
             setSelectedSupplier([])
@@ -103,8 +103,8 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
             const newItem = [...prevs]
             newItem[i] = {...prevs[i], ...sparePart, 
                 selectedSparePart: (sparePart && 
-                    spareParts.findIndex(sp => sp.itemCode ==sparePart.itemCode) >= 0 
-                    && spareParts.filter(sp => sp.itemCode == sparePart.itemCode)) || [...prevs[i].selectedSparePart], 
+                    spareParts.findIndex(sp => sp.itemCode === sparePart.itemCode) >= 0 
+                    && spareParts.filter(sp => sp.itemCode === sparePart.itemCode)) || [...prevs[i].selectedSparePart], 
                 selectedItemCode: (sparePart && [sparePart]) || []}
             return newItem
         })

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import React, { useCallback, useEffect, useState } from "react"
 import { Container, ListGroup, ListGroupItem, Row, Col, Stack, Pagination, Button, Badge, Nav, Offcanvas, OverlayTrigger, Popover } from "react-bootstrap"
 import getPaginationItems from "../utils/getPaginationItems"
 import { chunkArray } from "../utils/arrayUtils"
@@ -46,8 +46,7 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
         setShowNoteDialog(true)
     }
 
-    const viewOrder = (no, e) => {
-        e.preventDefault()
+    const viewOrder = (no) => {
         setExistingOrder(orders.filter(o => o.deliveryOrderNo === no))
         setShowDialog(true)
     }
@@ -120,7 +119,8 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
         })
     }
 
-    const removeOrder = (order) => {
+    const removeOrder = (order, e) => {
+        e.preventDefault()
         setLoading(true)
         requestAnimationFrame(() => {
             fetch(`${apiUrl}/supplier-spare-parts/${order.id}`, {
@@ -132,7 +132,7 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
             })
             .then(res => {
                 if (!res.ok) {
-                    throw `failed to delete order ${JSON.stringify(order)}`
+                    showToastMessage(`failed to delete order ${JSON.stringify(order)}`)
                 }
             })
             .then(_ => {
@@ -172,15 +172,16 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
         })
     }
 
+    const replaceOrders = useCallback(() => setFilteredOrders(orders), [orders, setFilteredOrders] )
     useEffect(() => {
         if (selectedSearchOptions.length > 0) {
             setSelectedSupplier()
         }
         else {
             // as good as changing from some search option to no option at all, so just set all
-            setFilteredOrders(orders)
+            replaceOrders()
         }
-    }, [selectedSearchOptions])
+    }, [selectedSearchOptions, replaceOrders])
 
     return (
         <Container>
@@ -257,8 +258,8 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
                             <ListGroupItem key={v.id}>
                                 <Stack direction="horizontal">
                                     <Col>{v.invoiceDate}</Col>
-                                    <Col>{findSupplier(v.supplierId).supplierName} <div>{ !v.sheetName && <a className="link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover" href="#"
-                                        onClick={(e) => viewOrder(v.deliveryOrderNo, e)}>{v.deliveryOrderNo}</a>}{v.sheetName && v.deliveryOrderNo}</div></Col>
+                                    <Col>{findSupplier(v.supplierId).supplierName} { !v.sheetName && <Button className="p-0 text-decoration-none" variant="link"
+                                        onClick={(e) => viewOrder(v.deliveryOrderNo, e)}>{v.deliveryOrderNo}</Button>}{v.sheetName && <span>{v.deliveryOrderNo}</span>}</Col>
                                     <Col sm="5">
                                         <Row>
                                             <Col><Badge bg="info" pill>{v.itemCode}</Badge></Col>
@@ -275,7 +276,7 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
                                             <Popover>
                                             <Popover.Header as="h3">Are you sure?</Popover.Header>
                                             <Popover.Body>
-                                                <a role="button" href="#" className="link-danger link-underline-opacity-25 link-underline-opacity-100-hover" onClick={() => removeOrder(v)}>Yes</a>
+                                                <Button className="p-0 text-decoration-none" variant="link" onClick={(e) => removeOrder(v)}>Yes</Button>
                                             </Popover.Body>
                                             </Popover>
                                         }>

@@ -159,7 +159,7 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
             }))
             setSelectedSupplier([suppliers.find(s => s.id === existingOrder[0].supplierId)])
         }
-    }, [existingOrder])
+    }, [existingOrder, sparePartUsages, suppliers])
 
     return (
         <Modal show={isShow} onHide={handleClose} onShow={dialogOpened} backdrop="static" onEscapeKeyDown={(e) => e.preventDefault()} size="xl">

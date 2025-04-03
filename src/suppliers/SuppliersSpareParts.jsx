@@ -119,8 +119,7 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
         })
     }
 
-    const removeOrder = (order, e) => {
-        e.preventDefault()
+    const removeOrder = (order) => {
         setLoading(true)
         requestAnimationFrame(() => {
             fetch(`${apiUrl}/supplier-spare-parts/${order.id}`, {
@@ -258,8 +257,8 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
                             <ListGroupItem key={v.id}>
                                 <Stack direction="horizontal">
                                     <Col>{v.invoiceDate}</Col>
-                                    <Col>{findSupplier(v.supplierId).supplierName} { !v.sheetName && <Button className="p-0 text-decoration-none" variant="link"
-                                        onClick={(e) => viewOrder(v.deliveryOrderNo, e)}>{v.deliveryOrderNo}</Button>}{v.sheetName && <span>{v.deliveryOrderNo}</span>}</Col>
+                                    <Col>{findSupplier(v.supplierId).supplierName} <div className="p-0 m-0">{ !v.sheetName && <Button className="p-0 text-decoration-none" variant="link"
+                                        onClick={(e) => viewOrder(v.deliveryOrderNo, e)}>{v.deliveryOrderNo}</Button>}{v.sheetName && <span>{v.deliveryOrderNo}</span>}</div></Col>
                                     <Col sm="5">
                                         <Row>
                                             <Col><Badge bg="info" pill>{v.itemCode}</Badge></Col>
@@ -276,7 +275,7 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
                                             <Popover>
                                             <Popover.Header as="h3">Are you sure?</Popover.Header>
                                             <Popover.Body>
-                                                <Button className="p-0 text-decoration-none" variant="link" onClick={(e) => removeOrder(v)}>Yes</Button>
+                                                <Button className="p-0 text-decoration-none" variant="link" onClick={() => removeOrder(v)}>Yes</Button>
                                             </Popover.Body>
                                             </Popover>
                                         }>

@@ -13,7 +13,7 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
     selectedSearchOptions=[], filterServices=() => {},
     orders=[], suppliers=[], spareParts=[], vehicles=[], sparePartUsages=[],
     refreshSpareParts=() => {}, refreshSparePartUsages=() =>{}, refreshServices=()=>{},
-    onNewVehicleCreated=() => {}, setLoading=()=>{}}) {
+    onNewVehicleCreated=() => {}, setLoading=()=>{}, showToastMessage}) {
     const apiUrl = process.env.REACT_APP_API_URL
 
     const [activePage, setActivePage] = useState(1)
@@ -81,13 +81,23 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
             })
             .then(res => res.json())
             .then(response => {
-                orders.push(...response)
+                response.forEach(o => {
+                    const idx = orders.findIndex(oo => oo.id === o.id)
+                    if (idx >= 0) {
+                        orders[idx] = o
+                    }
+                    else {
+                        orders.push(o)
+                    }
+                })
+                // orders.push(...response)
                 orders.sort((a, b) => a.invoiceDate < b.invoiceDate)
                 setFilteredOrders((selectedSupplier && orders.filter(s => s.supplierId === selectedSupplier.id)) || orders)
             })
             .then(() => refreshSpareParts())
             .then(() => callback && callback())
             .then(() => clearState())
+            .catch(e => showToastMessage('failed to save orders: ' + e))
             .finally(() => setLoading(false))
         })
     }
@@ -150,7 +160,7 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
             })
             .then(res => {
                 if (!res.ok) {
-                    throw `failed to delete order ${JSON.stringify(order)}`
+                    showToastMessage(`failed to update order ${JSON.stringify(order)}`)
                 }
             })
             .then(_ => {
@@ -182,6 +192,7 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
                     orders={orders}
                     existingOrder={existingOrder}
                     onSaveNewOrders={onSaveNewOrders}
+                    sparePartUsages={sparePartUsages}
                 ></AddSparePartsDialog>
                 { noteSparePart && <NoteTakingDialog isShow={showNoteDialog} 
                     setShowDialog={setShowNoteDialog} 
@@ -246,8 +257,8 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
                             <ListGroupItem key={v.id}>
                                 <Stack direction="horizontal">
                                     <Col>{v.invoiceDate}</Col>
-                                    <Col>{findSupplier(v.supplierId).supplierName} <div>{ false && <a className="link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover" href="#"
-                                        onClick={(e) => viewOrder(v.deliveryOrderNo, e)}>{v.deliveryOrderNo}</a>}{v.deliveryOrderNo}</div></Col>
+                                    <Col>{findSupplier(v.supplierId).supplierName} <div>{ !v.sheetName && <a className="link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover" href="#"
+                                        onClick={(e) => viewOrder(v.deliveryOrderNo, e)}>{v.deliveryOrderNo}</a>}{v.sheetName && v.deliveryOrderNo}</div></Col>
                                     <Col sm="5">
                                         <Row>
                                             <Col><Badge bg="info" pill>{v.itemCode}</Badge></Col>

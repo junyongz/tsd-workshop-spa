@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 import { Button, Col, Container, Form, InputGroup, ListGroup, Modal, Row } from "react-bootstrap";
 import { Typeahead } from "react-bootstrap-typeahead";
+import remainingQuantity from "../utils/quantityUtils";
 
-function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[], suppliers=[], spareParts=[], onSaveNewOrders}) {
+function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[], suppliers=[], spareParts=[], sparePartUsages=[], onSaveNewOrders}) {
     const formRef = useRef()
     const [validated, setValidated] = useState(false)
 
@@ -11,6 +12,7 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
     const defaultItem = {itemCode: '', partName: 'Choose one ...', quantity: 0, unit: 'pc', unitPrice: 0, selectedItemCode: [], selectedSparePart: []};
 
     const [items, setItems] = useState(existingOrder || [defaultItem])
+    const editing = items && items[0]?.deliveryOrderNo
 
     const [selectedSupplier, setSelectedSupplier] = useState([])
     const [sparePartsSelection, setSparePartsSelection] = useState(spareParts)
@@ -26,7 +28,20 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
         setValidated(false)
     }
 
-    // TODO: to use the state object instead of form one
+    const clone = () => {
+        setItems(prev => {
+            const newItems = prev.map(v => {
+                const newItem = {...v}
+                delete newItem.id
+                delete newItem.deliveryOrderNo
+                delete newItem.invoiceDate
+                delete newItem.disabled
+                return newItem
+            })
+            return newItems
+        })
+    }
+
     const saveChange = () => {
         const nativeForm = formRef.current
         if (nativeForm.checkValidity() === false) {
@@ -34,31 +49,21 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
             return
         }
 
-        const invoiceDate = nativeForm['invoiceDate']
-        const deliveryOrderNo = nativeForm['deliveryOrderNo']
+        const invoiceDate = nativeForm.querySelector('[name="invoiceDate"]')
+        const deliveryOrderNo = nativeForm.querySelector('[name="deliveryOrderNo"]')
 
-        const itemCodes = nativeForm['itemCode'].length === undefined ? [nativeForm['itemCode']] 
-            : Array.from(nativeForm['itemCode'])
-        const partNames = nativeForm['partName'].length === undefined ? [nativeForm['partName']] 
-            : Array.from(nativeForm['partName'])
-        const formQuantity = nativeForm['quantity'].length === undefined ? [nativeForm['quantity']] 
-            : Array.from(nativeForm['quantity'])
-        const formUnits = nativeForm['unit'].length === undefined ? [nativeForm['unit']] 
-            : Array.from(nativeForm['unit'])
-        const formUnitPrices = nativeForm['unitPrice'].length === undefined ? [nativeForm['unitPrice']] 
-            : Array.from(nativeForm['unitPrice'])
-
-        const payload = partNames.map((v, i) => {
+        const payload = items.map((v, i) => {
                 return {
+                    id: v.id,
                     invoiceDate: invoiceDate.value,
                     deliveryOrderNo: deliveryOrderNo.value,
                     supplierId: selectedSupplier[0].id,
-                    itemCode: itemCodes[i].value,
-                    partName: v.value,
-                    quantity: parseInt(formQuantity[i].value),
-                    unit: formUnits[i].value,
-                    unitPrice: parseFloat(formUnitPrices[i].value),
-                    totalPrice: formQuantity[i].value * formUnitPrices[i].value
+                    itemCode: v.selectedItemCode[0]?.itemCode,
+                    partName: v.selectedSparePart[0].partName,
+                    quantity: v.quantity,
+                    unit: v.unit,
+                    unitPrice: parseFloat(v.unitPrice),
+                    totalPrice: v.quantity * v.unitPrice
                 }
             })
         
@@ -99,6 +104,9 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
         if (sparePart && suppliers.findIndex(s => s.id === sparePart.supplierId) >= 0) {
             setSelectedSupplier([suppliers.find(s => s.id === sparePart.supplierId)])
         }
+        if (sparePart && sparePart.id) {
+            delete sparePart.id // we dont want the item.id get replaced
+        }
         setItems(prevs => {
             const newItem = [...prevs]
             newItem[i] = {...prevs[i], ...sparePart, 
@@ -113,6 +121,9 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
     const afterChooseSparePart = ([sparePart], i) => {
         if (sparePart && suppliers.findIndex(s => s.id === sparePart.supplierId) >= 0) {
             setSelectedSupplier([suppliers.find(s => s.id === sparePart.supplierId)])
+        }
+        if (sparePart && sparePart.id) {
+            delete sparePart.id // we dont want the item.id get replaced
         }
         setItems(prevs => {
             const newItem = [...prevs]
@@ -144,15 +155,16 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
     useEffect(() => {
         if (existingOrder && existingOrder.length > 0) {
             setItems(existingOrder.map(v => {
-                return {...v, selectedItemCode: (v.itemCode && [{itemCode: v.itemCode}]) || [], selectedSparePart: [{partName: v.partName}]}
+                return {...v, disabled: remainingQuantity(v, sparePartUsages) !== v.quantity, selectedItemCode: (v.itemCode && [{itemCode: v.itemCode}]) || [], selectedSparePart: [{partName: v.partName}]}
             }))
+            setSelectedSupplier([suppliers.find(s => s.id === existingOrder[0].supplierId)])
         }
     }, [existingOrder])
 
     return (
         <Modal show={isShow} onHide={handleClose} onShow={dialogOpened} backdrop="static" onEscapeKeyDown={(e) => e.preventDefault()} size="xl">
             <Modal.Header closeButton closeVariant="danger">
-            <Modal.Title><i className="bi bi-tools"></i> Adding New Spare Parts</Modal.Title>
+            <Modal.Title><i className="bi bi-tools"></i> <span>{ editing ? "Update Spare Parts" : "Adding New Spare Parts" }</span></Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <Container>
@@ -161,7 +173,7 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
                             <Col sm="3">
                                 <InputGroup>
                                     <InputGroup.Text><i className="bi bi-calendar-event"></i></InputGroup.Text>
-                                    <Form.Control required type="date" name="invoiceDate"></Form.Control>
+                                    <Form.Control required type="date" name="invoiceDate" placeholder="Key in Invoice Date" defaultValue={items[0]?.invoiceDate} disabled={editing}></Form.Control>
                                 </InputGroup>
                             </Col>
                             <Col sm="5">
@@ -173,8 +185,9 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
                                         labelKey='supplierName'
                                         options={suppliers}
                                         onChange={(supplier) => afterChooseSupplier(supplier)}
-                                        placeholder="Choose a supplier..."
+                                        placeholder="Choose a supplier"
                                         selected={selectedSupplier}
+                                        disabled={editing}
                                         clearButton
                                         />
                                 </InputGroup>
@@ -182,13 +195,13 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
                             <Col className="text-sm-end">
                                 <InputGroup>
                                     <InputGroup.Text><i className="bi bi-file-earmark-spreadsheet"></i></InputGroup.Text>
-                                    <Form.Control type="text" required name="deliveryOrderNo" placeholder="Key in DO. #"></Form.Control>
+                                    <Form.Control type="text" required name="deliveryOrderNo" placeholder="Key in DO. #" defaultValue={items[0]?.deliveryOrderNo} disabled={editing}></Form.Control>
                                 </InputGroup>
                             </Col>
                         </Row>
                         <Row className="my-3">
                             <Col className="text-sm-end">
-                                <Button size="sm" onClick={addNewItem}><i className="bi bi-plus-circle-fill me-2"></i>Add More</Button>
+                                <Button size="sm" disabled={editing} onClick={addNewItem}><i className="bi bi-plus-circle-fill me-2"></i>Add More</Button>
                             </Col>
                         </Row>
                         
@@ -196,7 +209,7 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
                         {items?.map((v, i) =>
                             <ListGroup.Item>
                                 <Row>
-                                    <Col xs="1"><span onClick={() => removeItem(i)} role="button"><i className="bi bi-x-lg text-danger"></i></span></Col>
+                                    { !editing && <Col xs="1"><span onClick={() => removeItem(i)} role="button" aria-label="remove"><i className="bi bi-x-lg text-danger"></i></span></Col> }
                                     <Form.Group as={Col} className="mb-3 col-3" controlId="itemCode">
                                         <InputGroup>
                                         <InputGroup.Text><i className="bi bi-123"></i></InputGroup.Text>
@@ -209,6 +222,7 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
                                             clearButton
                                             allowNew
                                             selected={v.selectedItemCode}
+                                            disabled={v.disabled}
                                             />
                                         </InputGroup>
                                     </Form.Group>
@@ -231,6 +245,7 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
                                             clearButton
                                             allowNew
                                             selected={v.selectedSparePart}
+                                            disabled={v.disabled}
                                             />
                                         </InputGroup>
                                     </Form.Group>
@@ -238,19 +253,19 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
                                 <Row>
                                     <Col sm="5"></Col>
                                     <Col sm="2">
-                                        <Form.Control onChange={(e) => updatePriceByQuantity(e.target.value, i)} required type="number" min="1" name="quantity" placeholder="Quantity" value={v?.quantity}/>
+                                        <Form.Control onChange={(e) => updatePriceByQuantity(e.target.value, i)} required disabled={v.disabled} type="number" min="1" name="quantity" placeholder="Quantity" value={v?.quantity}/>
                                     </Col>
                                     <Col sm="1" className="mb-3">
-                                        <Form.Control required type="text" name="unit" placeholder="Unit" defaultValue={v?.unit}/>
+                                        <Form.Control required type="text" name="unit" placeholder="Unit" disabled={v.disabled} defaultValue={v?.unit}/>
                                     </Col>
                                     <Col sm="2">
                                         <InputGroup>
                                             <InputGroup.Text><i className="bi bi-currency-dollar"></i></InputGroup.Text>
-                                            <Form.Control onChange={(e) => updatePriceByUnitPrice(e.target.value, i)} required type="number" min="0" step="0.1" name="unitPrice" placeholder="Price $" value={v?.unitPrice} />
+                                            <Form.Control onChange={(e) => updatePriceByUnitPrice(e.target.value, i)} required disabled={v.disabled} type="number" min="0" step="0.1" name="unitPrice" placeholder="Price $" value={v?.unitPrice} />
                                         </InputGroup>
                                     </Col>
                                     <Col className="mb-3 text-sm-end">
-                                        <p className="fs-4">$ {(v.quantity && v.unitPrice && v.quantity * v.unitPrice) || 0}</p>
+                                        <span className="fs-4">$ {(v.quantity && v.unitPrice && v.quantity * v.unitPrice) || 0}</span>
                                     </Col>
                                 </Row>
                             </ListGroup.Item>
@@ -262,8 +277,11 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
                 </Container>
             </Modal.Body>
             <Modal.Footer>
-            <Button variant="primary" onClick={saveChange} disabled={isPending}>
-                <i className="bi bi-save2 me-2"></i>Save
+            {editing && <Button variant="secondary" onClick={clone} disabled={isPending}>
+                <i className="bi bi-copy me-2"></i><span>Clone</span>
+            </Button> }
+            <Button variant="primary" onClick={saveChange} disabled={isPending || items.filter(it => !!!it.disabled).length === 0}>
+                <i className="bi bi-save2 me-2"></i><span>Save</span> 
             </Button>
             </Modal.Footer>
         </Modal>

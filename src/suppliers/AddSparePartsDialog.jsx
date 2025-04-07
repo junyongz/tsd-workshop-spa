@@ -136,15 +136,25 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
 
     const updatePriceByQuantity = (val, i) => {
         setItems(prevs => {
-            prevs[i] = {...prevs[i], quantity: val}
-            return [...prevs]
+            const newItems = [...prevs]
+            newItems[i] = {...newItems[i], quantity: val}
+            return newItems
         })
     }
 
     const updatePriceByUnitPrice = (val, i) => {
         setItems(prevs => {
-            prevs[i] = {...prevs[i], unitPrice: val}
-            return [...prevs]
+            const newItems = [...prevs]
+            newItems[i] = {...newItems[i], unitPrice: val}
+            return newItems
+        })
+    }
+
+    const updateUnit = (val, i) => {
+        setItems(prevs => {
+            const newItems = [...prevs]
+            newItems[i] = {...newItems[i], unit: val}
+            return newItems
         })
     }
 
@@ -256,7 +266,7 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
                                         <Form.Control onChange={(e) => updatePriceByQuantity(e.target.value, i)} required disabled={v.disabled} type="number" min="1" name="quantity" placeholder="Quantity" value={v?.quantity}/>
                                     </Col>
                                     <Col sm="1" className="mb-3">
-                                        <Form.Control required type="text" name="unit" placeholder="Unit" disabled={v.disabled} defaultValue={v?.unit}/>
+                                        <Form.Control onChange={(e) => updateUnit(e.target.value, i)} required type="text" name="unit" placeholder="Unit" disabled={v.disabled} defaultValue={v?.unit}/>
                                     </Col>
                                     <Col sm="2">
                                         <InputGroup>

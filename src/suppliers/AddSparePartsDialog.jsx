@@ -60,6 +60,7 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
                     supplierId: selectedSupplier[0].id,
                     itemCode: v.selectedItemCode[0]?.itemCode,
                     partName: v.selectedSparePart[0].partName,
+                    notes: v.notes,
                     quantity: v.quantity,
                     unit: v.unit,
                     unitPrice: parseFloat(v.unitPrice),

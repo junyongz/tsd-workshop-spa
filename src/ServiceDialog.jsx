@@ -193,7 +193,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles, set
                                     </InputGroup>
                                 </Form.Group>
                                 <Col className="text-sm-end align-items-center">
-                                    <FormLabel><Badge pill>$ {(v?.quantity * v?.unitPrice) || 0}</Badge></FormLabel>
+                                    <FormLabel><Badge pill>$ {(v?.quantity * v?.unitPrice).toFixed(2) || 0}</Badge></FormLabel>
                                 </Col>
                             </Row>
                         </ListGroup.Item>

@@ -159,6 +159,26 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
         })
     }
 
+    const updateSelectedSpartPart = (e, idx)  => {
+        if (e.target.value) {
+            setItems(prevs => {
+                const newItems = [...prevs]
+                newItems[idx] = {...newItems[idx], selectedSparePart: [{itemCode: '', partName: e.target.value}]}
+                return newItems
+            })
+        }
+    }
+
+    const updateSelectedItemCode = (e, idx)  => {
+        if (e.target.value) {
+            setItems(prevs => {
+                const newItems = [...prevs]
+                newItems[idx] = {...newItems[idx], selectedItemCode: [{itemCode: e.target.value, partName: ''}]}
+                return newItems
+            })
+        }
+    }
+
     const findOrderById = (id=0) => {
         return orders.find(o => o.id === id)
     }
@@ -232,6 +252,7 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
                                             placeholder="Key in item code"
                                             clearButton
                                             allowNew
+                                            onBlur={(e) => updateSelectedItemCode(e, i)}
                                             selected={v.selectedItemCode}
                                             disabled={v.disabled}
                                             />
@@ -241,7 +262,7 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
                                         <InputGroup>
                                         <InputGroup.Text><i className="bi bi-tools"></i></InputGroup.Text>
                                         <Typeahead
-                                            inputProps={{required:true, name: 'partName'}}
+                                            inputProps={{required: true, name: 'partName'}}
                                             labelKey='partName'
                                             options={sparePartsSelection}
                                             onChange={(opts) => afterChooseSparePart(opts, i)}
@@ -255,6 +276,7 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
                                             }
                                             clearButton
                                             allowNew
+                                            onBlur={(e) => updateSelectedSpartPart(e, i)}
                                             selected={v.selectedSparePart}
                                             disabled={v.disabled}
                                             />

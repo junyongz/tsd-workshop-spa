@@ -1,7 +1,7 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import AddSparePartsDialog from '../AddSparePartsDialog';
-import remainingQuantity from '../../utils/quantityUtils';
 
 describe('AddSparePartsDialog Component', () => {
   const mockSuppliers = [
@@ -195,6 +195,55 @@ describe('AddSparePartsDialog Component', () => {
             deliveryOrderNo: 'DO123',
             supplierId: 1,
             itemCode: 'ABC123',
+            partName: 'Engine Oil',
+            quantity: '5',
+            unit: 'ltr',
+            unitPrice: 50,
+            totalPrice: 250
+          })
+        ]),
+        expect.any(Function)
+      );
+    });
+  });
+
+  test('saves valid form data, using "onblur"', async () => {
+    const user = userEvent.setup()
+
+    render(<AddSparePartsDialog {...defaultProps} />);
+
+    await user.click(screen.getByPlaceholderText('Key in Invoice Date'))
+    await user.keyboard('2023-01-01')
+
+    await user.click(screen.getByPlaceholderText('Choose a supplier'))
+    await user.click(screen.getByText('Supplier A'))
+
+    await user.click(screen.getByPlaceholderText('Key in DO. #'))
+    await user.keyboard('DO123')
+
+    await user.click(screen.getByText('Add More'))
+    await user.click(screen.getByPlaceholderText('Find a existing one as template'))
+    await user.keyboard('Engine Oil')
+
+    await user.click(screen.getByPlaceholderText('Quantity'))
+    await user.keyboard('5')
+
+    // replace the default 'pc'
+    await user.dblClick(screen.getByPlaceholderText('Unit'))
+    await user.keyboard('ltr')
+
+    await user.click(screen.getByPlaceholderText('Price $'))
+    await user.keyboard('50')
+
+    await user.click(screen.getByText('Save'));
+
+    await waitFor(() => {
+      expect(defaultProps.onSaveNewOrders).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({
+            invoiceDate: '2023-01-01',
+            deliveryOrderNo: 'DO123',
+            supplierId: 1,
             partName: 'Engine Oil',
             quantity: '5',
             unit: 'ltr',

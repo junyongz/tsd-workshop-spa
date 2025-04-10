@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react"
-import { Container, ListGroup, ListGroupItem, Row, Col, Stack, Pagination, Button, Badge, Nav, Offcanvas, OverlayTrigger, Popover } from "react-bootstrap"
+import { Container, ListGroup, ListGroupItem, Row, Col, Stack, Pagination, Button, Badge, Nav, Offcanvas, OverlayTrigger, Popover, ButtonGroup } from "react-bootstrap"
 import getPaginationItems from "../utils/getPaginationItems"
 import { chunkArray } from "../utils/arrayUtils"
 import AddSparePartsDialog from "./AddSparePartsDialog"
@@ -8,6 +8,7 @@ import remainingQuantity from "../utils/quantityUtils"
 import NoteTakingDialog from "./NoteTakingDialog"
 import { clearState } from "../autoRefreshWorker"
 import SparePartNotes from "./SparePartNotes"
+import SupplierSparePartsYearMonthView from "./SupplierSparePartsYearMonthView"
 
 function SuppliersSpareParts({filteredOrders=[], setFilteredOrders, 
     selectedSearchOptions=[], filterServices=() => {},
@@ -31,6 +32,8 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
 
     const [showSuppliers, setShowSuppliers] = useState(false)
     const [selectedSupplier, setSelectedSupplier] = useState()
+
+    const [overview, setOverview] = useState(false)
 
     const findSupplier = (supplierId) => {
         return suppliers.find(v => v.id === supplierId)
@@ -208,17 +211,20 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
                     onNewVehicleCreated={onNewVehicleCreated}
                 ></SparePartsUsageDialog> }
             </Row>
-            <Row>
+            {!overview && <Row>
                 <Col>
                     <Pagination>
                     { getPaginationItems(activePage, setActivePage, totalPages, 10) }
                     </Pagination>
                 </Col>
-                <Col className={'text-sm-end col-2'}>
-                    <Button variant='success' onClick={() => setShowDialog(!showDialog)}><i className="bi bi-plus-circle-fill me-2"></i>Add New</Button>
+                <Col className={'text-sm-end col-3'}>
+                    <ButtonGroup>
+                        <Button variant="secondary" onClick={() => setOverview(true)}><i className="bi bi-card-heading me-2"></i>Overview</Button>
+                        <Button variant='success' onClick={() => setShowDialog(!showDialog)}><i className="bi bi-plus-circle-fill me-2"></i>Add New</Button>
+                    </ButtonGroup>
                 </Col>
-            </Row>
-            {selectedSearchOptions.length === 0 && <Row>
+            </Row> }
+            {selectedSearchOptions.length === 0 && !overview && <Row>
                 <Col>
                     <Button variant="link" onClick={() => setShowSuppliers(true)}>{ selectedSupplier ? `Showing for ${suppliers.find(v => v.id === selectedSupplier.id).supplierName}` : 'Showing All'}</Button>
                     <Offcanvas show={showSuppliers} placement="top" onHide={() => setShowSuppliers(false)}>
@@ -239,6 +245,9 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
                     </Offcanvas>
                 </Col>
             </Row> }
+            { overview && <SupplierSparePartsYearMonthView orders={orders} suppliers={suppliers} backToOrders={() => setOverview(false)}></SupplierSparePartsYearMonthView> }
+            { !overview &&
+            <React.Fragment>
             <Row className="mb-3">
                 <Col>
                     <ListGroup>
@@ -298,6 +307,7 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
                 </Pagination>
                 </Col>
             </Row>
+            </React.Fragment> }
         </Container>
     )
 }

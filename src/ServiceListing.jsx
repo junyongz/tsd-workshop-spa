@@ -184,12 +184,9 @@ function ServiceListing({services, filteredServices=[],
                   <Col className="p-0">
                     <ListGroup>
                     {vv.migratedHandWrittenSpareParts?.map(vvv => {
-                      const order = findOrder(vvv.orderId)
-                      const supplier = suppliers.find(s => s.id === vvv.supplierId)
-
                       return <ListGroupItem key={vvv.index}>
                         <Stack direction="horizontal">
-                          <Col>{vvv.itemDescription} { order && <div><OrderTooltip order={order} supplier={supplier} /></div> }</Col>
+                          <Col>{vvv.itemDescription}</Col>
                           <Col className='text-sm-end col-2'><Badge pill>{vvv.quantity > 0 && vvv.unitPrice && `${vvv.quantity} ${vvv.unit} @ $${vvv.unitPrice?.toFixed(2)}`}</Badge></Col>
                           <Col className='text-sm-end col-2'>{vvv.migratedIndicator || vvv.completionDate ? <Badge pill>$ {vvv.totalPrice}</Badge> : <HoverPilledBadge onRemove={() => removeTransaction(vvv.index)}>$ {vvv.totalPrice}</HoverPilledBadge> }</Col>
                         </Stack>

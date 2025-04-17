@@ -65,26 +65,35 @@ function App() {
   const doFilterServices = (options=[]) => {
     if (services.current) {
       const searchedFilteredServices = []
-      for (const v of services.current.entriedServices()) {
-        const vehicleItemsForV0 = {}
-        for (const [veh, items] of Object.entries(v[1])) {
-          if (options.some(val => veh.includes(val.name))) {
-            vehicleItemsForV0[veh] = items
-          }
+      for (const v of services.current.transactions) {
+        let foundVehicle = false
+        if (options.some(val => v.vehicleNo.includes(val.name))) {
+          foundVehicle = true
+        }
 
-          for (const item of items) {
+        let foundSpareParts = false
+        if (!foundVehicle) {
+          for (const item of v.migratedHandWrittenSpareParts) {
             if (options.some(val => item.partName?.toUpperCase().includes(val.name.toUpperCase())) ||
             options.some(val => item.itemDescription?.toUpperCase().includes(val.name.toUpperCase())) ) {
-              vehicleItemsForV0[veh] = items
+              foundSpareParts = true
+              break
             }
           }
         }
-        if (Object.values(vehicleItemsForV0).length > 0) {
-          searchedFilteredServices.push([v[0], vehicleItemsForV0])
+
+        const idx = searchedFilteredServices.findIndex(t => t.startDate === v.startDate)
+        if (foundVehicle || foundSpareParts) {
+          if (idx === -1) {
+            searchedFilteredServices.push({startDate: v.startDate, services: [v]})
+          }
+          else {
+            searchedFilteredServices[idx].services.push(v)
+          }
         }
       }
 
-      searchedFilteredServices.sort((left, right) => left[0] < right[0])
+      searchedFilteredServices.sort((left, right) => left.startDate < right.startDate)
       setFilteredServices(searchedFilteredServices)
     }
 
@@ -106,7 +115,7 @@ function App() {
   const filterServices = (options=[]) => {
     if (!options || options.length === 0) {
       clearTimeout(filterTimeoutRef.current)
-      setFilteredServices(services.current.entriedServices())
+      setFilteredServices(services.current.formattedTransactions)
       setFilteredOrders(orders.current)
       setSelectedSearchOptions([])
       return
@@ -119,13 +128,13 @@ function App() {
   const filterByDate = (val) => {
     if (services.current) {
       const searchedFilteredServices = []
-      for (const v of services.current.entriedServices()) {
-        if (v[0] === val) {
-          searchedFilteredServices.push([v[0], v[1]])
+      for (const v of services.current.formattedTransactions) {
+        if (v.startDate === val) {
+          searchedFilteredServices.push({startDate: v.startDate, services: v.services})
         }
       }
 
-      searchedFilteredServices.sort((left, right) => left[0] < right[0])
+      searchedFilteredServices.sort((left, right) => left.startDate < right.startDate)
       setFilteredServices(searchedFilteredServices)
     }
 
@@ -142,7 +151,7 @@ function App() {
 
   const clearFilterDate = () => {
     setSearchByDate(false)
-    setFilteredServices(services.current.entriedServices())
+    setFilteredServices(services.current.formattedTransactions)
     setFilteredOrders(orders.current)
   }
 

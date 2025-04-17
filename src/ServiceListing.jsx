@@ -27,7 +27,7 @@ function ServiceListing({services, filteredServices=[],
   const serviceTransaction = useRef()
 
   const [activePage, setActivePage] = useState(1)
-  const chunkedItems = chunkArray(filteredServices, 14)
+  const chunkedItems = chunkArray(filteredServices, 5)
   const totalPages = chunkedItems.length;
 
   const [yearMonthView, setYearMonthView] = useState(false)
@@ -152,19 +152,19 @@ function ServiceListing({services, filteredServices=[],
 
       {
         chunkedItems[activePage - 1]?.map((v, i) =>
-          <div key={v.index} className="rounded-2 p-3 mb-3">
+          <div key={v.startDate} className="rounded-2 p-3 mb-3">
             <Row>
-              <Col><h3 key={i}><i className="bi bi-calendar-event pe-1"></i>{v[0]}</h3></Col>
+              <Col><h3 key={i}><i className="bi bi-calendar-event pe-1"></i>{v.startDate}</h3></Col>
               <Col className={'text-sm-end'}><Button variant="dark" onClick={() => addNewServiceTransaction(v[0])}><i className="bi bi-calendar-event me-2"></i>Add Service</Button></Col>
             </Row>
-          { Object.entries(v[1]).map((vv, ii) =>
-            <Card key={ii} className={'mb-3'}>
+          { v.services.map(vv =>
+            <Card key={vv.id} className={'mb-3'}>
               <Card.Header>
                 <Row>
-                  <Col><h5>{vv[0]}</h5> <CompletionLabel creationDate={v[0]} completionDate={vv[1][0].completionDate} onCompletion={() => completeAllServices(vv[1])}></CompletionLabel></Col>
+                  <Col><h5>{vv.vehicleNo}</h5> <CompletionLabel creationDate={vv.startDate} completionDate={vv.completionDate} onCompletion={() => completeAllServices(vv)}></CompletionLabel></Col>
                   { false && <Col className={'text-sm-end col-4'}><Badge pill><i className="bi bi-person-fill-gear me-1"></i>{'Tan Chwee Seng'}</Badge></Col> }
                   <Col sm="4" className={'text-sm-end'}>
-                    <h4><span className="border border-1 border-primary border-opacity-50 rounded-2 px-3 py-1">$ {vv[1].reduce((prev, curr) => prev += curr.totalPrice, 0).toFixed(2)}</span></h4>
+                    <h4><span className="border border-1 border-primary border-opacity-50 rounded-2 px-3 py-1">$ {vv.migratedHandWrittenSpareParts?.reduce((prev, curr) => prev += curr.totalPrice, 0).toFixed(2)}</span></h4>
                   </Col>
                 </Row>
               </Card.Header>
@@ -173,20 +173,34 @@ function ServiceListing({services, filteredServices=[],
                 <Row className='mb-3'>
                   <Col></Col>
                   <Col sm="2" className={'text-sm-end'}>
-                  {(!vv[1][0].migratedIndicator || !vv[1][0].migratedIndicator === 'Y') && 
-                    <Button size="sm" variant='secondary' onClick={() => addNewItemForVehicle(v[0], vv[0])}>
+                  {
+                  !vv.completionDate && 
+                    <Button size="sm" variant='secondary' onClick={() => addNewItemForVehicle(v.startDate, vv.vehicleNo)}>
                       <i className="bi bi-truck-front-fill me-2"></i>Add Item</Button>
-                    }
+                     }
                   </Col>
                 </Row>
                 <Row>
                   <Col className="p-0">
                     <ListGroup>
-                    {vv[1].map((vvv, iii) => {
+                    {vv.migratedHandWrittenSpareParts?.map(vvv => {
                       const order = findOrder(vvv.orderId)
                       const supplier = suppliers.find(s => s.id === vvv.supplierId)
 
                       return <ListGroupItem key={vvv.index}>
+                        <Stack direction="horizontal">
+                          <Col>{vvv.itemDescription} { order && <div><OrderTooltip order={order} supplier={supplier} /></div> }</Col>
+                          <Col className='text-sm-end col-2'><Badge pill>{vvv.quantity > 0 && vvv.unitPrice && `${vvv.quantity} ${vvv.unit} @ $${vvv.unitPrice?.toFixed(2)}`}</Badge></Col>
+                          <Col className='text-sm-end col-2'>{vvv.migratedIndicator || vvv.completionDate ? <Badge pill>$ {vvv.totalPrice}</Badge> : <HoverPilledBadge onRemove={() => removeTransaction(vvv.index)}>$ {vvv.totalPrice}</HoverPilledBadge> }</Col>
+                        </Stack>
+                      </ListGroupItem>
+                      })
+                    }
+                    {vv.sparePartUsages?.map(vvv => {
+                      const order = findOrder(vvv.orderId)
+                      const supplier = suppliers.find(s => s.id === vvv.supplierId)
+
+                      return <ListGroupItem key={vvv.id}>
                         <Stack direction="horizontal">
                           <Col>{vvv.itemDescription} { order && <div><OrderTooltip order={order} supplier={supplier} /></div> }</Col>
                           <Col className='text-sm-end col-2'><Badge pill>{vvv.quantity > 0 && vvv.unitPrice && `${vvv.quantity} ${vvv.unit} @ $${vvv.unitPrice?.toFixed(2)}`}</Badge></Col>

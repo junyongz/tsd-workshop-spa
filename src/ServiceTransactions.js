@@ -4,15 +4,24 @@ class ServiceTransactions {
         this.formatTransactions()
     }
 
+
+    /**
+     * [
+     *    {vehicle, migratedHandWrittenSpareParts: [], sparePartUsages: []}
+     * ]
+     */
     formatTransactions = () => {
-        this.formattedTransactions = {}
-        for (const trx of this.transactions) {
-            const trxsByVehicle = this.formattedTransactions[trx.creationDate] || {}
-            const trxs = trxsByVehicle[trx.vehicleNo] || []
-            trxs.push(trx)
-            trxsByVehicle[trx.vehicleNo] = trxs
-            this.formattedTransactions[trx.creationDate] = trxsByVehicle
-        }
+        this.formattedTransactions = []
+        this.transactions.forEach(v => {
+            const idx = this.formattedTransactions.findIndex(t => t.startDate === v.startDate)
+            const found = idx >= 0
+            if (!found) {
+                this.formattedTransactions.push({'startDate': v.startDate, 'services': [v]})
+            }
+            else {
+                this.formattedTransactions[idx].services.push(v)
+            }
+        })
     }
 
     // TODO: to write api to push to backend too

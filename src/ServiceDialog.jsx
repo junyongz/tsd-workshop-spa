@@ -105,7 +105,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles, set
     return (
         <Modal show={isShow} onHide={handleClose} onShow={changeSelectedVehicle} backdrop="static" onEscapeKeyDown={(e) => e.preventDefault()} size="xl">
             <Modal.Header closeButton>
-            <Modal.Title><i className="bi bi-file-earmark-text-fill"></i> Service at {trx?.current?.creationDate}</Modal.Title>
+            <Modal.Title><i className="bi bi-file-earmark-text-fill"></i> Service started at {trx?.current?.creationDate}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <Container>

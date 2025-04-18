@@ -16,19 +16,20 @@ describe('YearMonthView Component', () => {
     current: {
       filterByYearMonthGroupByVehicle(year, month) {
         const allServices = [
-          { index: 1, orderId: 1, supplierId: 1, creationDate: '2023-01-01', itemDescription: 'Oil Change', totalPrice: 100, quantity: 2, unit: 'ltr', unitPrice: 50 },
-          { index: 2, orderId: 2, supplierId: 2, creationDate: '2023-01-02', itemDescription: 'Tire Replacement', totalPrice: 200, quantity: 4, unit: 'pcs', unitPrice: 50 },
-          { index: 3, orderId: 3, supplierId: 1, creationDate: '2023-01-03', itemDescription: 'Brake Pads', totalPrice: 150, quantity: 1, unit: 'set', unitPrice: 150 },
-          { index: 4, orderId: 4, supplierId: 2, creationDate: '2023-01-04', itemDescription: 'Filter Change', totalPrice: 50, quantity: 1, unit: 'pcs', unitPrice: 50 }
+          { index: 1, itemDescription: 'Oil Change', totalPrice: 100, quantity: 2, unit: 'ltr', unitPrice: 50 },
+          { index: 2, itemDescription: 'Tire Replacement', totalPrice: 200, quantity: 4, unit: 'pcs', unitPrice: 50 },
+          { index: 3, itemDescription: 'Brake Pads', totalPrice: 300, quantity: 2, unit: 'set', unitPrice: 150 },
+          { index: 4, itemDescription: 'Filter Change', totalPrice: 160, quantity: 2, unit: 'pcs', unitPrice: 80 },
+          { id: 10, orderId: 1, supplierId: 1, creationDate: '2023-01-05', itemDescription: 'Diesel Change',  quantity: 2 },
+          { id: 20, orderId: 2, supplierId: 2, creationDate: '2023-01-06', itemDescription: 'Tire Rotation',  quantity: 4 },
+          { id: 30, orderId: 3, supplierId: 1, creationDate: '2023-01-07', itemDescription: 'Brake Lining',  quantity: 2 },
+          { id: 40, orderId: 4, supplierId: 2, creationDate: '2023-01-08', itemDescription: 'Air Balloon Change',  quantity: 2 }
         ];
-        const filtered = allServices.filter(s => {
-          const date = new Date(s.creationDate);
-          return date.getFullYear() === year && date.getMonth() === month;
-        });
+
         return {
-          'Truck A': filtered.slice(0, 1),
-          'Truck B': filtered.slice(1, 3),
-          'Truck C': filtered.slice(3)
+          'Truck A': [ { creationDate: '2023-01-01', sparePartUsages: allServices.slice(4, 5), migratedHandWrittenSpareParts: allServices.slice(0, 1) } ],
+          'Truck B': [ { creationDate: '2023-01-02', sparePartUsages: allServices.slice(5, 7), migratedHandWrittenSpareParts: allServices.slice(1, 3) } ],
+          'Truck C': [ { creationDate: '2023-01-03', sparePartUsages: allServices.slice(7), migratedHandWrittenSpareParts: allServices.slice(3, 4) } ]
         };
       },
       availableYears() {
@@ -43,16 +44,16 @@ describe('YearMonthView Component', () => {
   ];
 
   const mockOrders = [
-    { id: 1, details: 'Order 1' },
-    { id: 2, details: 'Order 2' },
-    { id: 3, details: 'Order 3' },
-    { id: 4, details: 'Order 4' }
+    { id: 1, details: 'Order 1', supplierId: 1, unit: 'ltr', unitPrice: 35 },
+    { id: 2, details: 'Order 2', supplierId: 2, unit: 'pcs', unitPrice: 60 },
+    { id: 3, details: 'Order 3', supplierId: 1, unit: 'set',  unitPrice: 150 },
+    { id: 4, details: 'Order 4', supplierId: 2, unit: 'pcs', unitPrice: 80 }
   ];
 
   const defaultProps = {
     services: mockServices,
     suppliers: mockSuppliers,
-    orders: mockOrders,
+    orders: {listing: mockOrders, mapping: mockOrders.reduce((acc, curr) => {acc[curr.id] = curr; return acc}, {})},
     backToService: jest.fn()
   };
 
@@ -84,8 +85,8 @@ describe('YearMonthView Component', () => {
 
     expect(screen.getByText('Trucks')).toBeInTheDocument();
     expect(screen.getByText('3')).toBeInTheDocument(); // 3 trucks
-    expect(screen.getByText('$ 500.00')).toBeInTheDocument(); // Total amount
-    expect(screen.getByText('4')).toBeInTheDocument(); // 4 items
+    expect(screen.getByText('$ 1530.00')).toBeInTheDocument(); // Total amount
+    expect(screen.getByText('8')).toBeInTheDocument(); // 4 items
   });
 
   test('changes year via dropdown', () => {
@@ -119,23 +120,23 @@ describe('YearMonthView Component', () => {
   test('displays vehicle transactions with order and supplier info', () => {
     render(<YearMonthView {...defaultProps} />);
 
-    expect(screen.getByText('2023-01-01')).toBeInTheDocument();
+    expect(screen.getAllByText('2023-01-01').length).toBe(2)
     expect(screen.getByText('Oil Change')).toBeInTheDocument();
     expect(screen.getByText('OrderTooltip for 1 from Supplier A')).toBeInTheDocument();
     expect(screen.getByText('2 ltr @ $50.00')).toBeInTheDocument();
     expect(screen.getByText('$ 100.00')).toBeInTheDocument();
 
-    expect(screen.getByText('2023-01-02')).toBeInTheDocument();
+    expect(screen.getAllByText('2023-01-02').length).toBe(4)
     expect(screen.getByText('Tire Replacement')).toBeInTheDocument();
     expect(screen.getByText('OrderTooltip for 2 from Supplier B')).toBeInTheDocument();
     expect(screen.getByText('4 pcs @ $50.00')).toBeInTheDocument();
     expect(screen.getByText('$ 200.00')).toBeInTheDocument();
 
-    expect(screen.getByText('2023-01-04')).toBeInTheDocument();
+    expect(screen.getAllByText('2023-01-03').length).toBe(2)
     expect(screen.getByText('Filter Change')).toBeInTheDocument();
     expect(screen.getByText('OrderTooltip for 4 from Supplier B')).toBeInTheDocument();
-    expect(screen.getByText('1 pcs @ $50.00')).toBeInTheDocument();
-    expect(screen.getByText('$ 50.00')).toBeInTheDocument();
+    expect(screen.getByText('2 ltr @ $35.00')).toBeInTheDocument();
+    expect(screen.getByText('$ 70.00')).toBeInTheDocument();
   });
 
   test('displays top 3 vehicles by amount in summary', () => {
@@ -145,10 +146,10 @@ describe('YearMonthView Component', () => {
     const withinSummary = within(summaryCard);
 
     expect(withinSummary.getByText('Truck B')).toBeInTheDocument();
-    expect(withinSummary.getByText('$350.00')).toBeInTheDocument();
+    expect(withinSummary.getByText('$1040.00')).toBeInTheDocument();
     expect(withinSummary.getByText('Truck C')).toBeInTheDocument();
-    expect(withinSummary.getByText('$50.00')).toBeInTheDocument();
+    expect(withinSummary.getByText('$320.00')).toBeInTheDocument();
     expect(withinSummary.getByText('Truck A')).toBeInTheDocument();
-    expect(withinSummary.getByText('$100.00')).toBeInTheDocument();
+    expect(withinSummary.getByText('$170.00')).toBeInTheDocument();
   });
 });

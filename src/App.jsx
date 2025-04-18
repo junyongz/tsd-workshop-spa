@@ -100,7 +100,7 @@ function App() {
     if (orders.current) {
       const searchedFilteredOrders = []
       for (const order of orders.current) {
-        if (options.some(val => 
+        if (options.listing.some(val => 
             order.partName.toUpperCase().includes(val.name.toUpperCase()) || 
             order.notes?.toUpperCase().includes(val.name.toUpperCase()))) {
           searchedFilteredOrders.push(order)
@@ -116,7 +116,7 @@ function App() {
     if (!options || options.length === 0) {
       clearTimeout(filterTimeoutRef.current)
       setFilteredServices(services.current.formattedTransactions)
-      setFilteredOrders(orders.current)
+      setFilteredOrders(orders.current.listing)
       setSelectedSearchOptions([])
       return
     }
@@ -140,7 +140,7 @@ function App() {
 
     if (orders.current) {
       const searchedFilteredOrders = []
-      for (const order of orders.current) {
+      for (const order of orders.current.listing) {
         if (order.invoiceDate === val) {
           searchedFilteredOrders.push(order)
         }
@@ -152,7 +152,7 @@ function App() {
   const clearFilterDate = () => {
     setSearchByDate(false)
     setFilteredServices(services.current.formattedTransactions)
-    setFilteredOrders(orders.current)
+    setFilteredOrders(orders.current.listing)
   }
 
   const onNewVehicleCreated = (vehicleNo) => {

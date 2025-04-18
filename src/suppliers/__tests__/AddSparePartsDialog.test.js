@@ -26,7 +26,7 @@ describe('AddSparePartsDialog Component', () => {
   const defaultProps = {
     isShow: true,
     setShowDialog: jest.fn(),
-    orders: mockOrders,
+    orders: { listing: mockOrders, mapping: mockOrders.reduce((acc, curr) => {acc[curr.id] = curr; return acc}, {}) },
     existingOrder: undefined,
     suppliers: mockSuppliers,
     spareParts: mockSpareParts,

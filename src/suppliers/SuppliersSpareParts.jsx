@@ -50,7 +50,7 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
     }
 
     const viewOrder = (no) => {
-        setExistingOrder(orders.filter(o => o.deliveryOrderNo === no))
+        setExistingOrder(orders.listing.filter(o => o.deliveryOrderNo === no))
         setShowDialog(true)
     }
 
@@ -64,7 +64,7 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
                 filterServices(selectedSearchOptions)
             }
             else {
-                setFilteredOrders(orders)
+                setFilteredOrders(orders.listing)
             }
             setSelectedSupplier()
         }
@@ -84,17 +84,18 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
             .then(res => res.json())
             .then(response => {
                 response.forEach(o => {
-                    const idx = orders.findIndex(oo => oo.id === o.id)
+                    const idx = orders.listing.findIndex(oo => oo.id === o.id)
                     if (idx >= 0) {
-                        orders[idx] = o
+                        orders.listing[idx] = o
                     }
                     else {
-                        orders.push(o)
+                        orders.listing.push(o)
                     }
+                    orders.mapping[o.id] = o
                 })
                 // orders.push(...response)
-                orders.sort((a, b) => a.invoiceDate < b.invoiceDate)
-                setFilteredOrders((selectedSupplier && orders.filter(s => s.supplierId === selectedSupplier.id)) || orders)
+                orders.listing.sort((a, b) => a.invoiceDate < b.invoiceDate)
+                setFilteredOrders((selectedSupplier && orders.listing.filter(s => s.supplierId === selectedSupplier.id)) || orders)
             })
             .then(() => refreshSpareParts())
             .then(() => callback && callback())
@@ -138,8 +139,9 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
                 }
             })
             .then(_ => {
-                orders.splice(orders.findIndex(o => o.id === order.id), 1)
-                setFilteredOrders((selectedSupplier && orders.filter(s => s.supplierId === selectedSupplier.id)) || orders)
+                orders.listing.splice(orders.listing.findIndex(o => o.id === order.id), 1)
+                delete orders.mapping[order.id]
+                setFilteredOrders((selectedSupplier && orders.listing.filter(s => s.supplierId === selectedSupplier.id)) || orders.listing)
                 return Promise.all([refreshSparePartUsages(),
                 refreshSpareParts(),
                 refreshServices()])
@@ -167,14 +169,14 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
             })
             .then(_ => {
                 orders[orders.findIndex(o => o.id === order.id)] = order
-                setFilteredOrders((selectedSupplier && orders.filter(s => s.supplierId === selectedSupplier.id)) || orders)
+                setFilteredOrders((selectedSupplier && orders.listing.filter(s => s.supplierId === selectedSupplier.id)) || orders)
             })
             .then(() => clearState())
             .finally(() => setLoading(false))
         })
     }
 
-    const replaceOrders = useCallback(() => setFilteredOrders(orders), [orders, setFilteredOrders] )
+    const replaceOrders = useCallback(() => setFilteredOrders(orders.listing), [orders, setFilteredOrders] )
     useEffect(() => {
         if (selectedSearchOptions.length > 0) {
             setSelectedSupplier()
@@ -234,8 +236,8 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
                         <Offcanvas.Body>
                             <Nav variant="underline" defaultActiveKey={selectedSupplier?.id} activeKey={selectedSupplier?.id}>
                                 {
-                                    suppliers.map((v, i) => 
-                                        <Nav.Item key={i}>
+                                    suppliers.map(v => 
+                                        <Nav.Item key={v.id}>
                                             <Nav.Link onClick={() => filterOrderBySupplier(v)} eventKey={v.id}>{v.supplierName}</Nav.Link>
                                         </Nav.Item>
                                     )

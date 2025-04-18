@@ -160,7 +160,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles, set
                                         onChange={(opts) => afterChooseSparePart(opts, i)}
                                         placeholder="Find a spare part..."
                                         renderMenuItemChildren={(option) => {
-                                            const order = orders.find(o => o.id === option.orderId)
+                                            const order = orders.mapping[option.orderId]
                                             const supplier = suppliers.find(s => s.id === option.supplierId)
                                             const quantityLeft = remainingQuantity(order, sparePartUsages)
                                               
@@ -182,7 +182,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles, set
                                 </Form.Group>
                                 <Form.Group as={Col} className="mb-3 col-2" controlId="quantity">
                                     <InputGroup>
-                                        <Form.Control onChange={(e) => updatePriceByQuantity(e.target.value, i)} required type="number" name="quantity" min="1" max={(v.selectedSpareParts[0] && orders.find(o => o.id === v.selectedSpareParts[0].orderId).quantity) || 0} placeholder="Quantity" value={v?.quantity}/>
+                                        <Form.Control onChange={(e) => updatePriceByQuantity(e.target.value, i)} required type="number" name="quantity" min="1" max={(v.selectedSpareParts[0] && orders.mapping[v.selectedSpareParts[0].orderId].quantity) || 0} placeholder="Quantity" value={v?.quantity}/>
                                         <InputGroup.Text>{v?.unit}</InputGroup.Text>
                                     </InputGroup>
                                 </Form.Group>

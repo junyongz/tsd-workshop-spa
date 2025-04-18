@@ -179,10 +179,6 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
         }
     }
 
-    const findOrderById = (id=0) => {
-        return orders.find(o => o.id === id)
-    }
-
     useEffect(() => {
         if (existingOrder && existingOrder.length > 0) {
             setItems(existingOrder.map(v => {
@@ -271,7 +267,7 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
                                                 <div>
                                                     <div>{option.partName}</div>
                                                     {/** TODO: to add supplier info later on */} 
-                                                    <small className="text-secondary">${option?.unitPrice} per {option?.unit} | <i className="bi bi-calendar-event"></i> {findOrderById(option.orderId).invoiceDate}</small>
+                                                    <small className="text-secondary">${option?.unitPrice} per {option?.unit} | <i className="bi bi-calendar-event"></i> {orders.mapping[option.orderId].invoiceDate}</small>
                                                 </div>
                                             }
                                             clearButton

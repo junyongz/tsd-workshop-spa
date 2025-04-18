@@ -24,7 +24,6 @@ class ServiceTransactions {
         })
     }
 
-    // TODO: to write api to push to backend too
     addNewTransaction(newTrx = []) {
         this.transactions.push(...newTrx)
         this.transactions.sort((left, right) => 

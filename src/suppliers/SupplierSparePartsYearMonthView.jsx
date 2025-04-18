@@ -3,8 +3,8 @@ import { Badge, Button, ButtonGroup, Card, Col, Container, Dropdown, DropdownBut
 import { ScrollSpy } from "bootstrap"
 
 // {[supplier]}
-const filterOrdersBySupplier = (orders=[], suppliers=[], year, month) => {
-    const matchedYearMonthOrders = orders.filter(order => {
+const filterOrdersBySupplier = (orders={listing:[],mapping:[]}, suppliers=[], year, month) => {
+    const matchedYearMonthOrders = orders.listing.filter(order => {
         const invoiceDate = new Date(order.invoiceDate)
         if (invoiceDate.getFullYear() === year && invoiceDate.getMonth() === month) {
             return true

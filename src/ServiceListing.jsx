@@ -118,10 +118,6 @@ function ServiceListing({services, filteredServices=[],
     })
   }
 
-  const findOrder = (orderId) => {
-    return orders.find(o => o.id === orderId)
-  }
-
   return (
     <Container>
     {
@@ -164,7 +160,13 @@ function ServiceListing({services, filteredServices=[],
                   <Col><h5>{vv.vehicleNo}</h5> <CompletionLabel creationDate={vv.startDate} completionDate={vv.completionDate} onCompletion={() => completeAllServices(vv)}></CompletionLabel></Col>
                   { false && <Col className={'text-sm-end col-4'}><Badge pill><i className="bi bi-person-fill-gear me-1"></i>{'Tan Chwee Seng'}</Badge></Col> }
                   <Col sm="4" className={'text-sm-end'}>
-                    <h4><span className="border border-1 border-primary border-opacity-50 rounded-2 px-3 py-1">$ {vv.migratedHandWrittenSpareParts?.reduce((prev, curr) => prev += curr.totalPrice, 0).toFixed(2)}</span></h4>
+                    <h4><span className="border border-1 border-primary border-opacity-50 rounded-2 px-3 py-1">
+                      $ {(vv.migratedHandWrittenSpareParts?.reduce((acc, curr) => acc += curr.totalPrice, 0) + 
+                          vv.sparePartUsages?.reduce((acc, curr) => {
+                                              const order = orders.mapping[curr.orderId] 
+                                              return acc + (curr.quantity * order.unitPrice)
+                      }, 0)).toFixed(2)}
+                    </span></h4>
                   </Col>
                 </Row>
               </Card.Header>
@@ -183,25 +185,26 @@ function ServiceListing({services, filteredServices=[],
                 <Row>
                   <Col className="p-0">
                     <ListGroup>
-                    {vv.migratedHandWrittenSpareParts?.map(vvv => {
+                    {vv.migratedHandWrittenSpareParts.map(vvv => {
                       return <ListGroupItem key={vvv.index}>
                         <Stack direction="horizontal">
                           <Col>{vvv.itemDescription}</Col>
                           <Col className='text-sm-end col-2'><Badge pill>{vvv.quantity > 0 && vvv.unitPrice && `${vvv.quantity} ${vvv.unit} @ $${vvv.unitPrice?.toFixed(2)}`}</Badge></Col>
-                          <Col className='text-sm-end col-2'>{vvv.migratedIndicator || vvv.completionDate ? <Badge pill>$ {vvv.totalPrice}</Badge> : <HoverPilledBadge onRemove={() => removeTransaction(vvv.index)}>$ {vvv.totalPrice}</HoverPilledBadge> }</Col>
+                          <Col className='text-sm-end col-2'><Badge pill>$ {vvv.totalPrice}</Badge></Col>
                         </Stack>
                       </ListGroupItem>
                       })
                     }
-                    {vv.sparePartUsages?.map(vvv => {
-                      const order = findOrder(vvv.orderId)
-                      const supplier = suppliers.find(s => s.id === vvv.supplierId)
+                    {vv.sparePartUsages.map(vvv => {
+                      const order = orders.mapping[vvv.orderId]
+                      const supplier = suppliers.find(s => s.id === order.supplierId)
+                      const totalPrice = (vvv.quantity * order.unitPrice).toFixed(2)
 
                       return <ListGroupItem key={vvv.id}>
                         <Stack direction="horizontal">
-                          <Col>{vvv.itemDescription} { order && <div><OrderTooltip order={order} supplier={supplier} /></div> }</Col>
-                          <Col className='text-sm-end col-2'><Badge pill>{vvv.quantity > 0 && vvv.unitPrice && `${vvv.quantity} ${vvv.unit} @ $${vvv.unitPrice?.toFixed(2)}`}</Badge></Col>
-                          <Col className='text-sm-end col-2'>{vvv.migratedIndicator || vvv.completionDate ? <Badge pill>$ {vvv.totalPrice}</Badge> : <HoverPilledBadge onRemove={() => removeTransaction(vvv.index)}>$ {vvv.totalPrice}</HoverPilledBadge> }</Col>
+                          <Col>{order.partName} <div><OrderTooltip order={order} supplier={supplier} /></div></Col>
+                          <Col className='text-sm-end col-2'><Badge pill>{vvv.quantity > 0 && order.unitPrice && `${vvv.quantity} ${order.unit} @ $${order.unitPrice?.toFixed(2)}`}</Badge></Col>
+                          <Col className='text-sm-end col-2'>{vv.completionDate ? <Badge pill>$ {totalPrice}</Badge> : <HoverPilledBadge onRemove={() => removeTransaction(vvv.id)}>$ {totalPrice}</HoverPilledBadge> }</Col>
                         </Stack>
                       </ListGroupItem>
                       })

@@ -78,7 +78,10 @@ describe('SuppliersSpareParts Component', () => {
         setFilteredOrders: jest.fn(),
         selectedSearchOptions: [],
         filterServices: jest.fn(),
-        orders: [...mockOrders],
+        orders: {listing: [...mockOrders], mapping: [...mockOrders].reduce((acc, item) => {
+          acc[item.id] = item;
+          return acc;
+        }, {})},
         suppliers: [...mockSuppliers],
         spareParts: [],
         vehicles: [],
@@ -87,7 +90,8 @@ describe('SuppliersSpareParts Component', () => {
         refreshSparePartUsages: jest.fn(),
         refreshServices: jest.fn(),
         onNewVehicleCreated: jest.fn(),
-        setLoading: jest.fn()
+        setLoading: jest.fn(),
+        showToastMessage: (msg) => console.error(msg)
     };
   });
 

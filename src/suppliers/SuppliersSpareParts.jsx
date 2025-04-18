@@ -95,7 +95,7 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
                 })
                 // orders.push(...response)
                 orders.listing.sort((a, b) => a.invoiceDate < b.invoiceDate)
-                setFilteredOrders((selectedSupplier && orders.listing.filter(s => s.supplierId === selectedSupplier.id)) || orders)
+                setFilteredOrders((selectedSupplier && orders.listing.filter(s => s.supplierId === selectedSupplier.id)) || orders.listing)
             })
             .then(() => refreshSpareParts())
             .then(() => callback && callback())

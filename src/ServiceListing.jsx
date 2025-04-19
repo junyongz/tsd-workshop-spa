@@ -27,7 +27,7 @@ function ServiceListing({services, filteredServices=[],
   const serviceTransaction = useRef()
 
   const [activePage, setActivePage] = useState(1)
-  const chunkedItems = chunkArray(filteredServices, 5)
+  const chunkedItems = chunkArray(filteredServices, 10)
   const totalPages = chunkedItems.length;
 
   const [yearMonthView, setYearMonthView] = useState(false)
@@ -120,6 +120,29 @@ function ServiceListing({services, filteredServices=[],
     })
   }
 
+  const deleteService = (ws) => {
+    setLoading(true)
+    requestAnimationFrame(() => {
+      fetch(`${apiUrl}/workshop-services/${ws.id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-type': 'application/json'
+        }
+      })
+      .then(res => res.json())
+      .then(id => {
+        if (ws.id !== id) {
+          throw Error(`seems nothing deleted, returning ${id}`)
+        }
+        services.current.removeService(ws)
+        keywordSearch()
+      })
+      .then(() => clearState())
+      .then(() => refreshSparePartUsages())
+      .finally(() => setLoading(false))
+    })
+  }
+
   return (
     <Container>
     {
@@ -155,7 +178,8 @@ function ServiceListing({services, filteredServices=[],
                 <Row>
                   <Col><h5>{v.vehicleNo} <span className="text-body-secondary">started since {v.startDate}</span></h5> 
                   {v.mileageKm > 0 && <h6><span className="text-body-secondary">At {v.mileageKm} KM</span></h6> }
-                  <CompletionLabel creationDate={v.startDate} completionDate={v.completionDate} onCompletion={() => completeServices(v)}></CompletionLabel></Col>
+                  <CompletionLabel creationDate={v.startDate} completionDate={v.completionDate} onCompletion={() => completeServices(v)} onDelete={() => deleteService(v)}></CompletionLabel>
+                  </Col>
                   { false && <Col className={'text-sm-end col-4'}><Badge pill><i className="bi bi-person-fill-gear me-1"></i>{'Tan Chwee Seng'}</Badge></Col> }
                   <Col sm="4" className={'text-sm-end'}>
                     <h4><span className="border border-1 border-primary border-opacity-50 rounded-2 px-3 py-1">

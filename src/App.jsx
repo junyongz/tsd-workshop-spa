@@ -46,6 +46,7 @@ function App() {
       setToastBoxMessage(msg)
     }
     finally {
+      console.trace('who is showing toast that causing error')
       setShowToastBox(true)
     }
   }
@@ -59,6 +60,8 @@ function App() {
   const [suppliers, setSuppliers] = useState([])
   const [vehicles, setVehicles] = useState([])
   const [spareParts, setSpareParts] = useState([])
+  // for ordering purpose, adding for service can only take addAllowed = true
+  const [orderSpareParts, setOrderSpareParts] = useState([])
   
   const filterTimeoutRef = useRef()
 
@@ -76,6 +79,14 @@ function App() {
           for (const item of v.migratedHandWrittenSpareParts) {
             if (options.some(val => item.partName?.toUpperCase().includes(val.name.toUpperCase())) ||
             options.some(val => item.itemDescription?.toUpperCase().includes(val.name.toUpperCase())) ) {
+              foundSpareParts = true
+              break
+            }
+          }
+
+          for (const item of v.sparePartUsages) {
+            if (options.some(val => orders.current.mapping[item.orderId]?.partName
+                .toUpperCase().includes(val.name.toUpperCase()))) {
               foundSpareParts = true
               break
             }
@@ -173,7 +184,7 @@ function App() {
 
   const refreshSparePartUsages = useCallback(() => fetchSparePartUsages(apiUrl, setSparePartUsages, showToastMessage), [apiUrl])
 
-  const refreshSpareParts = useCallback(() => fetchSpareParts(apiUrl, setSpareParts, setSearchOptions), [apiUrl])
+  const refreshSpareParts = useCallback(() => fetchSpareParts(apiUrl, setSpareParts, setSearchOptions, setOrderSpareParts), [apiUrl])
 
   const refreshServices = useCallback(() => fetchServices(apiUrl, services, setFilteredServices), [apiUrl])
 
@@ -311,7 +322,7 @@ function App() {
               setFilteredOrders={setFilteredOrders} 
               orders={orders.current} 
               suppliers={suppliers} 
-              spareParts={spareParts} 
+              spareParts={orderSpareParts} 
               vehicles={vehicles}
               sparePartUsages={sparePartUsages}
               refreshSpareParts={refreshSpareParts}

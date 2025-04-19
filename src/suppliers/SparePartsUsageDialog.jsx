@@ -1,4 +1,4 @@
-import { useRef, useState } from "react"
+import React, { useRef, useState } from "react"
 import { Container, Form, Modal, Row, Col, Button, InputGroup } from "react-bootstrap"
 import { Typeahead } from "react-bootstrap-typeahead"
 
@@ -6,10 +6,14 @@ function SparePartsUsageDialog({isShow, setShowDialog, vehicles,
     usageSpareParts, setUsageSpareParts, onSaveNewSparePartUsage,
     onNewVehicleCreated=() => {}}) {
 
+    const apiUrl = process.env.REACT_APP_API_URL
+
     const formRef = useRef()
     const [validated, setValidated] = useState(false)
     const [selectedVehicles, setSelectedVehicles] = useState([])
     const [remaining, setRemaining] = useState(usageSpareParts.remaining)
+    const [existingServices, setExistingServices] = useState([])
+    const [selectedExistingService, setSelectedExistingService] = useState()
 
     const [records, setRecords] = useState(1)
 
@@ -19,6 +23,8 @@ function SparePartsUsageDialog({isShow, setShowDialog, vehicles,
         // setRecords(1)
         setUsageSpareParts({})
         setSelectedVehicles([])
+        setExistingServices([])
+        setSelectedExistingService()
     }
 
     const updateRemaining = (qty) => {
@@ -37,10 +43,13 @@ function SparePartsUsageDialog({isShow, setShowDialog, vehicles,
         const quantity = nativeForm['quantity'].value
 
         onSaveNewSparePartUsage({
+            vehicleId: selectedVehicles[0].id,
             vehicleNo: vehicleNo,
             usageDate: usageDate,
             orderId: usageSpareParts.id,
-            quantity: quantity
+            serviceId: nativeForm['serviceId'] && nativeForm['serviceId'].value,
+            quantity: quantity,
+            soldPrice: usageSpareParts.unitPrice
         })
 
         handleClose()
@@ -52,10 +61,30 @@ function SparePartsUsageDialog({isShow, setShowDialog, vehicles,
                 onNewVehicleCreated(veh.vehicleNo)
             }
             setSelectedVehicles([veh])
+            fetch(`${apiUrl}/workshop-services?vehicleId=${veh.id}`, {
+                mode: 'cors',
+                headers: {
+                    'Content-type': 'application/json'
+                }
+            })
+            .then(resp => resp.json())
+            .then(ws => {
+                if (ws && ws.length > 0) {
+                    setExistingServices(ws)
+                    if (ws.length === 1) {
+                        setSelectedExistingService(ws[0])
+                    }
+                }
+            })
         }
         else {
             setSelectedVehicles([])
+            setExistingServices([])
         }
+    }
+
+    const afterChooseExistingService = (v) => {
+        setSelectedExistingService(v)
     }
 
     const addNewItem = () => {
@@ -76,11 +105,15 @@ function SparePartsUsageDialog({isShow, setShowDialog, vehicles,
                     <Form ref={formRef} validated={validated}>
                         {
                             Array.from({length: records}, (_, i) =>
+                                <React.Fragment>
                                 <Row key={i} className="mb-1">
-                                    <Col sm="3">
+                                    <Col xs="3">
                                         <InputGroup>
                                         <InputGroup.Text><i className="bi bi-calendar-event"></i></InputGroup.Text>
-                                        <Form.Control required type="date" name="usageDate" disabled={!usageSpareParts.quantity || usageSpareParts.quantity === 0}></Form.Control>
+                                        <Form.Control required type="date" 
+                                            min={selectedExistingService ? selectedExistingService.startDate : undefined}
+                                            max={new Date().toISOString().split('T')[0]}
+                                            name="usageDate" disabled={!usageSpareParts.quantity || usageSpareParts.quantity === 0}></Form.Control>
                                         </InputGroup>
                                     </Col>
                                     <Col>
@@ -101,13 +134,28 @@ function SparePartsUsageDialog({isShow, setShowDialog, vehicles,
                                             />
                                     </InputGroup>
                                     </Col>
-                                    <Col sm="3">
+                                    <Col xs="3">
                                         <InputGroup>
                                         <Form.Control onChange={(e) => updateRemaining(e.target.value)} required type="number" name="quantity" disabled={!usageSpareParts.remaining || usageSpareParts.remaining === 0} max={usageSpareParts.remaining || 0} min={1}></Form.Control>
                                         <InputGroup.Text>{usageSpareParts.unit}</InputGroup.Text>
                                         </InputGroup>
                                     </Col>
                                 </Row>
+                                { existingServices.length > 0 && 
+                                <Row>
+                                    <Col xs="3"></Col>
+                                    <Col>
+                                        {
+                                            existingServices.map(v => <Form.Check type="radio" 
+                                                onChange={() => afterChooseExistingService(v)} 
+                                                name="serviceId" value={v.id} 
+                                                checked={existingServices.length === 1}
+                                                label={`Service started at ${v.startDate}`} />)
+                                        }
+                                    </Col>
+                                </Row>
+                                }
+                                </React.Fragment>
                             
                             )
                         }

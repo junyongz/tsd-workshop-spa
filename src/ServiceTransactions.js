@@ -26,6 +26,12 @@ class ServiceTransactions {
         this.transactions[this.transactionIndexs[updatedService.id]] = updatedService       
     }
 
+    removeService(deletingService) {
+        const idx = this.transactionIndexs[deletingService.id]
+        this.transactions.splice(idx, 1)
+        delete this.transactionIndexs[idx]
+    }
+
     removeTransaction(serviceId, sparePartUsageId) {
         const service = this.transactions[this.transactionIndexs[serviceId]]
         service.sparePartUsages.splice(service.sparePartUsages.findIndex(v => v.id === sparePartUsageId), 1)

@@ -1,54 +1,38 @@
 class ServiceTransactions {
     constructor(transactions = []) {
         this.transactions = transactions
-        this.formatTransactions()
+        this.transactionIndexs = this.transactions.reduce((acc, cv, ci) => {
+            acc[cv.id] = ci
+            return acc
+        },{})
     }
 
-
-    /**
-     * [
-     *    {vehicle, migratedHandWrittenSpareParts: [], sparePartUsages: []}
-     * ]
-     */
-    formatTransactions = () => {
-        this.formattedTransactions = []
-        this.transactions.forEach(v => {
-            const idx = this.formattedTransactions.findIndex(t => t.startDate === v.startDate)
-            const found = idx >= 0
-            if (!found) {
-                this.formattedTransactions.push({'startDate': v.startDate, 'services': [v]})
-            }
-            else {
-                this.formattedTransactions[idx].services.push(v)
-            }
-        })
+    addNewTransaction(newService) {
+        const existingIdx = this.transactionIndexs[newService.id]
+        if (existingIdx === undefined) {
+            this.transactionIndexs[newService.id] = this.transactions.length
+            this.transactions.push(newService)
+            this.transactions.sort((left, right) => 
+                new Date(left.startDate).getTime() < new Date(right.startDate).getTime())
+        }
+        else {
+            const oldService = this.transactions[existingIdx]
+            newService.sparePartUsages = [...oldService.sparePartUsages, ...newService.sparePartUsages]
+            this.transactions[existingIdx] = newService
+        }
     }
 
-    addNewTransaction(newTrx = []) {
-        this.transactions.push(...newTrx)
-        this.transactions.sort((left, right) => 
-            new Date(left.creationDate).getTime() < new Date(right.creationDate).getTime())
-        this.formatTransactions()
+    updateTransaction(updatedService) {
+        this.transactions[this.transactionIndexs[updatedService.id]] = updatedService       
     }
 
-    updateTransaction(newTrx = []) {
-        newTrx.forEach(tt => 
-            this.transactions[this.transactions.findIndex(t => t.index === tt.index)] = tt
-        )
-        this.formatTransactions()        
-    }
-
-    removeTransaction(index=-1) {
-        this.transactions.splice(this.transactions.findIndex(v => v.index === index), 1)
-        this.formatTransactions()
+    removeTransaction(serviceId, sparePartUsageId) {
+        const service = this.transactions[this.transactionIndexs[serviceId]]
+        service.sparePartUsages.splice(service.sparePartUsages.findIndex(v => v.id === sparePartUsageId), 1)
     }
 
     services() {
-        return this.formattedTransactions
-    }
-
-    entriedServices() {
-        return Object.entries(this.formattedTransactions)
+        return this.transactions
     }
 
     // {vehicle: []}
@@ -71,7 +55,8 @@ class ServiceTransactions {
     }
 
     availableYears() {
-        return Array.from(new Set(this.transactions.map(trx => new Date(trx.creationDate).getFullYear()))).sort((a, b) => b - a)
+        return Array.from(new Set(this.transactions.map(trx => 
+            new Date(trx.creationDate).getFullYear()))).sort((a, b) => b - a)
     }
 }
 

@@ -1,4 +1,4 @@
-export default function autoRefreshWorker(setLoading, refresherByTableName) {
+export default async function autoRefreshWorker(setLoading, refresherByTableName) {
     // stats-dbtables	[{"tableName":"mig_supplier_spare_parts","lastTransactionId":1781},{"tableName":"spare_part_usages","lastTransactionId":1781},{"tableName":"mig_data","lastTransactionId":1748}]
 
     const apiUrl = process.env.REACT_APP_API_URL

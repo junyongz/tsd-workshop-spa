@@ -8,7 +8,7 @@ export default async function fetchServices(apiUrl, services, setFilteredService
           })
           .then(response => {
             services.current = new ServiceTransactions(response)
-            setFilteredServices(services.current.formattedTransactions)
+            setFilteredServices(services.current.transactions)
           })
           .catch(error => {
             console.error('There was an error fetching the services:', error);

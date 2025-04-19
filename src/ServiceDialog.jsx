@@ -4,7 +4,7 @@ import { Typeahead } from "react-bootstrap-typeahead";
 import Form from "react-bootstrap/Form";
 import remainingQuantity from "./utils/quantityUtils";
 
-function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles, setVehicles, 
+function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles, 
     spareParts, orders=[], suppliers=[], sparePartUsages=[],
     onNewVehicleCreated=() => {}}) {
     const [items, setItems] = useState([{partName: 'Choose one ...', quantity: 1, unit: 'pc', unitPrice: 0, selectedSpareParts: []}])
@@ -12,6 +12,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles, set
     const formRef = useRef()
     
     const [selectedVehicles, setSelectedVehicles] = useState(trx?.current?.vehicleNo ? [vehicles.find(veh => veh.vehicleNo === trx.current.vehicleNo)] : [])
+    const [serviceStartDate, setServiceStartDate] = useState(trx?.current?.startDate)
 
     const handleClose = () => {
         setItems([{partName: 'Choose one ...', quantity: 1, unit: 'pc', unitPrice: 0, selectedSpareParts:[]}])
@@ -32,6 +33,12 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles, set
             newItems.splice(i, 1)
             return newItems
         })
+    }
+
+    const afterChooseDate = (dateVal) => {
+        if (!trx?.current?.vehicleNo) {
+            setServiceStartDate(dateVal)
+        }
     }
 
     const afterChooseSparePart = ([sparePart], i) => {
@@ -77,40 +84,57 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles, set
             return
         }
 
-        onNewServiceCreated(items.map((v, i) => {
-            return {
-                creationDate: trx?.current?.creationDate,
-                vehicleNo: nativeForm[0].value,
-                quantity: v.quantity,
-                unit: v.unit,
-                unitPrice: parseFloat(v.unitPrice),
-                itemDescription: v.partName,
-                totalPrice: v.quantity * v.unitPrice,
-                orderId: v.selectedSpareParts[0].orderId,
-                supplierId: v.selectedSpareParts[0].supplierId,
-            }
-        }))
+        // { id: ?, creationDate: ?, sparePartUsages: [{}, {} ]}
+        const service = {
+            id: trx?.current?.id,
+            vehicleId: selectedVehicles[0].id,
+            vehicleNo: selectedVehicles[0].vehicleNo,
+            startDate: serviceStartDate,
+            mileageKm: nativeForm['mileageKm'].value,
+            sparePartUsages: items.map((v, i) => {
+                return {
+                    vehicleNo: selectedVehicles[0].vehicleNo,
+                    usageDate: nativeForm['startDate'].value,
+                    quantity: v.quantity,
+                    soldPrice: parseFloat(v.unitPrice),
+                    orderId: v.selectedSpareParts[0].orderId,
+                }
+            })
+        }
+
+        onNewServiceCreated(service)
         handleClose()
     }
 
-    const changeSelectedVehicle = () => {
+    const uponShowing = () => {
         if (trx?.current?.vehicleNo && vehicles.length > 0 && vehicles.findIndex(veh => veh.vehicleNo === trx.current.vehicleNo) > -1) {
             setSelectedVehicles([vehicles.find(veh => veh.vehicleNo === trx.current.vehicleNo)])
         }
         else {
             setSelectedVehicles([])
         }
+
+        setServiceStartDate(trx?.current?.startDate)
     }
 
     return (
-        <Modal show={isShow} onHide={handleClose} onShow={changeSelectedVehicle} backdrop="static" onEscapeKeyDown={(e) => e.preventDefault()} size="xl">
+        <Modal show={isShow} onHide={handleClose} onShow={uponShowing} backdrop="static" onEscapeKeyDown={(e) => e.preventDefault()} size="xl">
             <Modal.Header closeButton>
-            <Modal.Title><i className="bi bi-file-earmark-text-fill"></i> Service started at {trx?.current?.creationDate}</Modal.Title>
+            <Modal.Title><i className="bi bi-file-earmark-text-fill"></i> Service started at {serviceStartDate}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <Container>
                     <Form ref={formRef} validated={validated}>
                         <Row className="mb-1">
+                            <Col xs="2">
+                                <InputGroup>
+                                <InputGroup.Text><i className="bi bi-calendar-event"></i></InputGroup.Text>
+                                    <Form.Control onChange={(e) => afterChooseDate(e.target.value)} name="startDate" 
+                                        min={trx?.current?.vehicleNo ? trx?.current?.startDate : undefined} 
+                                        max={trx?.current?.vehicleNo ? new Date().toISOString().split('T')[0] : undefined} 
+                                        required type="date"></Form.Control>
+                                </InputGroup>
+                            </Col>
                             <Col>
                                 <InputGroup>
                                 <InputGroup.Text><i className="bi bi-truck"></i></InputGroup.Text>
@@ -127,10 +151,16 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles, set
                                     />
                                 </InputGroup>
                             </Col>
+                            <Col xs="2">
+                                <InputGroup>
+                                    <Form.Control name="mileageKm"></Form.Control>
+                                    <InputGroup.Text>KM</InputGroup.Text>
+                                </InputGroup>
+                            </Col>
                         </Row>
                         <Row>
                             <Col className="text-sm-end">
-                                <Button size="sm" onClick={addNewItem}><i className="bi bi-plus-circle-fill me-2"></i>Add More</Button>
+                                <Button size="sm" onClick={addNewItem}><i className="bi bi-plus-circle-fill me-2"></i>{items.length === 0 ? 'Add New' : 'Add More' }</Button>
                             </Col>
                         </Row>
                         

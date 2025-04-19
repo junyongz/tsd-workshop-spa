@@ -147,7 +147,7 @@ describe('AddSparePartsDialog Component', () => {
 
     expect(quantityInput).toHaveValue(5);
     expect(unitPriceInput).toHaveValue(10);
-    expect(screen.getAllByText('$ 50').length).toEqual(2)
+    expect(screen.getAllByText('$ 50.00').length).toEqual(2)
   });
 
   test('validates form and prevents save on invalid input', async () => {

@@ -82,14 +82,8 @@ function App() {
           }
         }
 
-        const idx = searchedFilteredServices.findIndex(t => t.startDate === v.startDate)
         if (foundVehicle || foundSpareParts) {
-          if (idx === -1) {
-            searchedFilteredServices.push({startDate: v.startDate, services: [v]})
-          }
-          else {
-            searchedFilteredServices[idx].services.push(v)
-          }
+          searchedFilteredServices.push(v)
         }
       }
 
@@ -99,8 +93,8 @@ function App() {
 
     if (orders.current) {
       const searchedFilteredOrders = []
-      for (const order of orders.current) {
-        if (options.listing.some(val => 
+      for (const order of orders.current.listing) {
+        if (options.some(val => 
             order.partName.toUpperCase().includes(val.name.toUpperCase()) || 
             order.notes?.toUpperCase().includes(val.name.toUpperCase()))) {
           searchedFilteredOrders.push(order)
@@ -115,7 +109,7 @@ function App() {
   const filterServices = (options=[]) => {
     if (!options || options.length === 0) {
       clearTimeout(filterTimeoutRef.current)
-      setFilteredServices(services.current.formattedTransactions)
+      setFilteredServices(services.current.transactions)
       setFilteredOrders(orders.current.listing)
       setSelectedSearchOptions([])
       return
@@ -128,9 +122,9 @@ function App() {
   const filterByDate = (val) => {
     if (services.current) {
       const searchedFilteredServices = []
-      for (const v of services.current.formattedTransactions) {
+      for (const v of services.current.transactions) {
         if (v.startDate === val) {
-          searchedFilteredServices.push({startDate: v.startDate, services: v.services})
+          searchedFilteredServices.push(v)
         }
       }
 
@@ -151,7 +145,7 @@ function App() {
 
   const clearFilterDate = () => {
     setSearchByDate(false)
-    setFilteredServices(services.current.formattedTransactions)
+    setFilteredServices(services.current.transactions)
     setFilteredOrders(orders.current.listing)
   }
 
@@ -297,7 +291,7 @@ function App() {
               filteredServices={filteredServices}
               keywordSearch={() => {
                 if (selectedSearchOptions && selectedSearchOptions.length === 0) {
-                  setFilteredServices(services.current.entriedServices()) 
+                  setFilteredServices(services.current.transactions) 
                 }
                 else {
                   doFilterServices(selectedSearchOptions)}

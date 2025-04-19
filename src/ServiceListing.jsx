@@ -36,60 +36,62 @@ function ServiceListing({services, filteredServices=[],
     setYearMonthView(true)
   }
 
-  const addNewServiceTransaction = (creationDate) => {
+  const addNewServiceTransaction = (startDate) => {
     serviceTransaction.current = {
-      creationDate: creationDate,
+      startDate: startDate,
       items: [{ partName: 'Engine Oil 20w-50' }]
     };
     setShowModal(true)
   }
 
-  const addNewItemForVehicle = (creationDate, vehicleNo) => {
+  const addNewItemForVehicle = (service) => {
     serviceTransaction.current = {
-      creationDate: creationDate,
-      vehicleNo: vehicleNo,
+      id: service.id,
+      startDate: service.startDate,
+      vehicleNo: service.vehicleNo,
       items: [{ partName: 'Engine Oil 20w-50' }]
     };
     setShowModal(true)
   }
 
-  const onNewServiceCreated = (newTrx=[]) => {
+  // { id: ?, creationDate: ?, sparePartUsages: [{}, {} ]}
+  const onNewServiceCreated = (service) => {
     setLoading(true)
     requestAnimationFrame(() => {
-      fetch(`${apiUrl}/transactions`, {
+      fetch(`${apiUrl}/workshop-services`, {
         method: 'POST', 
-        body: JSON.stringify(newTrx), 
+        body: JSON.stringify(service), 
         headers: {
           'Content-type': 'application/json'
         }
       })
       .then(res => res.json())
-      .then(trxs => {
-        services.current.addNewTransaction(trxs)
+      .then(service => {
+        services.current.addNewTransaction(service)
         keywordSearch()
       })
-      .then(() => refreshSparePartUsages())
+      .then(() => Promise.all([refreshSpareParts(), refreshSparePartUsages()]))
       .then(() => clearState())
       .finally(() => setLoading(false))
     })
     
   }
 
-  const removeTransaction = (index) => {
+  const removeTransaction = (serviceId, sparePartUsageId) => {
     setLoading(true)
     requestAnimationFrame(() => {
-      fetch(`${apiUrl}/transactions/${index}`, {
+      fetch(`${apiUrl}/spare-part-utilizations/${sparePartUsageId}`, {
         method: 'DELETE', 
         headers: {
           'Content-type': 'application/json'
         }
       })
       .then(res => res.json())
-      .then(count => {
-        if (count !== 1) {
-          throw Error("should have 1 record deleted")
+      .then(deleteId => {
+        if (deleteId !== sparePartUsageId) {
+          throw Error("seems nothing deleted")
         }
-        services.current.removeTransaction(index)
+        services.current.removeTransaction(serviceId, sparePartUsageId)
         keywordSearch()
       })
       .then(() => Promise.all([refreshSpareParts(), refreshSparePartUsages()]))
@@ -98,19 +100,19 @@ function ServiceListing({services, filteredServices=[],
     })
   }
 
-  const completeAllServices = (newTrxs) => {
+  const completeServices = (service) => {
     setLoading(true)
     requestAnimationFrame(() => {
-      fetch(`${apiUrl}/transactions?op=COMPLETE`, {
+      fetch(`${apiUrl}/workshop-services?op=COMPLETE`, {
         method: 'POST', 
-        body: JSON.stringify(newTrxs), 
+        body: JSON.stringify(service), 
         headers: {
           'Content-type': 'application/json'
         }
       })
       .then(res => res.json())
-      .then(trxs => {
-        services.current.updateTransaction(trxs)
+      .then(newService => {
+        services.current.updateTransaction(newService)
         keywordSearch()
       })
       .then(() => clearState())
@@ -148,24 +150,17 @@ function ServiceListing({services, filteredServices=[],
 
       {
         chunkedItems[activePage - 1]?.map((v, i) =>
-          <div key={v.startDate} className="rounded-2 p-3 mb-3">
-            <Row>
-              <Col><h3 key={i}><i className="bi bi-calendar-event pe-1"></i>{v.startDate}</h3></Col>
-              <Col className={'text-sm-end'}><Button variant="dark" onClick={() => addNewServiceTransaction(v[0])}><i className="bi bi-calendar-event me-2"></i>Add Service</Button></Col>
-            </Row>
-          { v.services.map(vv =>
-            <Card key={vv.id} className={'mb-3'}>
+            <Card key={v.id} className={'mb-3'}>
               <Card.Header>
                 <Row>
-                  <Col><h5>{vv.vehicleNo}</h5> <CompletionLabel creationDate={vv.startDate} completionDate={vv.completionDate} onCompletion={() => completeAllServices(vv)}></CompletionLabel></Col>
+                  <Col><h5>{v.vehicleNo} <span className="text-body-secondary">started since {v.startDate}</span></h5> 
+                  {v.mileageKm > 0 && <h6><span className="text-body-secondary">At {v.mileageKm} KM</span></h6> }
+                  <CompletionLabel creationDate={v.startDate} completionDate={v.completionDate} onCompletion={() => completeServices(v)}></CompletionLabel></Col>
                   { false && <Col className={'text-sm-end col-4'}><Badge pill><i className="bi bi-person-fill-gear me-1"></i>{'Tan Chwee Seng'}</Badge></Col> }
                   <Col sm="4" className={'text-sm-end'}>
                     <h4><span className="border border-1 border-primary border-opacity-50 rounded-2 px-3 py-1">
-                      $ {(vv.migratedHandWrittenSpareParts?.reduce((acc, curr) => acc += curr.totalPrice, 0) + 
-                          vv.sparePartUsages?.reduce((acc, curr) => {
-                                              const order = orders.mapping[curr.orderId] 
-                                              return acc + (curr.quantity * order.unitPrice)
-                      }, 0)).toFixed(2)}
+                      $ {((v.migratedHandWrittenSpareParts?.reduce((acc, curr) => acc += curr.totalPrice, 0) || 0) + 
+                          v.sparePartUsages?.reduce((acc, curr) =>  acc + (curr.quantity * curr.soldPrice), 0)).toFixed(2)}
                     </span></h4>
                   </Col>
                 </Row>
@@ -176,8 +171,8 @@ function ServiceListing({services, filteredServices=[],
                   <Col></Col>
                   <Col sm="2" className={'text-sm-end'}>
                   {
-                  !vv.completionDate && 
-                    <Button size="sm" variant='secondary' onClick={() => addNewItemForVehicle(v.startDate, vv.vehicleNo)}>
+                  !v.completionDate && 
+                    <Button size="sm" variant='secondary' onClick={() => addNewItemForVehicle(v)}>
                       <i className="bi bi-truck-front-fill me-2"></i>Add Item</Button>
                      }
                   </Col>
@@ -185,26 +180,28 @@ function ServiceListing({services, filteredServices=[],
                 <Row>
                   <Col className="p-0">
                     <ListGroup>
-                    {vv.migratedHandWrittenSpareParts.map(vvv => {
+                    {v.migratedHandWrittenSpareParts?.map(vvv => {
                       return <ListGroupItem key={vvv.index}>
                         <Stack direction="horizontal">
+                          <Col xs="2">{vvv.creationDate}</Col>
                           <Col>{vvv.itemDescription}</Col>
-                          <Col className='text-sm-end col-2'><Badge pill>{vvv.quantity > 0 && vvv.unitPrice && `${vvv.quantity} ${vvv.unit} @ $${vvv.unitPrice?.toFixed(2)}`}</Badge></Col>
-                          <Col className='text-sm-end col-2'><Badge pill>$ {vvv.totalPrice}</Badge></Col>
+                          <Col xs="2" className='text-sm-end'><Badge pill>{vvv.quantity > 0 && vvv.unitPrice && `${vvv.quantity} ${vvv.unit} @ $${vvv.unitPrice?.toFixed(2)}`}</Badge></Col>
+                          <Col xs="2" className='text-sm-end'><Badge pill>$ {vvv.totalPrice}</Badge></Col>
                         </Stack>
                       </ListGroupItem>
                       })
                     }
-                    {vv.sparePartUsages.map(vvv => {
+                    {v.sparePartUsages?.map(vvv => {
                       const order = orders.mapping[vvv.orderId]
                       const supplier = suppliers.find(s => s.id === order.supplierId)
-                      const totalPrice = (vvv.quantity * order.unitPrice).toFixed(2)
+                      const totalPrice = (vvv.quantity * vvv.soldPrice).toFixed(2)
 
                       return <ListGroupItem key={vvv.id}>
                         <Stack direction="horizontal">
+                          <Col xs="2">{vvv.usageDate}</Col>
                           <Col>{order.partName} <div><OrderTooltip order={order} supplier={supplier} /></div></Col>
-                          <Col className='text-sm-end col-2'><Badge pill>{vvv.quantity > 0 && order.unitPrice && `${vvv.quantity} ${order.unit} @ $${order.unitPrice?.toFixed(2)}`}</Badge></Col>
-                          <Col className='text-sm-end col-2'>{vv.completionDate ? <Badge pill>$ {totalPrice}</Badge> : <HoverPilledBadge onRemove={() => removeTransaction(vvv.id)}>$ {totalPrice}</HoverPilledBadge> }</Col>
+                          <Col xs="2" className='text-sm-end'><Badge pill>{vvv.quantity > 0 && vvv.soldPrice && `${vvv.quantity} ${order.unit} @ $${vvv.soldPrice?.toFixed(2)}`}</Badge></Col>
+                          <Col xs="2" className='text-sm-end'>{v.completionDate ? <Badge pill>$ {totalPrice}</Badge> : <HoverPilledBadge onRemove={() => removeTransaction(v.id, vvv.id)}>$ {totalPrice}</HoverPilledBadge> }</Col>
                         </Stack>
                       </ListGroupItem>
                       })
@@ -215,8 +212,7 @@ function ServiceListing({services, filteredServices=[],
               </Container>
               </Card.Body>
             </Card>
-           ) } 
-           </div>
+           
         )
       }
       <Pagination>

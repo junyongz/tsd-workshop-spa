@@ -200,7 +200,8 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
                             <Col sm="3">
                                 <InputGroup>
                                     <InputGroup.Text><i className="bi bi-calendar-event"></i></InputGroup.Text>
-                                    <Form.Control required type="date" name="invoiceDate" placeholder="Key in Invoice Date" defaultValue={items[0]?.invoiceDate} disabled={editing}></Form.Control>
+                                    <Form.Control required type="date" name="invoiceDate" max={new Date().toISOString().split('T')[0]}
+                                        placeholder="Key in Invoice Date" defaultValue={items[0]?.invoiceDate} disabled={editing}></Form.Control>
                                 </InputGroup>
                             </Col>
                             <Col sm="5">

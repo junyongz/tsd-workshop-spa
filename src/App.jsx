@@ -107,7 +107,8 @@ function App() {
       for (const order of orders.current.listing) {
         if (options.some(val => 
             order.partName.toUpperCase().includes(val.name.toUpperCase()) || 
-            order.notes?.toUpperCase().includes(val.name.toUpperCase()))) {
+            order.notes?.toUpperCase().includes(val.name.toUpperCase()) ||
+            sparePartUsages.find(spu => spu.orderId === order.id)?.vehicleNo === val.name)) {
           searchedFilteredOrders.push(order)
         }
       }

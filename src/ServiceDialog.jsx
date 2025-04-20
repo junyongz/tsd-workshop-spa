@@ -15,12 +15,14 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles,
     const formRef = useRef()
     
     const [selectedVehicles, setSelectedVehicles] = useState(trx?.current?.vehicleNo ? [vehicles.find(veh => veh.vehicleNo === trx.current.vehicleNo)] : [])
-    const [serviceStartDate, setServiceStartDate] = useState(trx?.current?.startDate)
+    const [selectedExistingService, setSelectedExistingService] = useState()
+    const [selectedStartDate, setSelectedStartDate] = useState(trx?.current?.startDate)
 
     const handleClose = () => {
         setItems([{partName: 'Choose one ...', quantity: 1, unit: 'pc', unitPrice: 0, selectedSpareParts:[]}])
         setValidated(false)
         setShow(false)
+        setSelectedExistingService()
     }
 
     const addNewItem = () => {
@@ -40,7 +42,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles,
 
     const afterChooseDate = (dateVal) => {
         if (!trx?.current?.vehicleNo) {
-            setServiceStartDate(dateVal)
+            setSelectedStartDate(dateVal)
         }
     }
 
@@ -86,14 +88,15 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles,
             .then(ws => {
                 if (ws && ws.length > 0) {
                     trx.current.id = ws[0].id
-                    setServiceStartDate(ws[0].startDate)
+                    setSelectedExistingService(ws[0])
                 }
             })
         }
         else {
             setSelectedVehicles([])
             trx.current.id = undefined
-            setServiceStartDate(new Date().toISOString().split('T')[0])
+            setSelectedExistingService()
+            setSelectedStartDate()
         }
     }
 
@@ -106,10 +109,10 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles,
 
         // { id: ?, creationDate: ?, sparePartUsages: [{}, {} ]}
         const service = {
-            id: trx?.current?.id,
+            id: selectedExistingService?.startDate,
             vehicleId: selectedVehicles[0].id,
             vehicleNo: selectedVehicles[0].vehicleNo,
-            startDate: serviceStartDate,
+            startDate: selectedExistingService ? selectedExistingService.startDate : nativeForm['startDate'].value,
             mileageKm: nativeForm['mileageKm'].value,
             sparePartUsages: items.map((v, i) => {
                 return {
@@ -134,13 +137,16 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles,
             setSelectedVehicles([])
         }
 
-        setServiceStartDate(trx?.current?.startDate)
+        setSelectedStartDate(trx?.current?.startDate)
+        if (trx?.current?.id) {
+            setSelectedExistingService({id: trx?.current?.id, startDate: trx?.current?.startDate})
+        }
     }
 
     return (
         <Modal show={isShow} onHide={handleClose} onShow={uponShowing} backdrop="static" onEscapeKeyDown={(e) => e.preventDefault()} size="xl">
             <Modal.Header closeButton>
-            <Modal.Title><i className="bi bi-file-earmark-text-fill"></i> Service started at {serviceStartDate}</Modal.Title>
+            <Modal.Title><i className="bi bi-file-earmark-text-fill"></i> Service started at {selectedExistingService ? selectedExistingService.startDate : selectedStartDate}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <Container>
@@ -150,7 +156,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles,
                                 <InputGroup>
                                 <InputGroup.Text><i className="bi bi-calendar-event"></i></InputGroup.Text>
                                     <Form.Control onChange={(e) => afterChooseDate(e.target.value)} name="startDate" 
-                                        min={selectedVehicles.length > 0 ? serviceStartDate : undefined} 
+                                        min={selectedExistingService ? selectedExistingService.startDate : undefined} 
                                         max={new Date().toISOString().split('T')[0]} 
                                         required type="date"></Form.Control>
                                 </InputGroup>

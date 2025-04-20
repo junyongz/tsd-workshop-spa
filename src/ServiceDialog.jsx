@@ -109,7 +109,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles,
 
         // { id: ?, creationDate: ?, sparePartUsages: [{}, {} ]}
         const service = {
-            id: selectedExistingService?.startDate,
+            id: selectedExistingService?.id,
             vehicleId: selectedVehicles[0].id,
             vehicleNo: selectedVehicles[0].vehicleNo,
             startDate: selectedExistingService ? selectedExistingService.startDate : nativeForm['startDate'].value,
@@ -201,11 +201,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles,
                         <ListGroup>
                         {items?.map((v, i) =>
                         <ListGroup.Item key={i}>
-                            <Row>
-                                <Col xs="1">
-                                <span onClick={() => removeItem(i)} role="button"><i className="bi bi-x-lg text-danger"></i></span>
-                                </Col>
-                                
+                            <Row>                                
                                 <Form.Group as={Col} className="mb-3 col-6" controlId="spareParts">
                                     <InputGroup>
                                     <InputGroup.Text><i className="bi bi-tools"></i></InputGroup.Text>
@@ -250,6 +246,9 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles,
                                 </Form.Group>
                                 <Col className="text-sm-end align-items-center">
                                     <FormLabel><Badge pill>$ {(v?.quantity * v?.unitPrice).toFixed(2) || 0}</Badge></FormLabel>
+                                </Col>
+                                <Col xs="1" style={{"margin-right":"-3em"}}>
+                                <span onClick={() => removeItem(i)} role="button"><i className="bi bi-trash3 text-danger"></i></span>
                                 </Col>
                             </Row>
                         </ListGroup.Item>

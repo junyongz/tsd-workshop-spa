@@ -67,7 +67,8 @@ function ServiceListing({services, filteredServices=[],
       })
       .then(res => {
         if (!res.ok) {
-          throw Error("not good: ", res.json())
+          console.trace("Issue with POST workshop-services: " + JSON.stringify(res.body))
+          throw Error("not good")
         }
         return res.json()
       })

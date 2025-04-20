@@ -166,6 +166,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles,
                                 <InputGroup.Text><i className="bi bi-truck"></i></InputGroup.Text>
                                 <Typeahead
                                     allowNew
+                                    disabled={!!trx?.current?.id}
                                     newSelectionPrefix="Add a new vehicle: "
                                     inputProps={{required:true, pattern:"([A-Z]{1,3})\\s(\\d{1,4})(\\s([A-Z]{1,2}))?"}}
                                     id="vehicle-select"

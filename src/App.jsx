@@ -76,7 +76,7 @@ function App() {
 
         let foundSpareParts = false
         if (!foundVehicle) {
-          for (const item of v.migratedHandWrittenSpareParts) {
+          for (const item of v.migratedHandWrittenSpareParts || []) {
             if (options.some(val => item.partName?.toUpperCase().includes(val.name.toUpperCase())) ||
             options.some(val => item.itemDescription?.toUpperCase().includes(val.name.toUpperCase())) ) {
               foundSpareParts = true
@@ -84,7 +84,7 @@ function App() {
             }
           }
 
-          for (const item of v.sparePartUsages) {
+          for (const item of v.sparePartUsages || []) {
             if (options.some(val => orders.current.mapping[item.orderId]?.partName
                 .toUpperCase().includes(val.name.toUpperCase()))) {
               foundSpareParts = true

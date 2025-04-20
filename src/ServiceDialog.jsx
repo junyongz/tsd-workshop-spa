@@ -7,6 +7,9 @@ import remainingQuantity from "./utils/quantityUtils";
 function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles, 
     spareParts, orders=[], suppliers=[], sparePartUsages=[],
     onNewVehicleCreated=() => {}}) {
+
+    const apiUrl = process.env.REACT_APP_API_URL
+
     const [items, setItems] = useState([{partName: 'Choose one ...', quantity: 1, unit: 'pc', unitPrice: 0, selectedSpareParts: []}])
     const [validated, setValidated] = useState(false)
     const formRef = useRef()
@@ -71,9 +74,26 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles,
                 onNewVehicleCreated(veh.vehicleNo)
             }
             setSelectedVehicles([veh])
+
+            // not allow to add more than 1 service for same vehicle
+            fetch(`${apiUrl}/workshop-services?vehicleId=${veh.id}`, {
+                mode: 'cors',
+                headers: {
+                    'Content-type': 'application/json'
+                }
+            })
+            .then(resp => resp.json())
+            .then(ws => {
+                if (ws && ws.length > 0) {
+                    trx.current.id = ws[0].id
+                    setServiceStartDate(ws[0].startDate)
+                }
+            })
         }
         else {
             setSelectedVehicles([])
+            trx.current.id = undefined
+            setServiceStartDate(new Date().toISOString().split('T')[0])
         }
     }
 
@@ -130,8 +150,8 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles,
                                 <InputGroup>
                                 <InputGroup.Text><i className="bi bi-calendar-event"></i></InputGroup.Text>
                                     <Form.Control onChange={(e) => afterChooseDate(e.target.value)} name="startDate" 
-                                        min={trx?.current?.vehicleNo ? trx?.current?.startDate : undefined} 
-                                        max={trx?.current?.vehicleNo ? new Date().toISOString().split('T')[0] : undefined} 
+                                        min={selectedVehicles.length > 0 ? serviceStartDate : undefined} 
+                                        max={new Date().toISOString().split('T')[0]} 
                                         required type="date"></Form.Control>
                                 </InputGroup>
                             </Col>

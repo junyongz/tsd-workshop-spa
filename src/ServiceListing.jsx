@@ -65,7 +65,12 @@ function ServiceListing({services, filteredServices=[],
           'Content-type': 'application/json'
         }
       })
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) {
+          throw Error("not good: ", res.json())
+        }
+        return res.json()
+      })
       .then(service => {
         services.current.addNewTransaction(service)
         keywordSearch()

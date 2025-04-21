@@ -303,7 +303,7 @@ function App() {
               spareParts={spareParts}
               filteredServices={filteredServices}
               keywordSearch={() => {
-                if (selectedSearchOptions && selectedSearchOptions.length === 0) {
+                if (!selectedSearchOptions || selectedSearchOptions.length === 0) {
                   setFilteredServices(services.current.transactions) 
                 }
                 else {

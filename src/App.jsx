@@ -157,6 +157,7 @@ function App() {
 
   const clearFilterDate = () => {
     setSearchByDate(false)
+    setSearchOptions([])
     setFilteredServices(services.current.transactions)
     setFilteredOrders(orders.current.listing)
   }

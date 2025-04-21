@@ -13,7 +13,7 @@ const CompletionLabel = ({creationDate, completionDate, onCompletion, onDelete})
     if (!completionDate) {
         return (
             <ButtonGroup>
-                <Button variant="outline-success" onClick={onCompletion} size="sm">Complete Service</Button>
+                <Button variant="outline-success" onClick={onCompletion} size="sm"><i role="button" className="bi bi-hand-thumbs-up"></i> Complete Service</Button>
                 { promptDelete && <Button variant="outline-warning" onClick={() => setPromptDelete(false)}>X</Button> }
                 <Button variant={promptDelete ? 'outline-danger' : 'outline-warning'}
                     onClick={() => promptDelete ? confirmDelete() : setPromptDelete(true)}>

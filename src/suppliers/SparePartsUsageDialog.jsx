@@ -111,7 +111,7 @@ function SparePartsUsageDialog({isShow, setShowDialog, vehicles,
                                         <InputGroup>
                                         <InputGroup.Text><i className="bi bi-calendar-event"></i></InputGroup.Text>
                                         <Form.Control required type="date" 
-                                            min={selectedExistingService ? selectedExistingService.startDate : undefined}
+                                            min={selectedExistingService ? selectedExistingService.startDate : usageSpareParts.invoiceDate}
                                             max={new Date().toISOString().split('T')[0]}
                                             name="usageDate" disabled={!usageSpareParts.quantity || usageSpareParts.quantity === 0}></Form.Control>
                                         </InputGroup>

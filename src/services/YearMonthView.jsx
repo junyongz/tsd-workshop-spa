@@ -95,7 +95,7 @@ function YearMonthView({services, suppliers=[], orders=[], backToService}) {
                                     </Card.Header>    
                                     <Card.Body>
                                         {values.map(trx => {                                            
-                                            const migrated = trx.migratedHandWrittenSpareParts.map(v => <ListGroupItem key={v.index}>
+                                            const migrated = trx.migratedHandWrittenSpareParts?.map(v => <ListGroupItem key={v.index}>
                                                 <Stack direction="horizontal">
                                                     <Col>{trx.creationDate}</Col>
                                                     <Col xs="8">{v.itemDescription}</Col>
@@ -119,7 +119,7 @@ function YearMonthView({services, suppliers=[], orders=[], backToService}) {
                                                     </ListGroupItem>)
                                             })
 
-                                            return migrated.concat(usages)
+                                            return (migrated || []).concat(usages)
                                         })}
                                     </Card.Body>
                                 </Card>

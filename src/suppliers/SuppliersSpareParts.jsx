@@ -168,7 +168,7 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
                 }
             })
             .then(_ => {
-                orders[orders.findIndex(o => o.id === order.id)] = order
+                orders.mapping[order.id] = order
                 setFilteredOrders((selectedSupplier && orders.listing.filter(s => s.supplierId === selectedSupplier.id)) || orders)
             })
             .then(() => clearState())

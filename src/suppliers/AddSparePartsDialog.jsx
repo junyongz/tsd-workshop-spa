@@ -136,19 +136,23 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
     }
 
     const updatePriceByQuantity = (val, i) => {
-        setItems(prevs => {
-            const newItems = [...prevs]
-            newItems[i] = {...newItems[i], quantity: val}
-            return newItems
-        })
+        if (val && val >= 0) {
+            setItems(prevs => {
+                const newItems = [...prevs]
+                newItems[i] = {...newItems[i], quantity: val}
+                return newItems
+            })
+        }
     }
 
     const updatePriceByUnitPrice = (val, i) => {
-        setItems(prevs => {
-            const newItems = [...prevs]
-            newItems[i] = {...newItems[i], unitPrice: val}
-            return newItems
-        })
+        if (val && val >= 0) {
+            setItems(prevs => {
+                const newItems = [...prevs]
+                newItems[i] = {...newItems[i], unitPrice: val}
+                return newItems
+            })
+        }
     }
 
     const updateUnit = (val, i) => {
@@ -268,7 +272,7 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
                                                 <div>
                                                     <div>{option.partName}</div>
                                                     {/** TODO: to add supplier info later on */} 
-                                                    <small className="text-secondary">${option?.unitPrice} per {option?.unit} | <i className="bi bi-calendar-event"></i> {orders.mapping[option.orderId].invoiceDate}</small>
+                                                    <small className="text-secondary">${option?.unitPrice} per {option?.unit} | <i className="bi bi-calendar-event"></i> {orders.mapping[option.orderId]?.invoiceDate}</small>
                                                 </div>
                                             }
                                             clearButton

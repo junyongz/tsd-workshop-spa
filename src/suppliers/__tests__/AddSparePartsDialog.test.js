@@ -196,7 +196,7 @@ describe('AddSparePartsDialog Component', () => {
             supplierId: 1,
             itemCode: 'ABC123',
             partName: 'Engine Oil',
-            quantity: '5',
+            quantity: 5,
             unit: 'ltr',
             unitPrice: 50,
             totalPrice: 250
@@ -245,7 +245,7 @@ describe('AddSparePartsDialog Component', () => {
             deliveryOrderNo: 'DO123',
             supplierId: 1,
             partName: 'Engine Oil',
-            quantity: '5',
+            quantity: 5,
             unit: 'ltr',
             unitPrice: 50,
             totalPrice: 250

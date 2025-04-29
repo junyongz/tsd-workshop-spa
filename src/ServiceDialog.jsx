@@ -113,6 +113,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles,
             vehicleId: selectedVehicles[0].id,
             vehicleNo: selectedVehicles[0].vehicleNo,
             startDate: selectedExistingService ? selectedExistingService.startDate : nativeForm['startDate'].value,
+            transactionTypes: Array.from(nativeForm['transactionTypes']).filter(tt => tt.checked).map(tt => tt.value),
             mileageKm: nativeForm['mileageKm'].value,
             sparePartUsages: items.map((v, i) => {
                 return {
@@ -183,6 +184,14 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles,
                                     <Form.Control name="mileageKm"></Form.Control>
                                     <InputGroup.Text>KM</InputGroup.Text>
                                 </InputGroup>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col xs="2"></Col>
+                            <Col>
+                            <Form.Check inline name="transactionTypes" defaultChecked={trx.current?.transactionTypes?.includes('REPAIR')} value="REPAIR" label={ <span><i className="bi bi-hammer"></i> Repair</span> }></Form.Check>
+                            <Form.Check inline name="transactionTypes" defaultChecked={trx.current?.transactionTypes?.includes('SERVICE')}value="SERVICE" label={ <span><i className="bi bi-clock"></i> Maintenance Service</span> }></Form.Check>
+                            <Form.Check inline name="transactionTypes" defaultChecked={trx.current?.transactionTypes?.includes('INSPECTION')}value="INSPECTION"  label={ <span><i className="bi bi-calendar-check"></i> Inspection</span> }></Form.Check>
                             </Col>
                         </Row>
                         <Row>

@@ -151,10 +151,10 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
         })
     }
 
-    const onUpdateOrder = (order) => {
+    const onUpdateOrder = (order, note) => {
         setLoading(true)
         requestAnimationFrame(() => {
-            fetch(`${apiUrl}/supplier-spare-parts`, {
+            fetch(`${apiUrl}/supplier-spare-parts${note ? '?op=NOTES' : ''}`, {
                 method: 'POST',
                 mode: 'cors',
                 headers: {
@@ -166,11 +166,17 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
                 if (!res.ok) {
                     showToastMessage(`failed to update order ${JSON.stringify(order)}`)
                 }
+                return res.json()
             })
-            .then(_ => {
-                orders.mapping[order.id] = order
-                orders.listing[orders.listing.findIndex(o => o.id === order.id)] = order
-                setFilteredOrders((selectedSupplier && orders.listing.filter(s => s.supplierId === selectedSupplier.id)) || orders.listing)
+            .then(json => {
+                if (json.status === 500 || json.code === 'SP-QUANTITY-002') {
+                    showToastMessage(`failed to update order, response: ${JSON.stringify(json)}`)
+                }
+                else {
+                    orders.mapping[order.id] = order
+                    orders.listing[orders.listing.findIndex(o => o.id === order.id)] = order
+                    setFilteredOrders((selectedSupplier && orders.listing.filter(s => s.supplierId === selectedSupplier.id)) || orders.listing)
+                }
             })
             .then(() => clearState())
             .finally(() => setLoading(false))

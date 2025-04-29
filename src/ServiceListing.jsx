@@ -9,6 +9,7 @@ import { chunkArray } from './utils/arrayUtils';
 import { clearState } from './autoRefreshWorker';
 import OrderTooltip from './services/OrderTooltip';
 import YearMonthView from './services/YearMonthView';
+import TransactionTypes from './components/TransactionTypes';
 
 /***
  * Date: {
@@ -49,6 +50,7 @@ function ServiceListing({services, filteredServices=[],
       id: service.id,
       startDate: service.startDate,
       vehicleNo: service.vehicleNo,
+      transactionTypes: service.transactionTypes,
       items: [{ partName: 'Engine Oil 20w-50' }]
     };
     setShowModal(true)
@@ -182,7 +184,7 @@ function ServiceListing({services, filteredServices=[],
             <Card key={v.id} className={'mb-3'}>
               <Card.Header>
                 <Row>
-                  <Col><h5>{v.vehicleNo} <span className="text-body-secondary">started since {v.startDate}</span></h5> 
+                  <Col><h5>{v.vehicleNo} <span className="text-body-secondary">started since {v.startDate}</span> <TransactionTypes service={v} /></h5> 
                   {v.mileageKm > 0 && <h6><span className="text-body-secondary">At {v.mileageKm} KM</span></h6> }
                   <CompletionLabel creationDate={v.startDate} completionDate={v.completionDate} onCompletion={() => completeServices(v)} onDelete={() => deleteService(v)}></CompletionLabel>
                   </Col>

@@ -135,24 +135,20 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
         })
     }
 
-    const updatePriceByQuantity = (val, i) => {
-        if (val && val >= 0) {
-            setItems(prevs => {
-                const newItems = [...prevs]
-                newItems[i] = {...newItems[i], quantity: val}
-                return newItems
-            })
-        }
+    const updatePriceByQuantity = (val=0, i) => {
+        setItems(prevs => {
+            const newItems = [...prevs]
+            newItems[i] = {...newItems[i], quantity: parseInt(val)}
+            return newItems
+        })
     }
 
-    const updatePriceByUnitPrice = (val, i) => {
-        if (val && val >= 0) {
-            setItems(prevs => {
-                const newItems = [...prevs]
-                newItems[i] = {...newItems[i], unitPrice: val}
-                return newItems
-            })
-        }
+    const updatePriceByUnitPrice = (val=0.0, i) => {
+        setItems(prevs => {
+            const newItems = [...prevs]
+            newItems[i] = {...newItems[i], unitPrice: parseFloat(val)}
+            return newItems
+        })
     }
 
     const updateUnit = (val, i) => {
@@ -299,7 +295,7 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
                                         </InputGroup>
                                     </Col>
                                     <Col className="mb-3 text-sm-end">
-                                        <span className="fs-4">$ {(v.quantity && v.unitPrice && v.quantity * v.unitPrice).toFixed(2) || 0}</span>
+                                        <span className="fs-4">$ { (Number.isFinite(v.quantity) && Number.isFinite(v.unitPrice)) ? (v.quantity * v.unitPrice).toFixed(2) : 0}</span>
                                     </Col>
                                 </Row>
                             </ListGroup.Item>

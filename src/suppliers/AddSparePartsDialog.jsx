@@ -291,7 +291,7 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
                                     <Col sm="2">
                                         <InputGroup>
                                             <InputGroup.Text><i className="bi bi-currency-dollar"></i></InputGroup.Text>
-                                            <Form.Control onChange={(e) => updatePriceByUnitPrice(e.target.value, i)} required disabled={v.disabled} type="number" min="0" step="0.1" name="unitPrice" placeholder="Price $" value={v?.unitPrice} />
+                                            <Form.Control onChange={(e) => updatePriceByUnitPrice(e.target.value, i)} required disabled={v.disabled} type="number" min="0" step="0.01" name="unitPrice" placeholder="Price $" value={v?.unitPrice} />
                                         </InputGroup>
                                     </Col>
                                     <Col className="mb-3 text-sm-end">

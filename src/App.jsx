@@ -1,12 +1,12 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { Route, Routes, NavLink, useLocation } from 'react-router-dom';
+import { Route, Routes} from 'react-router-dom';
 import ServiceListing from './ServiceListing';
-import { Badge, Col, Container, Form, InputGroup, Row, Spinner, Toast, ToastContainer } from 'react-bootstrap';
-import { Typeahead } from 'react-bootstrap-typeahead';
+import Spinner from 'react-bootstrap/Spinner';
 import SuppliersSpareParts from './suppliers/SuppliersSpareParts';
 import fetchSpareParts from './spare-parts/fetchSpareParts';
 
 import './App.css'
+import fetchCompanies from './companies/fetchCompanies';
 import fetchSupplierSpareParts from './suppliers/fetchSupplierSpareParts';
 import fetchVehicles from './vehicles/fetchVehicles';
 import fetchSuppliers from './suppliers/fetchSuppliers';
@@ -14,6 +14,8 @@ import fetchSparePartUsages from './spare-parts/fetchSparePartUsages';
 import fetchServices from './fetchServices';
 import autoRefreshWorker from './autoRefreshWorker';
 import ServiceTransactions from './ServiceTransactions';
+import NavigationBar from './NavigationBar';
+import Vehicles from './vehicles/Vehicles';
 
 /***
  * Date: {
@@ -22,7 +24,6 @@ import ServiceTransactions from './ServiceTransactions';
  */
 
 function App() {
-  const location = useLocation()
   const apiUrl = process.env.REACT_APP_API_URL
 
   const [loading, setLoading] = useState(false)
@@ -57,6 +58,7 @@ function App() {
   const [searchByDate, setSearchByDate] = useState(false)
 
   // domain data
+  const [companies, setCompanies] = useState([])
   const [suppliers, setSuppliers] = useState([])
   const [vehicles, setVehicles] = useState([])
   const [spareParts, setSpareParts] = useState([])
@@ -162,13 +164,13 @@ function App() {
     setFilteredOrders(orders.current.listing)
   }
 
-  const onNewVehicleCreated = (vehicleNo) => {
+  const onNewVehicleCreated = async (vehicleNo) => {
     if (!/([A-Z]{1,3})\s([\d]{1,4})(\s([A-Z]{1,2}))?/.test(vehicleNo)) {
       alert('Wrong vehicle no format')
       return
     }
 
-    fetch(`${apiUrl}/vehicles`, {
+    return fetch(`${apiUrl}/vehicles`, {
         method: 'POST',
         body: JSON.stringify({
           vehicleNo: vehicleNo,
@@ -179,10 +181,13 @@ function App() {
         }
     })
     .then(res => res.json())
-    .then(_ => {
+    .then(veh => {
       fetchVehicles(apiUrl, setVehicles, setSearchOptions)
+      return veh
     })
-}
+  }
+
+  const refreshCompanies = useCallback(() => fetchCompanies(apiUrl, setCompanies), [apiUrl])
 
   const refreshSparePartUsages = useCallback(() => fetchSparePartUsages(apiUrl, setSparePartUsages, showToastMessage), [apiUrl])
 
@@ -201,6 +206,7 @@ function App() {
           refreshSupplierSpareParts(),
           refreshSparePartUsages(),
       
+          refreshCompanies(),
           fetchVehicles(apiUrl, setVehicles, setSearchOptions),
           refreshSpareParts(),
           fetchSuppliers(apiUrl, setSuppliers)
@@ -211,7 +217,7 @@ function App() {
       const fetchStatsTimer = setInterval(() => {
         autoRefreshWorker(setLoading, 
           {
-            'mig_data': refreshServices,
+            'workshop_service': refreshServices,
             'mig_supplier_spare_parts': refreshSupplierSpareParts,
             'mig_spare_parts': refreshSpareParts,
             'spare_part_usages': refreshSparePartUsages,
@@ -242,59 +248,21 @@ function App() {
           </div>
         )}
         <div id="content" className={(loading ? ' blurred ' : '')}>
-        <Container fluid className="my-3">
-          <Row>
-              <ToastContainer className="p-3" position={'top-left'} style={{ zIndex: 3 }}>
-                <Toast bg="warning" show={showToastBox} onClose={() => setShowToastBox(false)}>
-                  <Toast.Header>
-                    <strong className="me-auto">Warning</strong>
-                  </Toast.Header>
-                  <Toast.Body>{toastBoxMessage}</Toast.Body>
-                </Toast>
-              </ToastContainer>
-          </Row>
-          <Row>
-            <Col sm="2">
-              <h3>TSD</h3>
-            </Col>
-            <Col sm="2" className='text-sm-end'>
-              { location.pathname === '/' && <NavLink className={'btn btn-outline-primary'} to="/orders"><i className="bi bi-shop"></i> Suppliers {selectedSearchOptions.length > 0 && <Badge pill>{filteredOrders.length}</Badge>}</NavLink> }
-              { location.pathname === '/orders' && <NavLink className={'btn btn-outline-primary'} to="/"><i className="bi bi-file-earmark-text-fill"></i> Services {selectedSearchOptions.length > 0 && <Badge pill>{filteredServices.length}</Badge>}</NavLink> }
-            </Col>
-            {!searchByDate &&
-            <Col>
-              <Form.Group>
-              <InputGroup>
-              <InputGroup.Text><i className="bi bi-truck"></i></InputGroup.Text>
-              <InputGroup.Text><i className="bi bi-tools"></i></InputGroup.Text>
-                <Typeahead
-                    allowNew
-                    newSelectionPrefix="Search for... "
-                    id="search-multiple"
-                    labelKey="name"
-                    multiple
-                    onChange={filterServices}
-                    options={searchOptions}
-                    placeholder="Choose by vehicle(s) and/or spart part(s)"
-                    selected={selectedSearchOptions}
-                  />
-                  <InputGroup.Text><i className="bi bi-calendar-event" role="button" onClick={() => setSearchByDate(true)}></i></InputGroup.Text>
-                </InputGroup>
-                </Form.Group>
-            </Col> }
-            {searchByDate && 
-            <Col>
-              <Form.Group>
-              <InputGroup>
-                <InputGroup.Text>Choose a date</InputGroup.Text>
-                <InputGroup.Text><i className="bi bi-x-circle" role="button" onClick={clearFilterDate}></i></InputGroup.Text>
-                <Form.Control type='date' placeholder='Choose a date' onChange={(e) => filterByDate(e.target.value)}></Form.Control>
-              </InputGroup>
-              </Form.Group>
-            </Col>
-            }
-          </Row>
-        </Container>
+        <NavigationBar
+            {...{
+            clearFilterDate,
+            filterByDate,
+            filterServices,
+            filteredOrders,
+            filteredServices,
+            searchByDate,
+            searchOptions,
+            selectedSearchOptions,
+            setSearchByDate,
+            setShowToastBox,
+            showToastBox,
+            toastBoxMessage}}
+          ></NavigationBar>  
         <Routes>
           <Route exact path="/" element={
             <ServiceListing services={services}
@@ -336,6 +304,8 @@ function App() {
               filterServices={filterServices}
               showToastMessage={showToastMessage}
             />} />
+          <Route path="/vehicles" element={ 
+            <Vehicles vehicles={vehicles} setVehicles={setVehicles} companies={companies} /> } />
         </Routes>
         </div>
     </div>

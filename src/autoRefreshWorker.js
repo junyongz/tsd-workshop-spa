@@ -6,8 +6,8 @@ export default async function autoRefreshWorker(setLoading, refresherByTableName
     const refreshBasedOnStats = (stats = [], response = []) => {
         const promises = []
         stats.forEach(v => { 
-            const currVal = response.find(r => v.tableName === r.tableName).lastTransactionId
-            if (currVal !== v.lastTransactionId) {
+            const currVal = response.find(r => v.tableName === r.tableName)?.lastTransactionId
+            if (currVal !== v.lastTransactionId && refresherByTableName[v.tableName]) {
                 promises.push(refresherByTableName[v.tableName])
             }
         })

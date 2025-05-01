@@ -4,7 +4,7 @@ import { Typeahead } from "react-bootstrap-typeahead";
 import Form from "react-bootstrap/Form";
 import remainingQuantity from "./utils/quantityUtils";
 
-function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles, 
+function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[], 
     spareParts, orders=[], suppliers=[], sparePartUsages=[],
     onNewVehicleCreated=() => {}}) {
 
@@ -74,9 +74,12 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles,
         if (veh) {
             if (vehicles.findIndex(v => v.vehicleNo === veh?.vehicleNo) === -1) {
                 onNewVehicleCreated(veh.vehicleNo)
+                .then(stored => setSelectedVehicles([stored]))
             }
-            setSelectedVehicles([veh])
-
+            else {
+                setSelectedVehicles([veh])
+            }
+            
             // not allow to add more than 1 service for same vehicle
             fetch(`${apiUrl}/workshop-services?vehicleId=${veh.id}`, {
                 mode: 'cors',
@@ -100,12 +103,26 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles,
         }
     }
 
+    const checkVehicleValidity = (vehicleInput) => {
+        if (vehicleInput) {
+            if (vehicles.findIndex(veh => veh.vehicleNo === vehicleInput.value) === -1) {
+                vehicleInput.setCustomValidity('not a valid vehicle, either choose one and create one first')
+            }
+            else {
+                vehicleInput.setCustomValidity('')
+            }
+        }
+    }
+
     const saveChange = () => {
         const nativeForm = formRef.current
+
+        checkVehicleValidity(nativeForm['vehicle'])
         if (nativeForm.checkValidity() === false) {
             setValidated(true)
             return
         }
+        nativeForm['vehicle'].setCustomValidity('')
 
         // { id: ?, creationDate: ?, sparePartUsages: [{}, {} ]}
         const service = {
@@ -168,20 +185,25 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles,
                                 <Typeahead
                                     allowNew
                                     disabled={!!trx?.current?.id}
-                                    newSelectionPrefix="Add a new vehicle: "
-                                    inputProps={{required:true, pattern:"([A-Z]{1,3})\\s(\\d{1,4})(\\s([A-Z]{1,2}))?"}}
+                                    newSelectionPrefix="Create & add a new vehicle: "
+                                    inputProps={{name:'vehicle', required:true, pattern:"([A-Z]{1,3})\\s(\\d{1,4})(\\s([A-Z]{1,2}))?"}}
                                     id="vehicle-select"
                                     labelKey='vehicleNo'
                                     options={vehicles}
                                     onChange={(vehs) => addOrUpdateVehicles(vehs)}
+                                    onBlur={(event) => {
+                                        const veh = vehicles.find(veh => veh.vehicleNo === event.target.value);
+                                        if (veh) {
+                                            setSelectedVehicles([veh])
+                                        }
+                                    }}
                                     placeholder="Choose a vehicle..."
-                                    selected={selectedVehicles}
-                                    />
+                                    selected={selectedVehicles} />
                                 </InputGroup>
                             </Col>
                             <Col xs="2">
                                 <InputGroup>
-                                    <Form.Control name="mileageKm"></Form.Control>
+                                    <Form.Control name="mileageKm" defaultValue={trx.current?.mileageKm}></Form.Control>
                                     <InputGroup.Text>KM</InputGroup.Text>
                                 </InputGroup>
                             </Col>

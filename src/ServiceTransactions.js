@@ -10,10 +10,12 @@ class ServiceTransactions {
     addNewTransaction(newService) {
         const existingIdx = this.transactionIndexs[newService.id]
         if (existingIdx === undefined) {
-            this.transactionIndexs[newService.id] = this.transactions.length
             this.transactions.push(newService)
-            this.transactions.sort((left, right) => 
-                new Date(left.startDate).getTime() < new Date(right.startDate).getTime())
+            this.transactions.sort((a, b) => 
+                (b.completionDate === null) - (a.completionDate === null) || 
+                    (a.completionDate === null ? b.startDate.localeCompare(a.startDate) : 
+                    b.completionDate.localeCompare(a.completionDate) || b.startDate.localeCompare(a.startDate)))
+            this.transactionIndexs[newService.id] = this.transactions.findIndex(s => s.id === newService.id)
         }
         else {
             const oldService = this.transactions[existingIdx]

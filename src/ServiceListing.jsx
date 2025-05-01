@@ -51,6 +51,7 @@ function ServiceListing({services, filteredServices=[],
       startDate: service.startDate,
       vehicleNo: service.vehicleNo,
       transactionTypes: service.transactionTypes,
+      mileageKm: service.mileageKm,
       items: [{ partName: 'Engine Oil 20w-50' }]
     };
     setShowModal(true)
@@ -140,7 +141,7 @@ function ServiceListing({services, filteredServices=[],
       .then(res => res.json())
       .then(id => {
         if (ws.id !== id) {
-          throw Error(`seems nothing deleted, returning ${id}`)
+          throw Error(`seems nothing deleted, returning ${JSON.stringify(id)}`)
         }
         services.current.removeService(ws)
         keywordSearch()

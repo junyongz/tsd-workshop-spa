@@ -56,7 +56,7 @@ function YearMonthView({services, suppliers=[], orders=[], backToService}) {
                     </ButtonGroup>
  
                     <Col className="text-sm-end">
-                        <Button variant="outline-secondary" onClick={backToService}><i className="bi bi-file-earmark-text-fill"></i> Back to Service</Button>
+                        <Button variant="outline-secondary" onClick={backToService}><i className="bi bi-wrench-adjustable"></i> Back to Service</Button>
                     </Col>
                 </Stack>
             </Row>

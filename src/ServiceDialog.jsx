@@ -23,6 +23,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
         setValidated(false)
         setShow(false)
         setSelectedExistingService()
+        setSelectedVehicles([])
     }
 
     const addNewItem = () => {
@@ -91,6 +92,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
             .then(ws => {
                 if (ws && ws.length > 0) {
                     trx.current.id = ws[0].id
+                    trx.current.mileageKm = ws[0].mileageKm
                     setSelectedExistingService(ws[0])
                 }
             })
@@ -157,7 +159,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
 
         setSelectedStartDate(trx?.current?.startDate)
         if (trx?.current?.id) {
-            setSelectedExistingService({id: trx?.current?.id, startDate: trx?.current?.startDate})
+            setSelectedExistingService({id: trx?.current?.id, startDate: trx?.current?.startDate, mileageKm: trx?.current?.mileageKm})
         }
     }
 
@@ -203,7 +205,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
                             </Col>
                             <Col xs="2">
                                 <InputGroup>
-                                    <Form.Control name="mileageKm" defaultValue={trx.current?.mileageKm}></Form.Control>
+                                    <Form.Control name="mileageKm" defaultValue={selectedExistingService?.mileageKm || selectedVehicles[0]?.latestMileageKm}></Form.Control>
                                     <InputGroup.Text>KM</InputGroup.Text>
                                 </InputGroup>
                             </Col>

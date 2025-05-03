@@ -88,8 +88,8 @@ export default function Vehicles({vehicles=[], setVehicles, companies=[]}) {
                             <Col>{v.insuranceExpiryDate}</Col>
                             <Col>{v.roadTaxExpiryDate}</Col>
                             <Col> 
-                            {serviceByVehicle[v.vehicleNo] && serviceByVehicle[v.vehicleNo].mileageKm ? <React.Fragment><div>Maintenace Service:</div><div>{serviceByVehicle[v.vehicleNo].mileageKm} KM @ ${serviceByVehicle[v.vehicleNo].startDate}</div></React.Fragment> : ''}
-                            {inspectionByVehicle[v.vehicleNo] && inspectionByVehicle[v.vehicleNo].mileageKm ? <React.Fragment><div>Inspection:</div><div>{inspectionByVehicle[v.vehicleNo].mileageKm} KM @ ${inspectionByVehicle[v.vehicleNo].startDate}</div></React.Fragment> : ''}
+                            {serviceByVehicle[v.vehicleNo] && serviceByVehicle[v.vehicleNo].mileageKm ? <React.Fragment><div>Maintenace Service:</div><div>{serviceByVehicle[v.vehicleNo].mileageKm} KM @ {serviceByVehicle[v.vehicleNo].startDate}</div></React.Fragment> : ''}
+                            {inspectionByVehicle[v.vehicleNo] && inspectionByVehicle[v.vehicleNo].mileageKm ? <React.Fragment><div>Inspection:</div><div>{inspectionByVehicle[v.vehicleNo].mileageKm} KM @ {inspectionByVehicle[v.vehicleNo].startDate}</div></React.Fragment> : ''}
                              </Col>
                         </Stack>
                     </ListGroupItem>

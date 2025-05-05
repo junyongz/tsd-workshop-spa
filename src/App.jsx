@@ -227,7 +227,7 @@ function App() {
 
       return  () => clearInterval(fetchStatsTimer);
       
-  }, [refreshServices, refreshSupplierSpareParts, refreshSparePartUsages, refreshSpareParts, apiUrl]);
+  }, [refreshServices, refreshSupplierSpareParts, refreshSparePartUsages, refreshCompanies, refreshSpareParts, apiUrl]);
 
   useEffect(() => {
     let loadingTimer 

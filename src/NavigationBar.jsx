@@ -9,8 +9,6 @@ export default function NavigationBar({
     filterServices, searchByDate, setSearchByDate, clearFilterDate, filterByDate
 
 }) {
-    const searchBoxRef = useRef();
-
     return (
         <Navbar expand="lg" className="justify-content-between">
         <Container>

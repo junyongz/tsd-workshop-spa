@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Button, ButtonGroup, Dropdown, DropdownButton, Form, InputGroup, OverlayTrigger, Popover } from "react-bootstrap";
+import { Button, ButtonGroup, Form, InputGroup, OverlayTrigger, Popover } from "react-bootstrap";
 import InputGroupText from "react-bootstrap/esm/InputGroupText";
 
 const CompletionLabel = ({creationDate, completionDate, onCompletion, onDelete}) => {

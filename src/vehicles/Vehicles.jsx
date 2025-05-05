@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, Col, Container, Form, InputGroup, ListGroup, ListGroupItem, Row, Stack } from "react-bootstrap";
+import { Button, Col, Container, Form, ListGroup, ListGroupItem, Row, Stack } from "react-bootstrap";
 import VehicleUpdateDialog from "./VehicleUpdateDialog";
 
 export default function Vehicles({vehicles=[], setVehicles, companies=[]}) {
@@ -46,7 +46,7 @@ export default function Vehicles({vehicles=[], setVehicles, companies=[]}) {
                 return pv
             }, {}))
           })
-    }, [])
+    })
 
     return (
         <Container>

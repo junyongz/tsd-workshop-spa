@@ -1,4 +1,3 @@
-import { useRef } from "react";
 import { Badge, Container, Form, InputGroup, Nav, Navbar, Row, Toast, ToastContainer } from "react-bootstrap";
 import { Typeahead } from "react-bootstrap-typeahead";
 import { NavLink } from "react-router-dom";

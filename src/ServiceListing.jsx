@@ -109,9 +109,11 @@ function ServiceListing({services, filteredServices=[],
     })
   }
 
-  const completeServices = (service) => {
+  const completeService = (service, date) => {
     setLoading(true)
     requestAnimationFrame(() => {
+      service.completionDate = date
+ 
       fetch(`${apiUrl}/workshop-services?op=COMPLETE`, {
         method: 'POST', 
         body: JSON.stringify(service), 
@@ -187,7 +189,7 @@ function ServiceListing({services, filteredServices=[],
                 <Row>
                   <Col><h5>{v.vehicleNo} <span className="text-body-secondary">started since {v.startDate}</span> <TransactionTypes service={v} /></h5> 
                   {v.mileageKm > 0 && <h6><span className="text-body-secondary">At {v.mileageKm} KM</span></h6> }
-                  <CompletionLabel creationDate={v.startDate} completionDate={v.completionDate} onCompletion={() => completeServices(v)} onDelete={() => deleteService(v)}></CompletionLabel>
+                  <CompletionLabel creationDate={v.startDate} completionDate={v.completionDate} onCompletion={(date) => completeService(v, date)} onDelete={() => deleteService(v)}></CompletionLabel>
                   </Col>
                   { false && <Col className={'text-sm-end col-4'}><Badge pill><i className="bi bi-person-fill-gear me-1"></i>{'Tan Chwee Seng'}</Badge></Col> }
                   <Col sm="4" className={'text-sm-end'}>

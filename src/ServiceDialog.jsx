@@ -13,6 +13,9 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
     const [items, setItems] = useState([{partName: 'Choose one ...', quantity: 1, unit: 'pc', unitPrice: 0, selectedSpareParts: []}])
     const [validated, setValidated] = useState(false)
     const formRef = useRef()
+    const repairSwitchRef = useRef()
+    const maintSwitchRef = useRef()
+    const inspectionSwitchRef = useRef()
     
     const [selectedVehicles, setSelectedVehicles] = useState(trx?.current?.vehicleNo ? [vehicles.find(veh => veh.vehicleNo === trx.current.vehicleNo)] : [])
     const [selectedExistingService, setSelectedExistingService] = useState()
@@ -213,9 +216,9 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
                         <Row>
                             <Col xs="2"></Col>
                             <Col>
-                            <Form.Check inline name="transactionTypes" defaultChecked={trx.current?.transactionTypes?.includes('REPAIR')} value="REPAIR" label={ <span><i className="bi bi-hammer"></i> Repair</span> }></Form.Check>
-                            <Form.Check inline name="transactionTypes" defaultChecked={trx.current?.transactionTypes?.includes('SERVICE')}value="SERVICE" label={ <span><i className="bi bi-clock"></i> Maintenance Service</span> }></Form.Check>
-                            <Form.Check inline name="transactionTypes" defaultChecked={trx.current?.transactionTypes?.includes('INSPECTION')}value="INSPECTION"  label={ <span><i className="bi bi-calendar-check"></i> Inspection</span> }></Form.Check>
+                            <Form.Check ref={repairSwitchRef} inline name="transactionTypes" type="switch" defaultChecked={trx.current?.transactionTypes?.includes('REPAIR')} value="REPAIR" label={ <span onClick={() => repairSwitchRef.current.click()}><i className="bi bi-hammer"></i> Repair</span> }></Form.Check>
+                            <Form.Check ref={maintSwitchRef} inline name="transactionTypes" type="switch" defaultChecked={trx.current?.transactionTypes?.includes('SERVICE')}value="SERVICE" label={ <span onClick={() => maintSwitchRef.current.click()}><i className="bi bi-clock"></i> Maintenance Service</span> }></Form.Check>
+                            <Form.Check ref={inspectionSwitchRef} inline name="transactionTypes" type="switch" defaultChecked={trx.current?.transactionTypes?.includes('INSPECTION')}value="INSPECTION"  label={ <span onClick={() => inspectionSwitchRef.current.click()}><i className="bi bi-calendar-check"></i> Inspection</span> }></Form.Check>
                             </Col>
                         </Row>
                         <Row>

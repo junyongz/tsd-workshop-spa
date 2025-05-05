@@ -244,7 +244,9 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
                                     <InputGroup.Text><i className="bi bi-tools"></i></InputGroup.Text>
                                     <Typeahead
                                         inputProps={{required:true, name: 'partName'}}
-                                        labelKey='partName'
+                                        labelKey={(option) => 
+                                            `${(option.itemCode && !option.partName.includes(option.itemCode)) ? (option.itemCode + ' ') : ''}${option.partName}`
+                                        }
                                         options={spareParts}
                                         onChange={(opts) => afterChooseSparePart(opts, i)}
                                         placeholder="Find a spare part..."
@@ -258,7 +260,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
                                             }
 
                                             return <div>
-                                                <div>{option.partName}</div>
+                                                <div>{ order.itemCode && !order.partName.includes(order.itemCode) && <span className='text-secondary'>{order.itemCode}&nbsp;</span> } {option.partName}</div>
                                                 {/** TODO: to add supplier info later on */} 
                                                 <small className="text-secondary">${option.unitPrice} / {quantityLeft} left / <i className="bi bi-shop"></i> {supplier.supplierName} / {order.invoiceDate}</small>
                                             </div>

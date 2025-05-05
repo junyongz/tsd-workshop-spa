@@ -4,10 +4,8 @@ export default async function fetchVehicles(apiUrl = '', setVehicles, setSearchO
       .then(response => {
           setVehicles(response)
           setSearchOptions(prevs => 
-            [...prevs, ...response
-              .filter(v => prevs.findIndex(pv => pv.name === v.vehicleNo) === -1)
-              .map(veh => {return {name: veh.vehicleNo}})
-            ]
+            Array.from(new Set([...prevs.map(pv => pv.name), ...response.map(rv => rv.vehicleNo)]))
+            .map(vv => {return {name: vv}})
           )
       })
       .catch(error => {

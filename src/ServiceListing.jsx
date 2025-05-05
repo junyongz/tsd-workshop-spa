@@ -234,7 +234,7 @@ function ServiceListing({services, filteredServices=[],
                       return <ListGroupItem key={vvv.id}>
                         <Stack direction="horizontal">
                           <Col xs="2">{vvv.usageDate}</Col>
-                          <Col>{order.partName} <div><OrderTooltip order={order} supplier={supplier} /></div></Col>
+                          <Col>{ order.itemCode && !order.partName.includes(order.itemCode) && <span className='text-secondary'>{order.itemCode}&nbsp;</span> }<span>{order.partName}</span> <div><OrderTooltip order={order} supplier={supplier} /></div></Col>
                           <Col xs="2" className='text-sm-end'><Badge pill>{vvv.quantity > 0 && vvv.soldPrice && `${vvv.quantity} ${order.unit} @ $${vvv.soldPrice?.toFixed(2)}`}</Badge></Col>
                           <Col xs="2" className='text-sm-end'>{v.completionDate ? <Badge pill>$ {totalPrice}</Badge> : <HoverPilledBadge onRemove={() => removeTransaction(v.id, vvv.id)}>$ {totalPrice}</HoverPilledBadge> }</Col>
                         </Stack>

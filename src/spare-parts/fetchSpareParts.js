@@ -2,7 +2,7 @@ export default async function fetchSpareParts (apiUrl, setSpareParts, setSearchO
 
     return fetch(`${apiUrl}/spare-parts`, {mode: 'cors'})
       .then(res => res.json())
-      .then(response => {
+      .then((response=[]) => {
           setSpareParts(response.filter(sp => sp.addAllowed).sort((sp1, sp2) => sp2.orderId - sp1.orderId))
           setOrderSpareParts(
             Object.values(response
@@ -22,11 +22,13 @@ export default async function fetchSpareParts (apiUrl, setSpareParts, setSearchO
                   return {orderId: sp.orderId, invoiceDate: sp.invoiceDate, unitPrice: sp.unitPrice, supplierId: sp.supplierId, itemCode: sp.itemCode, partName: sp.partName}
               })
               .sort((sp1, sp2) => sp2.orderId - sp1.orderId))
-          setSearchOptions(prevs => 
-            [...prevs, ...response
-              .filter(v => prevs.findIndex(pv => pv.name === v.partName) === -1)
-              .map(sp => {return {name: sp.partName}})
-            ]
+
+          setSearchOptions((prevs=[]) => 
+            Array.from(new Set([...prevs.map(pv => pv.name), 
+              ...response.map(sp => `${(sp.itemCode && !sp.partName.includes(sp.itemCode)) ? (sp.itemCode + ' ') : ''}${sp.partName}`)]))
+            .map(vv => {
+              return { name: vv }
+            })
           )
       })
       .catch(error => {

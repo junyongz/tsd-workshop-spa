@@ -1,6 +1,9 @@
 import React, { useRef, useState } from "react"
 import { Container, Form, Modal, Row, Col, Button, InputGroup, FloatingLabel } from "react-bootstrap"
 import { Typeahead } from "react-bootstrap-typeahead"
+import formatThousandSeparator from "../utils/numberUtils"
+import { maintenanceServiceKm } from "./maintenanceService"
+import { addMonthsToDateStr } from "../utils/dateUtils"
 
 function VehicleUpdateDialog({isShow, setShowDialog, vehicle, setVehicles, companies}) {
 
@@ -15,12 +18,6 @@ function VehicleUpdateDialog({isShow, setShowDialog, vehicle, setVehicles, compa
         if (vehicle?.companyId) {
             setSelectedCompanies([companies.find(co => co.id === vehicle.companyId)])
         }
-    }
-
-    const addMonthsToDate = (dateVal, monthNum) => {
-        const aDate = new Date(dateVal)
-        aDate.setMonth(aDate.getMonth() + monthNum)
-        return aDate
     }
 
     const handleClose = () => {
@@ -54,9 +51,10 @@ function VehicleUpdateDialog({isShow, setShowDialog, vehicle, setVehicles, compa
             id: vehicle.id,
             vehicleNo: vehicle.vehicleNo,
             trailerNo: nativeForm['trailerNo'].value,
-            companyId: selectedCompanies[0].companyId,
+            companyId: selectedCompanies[0].id,
             insuranceExpiryDate: nativeForm['insuranceExpiryDate'].value,
-            roadTaxExpiryDate: nativeForm['roadTaxExpiryDate'].value
+            roadTaxExpiryDate: nativeForm['roadTaxExpiryDate'].value,
+            inspectionDueDate: nativeForm['inspectionDueDate'].value
         }
 
         fetch(`${apiUrl}/vehicles`, {
@@ -117,7 +115,7 @@ function VehicleUpdateDialog({isShow, setShowDialog, vehicle, setVehicles, compa
                                 <InputGroup>
                                 <InputGroup.Text><i className="bi bi-buildings"></i></InputGroup.Text>
                                     <Typeahead
-                                        disabled={selectedCompanies[0]?.internal}
+                                        disabled={selectedCompanies[0]?.internal && vehicle.companyId === selectedCompanies[0].id}
                                         inputProps={{required:true, name: 'companyId'}}
                                         labelKey='companyName'
                                         options={companies}
@@ -133,7 +131,7 @@ function VehicleUpdateDialog({isShow, setShowDialog, vehicle, setVehicles, compa
                                 <InputGroup>
                                 <InputGroup.Text><i className="bi bi-journal-text"></i></InputGroup.Text>
                                 <FloatingLabel label="Insurance Expiry Date">
-                                <Form.Control required type="date" name="insuranceExpiryDate" defaultValue={vehicle?.insuranceExpiryDate}></Form.Control>
+                                <Form.Control type="date" required={selectedCompanies[0]?.internal} name="insuranceExpiryDate" defaultValue={vehicle?.insuranceExpiryDate}></Form.Control>
                                 </FloatingLabel>
                                 </InputGroup>
                             </Col>
@@ -141,7 +139,15 @@ function VehicleUpdateDialog({isShow, setShowDialog, vehicle, setVehicles, compa
                                 <InputGroup>
                                 <InputGroup.Text><i className="bi bi-sign-turn-slight-right"></i></InputGroup.Text>
                                 <FloatingLabel label="Road Tax Expiry Date">
-                                <Form.Control required type="date" name="roadTaxExpiryDate" defaultValue={vehicle?.roadTaxExpiryDate}></Form.Control>
+                                <Form.Control type="date" required={selectedCompanies[0]?.internal} name="roadTaxExpiryDate" defaultValue={vehicle?.roadTaxExpiryDate}></Form.Control>
+                                </FloatingLabel>
+                                </InputGroup>
+                            </Col>
+                            <Col>
+                                <InputGroup>
+                                <InputGroup.Text><i className="bi bi-calendar-check"></i></InputGroup.Text>
+                                <FloatingLabel label="Inspection Due Date">
+                                <Form.Control type="date" required={selectedCompanies[0]?.internal} name="inspectionDueDate" defaultValue={vehicle?.inspectionDueDate}></Form.Control>
                                 </FloatingLabel>
                                 </InputGroup>
                             </Col>
@@ -157,30 +163,30 @@ function VehicleUpdateDialog({isShow, setShowDialog, vehicle, setVehicles, compa
                             <Col>
                                 <Form.Group>
                                     <FloatingLabel label="Last Service">
-                                    <Form.Control plaintext readOnly defaultValue={vehicle?.lastService?.mileageKm ? `${vehicle?.lastService?.mileageKm} KM @ ${vehicle?.lastService?.startDate}` : 'No Last Service Recorded' } /> 
+                                    <Form.Control plaintext readOnly defaultValue={vehicle?.lastService?.mileageKm ? `${vehicle?.lastService?.mileageKm} KM @ ${vehicle?.lastService?.startDate}` : '-' } /> 
                                     </FloatingLabel>
                                 </Form.Group>
                             </Col>
                             <Col>
                                 <Form.Group>
-                                    <FloatingLabel label="Next Service">
-                                    <Form.Control plaintext readOnly defaultValue={(vehicle?.lastService?.mileageKm && vehicle?.latestMileageKm) ? `${vehicle?.latestMileageKm - vehicle?.lastService?.mileageKm} KM more to go` : 'No Service/Distance Recorded' } /> 
+                                    <FloatingLabel label={`Next Service (every ${formatThousandSeparator(maintenanceServiceKm)}KM)`}>
+                                    <Form.Control plaintext readOnly defaultValue={(vehicle?.lastService?.mileageKm && vehicle?.latestMileageKm) ? (((vehicle?.latestMileageKm - vehicle?.lastService?.mileageKm) > maintenanceServiceKm) ? 'Do it now!' : `${maintenanceServiceKm - (vehicle?.latestMileageKm - vehicle?.lastService?.mileageKm)} KM more to go`) : 'No Service/Distance Recorded' } /> 
                                     </FloatingLabel>
                                 </Form.Group>
                             </Col>
                         </Row>
                         <Row>
-                            <Col xs="4">
+                            <Col>
                                 <Form.Group>
-                                    <FloatingLabel label="Last Inspection">
-                                    <Form.Control plaintext readOnly defaultValue={vehicle?.lastInspection?.mileageKm ? `${vehicle?.lastInspection?.mileageKm} KM @ ${vehicle?.lastInspection?.startDate}` : 'No Last Inspection Recorded' } />
+                                    <FloatingLabel label="Last Inspection Work">
+                                    <Form.Control plaintext readOnly defaultValue={vehicle?.lastInspection ? `${vehicle?.lastInspection?.startDate}` : '-' } />
                                     </FloatingLabel>
                                 </Form.Group>
                             </Col>
-                            <Col xs="4">
+                            <Col>
                                 <Form.Group>
-                                    <FloatingLabel label="Next Inspection">
-                                    <Form.Control plaintext readOnly defaultValue={vehicle?.lastInspection?.mileageKm ? addMonthsToDate(vehicle?.lastInspection?.startDate, 6) : '-'} /> 
+                                    <FloatingLabel label="Next Inspection Work">
+                                    <Form.Control plaintext readOnly defaultValue={vehicle?.lastInspection ? addMonthsToDateStr(vehicle?.lastInspection?.startDate, 6) : '-'} /> 
                                     </FloatingLabel>
                                 </Form.Group>
                             </Col>

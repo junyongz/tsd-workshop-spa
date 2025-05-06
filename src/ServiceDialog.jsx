@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { Modal, Button, Container, Col, Row, FormLabel, Badge, ListGroup, InputGroup, Nav } from "react-bootstrap";
 import { Typeahead } from "react-bootstrap-typeahead";
 import Form from "react-bootstrap/Form";
-import remainingQuantity from "./utils/quantityUtils";
+import remainingQuantity, { decimalPointUomAvailable } from "./utils/quantityUtils";
 
 function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[], 
     spareParts, orders=[], suppliers=[], sparePartUsages=[],
@@ -84,21 +84,23 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
                 setSelectedVehicles([veh])
             }
             
-            // not allow to add more than 1 service for same vehicle
-            fetch(`${apiUrl}/workshop-services?vehicleId=${veh.id}`, {
-                mode: 'cors',
-                headers: {
-                    'Content-type': 'application/json'
-                }
-            })
-            .then(resp => resp.json())
-            .then(ws => {
-                if (ws && ws.length > 0) {
-                    trx.current.id = ws[0].id
-                    trx.current.mileageKm = ws[0].mileageKm
-                    setSelectedExistingService(ws[0])
-                }
-            })
+            if (isFinite(veh.id)) {
+                // not allow to add more than 1 service for same vehicle
+                fetch(`${apiUrl}/workshop-services?vehicleId=${veh.id}`, {
+                    mode: 'cors',
+                    headers: {
+                        'Content-type': 'application/json'
+                    }
+                })
+                .then(resp => resp.json())
+                .then(ws => {
+                    if (ws && ws.length > 0) {
+                        trx.current.id = ws[0].id
+                        trx.current.mileageKm = ws[0].mileageKm
+                        setSelectedExistingService(ws[0])
+                    }
+                })
+            }
         }
         else {
             setSelectedVehicles([])
@@ -273,7 +275,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
                                 </Form.Group>
                                 <Form.Group as={Col} className="mb-3 col-2" controlId="quantity">
                                     <InputGroup>
-                                        <Form.Control onChange={(e) => updatePriceByQuantity(e.target.value, i)} required type="number" name="quantity" min="1" max={(v.selectedSpareParts[0] && remainingQuantity(orders.mapping[v.selectedSpareParts[0].orderId], sparePartUsages)) || 0} placeholder="Quantity" value={v?.quantity}/>
+                                        <Form.Control onChange={(e) => updatePriceByQuantity(e.target.value, i)} required step={decimalPointUomAvailable(v?.unit) ? 0.1 : 1} type="number" name="quantity" min="1" max={(v.selectedSpareParts[0] && remainingQuantity(orders.mapping[v.selectedSpareParts[0].orderId], sparePartUsages)) || 0} placeholder="Quantity" value={v?.quantity}/>
                                         <InputGroup.Text>{v?.unit}</InputGroup.Text>
                                     </InputGroup>
                                 </Form.Group>

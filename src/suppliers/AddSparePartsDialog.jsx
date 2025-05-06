@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 import { Button, Col, Container, Form, InputGroup, ListGroup, Modal, Row } from "react-bootstrap";
 import { Typeahead } from "react-bootstrap-typeahead";
-import remainingQuantity from "../utils/quantityUtils";
+import remainingQuantity, { decimalPointUomAvailable } from "../utils/quantityUtils";
 
 function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[], suppliers=[], spareParts=[], sparePartUsages=[], onSaveNewOrders}) {
     const formRef = useRef()
@@ -138,7 +138,7 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
     const updatePriceByQuantity = (val=0, i) => {
         setItems(prevs => {
             const newItems = [...prevs]
-            newItems[i] = {...newItems[i], quantity: parseInt(val)}
+            newItems[i] = {...newItems[i], quantity: parseFloat(val)}
             return newItems
         })
     }
@@ -283,10 +283,10 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
                                 <Row>
                                     <Col sm="5"></Col>
                                     <Col sm="2">
-                                        <Form.Control onChange={(e) => updatePriceByQuantity(e.target.value, i)} required disabled={v.disabled} type="number" min="1" name="quantity" placeholder="Quantity" value={v?.quantity}/>
+                                        <Form.Control onChange={(e) => updatePriceByQuantity(e.target.value, i)} required disabled={v.disabled} type="number" min={decimalPointUomAvailable(v?.unit) ? 0.1 : 1} step={decimalPointUomAvailable(v?.unit) ? 0.1 : 1} name="quantity" placeholder="Quantity" value={v?.quantity}/>
                                     </Col>
                                     <Col sm="1" className="mb-3">
-                                        <Form.Control onChange={(e) => updateUnit(e.target.value, i)} required type="text" name="unit" placeholder="Unit" disabled={v.disabled} defaultValue={v?.unit}/>
+                                        <Form.Control onChange={(e) => updateUnit(e.target.value, i)} required type="text" name="unit" placeholder="Unit" disabled={v.disabled} value={v?.unit}/>
                                     </Col>
                                     <Col sm="2">
                                         <InputGroup>

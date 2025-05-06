@@ -1,6 +1,7 @@
 import React, { useRef, useState } from "react"
 import { Container, Form, Modal, Row, Col, Button, InputGroup } from "react-bootstrap"
 import { Typeahead } from "react-bootstrap-typeahead"
+import { decimalPointUomAvailable } from "../utils/quantityUtils"
 
 function SparePartsUsageDialog({isShow, setShowDialog, vehicles, 
     usageSpareParts, setUsageSpareParts, onSaveNewSparePartUsage,
@@ -140,7 +141,7 @@ function SparePartsUsageDialog({isShow, setShowDialog, vehicles,
                                     </Col>
                                     <Col xs="3">
                                         <InputGroup>
-                                        <Form.Control onChange={(e) => updateRemaining(e.target.value)} required type="number" name="quantity" disabled={!usageSpareParts.remaining || usageSpareParts.remaining === 0} max={usageSpareParts.remaining || 0} min={1}></Form.Control>
+                                        <Form.Control onChange={(e) => updateRemaining(e.target.value)} required type="number" name="quantity" disabled={!usageSpareParts.remaining || usageSpareParts.remaining === 0} max={usageSpareParts.remaining || 0} step={decimalPointUomAvailable(usageSpareParts.unit) ? 0.1 : 1} min={decimalPointUomAvailable(usageSpareParts.unit) ? 0.1 : 1}></Form.Control>
                                         <InputGroup.Text>{usageSpareParts.unit}</InputGroup.Text>
                                         </InputGroup>
                                     </Col>

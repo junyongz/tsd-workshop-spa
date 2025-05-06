@@ -1,6 +1,6 @@
 import { Badge, Container, Form, InputGroup, Nav, Navbar, Row, Toast, ToastContainer } from "react-bootstrap";
 import { Typeahead } from "react-bootstrap-typeahead";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 
 export default function NavigationBar({
     showToastBox, setShowToastBox, toastBoxMessage,
@@ -8,6 +8,8 @@ export default function NavigationBar({
     filterServices, searchByDate, setSearchByDate, clearFilterDate, filterByDate
 
 }) {
+    const location = useLocation()
+
     return (
         <Navbar expand="lg" className="justify-content-between">
         <Container>
@@ -34,6 +36,7 @@ export default function NavigationBar({
                         <InputGroup.Text><i className="bi bi-tools"></i></InputGroup.Text>
                             <Typeahead
                                 allowNew
+                                disabled={location.pathname === '/vehicles'}
                                 newSelectionPrefix="Search for... "
                                 id="search-multiple"
                                 labelKey="name"
@@ -54,7 +57,7 @@ export default function NavigationBar({
                 <InputGroup>
                     <InputGroup.Text>Choose a date</InputGroup.Text>
                     <InputGroup.Text><i className="bi bi-x-circle" role="button" onClick={clearFilterDate}></i></InputGroup.Text>
-                    <Form.Control type='date' placeholder='Choose a date' onChange={(e) => filterByDate(e.target.value)}></Form.Control>
+                    <Form.Control disabled={location.pathname === '/vehicles'} type='date' placeholder='Choose a date' onChange={(e) => filterByDate(e.target.value)}></Form.Control>
                 </InputGroup>
                 </Form.Group>
                 }

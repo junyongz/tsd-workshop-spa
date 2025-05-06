@@ -46,7 +46,7 @@ export default function Vehicles({vehicles=[], setVehicles, companies=[]}) {
                 return pv
             }, {}))
           })
-    })
+    }, [])
 
     return (
         <Container>
@@ -72,9 +72,9 @@ export default function Vehicles({vehicles=[], setVehicles, companies=[]}) {
                     <Stack direction="horizontal">
                         <Col><i className="bi bi-truck"></i> Plate No</Col>
                         <Col><i className="bi bi-truck-flatbed"></i> Trailer No</Col>
-                        <Col xs="3"><i className="bi bi-buildings"></i> Company</Col>
-                        <Col><i className="bi bi-journal-text"></i> Insurance Expiry</Col>
-                        <Col><i className="bi bi-sign-turn-slight-right"></i> Road Tax Expiry</Col>
+                        {!showInternalOnly && <Col xs="3"><i className="bi bi-buildings"></i> Company</Col> }
+                        <Col>Last Recorded Mileage</Col>
+                        <Col>Dates</Col>
                         <Col><i className="bi bi-wrench-adjustable"></i> Services</Col>
                     </Stack>
                 </ListGroupItem>
@@ -84,9 +84,13 @@ export default function Vehicles({vehicles=[], setVehicles, companies=[]}) {
                         <Stack direction="horizontal">
                             <Col><Button variant="link" onClick={() => showVehicle(v.id)}>{v.vehicleNo}</Button></Col>
                             <Col>{v.trailerNo}</Col>
-                            <Col xs="3">{companies.find(co => co.id === v.companyId)?.companyName}</Col>
-                            <Col>{v.insuranceExpiryDate}</Col>
-                            <Col>{v.roadTaxExpiryDate}</Col>
+                            {!showInternalOnly && <Col xs="3">{companies.find(co => co.id === v.companyId)?.companyName}</Col>}
+                            <Col>{v.latestMileageKm ? `${v.latestMileageKm} KM` : '-'}</Col>
+                            <Col>
+                            {v.insuranceExpiryDate && <div><i className="bi bi-journal-text"></i> {v.insuranceExpiryDate}</div>}
+                            {v.roadTaxExpiryDate && <div><i className="bi bi-sign-turn-slight-right"></i> {v.roadTaxExpiryDate}</div>}
+                            {v.inspectionDueDate && <div><i className="bi bi-calendar-check"></i> {v.inspectionDueDate}</div>}
+                            </Col>
                             <Col> 
                             {serviceByVehicle[v.vehicleNo] && serviceByVehicle[v.vehicleNo].mileageKm ? <React.Fragment><div>Maintenace Service:</div><div>{serviceByVehicle[v.vehicleNo].mileageKm} KM @ {serviceByVehicle[v.vehicleNo].startDate}</div></React.Fragment> : ''}
                             {inspectionByVehicle[v.vehicleNo] && inspectionByVehicle[v.vehicleNo].mileageKm ? <React.Fragment><div>Inspection:</div><div>{inspectionByVehicle[v.vehicleNo].mileageKm} KM @ {inspectionByVehicle[v.vehicleNo].startDate}</div></React.Fragment> : ''}

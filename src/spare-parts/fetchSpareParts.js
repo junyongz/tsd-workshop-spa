@@ -19,7 +19,7 @@ export default async function fetchSpareParts (apiUrl, setSpareParts, setSearchO
                 return acc
               } , {}))
               .map(sp => {
-                  return {orderId: sp.orderId, invoiceDate: sp.invoiceDate, unitPrice: sp.unitPrice, supplierId: sp.supplierId, itemCode: sp.itemCode, partName: sp.partName}
+                  return {orderId: sp.orderId, invoiceDate: sp.invoiceDate, unit: sp.unit, unitPrice: sp.unitPrice, supplierId: sp.supplierId, itemCode: sp.itemCode, partName: sp.partName}
               })
               .sort((sp1, sp2) => sp2.orderId - sp1.orderId))
 

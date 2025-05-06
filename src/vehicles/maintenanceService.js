@@ -1,0 +1,1 @@
+export const maintenanceServiceKm = 18000;

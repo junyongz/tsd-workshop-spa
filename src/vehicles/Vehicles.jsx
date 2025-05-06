@@ -46,7 +46,7 @@ export default function Vehicles({vehicles=[], setVehicles, companies=[]}) {
                 return pv
             }, {}))
           })
-    }, [])
+    }, [apiUrl])
 
     return (
         <Container>

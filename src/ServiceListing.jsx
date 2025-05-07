@@ -227,7 +227,7 @@ function ServiceListing({services, filteredServices=[],
                       })
                     }
                     {v.sparePartUsages?.map(vvv => {
-                      const order = orders.mapping[vvv.orderId]
+                      const order = orders?.mapping[vvv.orderId]
                       const supplier = suppliers.find(s => s.id === order.supplierId)
                       const totalPrice = (vvv.quantity * vvv.soldPrice).toFixed(2)
 

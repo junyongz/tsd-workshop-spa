@@ -17,7 +17,7 @@ function YearMonthView({services, suppliers=[], orders=[], backToService}) {
         return {vehicle: veh, amount: 
             (services.flatMap(s => s.migratedHandWrittenSpareParts || []).reduce((pv, cv) => pv + (cv.totalPrice || 0), 0) +
             services.flatMap(s => s.sparePartUsages).reduce((acc, curr) => {
-                const order = orders.mapping[curr.orderId] 
+                const order = orders?.mapping[curr.orderId] 
                 return acc + (curr.quantity * order.unitPrice)}, 0)).toFixed(2)
          }
     }).sort((a, b) => b.amount - a.amount)
@@ -105,7 +105,7 @@ function YearMonthView({services, suppliers=[], orders=[], backToService}) {
                                             </ListGroupItem>)
 
                                             const usages = trx.sparePartUsages.map(v => {
-                                                const order = orders.mapping[v.orderId]
+                                                const order = orders?.mapping[v.orderId]
                                                 const supplier = suppliers.find(s => s.id === order.supplierId)
                                                 const totalPrice = (v.quantity * order.unitPrice).toFixed(2) || 0
                                                 

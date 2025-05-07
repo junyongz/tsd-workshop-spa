@@ -2,20 +2,18 @@
 
 ## What is in this SPA
 
-1. Fetching data from migration table, flatten record
-2. Allow to add new spare parts to existing date or vehicle
-3. Not allowed to touch migrated data (based on the 1st record only)
-4. Allow auto complete for vehicle and spare parts (need clean up)
-5. Allow to search by vehicle, spare parts and date
-6. Allow to complete the service(s)
-7. Allow to add new vehicle
-8. One glance view of all vehicle and repair cost by month
+1. Fetching workshop services, spare part usages the linkages to suppliers' orders
+2. Allow to search by vehicle, spare parts and date
+3. Allow to complete the service(s)
+4. Allow to add new vehicle
+5. One glance view of all vehicle and repair cost by month
+6. One glance view of all supplers' orders by month
+7. Truck listing, and maintenance too
 
 ## Work In-Progress
 
 1. Add new to choose existing date or vehicle (auto, DONE)
 2. Edit button (just delete, DONE)
-6. Truck listing
 3. Customer listing
 4. Supplier listing
 5. Spare part search (need clean up, DONE)

@@ -1,12 +1,13 @@
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
+import { Calendar, Suppliers } from "../Icons";
 
 function OrderTooltip({order, supplier}) {
 
     return (
         <OverlayTrigger trigger={order.notes ? ['hover'] : []} overlay={<Tooltip>{order.notes}</Tooltip>}>
             <small className="text-secondary">
-                <i className="bi bi-shop"></i>{supplier?.supplierName}&nbsp;
-                <i className="bi bi-calendar-event"></i>{order.invoiceDate}
+                <Suppliers /> {supplier?.supplierName}&nbsp;
+                <Calendar /> {order.invoiceDate}
             </small>
         </OverlayTrigger>
     )

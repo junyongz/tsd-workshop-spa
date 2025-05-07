@@ -10,6 +10,7 @@ import { clearState } from './autoRefreshWorker';
 import OrderTooltip from './services/OrderTooltip';
 import YearMonthView from './services/YearMonthView';
 import TransactionTypes from './components/TransactionTypes';
+import { Calendar } from './Icons';
 
 /***
  * Date: {
@@ -176,7 +177,7 @@ function ServiceListing({services, filteredServices=[],
         </Col>
         <Col className={'text-sm-end'}>
           <ButtonGroup>
-            <Button variant='secondary' onClick={() => viewByYearMonth()}><i className="bi bi-calendar-event me-2"></i>Calendar View</Button>
+            <Button variant='secondary' onClick={() => viewByYearMonth()}><Calendar />&nbsp;Calendar View</Button>
             <Button variant='success' onClick={() => addNewServiceTransaction(new Date().toISOString().split('T')[0])}><i className="bi bi-plus-circle-fill me-2"></i>Add New</Button>
           </ButtonGroup>
         </Col>

@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Button, Col, Container, Form, ListGroup, ListGroupItem, Row, Stack } from "react-bootstrap";
 import VehicleUpdateDialog from "./VehicleUpdateDialog";
+import formatThousandSeparator from "../utils/numberUtils";
+import VehicleServices from "./VehicleServices";
+import { Company, Inspection, Insurance, Roadtax, Services, Truck } from "../Icons";
 
 export default function Vehicles({vehicles=[], setVehicles, companies=[]}) {
 
@@ -70,30 +73,29 @@ export default function Vehicles({vehicles=[], setVehicles, companies=[]}) {
             <ListGroup>
                 <ListGroupItem key={'header'}>
                     <Stack direction="horizontal">
-                        <Col><i className="bi bi-truck"></i> Plate No</Col>
-                        <Col><i className="bi bi-truck-flatbed"></i> Trailer No</Col>
-                        {!showInternalOnly && <Col xs="3"><i className="bi bi-buildings"></i> Company</Col> }
+                        <Col xs={!showInternalOnly ? "2" : "3" }><Truck /> Plate No</Col>
+                        {!showInternalOnly && <Col xs="3"><Company /> Company</Col> }
                         <Col>Last Recorded Mileage</Col>
                         <Col>Dates</Col>
-                        <Col><i className="bi bi-wrench-adjustable"></i> Services</Col>
+                        <Col><Services /> Last Services</Col>
                     </Stack>
                 </ListGroupItem>
                 { vehicles.filter(veh => !showInternalOnly || (showInternalOnly && companies.find(co => co.id === veh.companyId)?.internal))
                     .map(v => 
                     <ListGroupItem key={v.id}>
                         <Stack direction="horizontal">
-                            <Col><Button variant="link" onClick={() => showVehicle(v.id)}>{v.vehicleNo}</Button></Col>
-                            <Col>{v.trailerNo}</Col>
+                            <Col xs={!showInternalOnly ? "2" : "3" }><Button variant="link" onClick={() => showVehicle(v.id)}>{v.vehicleNo}</Button><span>{v.trailerNo}</span></Col>
                             {!showInternalOnly && <Col xs="3">{companies.find(co => co.id === v.companyId)?.companyName}</Col>}
-                            <Col>{v.latestMileageKm ? `${v.latestMileageKm} KM` : '-'}</Col>
+                            <Col>{v.latestMileageKm ? `${formatThousandSeparator(v.latestMileageKm)} KM` : '-'}</Col>
                             <Col>
-                            {v.insuranceExpiryDate && <div><i className="bi bi-journal-text"></i> {v.insuranceExpiryDate}</div>}
-                            {v.roadTaxExpiryDate && <div><i className="bi bi-sign-turn-slight-right"></i> {v.roadTaxExpiryDate}</div>}
-                            {v.inspectionDueDate && <div><i className="bi bi-calendar-check"></i> {v.inspectionDueDate}</div>}
+                            {v.insuranceExpiryDate && <div><Insurance /> <span className="text-secondary">Insurance</span> {v.insuranceExpiryDate}</div>}
+                            {v.roadTaxExpiryDate && <div><Roadtax /> <span className="text-secondary">Roadtax</span> {v.roadTaxExpiryDate}</div>}
+                            {v.inspectionDueDate && <div><Inspection /> <span className="text-secondary">Inspection</span> {v.inspectionDueDate}</div>}
                             </Col>
                             <Col> 
-                            {serviceByVehicle[v.vehicleNo] && serviceByVehicle[v.vehicleNo].mileageKm ? <React.Fragment><div>Maintenace Service:</div><div>{serviceByVehicle[v.vehicleNo].mileageKm} KM @ {serviceByVehicle[v.vehicleNo].startDate}</div></React.Fragment> : ''}
-                            {inspectionByVehicle[v.vehicleNo] && inspectionByVehicle[v.vehicleNo].mileageKm ? <React.Fragment><div>Inspection:</div><div>{inspectionByVehicle[v.vehicleNo].mileageKm} KM @ {inspectionByVehicle[v.vehicleNo].startDate}</div></React.Fragment> : ''}
+                                <VehicleServices lastService={serviceByVehicle[v.vehicleNo]} 
+                                    lastInspection={inspectionByVehicle[v.vehicleNo]} 
+                                    vehicle={v} />
                              </Col>
                         </Stack>
                     </ListGroupItem>

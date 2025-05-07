@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import { Badge, Button, ButtonGroup, Card, Col, Container, Dropdown, DropdownButton, ListGroup, ListGroupItem, Row, Stack } from "react-bootstrap"
 import OrderTooltip from "./OrderTooltip"
 import { ScrollSpy } from "bootstrap"
+import { Services } from "../Icons"
 
 function YearMonthView({services, suppliers=[], orders=[], backToService}) {
     const currentDate = new Date()
@@ -56,7 +57,7 @@ function YearMonthView({services, suppliers=[], orders=[], backToService}) {
                     </ButtonGroup>
  
                     <Col className="text-sm-end">
-                        <Button variant="outline-secondary" onClick={backToService}><i className="bi bi-wrench-adjustable"></i> Back to Service</Button>
+                        <Button variant="outline-secondary" onClick={backToService}><Services /> Back to Service</Button>
                     </Col>
                 </Stack>
             </Row>

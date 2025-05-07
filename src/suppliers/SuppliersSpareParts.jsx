@@ -9,6 +9,7 @@ import NoteTakingDialog from "./NoteTakingDialog"
 import { clearState } from "../autoRefreshWorker"
 import SparePartNotes from "./SparePartNotes"
 import SupplierSparePartsYearMonthView from "./SupplierSparePartsYearMonthView"
+import { Calendar, Suppliers, Tools, Truck } from "../Icons"
 
 function SuppliersSpareParts({filteredOrders=[], setFilteredOrders, 
     selectedSearchOptions=[], filterServices=() => {},
@@ -238,7 +239,7 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
                     <Button variant="link" onClick={() => setShowSuppliers(true)}>{ selectedSupplier ? `Showing for ${suppliers.find(v => v.id === selectedSupplier.id).supplierName}` : 'Showing All'}</Button>
                     <Offcanvas show={showSuppliers} placement="top" onHide={() => setShowSuppliers(false)}>
                         <Offcanvas.Header closeButton>
-                        <Offcanvas.Title><i className="bi bi-shop"></i> Suppliers</Offcanvas.Title>
+                        <Offcanvas.Title><Suppliers /> Suppliers</Offcanvas.Title>
                         </Offcanvas.Header>
                         <Offcanvas.Body>
                             <Nav variant="underline" defaultActiveKey={selectedSupplier?.id} activeKey={selectedSupplier?.id}>
@@ -262,9 +263,9 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
                     <ListGroup>
                         <ListGroupItem key={'header'}>
                                 <Stack direction="horizontal">
-                                    <Col><i className="bi bi-calendar-event"></i> Invoice Date</Col>
-                                    <Col><i className="bi bi-shop"></i> Supplier</Col>
-                                    <Col sm="5"><i className="bi bi-tools"></i> Particular</Col>
+                                    <Col><Calendar /> Invoice Date</Col>
+                                    <Col><Suppliers /> Supplier</Col>
+                                    <Col sm="5"><Tools /> Particular</Col>
                                     <Col sm="3"><i className="bi bi-card-text"></i> Notes</Col>
                                     <Col sm="1"></Col>
                                 </Stack>
@@ -300,7 +301,7 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
                                             <span role="button"><i className="bi bi-x-lg text-danger"></i>&nbsp;</span>
                                         </OverlayTrigger>
                                         }
-                                        <i role="button" className="bi bi-truck" onClick={() => recordUsage(v)}></i>
+                                        <Truck role="button" onClick={() => recordUsage(v)} />
                                     </Col>
                                 </Stack>
                             </ListGroupItem>

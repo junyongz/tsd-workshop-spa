@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { Button, ButtonGroup, Form, InputGroup, OverlayTrigger, Popover } from "react-bootstrap";
 import InputGroupText from "react-bootstrap/esm/InputGroupText";
+import { Calendar } from "../Icons";
 
 const CompletionLabel = ({creationDate, completionDate, onCompletion, onDelete}) => {
 
@@ -27,7 +28,7 @@ const CompletionLabel = ({creationDate, completionDate, onCompletion, onDelete})
                 <OverlayTrigger trigger="click" placement="right"
                         overlay={
                         <Popover>
-                            <Popover.Header><i className="bi bi-calendar-event"></i> Choose a date for completion</Popover.Header>
+                            <Popover.Header><Calendar /> Choose a date for completion</Popover.Header>
                             <Popover.Body>
                                 <InputGroup>
                                 <Form.Control ref={completionDateRef} required type="date" defaultValue={todayDate} min={creationDate} max={todayDate}></Form.Control>

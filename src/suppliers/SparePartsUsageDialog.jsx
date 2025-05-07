@@ -2,6 +2,7 @@ import React, { useRef, useState } from "react"
 import { Container, Form, Modal, Row, Col, Button, InputGroup } from "react-bootstrap"
 import { Typeahead } from "react-bootstrap-typeahead"
 import { decimalPointUomAvailable } from "../utils/quantityUtils"
+import { Calendar, Tools, Truck } from "../Icons"
 
 function SparePartsUsageDialog({isShow, setShowDialog, vehicles, 
     usageSpareParts, setUsageSpareParts, onSaveNewSparePartUsage,
@@ -100,7 +101,7 @@ function SparePartsUsageDialog({isShow, setShowDialog, vehicles,
         <Modal show={isShow} onHide={handleClose} onShow={() => setRemaining(usageSpareParts.remaining)} size="lg">
             <Modal.Header closeButton>
             <Modal.Title>
-                <div><i className="bi bi-tools"></i> {usageSpareParts.partName}, tinggal lagi: {remaining} {usageSpareParts.unit}</div>
+                <div><Tools /> {usageSpareParts.partName}, tinggal lagi: {remaining} {usageSpareParts.unit}</div>
                 <div className="text-body-secondary fs-6">Order {usageSpareParts.deliveryOrderNo} from {usageSpareParts.supplierName} @ {usageSpareParts.invoiceDate} </div>
             </Modal.Title>
             </Modal.Header>
@@ -114,7 +115,7 @@ function SparePartsUsageDialog({isShow, setShowDialog, vehicles,
                                 <Row key={i} className="mb-1">
                                     <Col xs="3">
                                         <InputGroup>
-                                        <InputGroup.Text><i className="bi bi-calendar-event"></i></InputGroup.Text>
+                                        <InputGroup.Text><Calendar /></InputGroup.Text>
                                         <Form.Control required type="date" 
                                             min={selectedExistingService ? selectedExistingService.startDate : usageSpareParts.invoiceDate}
                                             max={new Date().toISOString().split('T')[0]}
@@ -123,7 +124,7 @@ function SparePartsUsageDialog({isShow, setShowDialog, vehicles,
                                     </Col>
                                     <Col>
                                     <InputGroup>
-                                    <InputGroup.Text><i className="bi bi-truck"></i></InputGroup.Text>
+                                    <InputGroup.Text><Truck /></InputGroup.Text>
                                         <Typeahead
                                             allowNew
                                             newSelectionPrefix="Add a new vehicle: "

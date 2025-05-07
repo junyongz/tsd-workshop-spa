@@ -1,5 +1,6 @@
 import React from "react"
 import { Badge } from "react-bootstrap"
+import { Calendar } from "../Icons"
 
 function SparePartNotes({order, onNoteClick, sparePartUsages }) {
     return (
@@ -14,7 +15,7 @@ function SparePartNotes({order, onNoteClick, sparePartUsages }) {
                     .map(spu => 
                         <span style={{display: 'block'}}>Used by {spu.vehicleNo}
                             <Badge pill>{spu.quantity}</Badge>&nbsp;
-                            <i className="bi bi-calendar-event"></i> {spu.usageDate}
+                            <Calendar /> {spu.usageDate}
                         </span>)
             }
         </div>

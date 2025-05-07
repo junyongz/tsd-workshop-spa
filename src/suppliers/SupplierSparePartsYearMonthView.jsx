@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import { Badge, Button, ButtonGroup, Card, Col, Container, Dropdown, DropdownButton, ListGroup, ListGroupItem, Row, Stack } from "react-bootstrap"
 import { ScrollSpy } from "bootstrap"
+import { Calendar } from "../Icons"
 
 // {[supplier]}
 const filterOrdersBySupplier = (orders={listing:[],mapping:[]}, suppliers=[], year, month) => {
@@ -127,7 +128,7 @@ function SupplierSparePartsYearMonthView({orders=[], suppliers=[], backToOrders}
                                             return <Card className="mb-3">
                                                 <Card.Header>
                                                     <Row>
-                                                        <Col><i className="bi bi-calendar-event"></i> {groupByDO[v][0].invoiceDate}</Col>
+                                                        <Col><Calendar /> {groupByDO[v][0].invoiceDate}</Col>
                                                         <Col className='text-sm-end'><i className="bi bi-journal"></i> {v} </Col>
                                                     </Row>
                                                 </Card.Header>

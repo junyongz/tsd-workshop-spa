@@ -1,6 +1,7 @@
 import { Badge, Container, Form, InputGroup, Nav, Navbar, Row, Toast, ToastContainer } from "react-bootstrap";
 import { Typeahead } from "react-bootstrap-typeahead";
 import { NavLink, useLocation } from "react-router-dom";
+import { Calendar, Services, Suppliers, Tools, Truck } from "./Icons";
 
 export default function NavigationBar({
     showToastBox, setShowToastBox, toastBoxMessage,
@@ -25,15 +26,15 @@ export default function NavigationBar({
           </Row>
             <Navbar.Brand href="/"><span className="bg-success text-white rounded-3 py-2 px-4 fw-bold">TSD</span></Navbar.Brand>
             <Nav className="me-auto">
-                <Nav.Item className="me-2"><NavLink className={'btn btn-outline-primary'} to="/"><i className="bi bi-wrench-adjustable"></i> Services {selectedSearchOptions.length > 0 && <Badge pill>{filteredServices.length}</Badge>}</NavLink></Nav.Item>
-                <Nav.Item className="me-2"><NavLink className={'btn btn-outline-primary'} to="/orders"><i className="bi bi-shop"></i> Suppliers {selectedSearchOptions.length > 0 && <Badge pill>{filteredOrders.length}</Badge>}</NavLink></Nav.Item>
-                <Nav.Item className="me-2"><NavLink className={'btn btn-outline-primary'} to="/vehicles"><i className="bi bi-truck"></i> Trucks</NavLink></Nav.Item>
+                <Nav.Item className="me-2"><NavLink className={'btn btn-outline-primary'} to="/"><Services /> Services {selectedSearchOptions.length > 0 && <Badge pill>{filteredServices.length}</Badge>}</NavLink></Nav.Item>
+                <Nav.Item className="me-2"><NavLink className={'btn btn-outline-primary'} to="/orders"><Suppliers /> Suppliers {selectedSearchOptions.length > 0 && <Badge pill>{filteredOrders.length}</Badge>}</NavLink></Nav.Item>
+                <Nav.Item className="me-2"><NavLink className={'btn btn-outline-primary'} to="/vehicles"><Truck /> Trucks</NavLink></Nav.Item>
                 <Form className="d-flex">
                 {!searchByDate &&
                     <Form.Group>
                     <InputGroup>
-                        <InputGroup.Text><i className="bi bi-truck"></i></InputGroup.Text>
-                        <InputGroup.Text><i className="bi bi-tools"></i></InputGroup.Text>
+                        <InputGroup.Text><Truck /></InputGroup.Text>
+                        <InputGroup.Text><Tools /></InputGroup.Text>
                             <Typeahead
                                 allowNew
                                 disabled={location.pathname === '/vehicles'}
@@ -48,7 +49,7 @@ export default function NavigationBar({
                                 placeholder="Choose by vehicle(s) and/or spart part(s)"
                                 selected={selectedSearchOptions}
                             />
-                        <InputGroup.Text><i className="bi bi-calendar-event" role="button" onClick={() => setSearchByDate(true)}></i></InputGroup.Text>
+                        <InputGroup.Text><Calendar role={location.pathname === '/vehicles'  ? '' : 'button'} onClick={location.pathname === '/vehicles' ? ()=>{} : () => setSearchByDate(true)} /></InputGroup.Text>
                     </InputGroup>
                     </Form.Group>
                 }

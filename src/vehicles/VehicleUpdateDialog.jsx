@@ -1,9 +1,10 @@
 import React, { useRef, useState } from "react"
-import { Container, Form, Modal, Row, Col, Button, InputGroup, FloatingLabel } from "react-bootstrap"
+import { Container, Form, Modal, Row, Col, Button, InputGroup, FloatingLabel, Card } from "react-bootstrap"
 import { Typeahead } from "react-bootstrap-typeahead"
 import formatThousandSeparator from "../utils/numberUtils"
 import { maintenanceServiceKm } from "./maintenanceService"
 import { addMonthsToDateStr } from "../utils/dateUtils"
+import { Calendar, Company, Inspection, Insurance, Roadtax, Services, Truck } from "../Icons"
 
 function VehicleUpdateDialog({isShow, setShowDialog, vehicle, setVehicles, companies}) {
 
@@ -96,7 +97,7 @@ function VehicleUpdateDialog({isShow, setShowDialog, vehicle, setVehicles, compa
                         <Row className="mb-3">
                             <Col>
                                 <InputGroup>
-                                <InputGroup.Text><i className="bi bi-truck"></i></InputGroup.Text>
+                                <InputGroup.Text><Truck /></InputGroup.Text>
                                 <FloatingLabel label="Vehicle No" controlId="floatingVehicleNo">
                                 <Form.Control plaintext readOnly name="vehicleNo" defaultValue={vehicle?.vehicleNo}></Form.Control>
                                 </FloatingLabel>
@@ -113,7 +114,7 @@ function VehicleUpdateDialog({isShow, setShowDialog, vehicle, setVehicles, compa
                         </Row>
                         <Row className="mb-3">
                                 <InputGroup>
-                                <InputGroup.Text><i className="bi bi-buildings"></i></InputGroup.Text>
+                                <InputGroup.Text><Company /></InputGroup.Text>
                                     <Typeahead
                                         disabled={selectedCompanies[0]?.internal && vehicle.companyId === selectedCompanies[0].id}
                                         inputProps={{required:true, name: 'companyId'}}
@@ -128,67 +129,94 @@ function VehicleUpdateDialog({isShow, setShowDialog, vehicle, setVehicles, compa
                         </Row>
                         <Row className="mb-3">
                             <Col>
-                                <InputGroup>
-                                <InputGroup.Text><i className="bi bi-journal-text"></i></InputGroup.Text>
-                                <FloatingLabel label="Insurance Expiry Date">
-                                <Form.Control type="date" required={selectedCompanies[0]?.internal} name="insuranceExpiryDate" defaultValue={vehicle?.insuranceExpiryDate}></Form.Control>
-                                </FloatingLabel>
-                                </InputGroup>
-                            </Col>
-                            <Col>
-                                <InputGroup>
-                                <InputGroup.Text><i className="bi bi-sign-turn-slight-right"></i></InputGroup.Text>
-                                <FloatingLabel label="Road Tax Expiry Date">
-                                <Form.Control type="date" required={selectedCompanies[0]?.internal} name="roadTaxExpiryDate" defaultValue={vehicle?.roadTaxExpiryDate}></Form.Control>
-                                </FloatingLabel>
-                                </InputGroup>
-                            </Col>
-                            <Col>
-                                <InputGroup>
-                                <InputGroup.Text><i className="bi bi-calendar-check"></i></InputGroup.Text>
-                                <FloatingLabel label="Inspection Due Date">
-                                <Form.Control type="date" required={selectedCompanies[0]?.internal} name="inspectionDueDate" defaultValue={vehicle?.inspectionDueDate}></Form.Control>
-                                </FloatingLabel>
-                                </InputGroup>
-                            </Col>
-                        </Row>
-                        <Row>
-                            <Col xs="3">
-                                <Form.Group>
-                                    <FloatingLabel label="Latest Mileage">
-                                    <Form.Control plaintext readOnly defaultValue={vehicle?.latestMileageKm ? `${vehicle?.latestMileageKm} KM` : '-'} />
-                                    </FloatingLabel>
-                                </Form.Group>
-                            </Col>
-                            <Col>
-                                <Form.Group>
-                                    <FloatingLabel label="Last Service">
-                                    <Form.Control plaintext readOnly defaultValue={vehicle?.lastService?.mileageKm ? `${vehicle?.lastService?.mileageKm} KM @ ${vehicle?.lastService?.startDate}` : '-' } /> 
-                                    </FloatingLabel>
-                                </Form.Group>
-                            </Col>
-                            <Col>
-                                <Form.Group>
-                                    <FloatingLabel label={`Next Service (every ${formatThousandSeparator(maintenanceServiceKm)}KM)`}>
-                                    <Form.Control plaintext readOnly defaultValue={(vehicle?.lastService?.mileageKm && vehicle?.latestMileageKm) ? (((vehicle?.latestMileageKm - vehicle?.lastService?.mileageKm) > maintenanceServiceKm) ? 'Do it now!' : `${maintenanceServiceKm - (vehicle?.latestMileageKm - vehicle?.lastService?.mileageKm)} KM more to go`) : 'No Service/Distance Recorded' } /> 
-                                    </FloatingLabel>
-                                </Form.Group>
+                            <Card>
+                                <Card.Body>
+                                    <Card.Subtitle className="mb-2"><Calendar /> Dates</Card.Subtitle>
+                                    <Row>
+                                    <Col>
+                                        <InputGroup>
+                                        <InputGroup.Text><Insurance /></InputGroup.Text>
+                                        <FloatingLabel label="Insurance Expiry Date">
+                                        <Form.Control type="date" required={selectedCompanies[0]?.internal} name="insuranceExpiryDate" defaultValue={vehicle?.insuranceExpiryDate}></Form.Control>
+                                        </FloatingLabel>
+                                        </InputGroup>
+                                    </Col>
+                                    <Col>
+                                        <InputGroup>
+                                        <InputGroup.Text><Roadtax /></InputGroup.Text>
+                                        <FloatingLabel label="Road Tax Expiry Date">
+                                        <Form.Control type="date" required={selectedCompanies[0]?.internal} name="roadTaxExpiryDate" defaultValue={vehicle?.roadTaxExpiryDate}></Form.Control>
+                                        </FloatingLabel>
+                                        </InputGroup>
+                                    </Col>
+                                    <Col>
+                                        <InputGroup>
+                                        <InputGroup.Text><Inspection /></InputGroup.Text>
+                                        <FloatingLabel label="Inspection Due Date">
+                                        <Form.Control type="date" required={selectedCompanies[0]?.internal} name="inspectionDueDate" defaultValue={vehicle?.inspectionDueDate}></Form.Control>
+                                        </FloatingLabel>
+                                        </InputGroup>
+                                    </Col>
+                                    </Row>
+                                </Card.Body>
+                            </Card>
                             </Col>
                         </Row>
+                        <Row className="mb-3">
+                            <Col>
+                                <Card>
+                                    <Card.Body>
+                                        <Card.Subtitle className="mb-2"><Services /> Services</Card.Subtitle>
+                                        <Row>
+                                            <Col>
+                                                <Form.Group>
+                                                    <FloatingLabel label="Latest Mileage">
+                                                    <Form.Control plaintext readOnly defaultValue={vehicle?.latestMileageKm ? `${vehicle?.latestMileageKm} KM` : '-'} />
+                                                    </FloatingLabel>
+                                                </Form.Group>
+                                            </Col>
+                                            <Col>
+                                                <Form.Group>
+                                                    <FloatingLabel label="Last Service">
+                                                    <Form.Control plaintext readOnly defaultValue={vehicle?.lastService?.mileageKm ? `${vehicle?.lastService?.mileageKm} KM @ ${vehicle?.lastService?.startDate}` : '-' } /> 
+                                                    </FloatingLabel>
+                                                </Form.Group>
+                                            </Col>
+                                            <Col>
+                                                <Form.Group>
+                                                    <FloatingLabel label={`Next Service (every ${formatThousandSeparator(maintenanceServiceKm)}KM)`}>
+                                                    <Form.Control plaintext readOnly defaultValue={(vehicle?.lastService?.mileageKm && vehicle?.latestMileageKm) ? (((vehicle?.latestMileageKm - vehicle?.lastService?.mileageKm) > maintenanceServiceKm) ? 'Do it now!' : `${maintenanceServiceKm - (vehicle?.latestMileageKm - vehicle?.lastService?.mileageKm)} KM more to go`) : 'No Service/Distance Recorded' } /> 
+                                                    </FloatingLabel>
+                                                </Form.Group>
+                                            </Col>
+                                        </Row>
+                                </Card.Body>
+                            </Card>
+                        </Col>
+                        </Row>
                         <Row>
-                            <Col>
-                                <Form.Group>
-                                    <FloatingLabel label="Last Inspection Work">
-                                    <Form.Control plaintext readOnly defaultValue={vehicle?.lastInspection ? `${vehicle?.lastInspection?.startDate}` : '-' } />
-                                    </FloatingLabel>
-                                </Form.Group>
-                            </Col>
-                            <Col>
-                                <Form.Group>
-                                    <FloatingLabel label="Next Inspection Work">
-                                    <Form.Control plaintext readOnly defaultValue={vehicle?.lastInspection ? addMonthsToDateStr(vehicle?.lastInspection?.startDate, 6) : '-'} /> 
-                                    </FloatingLabel>
-                                </Form.Group>
+                        <Col>
+                            <Card>
+                                <Card.Body>
+                                <Card.Subtitle className="mb-2"><Inspection /> Inspections</Card.Subtitle>
+                                <Row>
+                                    <Col xs="4">
+                                        <Form.Group>
+                                            <FloatingLabel label="Last Inspection Work">
+                                            <Form.Control plaintext readOnly defaultValue={vehicle?.lastInspection ? `${vehicle?.lastInspection?.startDate}` : '-' } />
+                                            </FloatingLabel>
+                                        </Form.Group>
+                                    </Col>
+                                    <Col xs="4">
+                                        <Form.Group>
+                                            <FloatingLabel label="Next Inspection Work (Estimated)">
+                                            <Form.Control plaintext readOnly defaultValue={vehicle?.lastInspection ? addMonthsToDateStr(vehicle?.lastInspection?.startDate, 6) : '-'} /> 
+                                            </FloatingLabel>
+                                        </Form.Group>
+                                    </Col>
+                                </Row>
+                                </Card.Body>
+                                </Card>
                             </Col>
                         </Row>                        
                     </Form>

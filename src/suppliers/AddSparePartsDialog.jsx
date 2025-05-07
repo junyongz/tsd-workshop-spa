@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { Button, Col, Container, Form, InputGroup, ListGroup, Modal, Row } from "react-bootstrap";
 import { Typeahead } from "react-bootstrap-typeahead";
 import remainingQuantity, { decimalPointUomAvailable } from "../utils/quantityUtils";
+import { Calendar, Dollar, Suppliers, Tools } from "../Icons";
 
 function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[], suppliers=[], spareParts=[], sparePartUsages=[], onSaveNewOrders}) {
     const formRef = useRef()
@@ -191,7 +192,7 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
     return (
         <Modal show={isShow} onHide={handleClose} onShow={dialogOpened} backdrop="static" onEscapeKeyDown={(e) => e.preventDefault()} size="xl">
             <Modal.Header closeButton closeVariant="danger">
-            <Modal.Title><i className="bi bi-tools"></i> <span>{ editing ? "Update Spare Parts" : "Adding New Spare Parts" }</span></Modal.Title>
+            <Modal.Title><Tools /> <span>{ editing ? "Update Spare Parts" : "Adding New Spare Parts" }</span></Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <Container>
@@ -199,14 +200,14 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
                         <Row className="mb-3">
                             <Col sm="3">
                                 <InputGroup>
-                                    <InputGroup.Text><i className="bi bi-calendar-event"></i></InputGroup.Text>
+                                    <InputGroup.Text><Calendar /></InputGroup.Text>
                                     <Form.Control required type="date" name="invoiceDate" max={new Date().toISOString().split('T')[0]}
                                         placeholder="Key in Invoice Date" defaultValue={items[0]?.invoiceDate} disabled={editing}></Form.Control>
                                 </InputGroup>
                             </Col>
                             <Col sm="5">
                                 <InputGroup>
-                                    <InputGroup.Text><i className="bi bi-shop"></i></InputGroup.Text>
+                                    <InputGroup.Text><Suppliers /></InputGroup.Text>
                                     <Typeahead
                                         inputProps={{required:true, name:'supplier'}}
                                         id="supplier-select"
@@ -257,7 +258,7 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
                                     </Form.Group>
                                     <Form.Group as={Col} className="mb-3" controlId="sparePart">
                                         <InputGroup>
-                                        <InputGroup.Text><i className="bi bi-tools"></i></InputGroup.Text>
+                                        <InputGroup.Text><Tools /></InputGroup.Text>
                                         <Typeahead
                                             inputProps={{required: true, name: 'partName'}}
                                             labelKey='partName'
@@ -268,7 +269,7 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
                                                 <div>
                                                     <div>{option.partName}</div>
                                                     {/** TODO: to add supplier info later on */} 
-                                                    <small className="text-secondary">${option?.unitPrice} per {option?.unit} | <i className="bi bi-calendar-event"></i> {orders.mapping[option.orderId]?.invoiceDate}</small>
+                                                    <small className="text-secondary">${option?.unitPrice} per {option?.unit} | <Calendar /> {orders.mapping[option.orderId]?.invoiceDate}</small>
                                                 </div>
                                             }
                                             clearButton
@@ -290,7 +291,7 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
                                     </Col>
                                     <Col sm="2">
                                         <InputGroup>
-                                            <InputGroup.Text><i className="bi bi-currency-dollar"></i></InputGroup.Text>
+                                            <InputGroup.Text><Dollar /></InputGroup.Text>
                                             <Form.Control onChange={(e) => updatePriceByUnitPrice(e.target.value, i)} required disabled={v.disabled} type="number" min="0" step="0.01" name="unitPrice" placeholder="Price $" value={v?.unitPrice} />
                                         </InputGroup>
                                     </Col>

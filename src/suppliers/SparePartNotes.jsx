@@ -13,7 +13,7 @@ function SparePartNotes({order, onNoteClick, sparePartUsages }) {
             {sparePartUsages.findIndex(spu => spu.orderId === order.id) >= 0 
                 && sparePartUsages.filter(spu => spu.orderId === order.id)
                     .map(spu => 
-                        <span style={{display: 'block'}}>Used by {spu.vehicleNo}
+                        <span key={spu.id} style={{display: 'block'}}>Used by {spu.vehicleNo}
                             <Badge pill>{spu.quantity}</Badge>&nbsp;
                             <Calendar /> {spu.usageDate}
                         </span>)

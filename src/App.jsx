@@ -35,7 +35,7 @@ function App() {
   const services = useRef(new ServiceTransactions([]))
   const [filteredServices, setFilteredServices] = useState()
 
-  const orders = useRef()
+  const orders = useRef({listing:[], mapping:{}})
   const [filteredOrders, setFilteredOrders] = useState()
 
   const [sparePartUsages, setSparePartUsages] = useState([])
@@ -150,18 +150,17 @@ function App() {
   useEffect(() => {
       setLoading(true)
       requestAnimationFrame(async () => {
-        Promise.all([
-          refreshServices(),
-
-          refreshSupplierSpareParts(),
-          refreshSparePartUsages(),
-      
-          refreshCompanies(),
-          fetchVehicles(apiUrl, setVehicles, setSearchOptions),
-          refreshSpareParts(),
-          fetchSuppliers(apiUrl, setSuppliers)
-        ])
-        .then( () => setLoading(false) )
+        fetchSuppliers(apiUrl, setSuppliers)
+        .then(() => refreshSupplierSpareParts()
+          .then(() => Promise.all([
+                  refreshServices(),
+                  refreshSparePartUsages(),
+              
+                  refreshCompanies(),
+                  fetchVehicles(apiUrl, setVehicles, setSearchOptions),
+                  refreshSpareParts(),
+                ]))
+        .then( () => setLoading(false) ))
       })
 
       const fetchStatsTimer = setInterval(() => {
@@ -219,6 +218,7 @@ function App() {
               vehicles={vehicles}
               setVehicles={setVehicles}
               spareParts={spareParts}
+              setFilteredServices={setFilteredServices}
               filteredServices={filteredServices}
               keywordSearch={() => {
                 if (!selectedSearchOptions || selectedSearchOptions.length === 0) {

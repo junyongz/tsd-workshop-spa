@@ -104,7 +104,7 @@ function SupplierSparePartsYearMonthView({orders=[], suppliers=[], backToOrders}
                     <ListGroup className="position-sticky top-0">
                     {
                         sortedKeys.map(supplier => 
-                            <ListGroup.Item key={supplier.replaceAll(' ', '').replaceAll('(','').replaceAll(')','')} action href={'#supplier-' + supplier.replaceAll(' ', '').replaceAll('(','').replaceAll(')','')}>{supplier} <Badge pill>${amountBySuppliers.find(a => a.supplier === supplier).amount}</Badge></ListGroup.Item>
+                            <ListGroup.Item key={supplier.replaceAll(/[^a-zA-Z0-9]/g, '')} action href={'#supplier-' + supplier.replaceAll(/[^a-zA-Z0-9]/g, '')}>{supplier} <Badge pill>${amountBySuppliers.find(a => a.supplier === supplier).amount}</Badge></ListGroup.Item>
                         )
                     }
                     </ListGroup>
@@ -116,7 +116,7 @@ function SupplierSparePartsYearMonthView({orders=[], suppliers=[], backToOrders}
                             const groupByDO = itemsByOrder(values)
                         
                             return (
-                            <ListGroup key={supplier} id={'supplier-' + supplier.replaceAll(' ', '').replaceAll('(','').replaceAll(')','')}>
+                            <ListGroup key={supplier} id={'supplier-' + supplier.replaceAll(/[^a-zA-Z0-9]/g, '')}>
                                 <Card className={'mb-2'}>
                                     <Card.Header>
                                         <Stack direction="horizontal">

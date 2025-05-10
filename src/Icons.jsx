@@ -10,6 +10,10 @@ export function Truck(props) {
     return (<i className="bi bi-truck" {...props}></i>)
 }
 
+export function Trailer(props) {
+    return (<i className="bi bi-truck-flatbed" {...props}></i>)
+}
+
 export function Repair() {
     return (<i className="bi bi-hammer"></i>)
 }

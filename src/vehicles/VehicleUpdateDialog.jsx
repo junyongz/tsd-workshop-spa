@@ -1,10 +1,10 @@
 import React, { useRef, useState } from "react"
-import { Container, Form, Modal, Row, Col, Button, InputGroup, FloatingLabel, Card } from "react-bootstrap"
+import { Container, Form, Modal, Row, Col, Button, InputGroup, FloatingLabel, Card, FormLabel } from "react-bootstrap"
 import { Typeahead } from "react-bootstrap-typeahead"
 import formatThousandSeparator from "../utils/numberUtils"
 import { maintenanceServiceKm } from "./maintenanceService"
 import { addMonthsToDateStr } from "../utils/dateUtils"
-import { Calendar, Company, Inspection, Insurance, Roadtax, Services, Truck } from "../Icons"
+import { Calendar, Company, Inspection, Insurance, Roadtax, Services, Trailer, Truck } from "../Icons"
 
 function VehicleUpdateDialog({isShow, setShowDialog, vehicle, setVehicles, companies}) {
 
@@ -14,16 +14,21 @@ function VehicleUpdateDialog({isShow, setShowDialog, vehicle, setVehicles, compa
     const [validated, setValidated] = useState(false)
 
     const [selectedCompanies, setSelectedCompanies] = useState([])
+    const [differentDueForTrailer, setDifferentDueForTrailer] = useState(false)
 
     const onShowingDialog = () => {
         if (vehicle?.companyId) {
             setSelectedCompanies([companies.find(co => co.id === vehicle.companyId)])
+        }
+        if (vehicle?.inspectionDueDate !== vehicle?.trailerInspectionDueDate) {
+            setDifferentDueForTrailer(true)
         }
     }
 
     const handleClose = () => {
         setValidated(false)
         setShowDialog(false)
+        setDifferentDueForTrailer(false)
         setSelectedCompanies([])
     }
 
@@ -55,7 +60,10 @@ function VehicleUpdateDialog({isShow, setShowDialog, vehicle, setVehicles, compa
             companyId: selectedCompanies[0].id,
             insuranceExpiryDate: nativeForm['insuranceExpiryDate'].value,
             roadTaxExpiryDate: nativeForm['roadTaxExpiryDate'].value,
-            inspectionDueDate: nativeForm['inspectionDueDate'].value
+            inspectionDueDate: nativeForm['inspectionDueDate'].value,
+            trailerInspectionDueDate: nativeForm['trailerInspectionDueDate'] ? nativeForm['trailerInspectionDueDate'].value : nativeForm['inspectionDueDate'].value,
+            nextInspectionDate: nativeForm['nextInspectionDate'].value,
+            nextTrailerInspectionDate: nativeForm['nextTrailerInspectionDate'] ? nativeForm['nextTrailerInspectionDate'].value : nativeForm['nextInspectionDate'].value
         }
 
         fetch(`${apiUrl}/vehicles`, {
@@ -105,7 +113,7 @@ function VehicleUpdateDialog({isShow, setShowDialog, vehicle, setVehicles, compa
                             </Col>
                             <Col>
                                 <InputGroup>
-                                <InputGroup.Text><i className="bi bi-truck-flatbed"></i></InputGroup.Text>
+                                <InputGroup.Text><Trailer /></InputGroup.Text>
                                 <FloatingLabel label="Trailer No">
                                 <Form.Control name="trailerNo" placeholder="Key in trailer no" defaultValue={vehicle?.trailerNo}></Form.Control>
                                 </FloatingLabel>
@@ -131,10 +139,9 @@ function VehicleUpdateDialog({isShow, setShowDialog, vehicle, setVehicles, compa
                             <Col>
                             <Card>
                                 <Card.Body>
-                                    <Card.Subtitle className="mb-2"><Calendar /> Dates</Card.Subtitle>
                                     <Row>
                                     <Col>
-                                        <InputGroup>
+                                        <InputGroup className="mb-3">
                                         <InputGroup.Text><Insurance /></InputGroup.Text>
                                         <FloatingLabel label="Insurance Expiry Date">
                                         <Form.Control type="date" required={selectedCompanies[0]?.internal} name="insuranceExpiryDate" defaultValue={vehicle?.insuranceExpiryDate}></Form.Control>
@@ -149,20 +156,75 @@ function VehicleUpdateDialog({isShow, setShowDialog, vehicle, setVehicles, compa
                                         </FloatingLabel>
                                         </InputGroup>
                                     </Col>
-                                    <Col>
-                                        <InputGroup>
-                                        <InputGroup.Text><Inspection /></InputGroup.Text>
-                                        <FloatingLabel label="Inspection Due Date">
-                                        <Form.Control type="date" required={selectedCompanies[0]?.internal} name="inspectionDueDate" defaultValue={vehicle?.inspectionDueDate}></Form.Control>
-                                        </FloatingLabel>
-                                        </InputGroup>
-                                    </Col>
                                     </Row>
                                 </Card.Body>
                             </Card>
                             </Col>
                         </Row>
                         <Row className="mb-3">
+                        <Col>
+                            <Card>
+                                <Card.Body>
+                                <Card.Subtitle className="mb-2"><Inspection /> Inspections</Card.Subtitle>
+                                <Row>
+                                    <Col>
+                                        <InputGroup className="mb-2">
+                                        <InputGroup.Text><Inspection /></InputGroup.Text>
+                                        <FloatingLabel label="Inspection Due Date">
+                                        <Form.Control type="date" required={selectedCompanies[0]?.internal} name="inspectionDueDate" defaultValue={vehicle?.inspectionDueDate}></Form.Control>
+                                        </FloatingLabel>
+                                        </InputGroup>
+                                        {!differentDueForTrailer && <FormLabel className="text-secondary form-text"><span role="button" onClick={() => setDifferentDueForTrailer(true)}>Different for Trailer</span></FormLabel> }
+                                        { differentDueForTrailer &&
+                                        <>
+                                        <InputGroup>
+                                        <InputGroup.Text><Trailer /></InputGroup.Text>
+                                        <FloatingLabel label="Trailer Inspection Due">
+                                        <Form.Control type="date" required={selectedCompanies[0]?.internal} name="trailerInspectionDueDate" defaultValue={vehicle?.trailerInspectionDueDate}></Form.Control>
+                                        </FloatingLabel>
+                                        </InputGroup> 
+                                        <FormLabel className="text-secondary form-text"><span role="button" onClick={() => setDifferentDueForTrailer(false)}>Cancel, they are same</span></FormLabel>
+                                        </>
+                                        }
+                                    </Col>
+                                    <Col>
+                                        <InputGroup className="mb-2">
+                                        <InputGroup.Text><Calendar /></InputGroup.Text>
+                                        <FloatingLabel label="Next Inspection Booked">
+                                        <Form.Control type="date" required={selectedCompanies[0]?.internal} name="nextInspectionDate" defaultValue={vehicle?.nextInspectionDate}></Form.Control>
+                                        </FloatingLabel>
+                                        </InputGroup>
+                                        { differentDueForTrailer &&
+                                            <InputGroup>
+                                            <InputGroup.Text><Calendar /></InputGroup.Text>
+                                            <FloatingLabel label="Booked for Trailer">
+                                            <Form.Control type="date" required={selectedCompanies[0]?.internal} name="nextTrailerInspectionDate" defaultValue={vehicle?.nextTrailerInspectionDate}></Form.Control>
+                                            </FloatingLabel>
+                                            </InputGroup> 
+                                        }
+                                    </Col>
+                                </Row>
+                                <Row>
+                                    <Col>
+                                        <Form.Group>
+                                            <FloatingLabel label="Last Inspection Work">
+                                            <Form.Control plaintext readOnly defaultValue={vehicle?.lastInspection ? `${vehicle?.lastInspection?.startDate}` : '-' } />
+                                            </FloatingLabel>
+                                        </Form.Group>
+                                    </Col>
+                                    <Col>
+                                        <Form.Group>
+                                            <FloatingLabel label="Next Inspection Work (Estimated)">
+                                            <Form.Control plaintext readOnly defaultValue={vehicle?.lastInspection ? addMonthsToDateStr(vehicle?.lastInspection?.startDate, 6) : '-'} /> 
+                                            </FloatingLabel>
+                                        </Form.Group>
+                                    </Col>
+                                </Row>
+                                </Card.Body>
+                            </Card>
+                        </Col>
+                        </Row>
+                        <Row>
                             <Col>
                                 <Card>
                                     <Card.Body>
@@ -194,31 +256,6 @@ function VehicleUpdateDialog({isShow, setShowDialog, vehicle, setVehicles, compa
                             </Card>
                         </Col>
                         </Row>
-                        <Row>
-                        <Col>
-                            <Card>
-                                <Card.Body>
-                                <Card.Subtitle className="mb-2"><Inspection /> Inspections</Card.Subtitle>
-                                <Row>
-                                    <Col xs="4">
-                                        <Form.Group>
-                                            <FloatingLabel label="Last Inspection Work">
-                                            <Form.Control plaintext readOnly defaultValue={vehicle?.lastInspection ? `${vehicle?.lastInspection?.startDate}` : '-' } />
-                                            </FloatingLabel>
-                                        </Form.Group>
-                                    </Col>
-                                    <Col xs="4">
-                                        <Form.Group>
-                                            <FloatingLabel label="Next Inspection Work (Estimated)">
-                                            <Form.Control plaintext readOnly defaultValue={vehicle?.lastInspection ? addMonthsToDateStr(vehicle?.lastInspection?.startDate, 6) : '-'} /> 
-                                            </FloatingLabel>
-                                        </Form.Group>
-                                    </Col>
-                                </Row>
-                                </Card.Body>
-                                </Card>
-                            </Col>
-                        </Row>                        
                     </Form>
                 </Container>
             </Modal.Body>

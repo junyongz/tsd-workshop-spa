@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react"
-import { Container, Form, Modal, Row, Col, Button, InputGroup, FloatingLabel, Card, FormLabel } from "react-bootstrap"
+import { Container, Form, Modal, Row, Col, Button, InputGroup, FloatingLabel, Card, FormLabel, Image } from "react-bootstrap"
 import { Typeahead } from "react-bootstrap-typeahead"
 import formatThousandSeparator from "../utils/numberUtils"
 import { maintenanceServiceKm } from "./maintenanceService"
@@ -16,6 +16,8 @@ function VehicleUpdateDialog({isShow, setShowDialog, vehicle, setVehicles, compa
     const [selectedCompanies, setSelectedCompanies] = useState([])
     const [differentDueForTrailer, setDifferentDueForTrailer] = useState(false)
 
+    const [showMap, setShowMap] = useState(false)
+
     const onShowingDialog = () => {
         if (vehicle?.companyId) {
             setSelectedCompanies([companies.find(co => co.id === vehicle.companyId)])
@@ -30,6 +32,7 @@ function VehicleUpdateDialog({isShow, setShowDialog, vehicle, setVehicles, compa
         setShowDialog(false)
         setDifferentDueForTrailer(false)
         setSelectedCompanies([])
+        setShowMap(false)
     }
 
     const checkCompanyValidity = (companyInput) => {
@@ -191,14 +194,14 @@ function VehicleUpdateDialog({isShow, setShowDialog, vehicle, setVehicles, compa
                                         <InputGroup className="mb-2">
                                         <InputGroup.Text><Calendar /></InputGroup.Text>
                                         <FloatingLabel label="Next Inspection Booked">
-                                        <Form.Control type="date" required={selectedCompanies[0]?.internal} name="nextInspectionDate" defaultValue={vehicle?.nextInspectionDate}></Form.Control>
+                                        <Form.Control type="date" name="nextInspectionDate" defaultValue={vehicle?.nextInspectionDate}></Form.Control>
                                         </FloatingLabel>
                                         </InputGroup>
                                         { differentDueForTrailer &&
                                             <InputGroup>
                                             <InputGroup.Text><Calendar /></InputGroup.Text>
                                             <FloatingLabel label="Booked for Trailer">
-                                            <Form.Control type="date" required={selectedCompanies[0]?.internal} name="nextTrailerInspectionDate" defaultValue={vehicle?.nextTrailerInspectionDate}></Form.Control>
+                                            <Form.Control type="date"  name="nextTrailerInspectionDate" defaultValue={vehicle?.nextTrailerInspectionDate}></Form.Control>
                                             </FloatingLabel>
                                             </InputGroup> 
                                         }
@@ -256,6 +259,19 @@ function VehicleUpdateDialog({isShow, setShowDialog, vehicle, setVehicles, compa
                             </Card>
                         </Col>
                         </Row>
+                        <Row>
+                            <Col><Button variant="link" onClick={() => setShowMap(prev => !prev)}>{showMap ? 'Hide the map' : 'Where are they now?' }</Button></Col>
+                        </Row>
+                        { showMap && <Row>
+                            <Col>
+                                <Card>
+                                    <Card.Body className="p-3 mx-auto">
+                                    <Image width={640} height={640} 
+                                        src={`${apiUrl}/vehicles/${vehicle.id}/gps`}></Image>
+                                    </Card.Body>
+                                </Card>
+                            </Col>
+                        </Row> }
                     </Form>
                 </Container>
             </Modal.Body>

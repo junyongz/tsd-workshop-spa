@@ -1,6 +1,5 @@
-export const doFilterServices = (options=[], services, setFilteredServices, sparePartUsages, orders, setFilteredOrders, setSelectedSearchOptions) => {
-    if (services.current) {
-      const searchedFilteredServices = []
+export const doInAppFilterServices = (options=[], services, orders, setFilteredServices) => {
+    const searchedFilteredServices = []
       for (const v of services.current.transactions) {
         let foundVehicle = false
         if (options.some(val => v.vehicleNo.includes(val.name))) {
@@ -33,23 +32,42 @@ export const doFilterServices = (options=[], services, setFilteredServices, spar
         }
       }
 
+
       searchedFilteredServices.sort((left, right) => left.startDate < right.startDate)
       setFilteredServices(searchedFilteredServices)
+}
+
+export const doInAppFilterOrders = (options, orders, setFilteredOrders, sparePartUsages) => {
+    const searchedFilteredOrders = []
+    for (const order of orders.current.listing) {
+      if (options.some(val => 
+          order.partName.toUpperCase().includes(val.name.toUpperCase()) ||
+          (order.itemCode && val.name.toUpperCase().includes(order.itemCode.toUpperCase())) || 
+          order.notes?.toUpperCase().includes(val.name.toUpperCase()) ||
+          sparePartUsages.find(spu => spu.orderId === order.id)?.vehicleNo === val.name)) {
+        searchedFilteredOrders.push(order)
+      }
+    }
+    setFilteredOrders(searchedFilteredOrders)
+}
+
+export const doFilterServices = (options=[], services, setFilteredServices, sparePartUsages, orders, setFilteredOrders, setSelectedSearchOptions) => {
+    const apiUrl = process.env.REACT_APP_API_URL
+
+    if (services.current) {
+      const keywords = options.map(opt => `keyword=${opt.name}`).join('&')
+
+      fetch(`${apiUrl}/workshop-services?${keywords}`)
+        .then(resp => resp.json())
+        .then(wss => {
+          wss.forEach(ws => services.current.updateTransaction(ws))
+          setFilteredServices([...wss].sort((left, right) => left.startDate < right.startDate))
+        })
     }
 
     if (orders.current) {
-      const searchedFilteredOrders = []
-      for (const order of orders.current.listing) {
-        if (options.some(val => 
-            val.name.toUpperCase().includes(order.partName.toUpperCase()) ||
-            (order.itemCode && val.name.toUpperCase().includes(order.itemCode.toUpperCase())) || 
-            order.notes?.toUpperCase().includes(val.name.toUpperCase()) ||
-            sparePartUsages.find(spu => spu.orderId === order.id)?.vehicleNo === val.name)) {
-          searchedFilteredOrders.push(order)
-        }
-      }
-      setFilteredOrders(searchedFilteredOrders)
+        doInAppFilterOrders(options, orders, setFilteredOrders, sparePartUsages)
     }
 
     setSelectedSearchOptions(options)
-  }
+}

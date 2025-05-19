@@ -12,12 +12,7 @@ import YearMonthView from './services/YearMonthView';
 import TransactionTypes from './components/TransactionTypes';
 import { Calendar } from './Icons';
 
-/***
- * Date: {
- *  vehicle: [transactions]
- * }
- */
-function ServiceListing({services, filteredServices=[], 
+function ServiceListing({services, filteredServices=[], setFilteredServices,
     keywordSearch = () => {}, refreshSparePartUsages=() => {}, 
     refreshSpareParts=() => {},
     vehicles, setVehicles, spareParts, sparePartUsages=[],
@@ -155,10 +150,19 @@ function ServiceListing({services, filteredServices=[],
     })
   }
 
+  const loadWorkshopService = (ws) => {
+    fetch(`${apiUrl}/workshop-services/${ws.id}`)
+    .then(resp => resp.json())
+    .then(wsJson => {
+      services.current.updateTransaction(wsJson)
+      setFilteredServices([...services.current.transactions])
+    })
+  }
+
   return (
     <Container>
     {
-      yearMonthView && <YearMonthView services={services} suppliers={suppliers} orders={orders} backToService={() => setYearMonthView(false)}></YearMonthView>
+      yearMonthView && <YearMonthView services={services} setFilteredServices={setFilteredServices} suppliers={suppliers} orders={orders} backToService={() => setYearMonthView(false)}></YearMonthView>
     }
     { !yearMonthView && <Container>
       <ServiceDialog isShow={showModal} setShow={setShowModal} trx={serviceTransaction} 
@@ -182,7 +186,6 @@ function ServiceListing({services, filteredServices=[],
           </ButtonGroup>
         </Col>
       </Row>
-
       {
         chunkedItems[activePage - 1]?.map((v, i) =>
             <Card key={v.id} className={'mb-3'}>
@@ -194,10 +197,10 @@ function ServiceListing({services, filteredServices=[],
                   </Col>
                   { false && <Col className={'text-sm-end col-4'}><Badge pill><i className="bi bi-person-fill-gear me-1"></i>{'Tan Chwee Seng'}</Badge></Col> }
                   <Col sm="4" className={'text-sm-end'}>
-                    <h4><span className="border border-1 border-primary border-opacity-50 rounded-2 px-3 py-1">
+                    <h4>
                       $ {((v.migratedHandWrittenSpareParts?.reduce((acc, curr) => acc += curr.totalPrice, 0) || 0) + 
-                          v.sparePartUsages?.reduce((acc, curr) =>  acc + (curr.quantity * curr.soldPrice), 0)).toFixed(2)}
-                    </span></h4>
+                          (v.sparePartUsages?.reduce((acc, curr) =>  acc + (curr.quantity * curr.soldPrice), 0) || 0)).toFixed(2)}
+                    </h4>
                   </Col>
                 </Row>
               </Card.Header>
@@ -228,7 +231,7 @@ function ServiceListing({services, filteredServices=[],
                       })
                     }
                     {v.sparePartUsages?.map(vvv => {
-                      const order = orders?.mapping[vvv.orderId]
+                      const order = orders?.mapping[vvv.orderId] || {}
                       const supplier = suppliers.find(s => s.id === order.supplierId)
                       const totalPrice = (vvv.quantity * vvv.soldPrice).toFixed(2)
 
@@ -242,6 +245,9 @@ function ServiceListing({services, filteredServices=[],
                       </ListGroupItem>
                       })
                     }
+                    {((!v.migratedHandWrittenSpareParts || v.migratedHandWrittenSpareParts.length === 0)
+                    && (!v.sparePartUsages || v.sparePartUsages.length === 0)) && 
+                    <Button onClick={() => loadWorkshopService(v)} variant='outline-secondary'><i className="bi bi-three-dots"></i></Button>}
                     </ListGroup>
                   </Col>
                 </Row>

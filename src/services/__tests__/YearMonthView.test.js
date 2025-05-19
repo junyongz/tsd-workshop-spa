@@ -1,7 +1,8 @@
 import React from 'react';
-import { render, screen, fireEvent, within } from '@testing-library/react';
+import { render, screen, fireEvent, within, act, waitFor } from '@testing-library/react';
 import YearMonthView from '../YearMonthView';
 import { ScrollSpy } from 'bootstrap';
+import { wait } from '@testing-library/user-event/dist/cjs/utils/index.js';
 
 // Mock OrderTooltip
 jest.mock('../OrderTooltip', () => ({ order, supplier }) => (
@@ -12,29 +13,36 @@ jest.mock('../OrderTooltip', () => ({ order, supplier }) => (
 jest.mock('bootstrap')
 
 describe('YearMonthView Component', () => {
+  const allServices = [
+    { index: 1, itemDescription: 'Oil Change', totalPrice: 100, quantity: 2, unit: 'ltr', unitPrice: 50 },
+    { index: 2, itemDescription: 'Tire Replacement', totalPrice: 200, quantity: 4, unit: 'pcs', unitPrice: 50 },
+    { index: 3, itemDescription: 'Brake Pads', totalPrice: 300, quantity: 2, unit: 'set', unitPrice: 150 },
+    { index: 4, itemDescription: 'Filter Change', totalPrice: 160, quantity: 2, unit: 'pcs', unitPrice: 80 },
+    { id: 10, orderId: 1, supplierId: 1, creationDate: '2023-01-05', itemDescription: 'Diesel Change',  quantity: 2 },
+    { id: 20, orderId: 2, supplierId: 2, creationDate: '2023-01-06', itemDescription: 'Tire Rotation',  quantity: 4 },
+    { id: 30, orderId: 3, supplierId: 1, creationDate: '2023-01-07', itemDescription: 'Brake Lining',  quantity: 2 },
+    { id: 40, orderId: 4, supplierId: 2, creationDate: '2023-01-08', itemDescription: 'Air Balloon Change',  quantity: 2 }
+  ];
+
   const mockServices = {
     current: {
       filterByYearMonthGroupByVehicle(year, month) {
-        const allServices = [
-          { index: 1, itemDescription: 'Oil Change', totalPrice: 100, quantity: 2, unit: 'ltr', unitPrice: 50 },
-          { index: 2, itemDescription: 'Tire Replacement', totalPrice: 200, quantity: 4, unit: 'pcs', unitPrice: 50 },
-          { index: 3, itemDescription: 'Brake Pads', totalPrice: 300, quantity: 2, unit: 'set', unitPrice: 150 },
-          { index: 4, itemDescription: 'Filter Change', totalPrice: 160, quantity: 2, unit: 'pcs', unitPrice: 80 },
-          { id: 10, orderId: 1, supplierId: 1, creationDate: '2023-01-05', itemDescription: 'Diesel Change',  quantity: 2 },
-          { id: 20, orderId: 2, supplierId: 2, creationDate: '2023-01-06', itemDescription: 'Tire Rotation',  quantity: 4 },
-          { id: 30, orderId: 3, supplierId: 1, creationDate: '2023-01-07', itemDescription: 'Brake Lining',  quantity: 2 },
-          { id: 40, orderId: 4, supplierId: 2, creationDate: '2023-01-08', itemDescription: 'Air Balloon Change',  quantity: 2 }
-        ];
-
         return {
           'Truck A': [ { creationDate: '2023-01-01', sparePartUsages: allServices.slice(4, 5), migratedHandWrittenSpareParts: allServices.slice(0, 1) } ],
           'Truck B': [ { creationDate: '2023-01-02', sparePartUsages: allServices.slice(5, 7), migratedHandWrittenSpareParts: allServices.slice(1, 3) } ],
           'Truck C': [ { creationDate: '2023-01-03', sparePartUsages: allServices.slice(7), migratedHandWrittenSpareParts: allServices.slice(3, 4) } ]
         };
       },
+      updateTransaction(ws) {
+
+      },
       availableYears() {
         return [2022, 2023, 2024];
-      }
+      },
+      transactions: [{ creationDate: '2023-01-01', sparePartUsages: allServices.slice(4, 5), migratedHandWrittenSpareParts: allServices.slice(0, 1) },
+        { creationDate: '2023-01-02', sparePartUsages: allServices.slice(5, 7), migratedHandWrittenSpareParts: allServices.slice(1, 3) },
+        { creationDate: '2023-01-03', sparePartUsages: allServices.slice(7), migratedHandWrittenSpareParts: allServices.slice(3, 4) }
+      ]
     }
   };
 
@@ -54,7 +62,8 @@ describe('YearMonthView Component', () => {
     services: mockServices,
     suppliers: mockSuppliers,
     orders: {listing: mockOrders, mapping: mockOrders.reduce((acc, curr) => {acc[curr.id] = curr; return acc}, {})},
-    backToService: jest.fn()
+    backToService: jest.fn(),
+    setFilteredServices: jest.fn()
   };
 
   beforeAll(() => {
@@ -71,85 +80,108 @@ describe('YearMonthView Component', () => {
     ScrollSpy.mockClear(); // Clear ScrollSpy mock calls between tests
   });
 
-  test('renders component with initial year and month', () => {
+  test('renders component with initial year and month', async () => {
+    global.fetch = jest.fn(() => Promise.resolve({ok: true, 
+      json: () => Promise.resolve([])}));
     render(<YearMonthView {...defaultProps} />);
 
-    const yearButton = screen.getByRole('button', { name: '2023' });
-    expect(yearButton).toBeInTheDocument();
+    await waitFor(() => {
+      const yearButton = screen.getByRole('button', { name: '2023' });
+      expect(yearButton).toBeInTheDocument();
 
-    expect(screen.getByRole('button', { name: 'Jan' })).toHaveClass('btn-outline-primary');
+      expect(screen.getByRole('button', { name: 'Jan' })).toHaveClass('btn-outline-primary');
 
-    expect(screen.getAllByText('Truck A').length).toBe(3);
-    expect(screen.getAllByText('Truck B').length).toBe(3);
-    expect(screen.getAllByText('Truck C').length).toBe(3);
+      expect(screen.getAllByText('Truck A').length).toBe(3);
+      expect(screen.getAllByText('Truck B').length).toBe(3);
+      expect(screen.getAllByText('Truck C').length).toBe(3);
 
-    expect(screen.getByText('Trucks')).toBeInTheDocument();
-    expect(screen.getByText('3')).toBeInTheDocument(); // 3 trucks
-    expect(screen.getByText('$ 1530.00')).toBeInTheDocument(); // Total amount
-    expect(screen.getByText('8')).toBeInTheDocument(); // 4 items
+      expect(screen.getByText('Trucks')).toBeInTheDocument();
+      expect(screen.getByText('3')).toBeInTheDocument(); // 3 trucks
+      expect(screen.getByText('$ 1530.00')).toBeInTheDocument(); // Total amount
+      expect(screen.getByText('8')).toBeInTheDocument(); // 4 items
+    })
   });
 
-  test('changes year via dropdown', () => {
+  test('changes year via dropdown', async () => {
+    global.fetch = jest.fn(() => Promise.resolve({ok: true, 
+      json: () => Promise.resolve([])}));
     render(<YearMonthView {...defaultProps} />);
 
-    const yearButton = screen.getByRole('button', { name: '2023' });
-    fireEvent.click(yearButton)
+    await waitFor(() => {
+      const yearButton = screen.getAllByRole('button', { name: '2023' })[0];
+      fireEvent.click(yearButton)
 
-    const yearDropdown = screen.getAllByRole('group')[0];
-    const year2022 = within(yearDropdown).getByText('2022');
-    fireEvent.click(year2022);
+      const year2022 = screen.getAllByRole('button', { name: '2022' })[0];
+      fireEvent.click(year2022);
 
-    expect(screen.getAllByRole('button', { name: '2022' })[1]).toBeInTheDocument();
+      expect(screen.getAllByRole('button', { name: '2022' })[1]).toBeInTheDocument();
+    })
   });
 
-  test('changes month via button', () => {
+  test('changes month via button', async () => {
+    global.fetch = jest.fn(() => Promise.resolve({ok: true, 
+      json: () => Promise.resolve([])}));
     render(<YearMonthView {...defaultProps} />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Jun' }));
+    await waitFor(() => {
+      fireEvent.click(screen.getByRole('button', { name: 'Jun' }));
 
-    expect(screen.getByRole('button', { name: 'Jun' })).toHaveClass('btn-outline-primary');
+      expect(screen.getByRole('button', { name: 'Jun' })).toHaveClass('btn-outline-primary');
+    })
   });
 
-  test('calls backToService when Back to Service button is clicked', () => {
+  test('calls backToService when Back to Service button is clicked', async () => {
+    global.fetch = jest.fn(() => Promise.resolve({ok: true, 
+      json: () => Promise.resolve([])}));
     render(<YearMonthView {...defaultProps} />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Back to Service' }));
-    expect(defaultProps.backToService).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      fireEvent.click(screen.getByRole('button', { name: 'Back to Service' }));
+      expect(defaultProps.backToService).toHaveBeenCalledTimes(1);
+    })
   });
 
-  test('displays vehicle transactions with order and supplier info', () => {
+  test('displays vehicle transactions with order and supplier info', async () => {
+    global.fetch = jest.fn(() => Promise.resolve({ok: true, 
+      json: () => Promise.resolve([])}));
     render(<YearMonthView {...defaultProps} />);
 
-    expect(screen.getAllByText('2023-01-01').length).toBe(2)
-    expect(screen.getByText('Oil Change')).toBeInTheDocument();
-    expect(screen.getByText('OrderTooltip for 1 from Supplier A')).toBeInTheDocument();
-    expect(screen.getByText('2 ltr @ $50.00')).toBeInTheDocument();
-    expect(screen.getByText('$ 100.00')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getAllByText('2023-01-01').length).toBe(2)
+      expect(screen.getByText('Oil Change')).toBeInTheDocument();
+      expect(screen.getByText('OrderTooltip for 1 from Supplier A')).toBeInTheDocument();
+      expect(screen.getByText('2 ltr @ $50.00')).toBeInTheDocument();
+      expect(screen.getByText('$ 100.00')).toBeInTheDocument();
 
-    expect(screen.getAllByText('2023-01-02').length).toBe(4)
-    expect(screen.getByText('Tire Replacement')).toBeInTheDocument();
-    expect(screen.getByText('OrderTooltip for 2 from Supplier B')).toBeInTheDocument();
-    expect(screen.getByText('4 pcs @ $50.00')).toBeInTheDocument();
-    expect(screen.getByText('$ 200.00')).toBeInTheDocument();
+      expect(screen.getAllByText('2023-01-02').length).toBe(4)
+      expect(screen.getByText('Tire Replacement')).toBeInTheDocument();
+      expect(screen.getByText('OrderTooltip for 2 from Supplier B')).toBeInTheDocument();
+      expect(screen.getByText('4 pcs @ $50.00')).toBeInTheDocument();
+      expect(screen.getByText('$ 200.00')).toBeInTheDocument();
 
-    expect(screen.getAllByText('2023-01-03').length).toBe(2)
-    expect(screen.getByText('Filter Change')).toBeInTheDocument();
-    expect(screen.getByText('OrderTooltip for 4 from Supplier B')).toBeInTheDocument();
-    expect(screen.getByText('2 ltr @ $35.00')).toBeInTheDocument();
-    expect(screen.getByText('$ 70.00')).toBeInTheDocument();
+      expect(screen.getAllByText('2023-01-03').length).toBe(2)
+      expect(screen.getByText('Filter Change')).toBeInTheDocument();
+      expect(screen.getByText('OrderTooltip for 4 from Supplier B')).toBeInTheDocument();
+      expect(screen.getByText('2 ltr @ $35.00')).toBeInTheDocument();
+      expect(screen.getByText('$ 70.00')).toBeInTheDocument();
+    })
   });
 
-  test('displays top 3 vehicles by amount in summary', () => {
-    render(<YearMonthView {...defaultProps} />);
+  test('displays top 3 vehicles by amount in summary', async () => {
+    global.fetch = jest.fn(() => Promise.resolve({ok: true, 
+      json: () => Promise.resolve([])}));
+    render(<YearMonthView {...defaultProps} />)
 
-    const summaryCard = screen.getByText('Top 3:').closest('.card-body');
-    const withinSummary = within(summaryCard);
+    await waitFor(() => {
+      const summaryCard = screen.getByText('Top 3:').closest('.card-body');
+      const withinSummary = within(summaryCard);
 
-    expect(withinSummary.getByText('Truck B')).toBeInTheDocument();
-    expect(withinSummary.getByText('$1040.00')).toBeInTheDocument();
-    expect(withinSummary.getByText('Truck C')).toBeInTheDocument();
-    expect(withinSummary.getByText('$320.00')).toBeInTheDocument();
-    expect(withinSummary.getByText('Truck A')).toBeInTheDocument();
-    expect(withinSummary.getByText('$170.00')).toBeInTheDocument();
+      expect(withinSummary.getByText('Truck B')).toBeInTheDocument();
+      expect(withinSummary.getByText('$1040.00')).toBeInTheDocument();
+      expect(withinSummary.getByText('Truck C')).toBeInTheDocument();
+      expect(withinSummary.getByText('$320.00')).toBeInTheDocument();
+      expect(withinSummary.getByText('Truck A')).toBeInTheDocument();
+      expect(withinSummary.getByText('$170.00')).toBeInTheDocument();
+    })
   });
 });

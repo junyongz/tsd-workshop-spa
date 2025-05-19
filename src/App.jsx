@@ -17,7 +17,7 @@ import ServiceTransactions from './ServiceTransactions';
 import NavigationBar from './NavigationBar';
 import Vehicles from './vehicles/Vehicles';
 
-import { doFilterServices } from './fuzzySearch';
+import { doFilterServices, doInAppFilterOrders, doInAppFilterServices } from './fuzzySearch';
 
 /***
  * Date: {
@@ -57,6 +57,13 @@ function App() {
   // search box
   const [searchOptions, setSearchOptions] = useState([])
   const [selectedSearchOptions, setSelectedSearchOptions] = useState([])
+  const searchedOptions = useRef(new Set())
+  const storeSelectedSearchOptions = (opts=[]) => {
+    setSelectedSearchOptions(opts)
+    if (opts && opts.length > 0) {
+      opts.forEach(opt => searchedOptions.current.add(opt.name))
+    }
+  }
   const [searchByDate, setSearchByDate] = useState(false)
 
   // domain data
@@ -74,13 +81,20 @@ function App() {
       clearTimeout(filterTimeoutRef.current)
       setFilteredServices(services.current.transactions)
       setFilteredOrders(orders.current.listing)
-      setSelectedSearchOptions([])
+      storeSelectedSearchOptions([])
       return
     }
 
-    clearTimeout(filterTimeoutRef.current)
-    filterTimeoutRef.current = setTimeout(() => doFilterServices(
-      options, services, setFilteredServices, sparePartUsages, orders, setFilteredOrders, setSelectedSearchOptions), 600)
+    if (options.map(opt => opt.name).every(v => searchedOptions.current.has(v))) {
+      doInAppFilterServices(options, services, orders, setFilteredServices);
+      doInAppFilterOrders(options, orders, setFilteredOrders, sparePartUsages)
+      setSelectedSearchOptions(options)
+    }
+    else {
+      clearTimeout(filterTimeoutRef.current)
+      filterTimeoutRef.current = setTimeout(() => doFilterServices(
+        options, services, setFilteredServices, sparePartUsages, orders, setFilteredOrders, storeSelectedSearchOptions), 600)
+    }
   }
 
   const filterByDate = (val) => {

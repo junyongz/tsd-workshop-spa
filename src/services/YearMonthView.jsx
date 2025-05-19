@@ -4,12 +4,34 @@ import OrderTooltip from "./OrderTooltip"
 import { ScrollSpy } from "bootstrap"
 import { Services } from "../Icons"
 
-function YearMonthView({services, suppliers=[], orders=[], backToService}) {
+function YearMonthView({services, setFilteredServices, suppliers=[], orders=[], backToService}) {
+    const apiUrl = process.env.REACT_APP_API_URL
+
     const currentDate = new Date()
     const [year, setYear] = useState(currentDate.getFullYear())
     const [month, setMonth] = useState(currentDate.getMonth())
 
-    const trxsGroupByVehicles = services.current.filterByYearMonthGroupByVehicle(year, month)
+    const [trxsGroupByVehicles, setTrxsGroupByVehicles] = useState({})
+
+    const fetchByYearAndMonth = async (year, month) => {
+        return fetch(`${apiUrl}/workshop-services?year=${year}&month=${month}`)
+        .then(resp => resp.json())
+        .then(yearMonthWss => {
+            yearMonthWss.forEach(ws => services.current.updateTransaction(ws))
+            setFilteredServices([...services.current.transactions])
+            setTrxsGroupByVehicles(services.current.filterByYearMonthGroupByVehicle(year, month-1))
+        })
+    }
+
+    const changeYear = (year) => {
+        fetchByYearAndMonth(year, month).finally(() => setYear(year))
+    }
+
+    const changeMonth = (month) => {
+        fetchByYearAndMonth(year, month+1).finally(() => setMonth(month))
+    }
+    
+    //services.current.filterByYearMonthGroupByVehicle(year, month)
     const sortedKeys = Object.keys(trxsGroupByVehicles).sort((a, b) => a > b ? -1 : 1)
 
     const amountByVehicles = sortedKeys.map(veh => {
@@ -31,11 +53,14 @@ function YearMonthView({services, suppliers=[], orders=[], backToService}) {
           smoothScroll: true,
           rootMargin: '0px 0px -40%'
         });
+
+        fetchByYearAndMonth(year, month+1)
     
         return () => {
           scrollSpy.dispose();
         };
-    }, [year, month]);    
+        
+    }, []);    
 
     return (
         <Container>
@@ -43,7 +68,7 @@ function YearMonthView({services, suppliers=[], orders=[], backToService}) {
                 <Stack direction="horizontal">
                     <DropdownButton id="dropdown-year" className="me-3" as={ButtonGroup} title={year} variant="success" >
                         { services.current.availableYears().map(
-                            v => <Dropdown.Item key={v} onClick={() => setYear(v)} eventKey={v}>{v}</Dropdown.Item> )
+                            v => <Dropdown.Item key={v} onClick={() => changeYear(v)} eventKey={v}>{v}</Dropdown.Item> )
                         }
                     </DropdownButton>
 
@@ -51,7 +76,7 @@ function YearMonthView({services, suppliers=[], orders=[], backToService}) {
                         {
                             ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                             'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map((v, i) => 
-                                <Button key={v} variant={month === i ? 'outline-primary' : 'primary'} onClick={() => setMonth(i)}>{v}</Button>
+                                <Button key={v} variant={month === i ? 'outline-primary' : 'primary'} onClick={() => changeMonth(i)}>{v}</Button>
                             )
                         }
                     </ButtonGroup>

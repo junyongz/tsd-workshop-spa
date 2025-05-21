@@ -7,11 +7,11 @@ import fetchSpareParts from './spare-parts/fetchSpareParts';
 
 import './App.css'
 import fetchCompanies from './companies/fetchCompanies';
-import fetchSupplierSpareParts from './suppliers/fetchSupplierSpareParts';
+import { fetchSupplierSpareParts, fetchWithUsageSupplierSpareParts } from './suppliers/fetchSupplierSpareParts';
 import fetchVehicles from './vehicles/fetchVehicles';
 import fetchSuppliers from './suppliers/fetchSuppliers';
 import fetchSparePartUsages from './spare-parts/fetchSparePartUsages';
-import fetchServices from './fetchServices';
+import fetchServices, { fetchFewPagesServices } from './fetchServices';
 import autoRefreshWorker from './autoRefreshWorker';
 import ServiceTransactions from './ServiceTransactions';
 import NavigationBar from './NavigationBar';
@@ -159,23 +159,31 @@ function App() {
   const refreshSpareParts = useCallback(() => fetchSpareParts(apiUrl, setSpareParts, setSearchOptions, setOrderSpareParts), [apiUrl])
 
   const refreshServices = useCallback(() => fetchServices(apiUrl, services, setFilteredServices, searchedOptions), [apiUrl])
+  const refreshFewPagesServices = useCallback(() => fetchFewPagesServices(apiUrl, services, setFilteredServices, searchedOptions), [apiUrl])
 
   const refreshSupplierSpareParts = useCallback(() => fetchSupplierSpareParts(apiUrl, orders, setFilteredOrders), [apiUrl])
+  const refreshWithUsageSupplierSpareParts = useCallback(() => fetchWithUsageSupplierSpareParts(apiUrl, orders, setFilteredOrders), [apiUrl])
 
   useEffect(() => {
       setLoading(true)
       requestAnimationFrame(async () => {
         fetchSuppliers(apiUrl, setSuppliers)
-        .then(() => refreshSupplierSpareParts()
+        .then(() => refreshWithUsageSupplierSpareParts()
           .then(() => Promise.all([
-                  refreshServices(),
+                  refreshFewPagesServices(),
                   refreshSparePartUsages(),
               
                   refreshCompanies(),
                   fetchVehicles(apiUrl, setVehicles, setSearchOptions),
-                  refreshSpareParts(),
                 ]))
         .then( () => setLoading(false) ))
+      })
+
+      const sparePartFetchTimer = setTimeout(() => {
+        Promise.all([
+          refreshSupplierSpareParts(),
+          refreshSpareParts()
+        ]).then(() => refreshServices())
       })
 
       const fetchStatsTimer = setInterval(() => {
@@ -189,7 +197,10 @@ function App() {
         )
       }, 30000)
 
-      return  () => clearInterval(fetchStatsTimer);
+      return () => { 
+        clearInterval(fetchStatsTimer)
+        clearTimeout(sparePartFetchTimer)
+      };
       
   }, [refreshServices, refreshSupplierSpareParts, refreshSparePartUsages, refreshCompanies, refreshSpareParts, apiUrl]);
 

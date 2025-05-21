@@ -1,4 +1,4 @@
-import { Badge, Container, Form, InputGroup, Nav, Navbar, Row, Toast, ToastContainer } from "react-bootstrap";
+import { Badge, Col, Container, Form, InputGroup, Nav, Navbar, Row, Toast, ToastContainer } from "react-bootstrap";
 import { Typeahead } from "react-bootstrap-typeahead";
 import { NavLink, useLocation } from "react-router-dom";
 import { Calendar, Services, Suppliers, Tools, Truck } from "./Icons";
@@ -12,7 +12,7 @@ export default function NavigationBar({
     const location = useLocation()
 
     return (
-        <Navbar expand="lg" className="justify-content-between">
+        <Navbar expand="lg">
         <Container>
           <Row>
               <ToastContainer className="p-3" position={'top-left'} style={{ zIndex: 3 }}>
@@ -25,16 +25,19 @@ export default function NavigationBar({
               </ToastContainer>
           </Row>
             <Navbar.Brand href="/"><span className="bg-success text-white rounded-3 py-2 px-4 fw-bold">TSD</span></Navbar.Brand>
+            <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="me-auto">
                 <Nav.Item className="me-2"><NavLink className={'btn btn-outline-primary'} to="/"><Services /> Services {selectedSearchOptions.length > 0 && <Badge pill>{filteredServices.length}</Badge>}</NavLink></Nav.Item>
                 <Nav.Item className="me-2"><NavLink className={'btn btn-outline-primary'} to="/orders"><Suppliers /> Suppliers {selectedSearchOptions.length > 0 && <Badge pill>{filteredOrders.length}</Badge>}</NavLink></Nav.Item>
                 <Nav.Item className="me-2"><NavLink className={'btn btn-outline-primary'} to="/vehicles"><Truck /> Trucks</NavLink></Nav.Item>
-                <Form className="d-flex">
+            </Nav>
+            </Navbar.Collapse>
+            <Form inline className="d-flex">
                 {!searchByDate &&
                     <Form.Group>
                     <InputGroup>
-                        <InputGroup.Text><Truck /></InputGroup.Text>
-                        <InputGroup.Text><Tools /></InputGroup.Text>
+                        <InputGroup.Text className="d-none d-lg-inline"><Truck /></InputGroup.Text>
+                        <InputGroup.Text className="d-none d-lg-inline"><Tools /></InputGroup.Text>
                             <Typeahead
                                 allowNew
                                 disabled={location.pathname === '/vehicles'}
@@ -62,8 +65,8 @@ export default function NavigationBar({
                 </InputGroup>
                 </Form.Group>
                 }
-            </Form>
-            </Nav>
+                </Form>
+                <Navbar.Toggle className="ms-1" aria-controls="basic-navbar-nav" />
         </Container>
         </Navbar>
     )

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Badge, Button, ButtonGroup, Card, Col, Container, ListGroup, ListGroupItem, Row, Stack } from 'react-bootstrap';
 import Pagination from 'react-bootstrap/Pagination';
 import ServiceDialog from './ServiceDialog';
@@ -17,7 +17,8 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
     refreshSpareParts=() => {},
     vehicles, setVehicles, spareParts, sparePartUsages=[],
     orders=[], suppliers=[],
-    onNewVehicleCreated=() => {}, setLoading=()=>{}}) {
+    onNewVehicleCreated=() => {}, setLoading=()=>{},
+    selectedSearchOptions}) {
 
   const apiUrl = process.env.REACT_APP_API_URL
   const [showModal, setShowModal] = useState(false)
@@ -159,6 +160,12 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
     })
   }
 
+  useEffect(() => {
+    if (selectedSearchOptions && selectedSearchOptions.length > 0) {
+      setActivePage(1)
+    }
+  }, [selectedSearchOptions])
+
   return (
     <Container>
     {
@@ -175,7 +182,10 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
         onNewVehicleCreated={onNewVehicleCreated}></ServiceDialog>
       <Row>
         <Col>
-          <Pagination>
+          <Pagination className='d-flex d-lg-none'>
+          { getPaginationItems(activePage, setActivePage, totalPages, 3) }
+          </Pagination>
+          <Pagination className='d-none d-lg-flex'>
           { getPaginationItems(activePage, setActivePage, totalPages, 10) }
           </Pagination>
         </Col>
@@ -212,7 +222,7 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
                   {
                   !v.completionDate && 
                     <Button size="sm" variant='secondary' onClick={() => addNewItemForVehicle(v)}>
-                      <i className="bi bi-truck-front-fill me-2"></i>Add Item</Button>
+                      <i className="bi bi-truck-front-fill"></i> <span className='d-none d-lg-inline'>Add Item</span></Button>
                      }
                   </Col>
                 </Row>
@@ -238,8 +248,8 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
                       return <ListGroupItem key={vvv.id}>
                         <Stack direction="horizontal">
                           <Col xs="2">{vvv.usageDate}</Col>
-                          <Col>{ order.itemCode && !order.partName.includes(order.itemCode) && <span className='text-secondary'>{order.itemCode}&nbsp;</span> }<span>{order.partName}</span> <div><OrderTooltip order={order} supplier={supplier} /></div></Col>
-                          <Col xs="2" className='text-sm-end'><Badge pill>{vvv.quantity > 0 && vvv.soldPrice && `${vvv.quantity} ${order.unit} @ $${vvv.soldPrice?.toFixed(2)}`}</Badge></Col>
+                          <Col>{ order.itemCode && !order.partName.includes(order.itemCode) && <span className='text-secondary'>{order.itemCode}&nbsp;</span> }<span>{order.partName}</span> <div className="d-none d-lg-block"><OrderTooltip order={order} supplier={supplier} /></div></Col>
+                          <Col xs="2" className='text-sm-end d-none d-lg-block'><Badge pill>{vvv.quantity > 0 && vvv.soldPrice && `${vvv.quantity} ${order.unit} @ $${vvv.soldPrice?.toFixed(2)}`}</Badge></Col>
                           <Col xs="2" className='text-sm-end'>{v.completionDate ? <Badge pill>$ {totalPrice}</Badge> : <HoverPilledBadge onRemove={() => removeTransaction(v.id, vvv.id)}>$ {totalPrice}</HoverPilledBadge> }</Col>
                         </Stack>
                       </ListGroupItem>
@@ -257,8 +267,11 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
            
         )
       }
-      <Pagination>
-        { getPaginationItems(activePage, setActivePage, totalPages, 10) }
+      <Pagination className='d-flex d-lg-none'>
+      { getPaginationItems(activePage, setActivePage, totalPages, 3) }
+      </Pagination>
+      <Pagination className='d-none d-lg-flex'>
+      { getPaginationItems(activePage, setActivePage, totalPages, 10) }
       </Pagination>
     </Container> }
     </Container>

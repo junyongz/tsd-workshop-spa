@@ -3,7 +3,7 @@ import { Modal, Button, Container, Col, Row, FormLabel, Badge, ListGroup, InputG
 import { Typeahead } from "react-bootstrap-typeahead";
 import Form from "react-bootstrap/Form";
 import remainingQuantity, { decimalPointUomAvailable } from "./utils/quantityUtils";
-import { Dollar, Inspection, MaintenanceServices, Repair, Suppliers, Tools, Truck } from "./Icons";
+import { Calendar, Dollar, Inspection, MaintenanceServices, Repair, Suppliers, Tools, Truck } from "./Icons";
 
 function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[], 
     spareParts, orders=[], suppliers=[], sparePartUsages=[],
@@ -175,12 +175,12 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
             <Modal.Title><i className="bi bi-file-earmark-text-fill"></i> Service started at {selectedExistingService ? selectedExistingService.startDate : selectedStartDate}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <Container>
+                <Container fluid>
                     <Form ref={formRef} validated={validated}>
                         <Row className="mb-1">
                             <Col xs="2">
                                 <InputGroup>
-                                <InputGroup.Text></InputGroup.Text>
+                                <InputGroup.Text><Calendar /></InputGroup.Text>
                                     <Form.Control onChange={(e) => afterChooseDate(e.target.value)} name="startDate" 
                                         min={selectedExistingService ? selectedExistingService.startDate : undefined} 
                                         max={new Date().toISOString().split('T')[0]} 
@@ -240,8 +240,8 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
                         </Nav>
                         <ListGroup>
                         {items?.map((v, i) =>
-                        <ListGroup.Item key={i}>
-                            <Row>                                
+                        <ListGroup.Item >
+                            <Row key={i}>                                
                                 <Form.Group as={Col} className="mb-3 col-6" controlId="spareParts">
                                     <InputGroup>
                                     <InputGroup.Text><Tools /></InputGroup.Text>

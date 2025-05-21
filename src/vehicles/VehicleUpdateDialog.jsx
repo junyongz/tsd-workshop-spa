@@ -259,9 +259,9 @@ function VehicleUpdateDialog({isShow, setShowDialog, vehicle, setVehicles, compa
                             </Card>
                         </Col>
                         </Row>
-                        <Row>
+                        { selectedCompanies[0]?.internal && <Row>
                             <Col><Button variant="link" onClick={() => setShowMap(prev => !prev)}>{showMap ? 'Hide the map' : 'Where are they now?' }</Button></Col>
-                        </Row>
+                        </Row> }
                         { showMap && <Row>
                             <Col>
                                 <Card>

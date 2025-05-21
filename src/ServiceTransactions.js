@@ -1,6 +1,10 @@
 class ServiceTransactions {
     constructor(transactions = []) {
         this.transactions = transactions
+        this.refreshIndexes()
+    }
+
+    refreshIndexes = () => {
         this.transactionIndexs = this.transactions.reduce((acc, cv, ci) => {
             acc[cv.id] = ci
             return acc
@@ -15,7 +19,7 @@ class ServiceTransactions {
                 (b.completionDate === null) - (a.completionDate === null) || 
                     (a.completionDate === null ? b.startDate.localeCompare(a.startDate) : 
                     b.completionDate.localeCompare(a.completionDate) || b.startDate.localeCompare(a.startDate)))
-            this.transactionIndexs[newService.id] = this.transactions.findIndex(s => s.id === newService.id)
+            this.refreshIndexes()
         }
         else {
             const oldService = this.transactions[existingIdx]

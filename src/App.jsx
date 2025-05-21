@@ -18,6 +18,7 @@ import NavigationBar from './NavigationBar';
 import Vehicles from './vehicles/Vehicles';
 
 import { doFilterServices, doInAppFilterOrders, doInAppFilterServices } from './fuzzySearch';
+import { Container } from 'react-bootstrap';
 
 /***
  * Date: {
@@ -157,7 +158,7 @@ function App() {
 
   const refreshSpareParts = useCallback(() => fetchSpareParts(apiUrl, setSpareParts, setSearchOptions, setOrderSpareParts), [apiUrl])
 
-  const refreshServices = useCallback(() => fetchServices(apiUrl, services, setFilteredServices), [apiUrl])
+  const refreshServices = useCallback(() => fetchServices(apiUrl, services, setFilteredServices, searchedOptions), [apiUrl])
 
   const refreshSupplierSpareParts = useCallback(() => fetchSupplierSpareParts(apiUrl, orders, setFilteredOrders), [apiUrl])
 
@@ -204,13 +205,13 @@ function App() {
   }, [loading])
 
   return (
-    <div>
+    <Container fluid>
         {loading && (
           <div className="loading-overlay">
             <Spinner animation="border" variant="primary">{loadingTime}</Spinner>
           </div>
         )}
-        <div id="content" className={(loading ? ' blurred ' : '')}>
+        <Container id="content" className={(loading ? ' blurred ' : '')}>
         <NavigationBar
             {...{
             clearFilterDate,
@@ -225,7 +226,7 @@ function App() {
             setShowToastBox,
             showToastBox,
             toastBoxMessage}}
-          ></NavigationBar>  
+          ></NavigationBar>
         <Routes>
           <Route exact path="/" element={
             <ServiceListing services={services}
@@ -242,6 +243,7 @@ function App() {
                   doFilterServices(selectedSearchOptions)}
                 }
               }
+              selectedSearchOptions={selectedSearchOptions}
               orders={orders.current}
               suppliers={suppliers}
               sparePartUsages={sparePartUsages}
@@ -274,8 +276,8 @@ function App() {
               companies={companies} 
             />} />
         </Routes>
-        </div>
-    </div>
+        </Container>
+    </Container>
   );
 }
 

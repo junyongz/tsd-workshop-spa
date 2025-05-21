@@ -188,6 +188,7 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
     useEffect(() => {
         if (selectedSearchOptions.length > 0) {
             setSelectedSupplier()
+            setActivePage(1)
         }
         else {
             // as good as changing from some search option to no option at all, so just set all

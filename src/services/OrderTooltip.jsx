@@ -4,7 +4,7 @@ import { Calendar, Suppliers } from "../Icons";
 function OrderTooltip({order, supplier}) {
 
     return (
-        <OverlayTrigger trigger={order.notes ? ['hover'] : []} overlay={<Tooltip>{order.notes}</Tooltip>}>
+        <OverlayTrigger trigger={order.notes ? ['hover', 'focus'] : []} overlay={<Tooltip>{order.notes}</Tooltip>}>
             <small className="text-secondary">
                 <Suppliers /> {supplier?.supplierName}&nbsp;
                 <Calendar /> {order.invoiceDate}

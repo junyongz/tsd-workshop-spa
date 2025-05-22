@@ -140,6 +140,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
             startDate: selectedExistingService ? selectedExistingService.startDate : nativeForm['startDate'].value,
             transactionTypes: Array.from(nativeForm['transactionTypes']).filter(tt => tt.checked).map(tt => tt.value),
             mileageKm: nativeForm['mileageKm'].value,
+            notes: selectedExistingService.notes,
             sparePartUsages: items.map((v, i) => {
                 return {
                     vehicleNo: selectedVehicles[0].vehicleNo,
@@ -165,7 +166,10 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
 
         setSelectedStartDate(trx?.current?.startDate)
         if (trx?.current?.id) {
-            setSelectedExistingService({id: trx?.current?.id, startDate: trx?.current?.startDate, mileageKm: trx?.current?.mileageKm})
+            setSelectedExistingService({id: trx?.current?.id, 
+                startDate: trx?.current?.startDate, 
+                mileageKm: trx?.current?.mileageKm, 
+                notes: trx?.current?.notes})
         }
     }
 
@@ -240,8 +244,8 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
                         </Nav>
                         <ListGroup>
                         {items?.map((v, i) =>
-                        <ListGroup.Item >
-                            <Row key={i}>                                
+                        <ListGroup.Item key={i}>
+                            <Row>                                
                                 <Form.Group as={Col} className="mb-3 col-6" controlId="spareParts">
                                     <InputGroup>
                                     <InputGroup.Text><Tools /></InputGroup.Text>

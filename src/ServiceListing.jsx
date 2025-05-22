@@ -51,6 +51,7 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
       vehicleNo: service.vehicleNo,
       transactionTypes: service.transactionTypes,
       mileageKm: service.mileageKm,
+      notes: service.notes,
       items: [{ partName: 'Engine Oil 20w-50' }]
     };
     setShowModal(true)

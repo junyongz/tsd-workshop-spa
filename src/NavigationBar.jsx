@@ -1,4 +1,4 @@
-import { Badge, Col, Container, Form, InputGroup, Nav, Navbar, Row, Toast, ToastContainer } from "react-bootstrap";
+import { Badge, Container, Form, InputGroup, Nav, Navbar, Row, Toast, ToastContainer } from "react-bootstrap";
 import { Typeahead } from "react-bootstrap-typeahead";
 import { NavLink, useLocation } from "react-router-dom";
 import { Calendar, Services, Suppliers, Tools, Truck } from "./Icons";
@@ -32,7 +32,7 @@ export default function NavigationBar({
                 <Nav.Item className="me-2"><NavLink className={'btn btn-outline-primary'} to="/vehicles"><Truck /> Trucks</NavLink></Nav.Item>
             </Nav>
             </Navbar.Collapse>
-            <Form inline className="d-flex">
+            <Form className="d-flex">
                 {!searchByDate &&
                     <Form.Group>
                     <InputGroup>

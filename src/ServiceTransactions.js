@@ -29,7 +29,12 @@ class ServiceTransactions {
     }
 
     updateTransaction(updatedService) {
-        this.transactions[this.transactionIndexs[updatedService.id]] = updatedService       
+        this.transactions[this.transactionIndexs[updatedService.id]] = updatedService
+    }
+
+    updateForNote(updatedService) {
+        const oldPrevService = this.transactions[this.transactionIndexs[updatedService.id]]
+        this.transactions[this.transactionIndexs[updatedService.id]] = {...oldPrevService, notes: updatedService.notes}
     }
 
     removeService(deletingService) {

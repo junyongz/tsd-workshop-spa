@@ -49,3 +49,11 @@ export function Tools() {
 export function Dollar() {
     return (<i className="bi bi-currency-dollar"></i>)
 }
+
+export function Trash() {
+    return (<i className="bi bi-trash3"></i>)
+}
+
+export function NoteTaking() {
+    return (<i className="bi bi-pencil"></i>)
+}

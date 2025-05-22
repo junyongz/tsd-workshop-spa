@@ -11,6 +11,7 @@ import OrderTooltip from './services/OrderTooltip';
 import YearMonthView from './services/YearMonthView';
 import TransactionTypes from './components/TransactionTypes';
 import { Calendar } from './Icons';
+import ServiceNoteTakingDialog from './services/ServiceNoteTakingDialog';
 
 function ServiceListing({services, filteredServices=[], setFilteredServices,
     keywordSearch = () => {}, refreshSparePartUsages=() => {}, 
@@ -22,6 +23,7 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
 
   const apiUrl = process.env.REACT_APP_API_URL
   const [showModal, setShowModal] = useState(false)
+  const [showNote, setShowNote] = useState(false)
   const serviceTransaction = useRef()
 
   const [activePage, setActivePage] = useState(1)
@@ -52,6 +54,18 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
       items: [{ partName: 'Engine Oil 20w-50' }]
     };
     setShowModal(true)
+  }
+
+  const noteForService = (service) => {
+    serviceTransaction.current = {
+      id: service.id,
+      startDate: service.startDate,
+      vehicleNo: service.vehicleNo,
+      transactionTypes: service.transactionTypes,
+      mileageKm: service.mileageKm,
+      notes: service.notes
+    };
+    setShowNote(true)
   }
 
   // { id: ?, creationDate: ?, sparePartUsages: [{}, {} ]}
@@ -128,6 +142,26 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
     })
   }
 
+  const onSaveNote = (service) => {
+    setLoading(true)
+    requestAnimationFrame(() => { 
+      fetch(`${apiUrl}/workshop-services?op=NOTE`, {
+        method: 'POST', 
+        body: JSON.stringify(service), 
+        headers: {
+          'Content-type': 'application/json'
+        }
+      })
+      .then(res => res.json())
+      .then(newService => {
+        services.current.updateForNote(newService)
+        keywordSearch()
+      })
+      .then(() => clearState())
+      .finally(() => setLoading(false))
+    })
+  }
+
   const deleteService = (ws) => {
     setLoading(true)
     requestAnimationFrame(() => {
@@ -180,6 +214,8 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
         suppliers={suppliers}
         sparePartUsages={sparePartUsages}
         onNewVehicleCreated={onNewVehicleCreated}></ServiceDialog>
+      {serviceTransaction.current && <ServiceNoteTakingDialog isShow={showNote} setShowDialog={setShowNote} 
+        ws={serviceTransaction.current} onSaveNote={onSaveNote}/> }
       <Row>
         <Col>
           <Pagination className='d-flex d-lg-none'>
@@ -203,7 +239,12 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
                 <Row>
                   <Col><h5>{v.vehicleNo} <span className="text-body-secondary">started since {v.startDate}</span> <TransactionTypes service={v} /></h5> 
                   {v.mileageKm > 0 && <h6><span className="text-body-secondary">At {v.mileageKm} KM</span></h6> }
-                  <CompletionLabel creationDate={v.startDate} completionDate={v.completionDate} onCompletion={(date) => completeService(v, date)} onDelete={() => deleteService(v)}></CompletionLabel>
+                  <CompletionLabel creationDate={v.startDate} 
+                    completionDate={v.completionDate}
+                    notes={v.notes}
+                    onCompletion={(date) => completeService(v, date)} 
+                    onDelete={() => deleteService(v)}
+                    noteForService={() => noteForService(v)}></CompletionLabel>
                   </Col>
                   { false && <Col className={'text-sm-end col-4'}><Badge pill><i className="bi bi-person-fill-gear me-1"></i>{'Tan Chwee Seng'}</Badge></Col> }
                   <Col sm="4" className={'text-sm-end'}>

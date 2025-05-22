@@ -1,10 +1,10 @@
 import React from "react"
 import { Badge } from "react-bootstrap"
-import { Calendar } from "../Icons"
+import { Calendar, NoteTaking } from "../Icons"
 
 function SparePartNotes({order, onNoteClick, sparePartUsages }) {
     return (
-        <div><i role="button" className="bi bi-pencil" onClick={onNoteClick}></i>&nbsp;
+        <div><span role="button" onClick={onNoteClick}><NoteTaking /></span>&nbsp;
             {order.notes && <span>{order.notes.split(/\r\n|\n|\r/).map((line, index) => (
                                 <React.Fragment key={index}>
                                 {line}<br />

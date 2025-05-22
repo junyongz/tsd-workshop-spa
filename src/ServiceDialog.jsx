@@ -3,7 +3,7 @@ import { Modal, Button, Container, Col, Row, FormLabel, Badge, ListGroup, InputG
 import { Typeahead } from "react-bootstrap-typeahead";
 import Form from "react-bootstrap/Form";
 import remainingQuantity, { decimalPointUomAvailable } from "./utils/quantityUtils";
-import { Calendar, Dollar, Inspection, MaintenanceServices, Repair, Suppliers, Tools, Truck } from "./Icons";
+import { Calendar, Dollar, Inspection, MaintenanceServices, Repair, Suppliers, Tools, Trash, Truck } from "./Icons";
 
 function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[], 
     spareParts, orders=[], suppliers=[], sparePartUsages=[],
@@ -290,7 +290,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
                                     <FormLabel><Badge pill>$ {(v?.quantity * v?.unitPrice).toFixed(2) || 0}</Badge></FormLabel>
                                 </Col>
                                 <Col xs="1" style={{"margin-right":"-3em"}}>
-                                <span className="text-danger" onClick={() => removeItem(i)} role="button"><i className="bi bi-trash3"></i></span>
+                                <span className="text-danger" onClick={() => removeItem(i)} role="button"><Trash /></span>
                                 </Col>
                             </Row>
                         </ListGroup.Item>

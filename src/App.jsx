@@ -165,6 +165,7 @@ function App() {
   const refreshWithUsageSupplierSpareParts = useCallback(() => fetchWithUsageSupplierSpareParts(apiUrl, orders, setFilteredOrders), [apiUrl])
 
   useEffect(() => {
+      let sparePartFetchTimer
       setLoading(true)
       requestAnimationFrame(async () => {
         fetchSuppliers(apiUrl, setSuppliers)
@@ -177,13 +178,14 @@ function App() {
                   fetchVehicles(apiUrl, setVehicles, setSearchOptions),
                 ]))
         .then( () => setLoading(false) ))
-      })
-
-      const sparePartFetchTimer = setTimeout(() => {
-        Promise.all([
-          refreshSupplierSpareParts(),
-          refreshSpareParts()
-        ]).then(() => refreshServices())
+        .then(() => {
+          sparePartFetchTimer = setTimeout(() => {
+            Promise.all([
+              refreshSupplierSpareParts(),
+              refreshSpareParts()
+            ]).then(() => refreshServices())
+          })
+        })
       })
 
       const fetchStatsTimer = setInterval(() => {

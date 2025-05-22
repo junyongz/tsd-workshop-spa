@@ -298,7 +298,7 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
                       })
                     }
                     {((!v.migratedHandWrittenSpareParts || v.migratedHandWrittenSpareParts.length === 0)
-                    && (!v.sparePartUsages || v.sparePartUsages.length === 0)) && 
+                    && (!v.sparePartUsages || v.sparePartUsages.length === 0) && v.completionDate) && 
                     <Button onClick={() => loadWorkshopService(v)} variant='outline-secondary'><i className="bi bi-three-dots"></i></Button>}
                     </ListGroup>
                   </Col>

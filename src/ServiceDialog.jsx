@@ -140,7 +140,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
             startDate: selectedExistingService ? selectedExistingService.startDate : nativeForm['startDate'].value,
             transactionTypes: Array.from(nativeForm['transactionTypes']).filter(tt => tt.checked).map(tt => tt.value),
             mileageKm: nativeForm['mileageKm'].value,
-            notes: selectedExistingService.notes,
+            notes: selectedExistingService?.notes,
             sparePartUsages: items.map((v, i) => {
                 return {
                     vehicleNo: selectedVehicles[0].vehicleNo,

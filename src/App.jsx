@@ -224,7 +224,7 @@ function App() {
             <Spinner animation="border" variant="primary">{loadingTime}</Spinner>
           </div>
         )}
-        <Container id="content" className={(loading ? ' blurred ' : '')}>
+        <Container fluid id="content" className={(loading ? ' blurred ' : '')}>
         <NavigationBar
             {...{
             clearFilterDate,

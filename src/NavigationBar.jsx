@@ -12,8 +12,8 @@ export default function NavigationBar({
     const location = useLocation()
 
     return (
-        <Navbar expand="lg">
-        <Container>
+        
+        <Container fluid>
           <Row>
               <ToastContainer className="p-3" position={'top-left'} style={{ zIndex: 3 }}>
                 <Toast bg="warning" show={showToastBox} onClose={() => setShowToastBox(false)}>
@@ -24,8 +24,10 @@ export default function NavigationBar({
                 </Toast>
               </ToastContainer>
           </Row>
-            <Navbar.Brand href="/"><span className="bg-success text-white rounded-3 py-2 px-4 fw-bold">TSD</span></Navbar.Brand>
+            <Navbar expand="md">
+            <Navbar.Toggle aria-controls="basic-navbar-nav" />
             <Navbar.Collapse id="basic-navbar-nav">
+            <Navbar.Brand href="/"><span className="bg-success text-white rounded-3 py-2 px-4 fw-bold">TSD</span></Navbar.Brand>
             <Nav className="me-auto">
                 <Nav.Item className="me-2"><NavLink className={'btn btn-outline-primary'} to="/"><Services /> Services {selectedSearchOptions.length > 0 && <Badge pill>{filteredServices.length}</Badge>}</NavLink></Nav.Item>
                 <Nav.Item className="me-2"><NavLink className={'btn btn-outline-primary'} to="/orders"><Suppliers /> Suppliers {selectedSearchOptions.length > 0 && <Badge pill>{filteredOrders.length}</Badge>}</NavLink></Nav.Item>
@@ -66,8 +68,7 @@ export default function NavigationBar({
                 </Form.Group>
                 }
                 </Form>
-                <Navbar.Toggle className="ms-1" aria-controls="basic-navbar-nav" />
+                </Navbar>
         </Container>
-        </Navbar>
     )
 }

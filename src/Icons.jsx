@@ -57,3 +57,14 @@ export function Trash() {
 export function NoteTaking() {
     return (<i className="bi bi-pencil"></i>)
 }
+
+/**
+ * using bi-camera
+ */
+export function Camera() {
+    return (<i className="bi bi-camera"></i>)
+}
+
+export function Download() {
+    return (<i className="bi bi-download"></i>)
+}

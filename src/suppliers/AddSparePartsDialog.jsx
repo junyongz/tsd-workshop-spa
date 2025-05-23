@@ -198,14 +198,14 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
                 <Container>
                     <Form ref={formRef} validated={validated}>
                         <Row className="mb-3">
-                            <Col sm="3">
+                            <Col xs="3">
                                 <InputGroup>
                                     <InputGroup.Text><Calendar /></InputGroup.Text>
                                     <Form.Control required type="date" name="invoiceDate" max={new Date().toISOString().split('T')[0]}
                                         placeholder="Key in Invoice Date" defaultValue={items[0]?.invoiceDate} disabled={editing}></Form.Control>
                                 </InputGroup>
                             </Col>
-                            <Col sm="5">
+                            <Col xs="5">
                                 <InputGroup>
                                     <InputGroup.Text><Suppliers /></InputGroup.Text>
                                     <Typeahead
@@ -221,7 +221,7 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
                                         />
                                 </InputGroup>
                             </Col>
-                            <Col className="text-sm-end">
+                            <Col xs="4" className="text-sm-end">
                                 <InputGroup>
                                     <InputGroup.Text><i className="bi bi-file-earmark-spreadsheet"></i></InputGroup.Text>
                                     <Form.Control type="text" required name="deliveryOrderNo" placeholder="Key in DO. #" defaultValue={items[0]?.deliveryOrderNo} disabled={editing}></Form.Control>
@@ -234,6 +234,7 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
                             </Col>
                         </Row>
                         
+                        <Row>
                         <ListGroup>
                         {items?.map((v, i) =>
                             <ListGroup.Item>
@@ -303,7 +304,7 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
                         )}
                         <ListGroup.Item key={'total'}><Col className="text-sm-end fs-4">$ {items?.reduce((pv, cv) => pv + ((cv.quantity && cv.unitPrice && cv.quantity * cv.unitPrice) || 0), 0).toFixed(2)}</Col></ListGroup.Item>
                         </ListGroup>
-                        
+                        </Row>
                     </Form>
                 </Container>
             </Modal.Body>

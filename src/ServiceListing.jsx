@@ -12,6 +12,7 @@ import YearMonthView from './services/YearMonthView';
 import TransactionTypes from './components/TransactionTypes';
 import { Calendar } from './Icons';
 import ServiceNoteTakingDialog from './services/ServiceNoteTakingDialog';
+import ServiceMediaDialog from './services/ServiceMediaDialog';
 
 function ServiceListing({services, filteredServices=[], setFilteredServices,
     keywordSearch = () => {}, refreshSparePartUsages=() => {}, 
@@ -24,6 +25,7 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
   const apiUrl = process.env.REACT_APP_API_URL
   const [showModal, setShowModal] = useState(false)
   const [showNote, setShowNote] = useState(false)
+  const [showMedia, setShowMedia] = useState(false)
   const serviceTransaction = useRef()
 
   const [activePage, setActivePage] = useState(1)
@@ -67,6 +69,18 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
       notes: service.notes
     };
     setShowNote(true)
+  }
+
+  const mediaForService = (service) => {
+    serviceTransaction.current = {
+      id: service.id,
+      startDate: service.startDate,
+      vehicleNo: service.vehicleNo,
+      transactionTypes: service.transactionTypes,
+      mileageKm: service.mileageKm,
+      notes: service.notes
+    };
+    setShowMedia(true)
   }
 
   // { id: ?, creationDate: ?, sparePartUsages: [{}, {} ]}
@@ -163,6 +177,27 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
     })
   }
 
+  const onSaveMedia = (service, file, afterSaveMedia) => {
+    setLoading(true)
+    requestAnimationFrame(() => { 
+      const formData = new FormData()
+      formData.append("file", file)
+
+      fetch(`${apiUrl}/workshop-services/${service.id}/medias`, {
+        method: 'POST', 
+        body: formData
+      })
+      .then(res => res.text())
+      .then(mediaId => {
+        if (!isFinite(mediaId)) {
+          throw new Error("uploaded media failed")
+        }
+        afterSaveMedia && afterSaveMedia(mediaId)
+      })
+      .finally(() => setLoading(false))
+    })
+  }
+
   const deleteService = (ws) => {
     setLoading(true)
     requestAnimationFrame(() => {
@@ -202,11 +237,11 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
   }, [selectedSearchOptions])
 
   return (
-    <Container>
+    <Container fluid>
     {
       yearMonthView && <YearMonthView services={services} setFilteredServices={setFilteredServices} suppliers={suppliers} orders={orders} backToService={() => setYearMonthView(false)}></YearMonthView>
     }
-    { !yearMonthView && <Container>
+    { !yearMonthView && <Container fluid>
       <ServiceDialog isShow={showModal} setShow={setShowModal} trx={serviceTransaction} 
         onNewServiceCreated={onNewServiceCreated} 
         vehicles={vehicles} setVehicles={setVehicles} 
@@ -217,6 +252,8 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
         onNewVehicleCreated={onNewVehicleCreated}></ServiceDialog>
       {serviceTransaction.current && <ServiceNoteTakingDialog isShow={showNote} setShowDialog={setShowNote} 
         ws={serviceTransaction.current} onSaveNote={onSaveNote}/> }
+      {serviceTransaction.current && <ServiceMediaDialog isShow={showMedia} setShowDialog={setShowMedia} 
+        ws={serviceTransaction.current} onSaveMedia={onSaveMedia}/> }
       <Row>
         <Col>
           <Pagination className='d-flex d-lg-none'>
@@ -240,12 +277,11 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
                 <Row>
                   <Col><h5>{v.vehicleNo} <span className="text-body-secondary">started since {v.startDate}</span> <TransactionTypes service={v} /></h5> 
                   {v.mileageKm > 0 && <h6><span className="text-body-secondary">At {v.mileageKm} KM</span></h6> }
-                  <CompletionLabel creationDate={v.startDate} 
-                    completionDate={v.completionDate}
-                    notes={v.notes}
+                  <CompletionLabel ws={v}
                     onCompletion={(date) => completeService(v, date)} 
                     onDelete={() => deleteService(v)}
-                    noteForService={() => noteForService(v)}></CompletionLabel>
+                    noteForService={() => noteForService(v)}
+                    mediaForService={() => mediaForService(v)}></CompletionLabel>
                   </Col>
                   { false && <Col className={'text-sm-end col-4'}><Badge pill><i className="bi bi-person-fill-gear me-1"></i>{'Tan Chwee Seng'}</Badge></Col> }
                   <Col sm="4" className={'text-sm-end'}>
@@ -257,7 +293,7 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
                 </Row>
               </Card.Header>
               <Card.Body>
-              <Container fluid="md">
+              <Container fluid>
                 <Row className='mb-3'>
                   <Col></Col>
                   <Col sm="2" className={'text-sm-end'}>
@@ -273,12 +309,12 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
                     <ListGroup>
                     {v.migratedHandWrittenSpareParts?.map(vvv => {
                       return <ListGroupItem key={vvv.index}>
-                        <Stack direction="horizontal">
-                          <Col xs="2">{vvv.creationDate}</Col>
-                          <Col>{vvv.itemDescription}</Col>
-                          <Col xs="2" className='text-sm-end'><Badge pill>{vvv.quantity > 0 && vvv.unitPrice && `${vvv.quantity} ${vvv.unit} @ $${vvv.unitPrice?.toFixed(2)}`}</Badge></Col>
-                          <Col xs="2" className='text-sm-end'><Badge pill>$ {vvv.totalPrice}</Badge></Col>
-                        </Stack>
+                        <Row>
+                          <Col xs="4" lg="2">{vvv.creationDate}</Col>
+                          <Col xs="8" lg="6">{vvv.itemDescription}</Col>
+                          <Col xs={false} lg="2" className='text-sm-end'><Badge pill>{vvv.quantity > 0 && vvv.unitPrice && `${vvv.quantity} ${vvv.unit} @ $${vvv.unitPrice?.toFixed(2)}`}</Badge></Col>
+                          <Col xs={false} lg="2" className='text-sm-end'><Badge pill>$ {vvv.totalPrice}</Badge></Col>
+                        </Row>
                       </ListGroupItem>
                       })
                     }
@@ -288,12 +324,12 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
                       const totalPrice = (vvv.quantity * vvv.soldPrice).toFixed(2)
 
                       return <ListGroupItem key={vvv.id}>
-                        <Stack direction="horizontal">
-                          <Col xs="2">{vvv.usageDate}</Col>
-                          <Col>{ order.itemCode && !order.partName.includes(order.itemCode) && <span className='text-secondary'>{order.itemCode}&nbsp;</span> }<span>{order.partName}</span> <div className="d-none d-lg-block"><OrderTooltip order={order} supplier={supplier} /></div></Col>
-                          <Col xs="2" className='text-sm-end d-none d-lg-block'><Badge pill>{vvv.quantity > 0 && vvv.soldPrice && `${vvv.quantity} ${order.unit} @ $${vvv.soldPrice?.toFixed(2)}`}</Badge></Col>
-                          <Col xs="2" className='text-sm-end'>{v.completionDate ? <Badge pill>$ {totalPrice}</Badge> : <HoverPilledBadge onRemove={() => removeTransaction(v.id, vvv.id)}>$ {totalPrice}</HoverPilledBadge> }</Col>
-                        </Stack>
+                        <Row>
+                          <Col xs="4" lg="2">{vvv.usageDate}</Col>
+                          <Col xs="8" lg="6">{ order.itemCode && !order.partName.includes(order.itemCode) && <span className='text-secondary'>{order.itemCode}&nbsp;</span> }<span>{order.partName}</span> <div className="d-none d-lg-block"><OrderTooltip order={order} supplier={supplier} /></div></Col>
+                          <Col xs={false} lg="2" className='text-sm-end'><Badge pill>{vvv.quantity > 0 && vvv.soldPrice && `${vvv.quantity} ${order.unit} @ $${vvv.soldPrice?.toFixed(2)}`}</Badge></Col>
+                          <Col xs={false} lg="2" className='text-sm-end'>{v.completionDate ? <Badge pill>$ {totalPrice}</Badge> : <HoverPilledBadge onRemove={() => removeTransaction(v.id, vvv.id)}>$ {totalPrice}</HoverPilledBadge> }</Col>
+                        </Row>
                       </ListGroupItem>
                       })
                     }

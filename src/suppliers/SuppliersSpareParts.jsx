@@ -197,7 +197,7 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
     }, [selectedSearchOptions, replaceOrders])
 
     return (
-        <Container>
+        <Container fluid>
             <Row>
                 <AddSparePartsDialog isShow={showDialog} 
                     setShowDialog={setShowDialog}
@@ -224,11 +224,14 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
             </Row>
             {!overview && <Row>
                 <Col>
-                    <Pagination>
-                    { getPaginationItems(activePage, setActivePage, totalPages, 10) }
-                    </Pagination>
+                <Pagination className='d-flex d-lg-none'>
+                { getPaginationItems(activePage, setActivePage, totalPages, 3) }
+                </Pagination>
+                <Pagination className='d-none d-lg-flex'>
+                { getPaginationItems(activePage, setActivePage, totalPages, 10) }
+                </Pagination>
                 </Col>
-                <Col className={'text-sm-end col-3'}>
+                <Col className={'text-sm-end'}>
                     <ButtonGroup>
                         <Button variant="secondary" onClick={() => setOverview(true)}><i className="bi bi-card-heading me-2"></i>Overview</Button>
                         <Button variant='success' onClick={() => setShowDialog(!showDialog)}><i className="bi bi-plus-circle-fill me-2"></i>Add New</Button>
@@ -263,23 +266,23 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
                 <Col>
                     <ListGroup>
                         <ListGroupItem key={'header'}>
-                                <Stack direction="horizontal">
-                                    <Col><Calendar /> Invoice Date</Col>
-                                    <Col><Suppliers /> Supplier</Col>
-                                    <Col sm="5"><Tools /> Particular</Col>
-                                    <Col sm="3"><i className="bi bi-card-text"></i> Notes</Col>
-                                    <Col sm="1"></Col>
-                                </Stack>
-                            </ListGroupItem>
+                                <Row>
+                                    <Col xs="3" md="2"><Calendar /> Invoice Date</Col>
+                                    <Col xs="3" md="2"><Suppliers /> Supplier</Col>
+                                    <Col xs="6" md="4"><Tools /> Particular</Col>
+                                    <Col xs={false} md="3"><i className="bi bi-card-text"></i> Notes</Col>
+                                    <Col xs={false} md="1"></Col>
+                                </Row>
+                        </ListGroupItem>
                     { (!filteredOrders || filteredOrders.length === 0) && <ListGroupItem>...</ListGroupItem> }        
                     { filteredOrders && filteredOrders.length > 0 &&
                         chunkedItems[activePage - 1]?.map(v => 
                             <ListGroupItem key={v.id}>
-                                <Stack direction="horizontal">
-                                    <Col>{v.invoiceDate}</Col>
-                                    <Col>{findSupplier(v.supplierId).supplierName} <div className="p-0 m-0">{ !v.sheetName && <Button className="p-0 text-decoration-none" variant="link"
+                                <Row>
+                                    <Col xs="3" md="2">{v.invoiceDate}</Col>
+                                    <Col xs="3" md="2">{findSupplier(v.supplierId).supplierName} <div className="p-0 m-0">{ !v.sheetName && <Button className="p-0 text-decoration-none" variant="link"
                                         onClick={(e) => viewOrder(v.deliveryOrderNo, e)}>{v.deliveryOrderNo}</Button>}{v.sheetName && <span>{v.deliveryOrderNo}</span>}</div></Col>
-                                    <Col sm="5">
+                                    <Col xs="6" md="4">
                                         <Row>
                                             <Col><Badge bg="info" pill>{v.itemCode}</Badge></Col>
                                         </Row>
@@ -288,8 +291,8 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
                                             <Col><Badge>{v.quantity} {v.unit} @ each ${v.unitPrice}</Badge>{remainingQuantity(v, sparePartUsages) < v.quantity && <Badge bg={remainingQuantity(v, sparePartUsages) === 0 ? 'danger' : 'warning' }>{remainingQuantity(v, sparePartUsages)} left</Badge>}</Col>
                                         </Row>                                    
                                     </Col>
-                                    <Col sm="3"><SparePartNotes order={v} onNoteClick={() => recordNote(v)} sparePartUsages={sparePartUsages}></SparePartNotes></Col>
-                                    <Col sm="1" className="text-sm-end">
+                                    <Col xs={false} md="3"><SparePartNotes order={v} onNoteClick={() => recordNote(v)} sparePartUsages={sparePartUsages}></SparePartNotes></Col>
+                                    <Col xs={false} md="1" className="text-sm-end">
                                         {!v.sheetName && 
                                         <OverlayTrigger trigger="click" placement="left" overlay={
                                             <Popover>
@@ -304,7 +307,7 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
                                         }
                                         <Truck role="button" onClick={() => recordUsage(v)} />
                                     </Col>
-                                </Stack>
+                                </Row>
                             </ListGroupItem>
                         )
                     }
@@ -314,7 +317,12 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
             <Row>
                 <Col>
                 <Pagination>
-                    { getPaginationItems(activePage, setActivePage, totalPages, 10) }
+                <Pagination className='d-flex d-lg-none'>
+                { getPaginationItems(activePage, setActivePage, totalPages, 3) }
+                </Pagination>
+                <Pagination className='d-none d-lg-flex'>
+                { getPaginationItems(activePage, setActivePage, totalPages, 10) }
+                </Pagination>
                 </Pagination>
                 </Col>
             </Row>

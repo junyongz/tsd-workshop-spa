@@ -52,7 +52,7 @@ export default function Vehicles({vehicles=[], setVehicles, companies=[]}) {
     }, [apiUrl])
 
     return (
-        <Container>
+        <Container fluid>
         <Row>
             <VehicleUpdateDialog isShow={showDialog} setShowDialog={setShowDialog} 
                 vehicle={selectedVehicle} setVehicles={setVehicles} companies={companies}></VehicleUpdateDialog>
@@ -72,32 +72,32 @@ export default function Vehicles({vehicles=[], setVehicles, companies=[]}) {
         <Col>
             <ListGroup>
                 <ListGroupItem key={'header'}>
-                    <Stack direction="horizontal">
-                        <Col xs={!showInternalOnly ? "2" : "3" }><Truck /> Plate No</Col>
-                        {!showInternalOnly && <Col xs="3"><Company /> Company</Col> }
-                        <Col>Last Recorded Mileage</Col>
-                        <Col>Dates</Col>
-                        <Col><Services /> Last Services</Col>
-                    </Stack>
+                    <Row>
+                        <Col xs={!showInternalOnly ? "5" : "6" } md={!showInternalOnly ? "2" : "3" }><Truck /> Plate No</Col>
+                        {!showInternalOnly && <Col xs="6" md="2"><Company /> Company</Col> }
+                        <Col xs={!showInternalOnly ? "5" : "6" } md={!showInternalOnly ? "2" : "3" }>Last Recorded Mileage</Col>
+                        <Col xs={false} md="3">Dates</Col>
+                        <Col xs={false} md="3"><Services /> Last Services</Col>
+                    </Row>
                 </ListGroupItem>
                 { vehicles.filter(veh => !showInternalOnly || (showInternalOnly && companies.find(co => co.id === veh.companyId)?.internal))
                     .map(v => 
                     <ListGroupItem key={v.id}>
-                        <Stack direction="horizontal">
-                            <Col xs={!showInternalOnly ? "2" : "3" }><Button variant="link" onClick={() => showVehicle(v.id)}>{v.vehicleNo}</Button><span>{v.trailerNo}</span></Col>
-                            {!showInternalOnly && <Col xs="3">{companies.find(co => co.id === v.companyId)?.companyName}</Col>}
-                            <Col>{v.latestMileageKm ? `${formatThousandSeparator(v.latestMileageKm)} KM` : '-'}</Col>
-                            <Col>
+                        <Row>
+                            <Col xs={!showInternalOnly ? "5" : "6" } md={!showInternalOnly ? "2" : "3" }><Button variant="link" onClick={() => showVehicle(v.id)}>{v.vehicleNo}</Button><span>{v.trailerNo}</span></Col>
+                            {!showInternalOnly && <Col xs="6" md="2">{companies.find(co => co.id === v.companyId)?.companyName}</Col>}
+                            <Col xs={!showInternalOnly ? "5" : "6" } md={!showInternalOnly ? "2" : "3" }>{v.latestMileageKm ? `${formatThousandSeparator(v.latestMileageKm)} KM` : '-'}</Col>
+                            <Col xs={false} md="3">
                             {v.insuranceExpiryDate && <div><Insurance /> <span className="text-secondary">Insurance</span> {v.insuranceExpiryDate}</div>}
                             {v.roadTaxExpiryDate && <div><Roadtax /> <span className="text-secondary">Roadtax</span> {v.roadTaxExpiryDate}</div>}
                             {v.inspectionDueDate && <div><Inspection /> <span className="text-secondary">Inspection</span> {v.inspectionDueDate}</div>}
                             </Col>
-                            <Col> 
+                            <Col xs={false} md="3"> 
                                 <VehicleServices lastService={serviceByVehicle[v.vehicleNo]} 
                                     lastInspection={inspectionByVehicle[v.vehicleNo]} 
                                     vehicle={v} />
                              </Col>
-                        </Stack>
+                        </Row>
                     </ListGroupItem>
                   )
                 }

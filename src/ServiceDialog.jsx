@@ -191,7 +191,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
                                         required type="date"></Form.Control>
                                 </InputGroup>
                             </Col>
-                            <Col>
+                            <Col xs="8">
                                 <InputGroup>
                                 <InputGroup.Text><Truck /></InputGroup.Text>
                                 <Typeahead

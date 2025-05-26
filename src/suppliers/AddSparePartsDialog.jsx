@@ -221,7 +221,7 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
                                         />
                                 </InputGroup>
                             </Col>
-                            <Col xs="4" className="text-sm-end">
+                            <Col xs="4" className="text-end">
                                 <InputGroup>
                                     <InputGroup.Text><i className="bi bi-file-earmark-spreadsheet"></i></InputGroup.Text>
                                     <Form.Control type="text" required name="deliveryOrderNo" placeholder="Key in DO. #" defaultValue={items[0]?.deliveryOrderNo} disabled={editing}></Form.Control>
@@ -229,7 +229,7 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
                             </Col>
                         </Row>
                         <Row className="my-3">
-                            <Col className="text-sm-end">
+                            <Col className="text-end">
                                 <Button size="sm" disabled={editing} onClick={addNewItem}><i className="bi bi-plus-circle-fill me-2"></i>Add More</Button>
                             </Col>
                         </Row>
@@ -296,13 +296,13 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
                                             <Form.Control onChange={(e) => updatePriceByUnitPrice(e.target.value, i)} required disabled={v.disabled} type="number" min="0" step="0.01" name="unitPrice" placeholder="Price $" value={v?.unitPrice} />
                                         </InputGroup>
                                     </Col>
-                                    <Col className="mb-3 text-sm-end">
+                                    <Col className="mb-3 text-end">
                                         <span className="fs-4">$ { (Number.isFinite(v.quantity) && Number.isFinite(v.unitPrice)) ? (v.quantity * v.unitPrice).toFixed(2) : 0}</span>
                                     </Col>
                                 </Row>
                             </ListGroup.Item>
                         )}
-                        <ListGroup.Item key={'total'}><Col className="text-sm-end fs-4">$ {items?.reduce((pv, cv) => pv + ((cv.quantity && cv.unitPrice && cv.quantity * cv.unitPrice) || 0), 0).toFixed(2)}</Col></ListGroup.Item>
+                        <ListGroup.Item key={'total'}><Col className="text-end fs-4">$ {items?.reduce((pv, cv) => pv + ((cv.quantity && cv.unitPrice && cv.quantity * cv.unitPrice) || 0), 0).toFixed(2)}</Col></ListGroup.Item>
                         </ListGroup>
                         </Row>
                     </Form>

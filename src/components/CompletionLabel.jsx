@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { Button, ButtonGroup, Carousel, Collapse, Form, Image, InputGroup, OverlayTrigger, Popover } from "react-bootstrap";
+import { Badge, Button, ButtonGroup, Carousel, Collapse, Form, Image, InputGroup, OverlayTrigger, Popover } from "react-bootstrap";
 import InputGroupText from "react-bootstrap/esm/InputGroupText";
 import { Calendar, Camera, Download, NoteTaking, Trash } from "../Icons";
 
@@ -69,7 +69,7 @@ const CompletionLabel = ({ws, onCompletion, onDelete, noteForService, mediaForSe
                     <Trash />
                 </Button>
                 <Button variant='outline-success' onClick={noteForService}><NoteTaking /></Button>
-                <Button variant='outline-success' onClick={mediaForService}><Camera /></Button>
+                <Button variant='outline-success' onClick={mediaForService}><Camera /> {ws.uploadedMediasCount > 0 && <Badge className="position-absolute top-0 start-100 translate-middle" pill>{ws.uploadedMediasCount}</Badge>}</Button>
             </ButtonGroup>
         )
     }
@@ -92,12 +92,12 @@ const CompletionLabel = ({ws, onCompletion, onDelete, noteForService, mediaForSe
                             <Image src={v.dataUrl} className="d-block w-100" width={640} height={480}/>
                             <Carousel.Caption>
                                 <Button variant="success" onClick={() => {
-                                    const link = document.createElement('a');
-                                    link.href = v.dataUrl;
-                                    link.download = v.fileName;
-                                    document.body.appendChild(link);
-                                    link.click();
-                                    document.body.removeChild(link);
+                                    const link = document.createElement('a')
+                                    link.href = v.dataUrl
+                                    link.download = v.fileName
+                                    document.body.appendChild(link)
+                                    link.click()
+                                    document.body.removeChild(link)
                                 }}><Download /> {v.fileName}</Button>
                             </Carousel.Caption>
                         </Carousel.Item>

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import { Badge, Button, ButtonGroup, Card, Col, Container, Dropdown, DropdownButton, ListGroup, ListGroupItem, Row, Stack } from "react-bootstrap"
 import { ScrollSpy } from "bootstrap"
 import { Calendar } from "../Icons"
+import { months3EngChars } from "../utils/dateUtils"
 
 // {[supplier]}
 const filterOrdersBySupplier = (orders={listing:[],mapping:[]}, suppliers=[], year, month) => {
@@ -50,6 +51,16 @@ function SupplierSparePartsYearMonthView({orders=[], suppliers=[], backToOrders}
         return {supplier: supplier, amount: orders.reduce((pv, cv) => pv + ((cv.quantity * cv.unitPrice) || 0), 0).toFixed(2)}
     }).sort((a, b) => b.amount - a.amount)
 
+    const DropDownYears = () => {
+        return (
+            <DropdownButton id="dropdown-year" as={ButtonGroup} title={year} variant="success" >
+            { availableYears.map(
+                v => <Dropdown.Item key={v} onClick={() => setYear(v)} eventKey={v}>{v}</Dropdown.Item> )
+            }
+            </DropdownButton> 
+        )
+    }
+
     const scrollSpyDataZoneRef = useRef()
     const scrollSpyNavZoneRef = useRef()
     useEffect(() => {
@@ -66,41 +77,46 @@ function SupplierSparePartsYearMonthView({orders=[], suppliers=[], backToOrders}
 
     return (
         <Container>
-            <Row className="mb-3">
-                <Stack direction="horizontal">
-                    <DropdownButton id="dropdown-year" className="me-3" as={ButtonGroup} title={year} variant="success" >
-                        { availableYears.map(
-                            v => <Dropdown.Item key={v} onClick={() => setYear(v)} eventKey={v}>{v}</Dropdown.Item> )
+            <Row className="mb-3 justify-content-between">
+                <Col xs="6" lg="10">
+                    <ButtonGroup className="d-flex d-lg-none">
+                    <DropDownYears />
+                    <DropdownButton id="dropdown-month" as={ButtonGroup} title={months3EngChars[month]} variant="primary" >
+                        {
+                            months3EngChars.map((v, i) => 
+                                    <Dropdown.Item key={v} variant={month === i ? 'outline-primary' : 'primary'} onClick={() => setMonth(i)}>{v}</Dropdown.Item>
+                                )
                         }
                     </DropdownButton>
+                    </ButtonGroup>
 
-                    <ButtonGroup>
+                    <ButtonGroup className="d-none d-lg-flex">
+                    <DropDownYears />
                         {
-                            ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                            'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map((v, i) => 
+                            months3EngChars.map((v, i) => 
                                 <Button key={v} variant={month === i ? 'outline-primary' : 'primary'} onClick={() => setMonth(i)}>{v}</Button>
                             )
                         }
                     </ButtonGroup>
- 
-                    <Col className="text-sm-end">
-                        <Button variant="outline-secondary" onClick={backToOrders}><i className="bi bi-file-earmark-text-fill"></i> Back to Orders</Button>
-                    </Col>
-                </Stack>
+                </Col>
+                <Col xs="6" lg="2" className="text-end">
+                    <Button variant="outline-secondary" onClick={backToOrders}><i className="bi bi-file-earmark-text-fill"></i> Back to Orders</Button>
+                </Col>
             </Row>
             <Row className="mb-3">
                 <Card>
-                    
                     <Card.Body>
-                        <span>Suppliers</span> <Badge bg="secondary">{Object.keys(trxsGroupBySuppliers).length}</Badge>&nbsp;
-                        <span>Amount</span> <Badge bg="secondary">$ {Object.values(trxsGroupBySuppliers).flat().reduce((pv, cv) => pv + ((cv.quantity * cv.unitPrice) || 0), 0).toFixed(2)}</Badge>&nbsp;
-                        <span>Items (Estimated)</span> <Badge bg="secondary">{Object.values(trxsGroupBySuppliers).flat().reduce((pv, cv) => pv + (cv.quantity || 0), 0)}</Badge>&nbsp;
-                        {amountBySuppliers.length > 0 && <span>Top 3: { [0,1,2].map(v => <Badge key={v} bg="secondary" className="me-2">{ amountBySuppliers[v]?.supplier } <Badge>${amountBySuppliers[v]?.amount}</Badge></Badge>) }</span> }
+                        <Row>
+                        <Col xs="6" lg="2"><span>Suppliers</span> <Badge bg="secondary">{Object.keys(trxsGroupBySuppliers).length}</Badge></Col>
+                        <Col xs="6" lg="2"><span>Amount</span> <Badge bg="secondary">$ {Object.values(trxsGroupBySuppliers).flat().reduce((pv, cv) => pv + ((cv.quantity * cv.unitPrice) || 0), 0).toFixed(2)}</Badge></Col>
+                        <Col xs="12" lg="2"><span>Items (Estimated)</span> <Badge bg="secondary">{Object.values(trxsGroupBySuppliers).flat().reduce((pv, cv) => pv + (cv.quantity || 0), 0)}</Badge></Col>
+                        {amountBySuppliers.length > 0 && <Col xs="12" lg="6"><span>Top 3: { [0,1,2].map(v => <Badge key={v} bg="secondary" className="me-2">{ amountBySuppliers[v]?.supplier } <Badge>${amountBySuppliers[v]?.amount}</Badge></Badge>) }</span></Col> }
+                        </Row>
                     </Card.Body>
                 </Card>
             </Row>
             <Row>
-                <Col xs="2" ref={scrollSpyNavZoneRef}>
+                <Col className="d-none d-lg-flex" lg="2" ref={scrollSpyNavZoneRef}>
                     <ListGroup className="position-sticky top-0">
                     {
                         sortedKeys.map(supplier => 
@@ -109,7 +125,7 @@ function SupplierSparePartsYearMonthView({orders=[], suppliers=[], backToOrders}
                     }
                     </ListGroup>
                 </Col>
-                <Col id="vehicle-items" ref={scrollSpyDataZoneRef}>
+                <Col lg="10" id="vehicle-items" ref={scrollSpyDataZoneRef}>
                     {
                         sortedKeys.map(supplier => {
                             const values = trxsGroupBySuppliers[supplier]
@@ -120,7 +136,7 @@ function SupplierSparePartsYearMonthView({orders=[], suppliers=[], backToOrders}
                                 <Card className={'mb-2'}>
                                     <Card.Header>
                                         <Stack direction="horizontal">
-                                            <Col className="fs-5 fw-bold">{supplier}</Col><Col className='text-sm-end'><Badge>${amountBySuppliers.find(a => a.supplier === supplier).amount}</Badge></Col>
+                                            <Col className="fs-5 fw-bold">{supplier}</Col><Col className='text-end'><Badge>${amountBySuppliers.find(a => a.supplier === supplier).amount}</Badge></Col>
                                         </Stack>
                                     </Card.Header>    
                                     <Card.Body>
@@ -129,20 +145,20 @@ function SupplierSparePartsYearMonthView({orders=[], suppliers=[], backToOrders}
                                                 <Card.Header>
                                                     <Row>
                                                         <Col><Calendar /> {groupByDO[v][0].invoiceDate}</Col>
-                                                        <Col className='text-sm-end'><i className="bi bi-journal"></i> {v} </Col>
+                                                        <Col className='text-end'><i className="bi bi-journal"></i> {v} </Col>
                                                     </Row>
                                                 </Card.Header>
                                                 <Card.Body>
                                                     {groupByDO[v].map(order => <ListGroupItem key={order.id}>
-                                                            <Stack direction="horizontal">
-                                                                <Col xs="2">{order.itemCode} </Col>
-                                                                <Col xs="7">{order.partName} </Col>
-                                                                <Col className='text-sm-end'><Badge pill>{order.quantity > 0 && order.unitPrice && `${order.quantity} ${order.unit} @ $${order.unitPrice?.toFixed(2)}`}</Badge></Col>
-                                                                <Col className='text-sm-end'>$ {(order.quantity * order.unitPrice).toFixed(2) || 0}</Col>
-                                                            </Stack>
+                                                            <Row>
+                                                                <Col xs="4" lg="2">{order.itemCode} </Col>
+                                                                <Col xs="8" lg="6">{order.partName} </Col>
+                                                                <Col xs="6" lg="2" className='text-lg-end'><Badge pill>{order.quantity > 0 && order.unitPrice && `${order.quantity} ${order.unit} @ $${order.unitPrice?.toFixed(2)}`}</Badge></Col>
+                                                                <Col xs="6" lg="2" className='text-end'>$ {(order.quantity * order.unitPrice).toFixed(2) || 0}</Col>
+                                                            </Row>
                                                         </ListGroupItem>)}
                                                         <ListGroupItem>
-                                                            <Col className='text-sm-end'>$ {groupByDO[v].reduce((pv, cv) => pv + ((cv.quantity * cv.unitPrice) || 0), 0).toFixed(2)}</Col>
+                                                            <Col className='text-end'>$ {groupByDO[v].reduce((pv, cv) => pv + ((cv.quantity * cv.unitPrice) || 0), 0).toFixed(2)}</Col>
                                                         </ListGroupItem>
                                                 </Card.Body>
                                             </Card>

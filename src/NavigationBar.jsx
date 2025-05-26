@@ -1,6 +1,6 @@
-import { Badge, Container, Form, InputGroup, Nav, Navbar, Row, Toast, ToastContainer } from "react-bootstrap";
+import { Badge, Container, Form, InputGroup, Nav, Navbar, Offcanvas, Row, Toast, ToastContainer } from "react-bootstrap";
 import { Typeahead } from "react-bootstrap-typeahead";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { Calendar, Services, Suppliers, Tools, Truck } from "./Icons";
 
 export default function NavigationBar({
@@ -10,6 +10,7 @@ export default function NavigationBar({
 
 }) {
     const location = useLocation()
+    const navigate = useNavigate()
 
     return (
         
@@ -25,15 +26,14 @@ export default function NavigationBar({
               </ToastContainer>
           </Row>
             <Navbar expand="md">
+            <Navbar.Brand href="/" className="mb-3"><span className="fw-bold fs-1"><Truck /> TSD</span></Navbar.Brand>
             <Navbar.Toggle aria-controls="basic-navbar-nav" />
-            <Navbar.Collapse id="basic-navbar-nav">
-            <Navbar.Brand href="/"><span className="bg-success text-white rounded-3 py-2 px-4 fw-bold">TSD</span></Navbar.Brand>
-            <Nav className="me-auto">
-                <Nav.Item className="me-2"><NavLink className={'btn btn-outline-primary'} to="/"><Services /> Services {selectedSearchOptions.length > 0 && <Badge pill>{filteredServices.length}</Badge>}</NavLink></Nav.Item>
-                <Nav.Item className="me-2"><NavLink className={'btn btn-outline-primary'} to="/orders"><Suppliers /> Suppliers {selectedSearchOptions.length > 0 && <Badge pill>{filteredOrders.length}</Badge>}</NavLink></Nav.Item>
-                <Nav.Item className="me-2"><NavLink className={'btn btn-outline-primary'} to="/vehicles"><Truck /> Trucks</NavLink></Nav.Item>
-            </Nav>
-            </Navbar.Collapse>
+            <Navbar.Collapse>
+                <Nav variant="underline" className="me-auto mb-3" defaultActiveKey="home">
+                    <Nav.Item><Nav.Link eventKey="home" onClick={() => navigate("/")}><Services /> Services {selectedSearchOptions.length > 0 && <Badge pill>{filteredServices.length}</Badge>}</Nav.Link></Nav.Item>
+                    <Nav.Item><Nav.Link eventKey="orders" onClick={() => navigate("/orders")}><Suppliers /> Suppliers {selectedSearchOptions.length > 0 && <Badge pill>{filteredOrders.length}</Badge>}</Nav.Link></Nav.Item>
+                    <Nav.Item><Nav.Link eventKey="vehicles" onClick={() => navigate("/vehicles")}><Truck /> Trucks</Nav.Link></Nav.Item>
+                </Nav>
             <Form className="d-flex">
                 {!searchByDate &&
                     <Form.Group>
@@ -68,6 +68,7 @@ export default function NavigationBar({
                 </Form.Group>
                 }
                 </Form>
+                </Navbar.Collapse>
                 </Navbar>
         </Container>
     )

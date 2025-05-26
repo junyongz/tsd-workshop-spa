@@ -182,7 +182,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
                 <Container fluid>
                     <Form ref={formRef} validated={validated}>
                         <Row className="mb-1">
-                            <Col xs="2">
+                            <Col xs="12" lg="2" className="mb-1">
                                 <InputGroup>
                                 <InputGroup.Text><Calendar /></InputGroup.Text>
                                     <Form.Control onChange={(e) => afterChooseDate(e.target.value)} name="startDate" 
@@ -191,7 +191,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
                                         required type="date"></Form.Control>
                                 </InputGroup>
                             </Col>
-                            <Col xs="8">
+                            <Col xs="12" lg="8" className="mb-1">
                                 <InputGroup>
                                 <InputGroup.Text><Truck /></InputGroup.Text>
                                 <Typeahead
@@ -213,7 +213,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
                                     selected={selectedVehicles} />
                                 </InputGroup>
                             </Col>
-                            <Col xs="2">
+                            <Col xs="12" lg="2" className="mb-1">
                                 <InputGroup>
                                     <Form.Control name="mileageKm" defaultValue={selectedExistingService?.mileageKm || selectedVehicles[0]?.latestMileageKm}></Form.Control>
                                     <InputGroup.Text>KM</InputGroup.Text>
@@ -221,15 +221,15 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
                             </Col>
                         </Row>
                         <Row>
-                            <Col xs="2"></Col>
-                            <Col>
+                            <Col xs={false} lg="2"></Col>
+                            <Col xs="12" lg="10">
                             <Form.Check ref={repairSwitchRef} inline name="transactionTypes" type="switch" defaultChecked={trx.current?.transactionTypes?.includes('REPAIR')} value="REPAIR" label={ <span onClick={() => repairSwitchRef.current.click()}><Repair /> Repair</span> }></Form.Check>
                             <Form.Check ref={maintSwitchRef} inline name="transactionTypes" type="switch" defaultChecked={trx.current?.transactionTypes?.includes('SERVICE')}value="SERVICE" label={ <span onClick={() => maintSwitchRef.current.click()}><MaintenanceServices /> Maintenance Service</span> }></Form.Check>
                             <Form.Check ref={inspectionSwitchRef} inline name="transactionTypes" type="switch" defaultChecked={trx.current?.transactionTypes?.includes('INSPECTION')}value="INSPECTION"  label={ <span onClick={() => inspectionSwitchRef.current.click()}><Inspection /> Inspection</span> }></Form.Check>
                             </Col>
                         </Row>
                         <Row>
-                            <Col className="text-sm-end">
+                            <Col className="text-end">
                                 <Button size="sm" onClick={addNewItem}><i className="bi bi-plus-circle-fill me-2"></i>{items.length === 0 ? 'Add New' : 'Add More' }</Button>
                             </Col>
                         </Row>
@@ -246,7 +246,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
                         {items?.map((v, i) =>
                         <ListGroup.Item key={i}>
                             <Row>                                
-                                <Form.Group as={Col} className="mb-3 col-6" controlId="spareParts">
+                                <Col xs="12" lg="6" className="mb-3">
                                     <InputGroup>
                                     <InputGroup.Text><Tools /></InputGroup.Text>
                                     <Typeahead
@@ -277,24 +277,24 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
                                         selected={v.selectedSpareParts}
                                         />
                                     </InputGroup>
-                                </Form.Group>
-                                <Form.Group as={Col} className="mb-3 col-2" controlId="quantity">
+                                </Col>
+                                <Col xs="6" lg="2" className="mb-3">
                                     <InputGroup>
                                         <Form.Control onChange={(e) => updatePriceByQuantity(e.target.value, i)} required step={decimalPointUomAvailable(v?.unit) ? 0.1 : 1} type="number" name="quantity" min="1" max={(v.selectedSpareParts[0] && remainingQuantity(orders?.mapping[v.selectedSpareParts[0].orderId], sparePartUsages)) || 0} placeholder="Quantity" value={v?.quantity}/>
                                         <InputGroup.Text>{v?.unit}</InputGroup.Text>
                                     </InputGroup>
-                                </Form.Group>
-                                <Form.Group as={Col} className="mb-3 col-2" controlId="unitPrice">
+                                </Col>
+                                <Col xs="6" lg="2" className="mb-3">
                                     <InputGroup>
                                         <InputGroup.Text><Dollar /></InputGroup.Text>
                                         <Form.Control onChange={(e) => updatePriceByUnitPrice(e.target.value, i)} required type="number" step="0.10" name="unitPrice" placeholder="Price $" value={v?.unitPrice} />
                                     </InputGroup>
-                                </Form.Group>
-                                <Col className="text-sm-end align-items-center">
+                                </Col>
+                                <Col xs="6" lg="1" className="mb-3">
                                     <FormLabel><Badge pill>$ {(v?.quantity * v?.unitPrice).toFixed(2) || 0}</Badge></FormLabel>
                                 </Col>
-                                <Col xs="1" style={{"margin-right":"-3em"}}>
-                                <span className="text-danger" onClick={() => removeItem(i)} role="button"><Trash /></span>
+                                <Col xs="6" lg="1" className="text-end">
+                                <div><span className="text-danger" onClick={() => removeItem(i)} role="button"><Trash /></span></div>
                                 </Col>
                             </Row>
                         </ListGroup.Item>

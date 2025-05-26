@@ -254,7 +254,7 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
         ws={serviceTransaction.current} onSaveNote={onSaveNote}/> }
       {serviceTransaction.current && <ServiceMediaDialog isShow={showMedia} setShowDialog={setShowMedia} 
         ws={serviceTransaction.current} onSaveMedia={onSaveMedia}/> }
-      <Row>
+      <Row className='mb-3'>
         <Col>
           <Pagination className='d-flex d-lg-none'>
           { getPaginationItems(activePage, setActivePage, totalPages, 3) }
@@ -263,7 +263,7 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
           { getPaginationItems(activePage, setActivePage, totalPages, 10) }
           </Pagination>
         </Col>
-        <Col className={'text-sm-end'}>
+        <Col className={'text-end'}>
           <ButtonGroup>
             <Button variant='secondary' onClick={() => viewByYearMonth()}><Calendar />&nbsp;Calendar View</Button>
             <Button variant='success' onClick={() => addNewServiceTransaction(new Date().toISOString().split('T')[0])}><i className="bi bi-plus-circle-fill me-2"></i>Add New</Button>
@@ -283,8 +283,8 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
                     noteForService={() => noteForService(v)}
                     mediaForService={() => mediaForService(v)}></CompletionLabel>
                   </Col>
-                  { false && <Col className={'text-sm-end col-4'}><Badge pill><i className="bi bi-person-fill-gear me-1"></i>{'Tan Chwee Seng'}</Badge></Col> }
-                  <Col sm="4" className={'text-sm-end'}>
+                  { false && <Col className={'text-end col-4'}><Badge pill><i className="bi bi-person-fill-gear me-1"></i>{'Tan Chwee Seng'}</Badge></Col> }
+                  <Col sm="4" className={'text-end'}>
                     <h4>
                       $ {((v.migratedHandWrittenSpareParts?.reduce((acc, curr) => acc += curr.totalPrice, 0) || 0) + 
                           (v.sparePartUsages?.reduce((acc, curr) =>  acc + (curr.quantity * curr.soldPrice), 0) || 0)).toFixed(2)}
@@ -296,7 +296,7 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
               <Container fluid>
                 <Row className='mb-3'>
                   <Col></Col>
-                  <Col sm="2" className={'text-sm-end'}>
+                  <Col sm="2" className={'text-end'}>
                   {
                   !v.completionDate && 
                     <Button size="sm" variant='secondary' onClick={() => addNewItemForVehicle(v)}>
@@ -312,8 +312,8 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
                         <Row>
                           <Col xs="4" lg="2">{vvv.creationDate}</Col>
                           <Col xs="8" lg="6">{vvv.itemDescription}</Col>
-                          <Col xs={false} lg="2" className='text-sm-end'><Badge pill>{vvv.quantity > 0 && vvv.unitPrice && `${vvv.quantity} ${vvv.unit} @ $${vvv.unitPrice?.toFixed(2)}`}</Badge></Col>
-                          <Col xs={false} lg="2" className='text-sm-end'><Badge pill>$ {vvv.totalPrice}</Badge></Col>
+                          <Col xs={false} lg="2" className='text-end'><Badge pill>{vvv.quantity > 0 && vvv.unitPrice && `${vvv.quantity} ${vvv.unit} @ $${vvv.unitPrice?.toFixed(2)}`}</Badge></Col>
+                          <Col xs={false} lg="2" className='text-end'><Badge pill>$ {vvv.totalPrice}</Badge></Col>
                         </Row>
                       </ListGroupItem>
                       })
@@ -327,8 +327,8 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
                         <Row>
                           <Col xs="4" lg="2">{vvv.usageDate}</Col>
                           <Col xs="8" lg="6">{ order.itemCode && !order.partName.includes(order.itemCode) && <span className='text-secondary'>{order.itemCode}&nbsp;</span> }<span>{order.partName}</span> <div className="d-none d-lg-block"><OrderTooltip order={order} supplier={supplier} /></div></Col>
-                          <Col xs={false} lg="2" className='text-sm-end'><Badge pill>{vvv.quantity > 0 && vvv.soldPrice && `${vvv.quantity} ${order.unit} @ $${vvv.soldPrice?.toFixed(2)}`}</Badge></Col>
-                          <Col xs={false} lg="2" className='text-sm-end'>{v.completionDate ? <Badge pill>$ {totalPrice}</Badge> : <HoverPilledBadge onRemove={() => removeTransaction(v.id, vvv.id)}>$ {totalPrice}</HoverPilledBadge> }</Col>
+                          <Col xs={false} lg="2" className='text-end'><Badge pill>{vvv.quantity > 0 && vvv.soldPrice && `${vvv.quantity} ${order.unit} @ $${vvv.soldPrice?.toFixed(2)}`}</Badge></Col>
+                          <Col xs={false} lg="2" className='text-end'>{v.completionDate ? <Badge pill>$ {totalPrice}</Badge> : <HoverPilledBadge onRemove={() => removeTransaction(v.id, vvv.id)}>$ {totalPrice}</HoverPilledBadge> }</Col>
                         </Row>
                       </ListGroupItem>
                       })

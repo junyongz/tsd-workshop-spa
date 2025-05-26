@@ -3,6 +3,7 @@ import { Badge, Button, ButtonGroup, Card, Col, Container, Dropdown, DropdownBut
 import OrderTooltip from "./OrderTooltip"
 import { ScrollSpy } from "bootstrap"
 import { Services } from "../Icons"
+import { months3EngChars } from "../utils/dateUtils"
 
 function YearMonthView({services, setFilteredServices, suppliers=[], orders=[], backToService}) {
     const apiUrl = process.env.REACT_APP_API_URL
@@ -45,6 +46,16 @@ function YearMonthView({services, setFilteredServices, suppliers=[], orders=[], 
          }
     }).sort((a, b) => b.amount - a.amount)
 
+    const DropDownYears = () => {
+        return (
+            <DropdownButton id="dropdown-year" as={ButtonGroup} title={year} variant="success" >
+            { services.current.availableYears().map(
+                v => <Dropdown.Item key={v} onClick={() => changeYear(v)} eventKey={v}>{v}</Dropdown.Item> )
+            }
+            </DropdownButton> 
+        )
+    }
+
     const scrollSpyDataZoneRef = useRef()
     const scrollSpyNavZoneRef = useRef()
     useEffect(() => {
@@ -64,40 +75,46 @@ function YearMonthView({services, setFilteredServices, suppliers=[], orders=[], 
 
     return (
         <Container>
-            <Row className="mb-3">
-                <Stack direction="horizontal">
-                    <DropdownButton id="dropdown-year" className="me-3" as={ButtonGroup} title={year} variant="success" >
-                        { services.current.availableYears().map(
-                            v => <Dropdown.Item key={v} onClick={() => changeYear(v)} eventKey={v}>{v}</Dropdown.Item> )
+            <Row className="mb-3 justify-content-between">
+                <Col xs="6" lg="10">
+                    <ButtonGroup className="d-flex d-lg-none">
+                    <DropDownYears />
+                    <DropdownButton id="dropdown-month" as={ButtonGroup} title={months3EngChars[month]} variant="primary" >
+                        {
+                            months3EngChars.map((v, i) => 
+                                    <Dropdown.Item key={v} variant={month === i ? 'outline-primary' : 'primary'} onClick={() => changeMonth(i)}>{v}</Dropdown.Item>
+                                )
                         }
                     </DropdownButton>
+                    </ButtonGroup>
 
-                    <ButtonGroup>
+                    <ButtonGroup className="d-none d-lg-flex">
+                    <DropDownYears />
                         {
-                            ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                            'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map((v, i) => 
-                                <Button key={v} variant={month === i ? 'outline-primary' : 'primary'} onClick={() => changeMonth(i)}>{v}</Button>
+                            months3EngChars.map((v, i) => 
+                                <Button aria-current={v} key={v} variant={month === i ? 'outline-primary' : 'primary'} onClick={() => changeMonth(i)}>{v}</Button>
                             )
                         }
                     </ButtonGroup>
- 
-                    <Col className="text-sm-end">
-                        <Button variant="outline-secondary" onClick={backToService}><Services /> Back to Service</Button>
-                    </Col>
-                </Stack>
+                </Col>
+                <Col xs="6" lg="2" className="text-end">
+                    <Button variant="outline-secondary" onClick={backToService}><Services /> Back to Service</Button>
+                </Col>
             </Row>
             <Row className="mb-3">
                 <Card>
                     <Card.Body>
-                        <span>Trucks</span> <Badge bg="secondary">{Object.keys(trxsGroupByVehicles).length}</Badge>&nbsp;
-                        <span>Amount</span> <Badge bg="secondary">$ {amountByVehicles.reduce((acc, curr) => acc + parseFloat(curr.amount), 0).toFixed(2)}</Badge>&nbsp;
-                        <span>Items (Estimated)</span> <Badge bg="secondary">{Object.values(trxsGroupByVehicles).flat().flatMap(trxs => trxs.migratedHandWrittenSpareParts).length + Object.values(trxsGroupByVehicles).flat().flatMap(trxs => trxs.sparePartUsages).length}</Badge>&nbsp;
-                        {amountByVehicles.length > 0 && <span>Top 3: { [0,1,2].map(v => <Badge key={v} bg="secondary" className="me-2">{ amountByVehicles[v]?.vehicle } <Badge>${amountByVehicles[v]?.amount}</Badge></Badge>) }</span> }
+                        <Row>
+                        <Col xs="6" lg="2"><span>Trucks</span> <Badge bg="secondary">{Object.keys(trxsGroupByVehicles).length}</Badge>&nbsp;</Col>
+                        <Col xs="6" lg="2"><span>Amount</span> <Badge bg="secondary">$ {amountByVehicles.reduce((acc, curr) => acc + parseFloat(curr.amount), 0).toFixed(2)}</Badge>&nbsp;</Col>
+                        <Col xs="12" lg="2"><span>Items (Estimated)</span> <Badge bg="secondary">{Object.values(trxsGroupByVehicles).flat().flatMap(trxs => trxs.migratedHandWrittenSpareParts).length + Object.values(trxsGroupByVehicles).flat().flatMap(trxs => trxs.sparePartUsages).length}</Badge></Col>
+                        {amountByVehicles.length > 0 && <Col xs="12" lg="6"><span>Top 3: { [0,1,2].map(v => <Badge key={v} bg="secondary" className="me-2">{ amountByVehicles[v]?.vehicle } <Badge>${amountByVehicles[v]?.amount}</Badge></Badge>) }</span></Col> }
+                        </Row>
                     </Card.Body>
                 </Card>
             </Row>
             <Row>
-                <Col xs="2" ref={scrollSpyNavZoneRef}>
+                <Col className="d-none d-lg-flex" lg="2" ref={scrollSpyNavZoneRef}>
                     <ListGroup className="position-sticky top-0">
                     {
                         sortedKeys.map(veh => 
@@ -106,7 +123,7 @@ function YearMonthView({services, setFilteredServices, suppliers=[], orders=[], 
                     }
                     </ListGroup>
                 </Col>
-                <Col id="vehicle-items" ref={scrollSpyDataZoneRef}>
+                <Col lg="10" id="vehicle-items" ref={scrollSpyDataZoneRef}>
                     {
                         sortedKeys.map(veh => {
                             const values = trxsGroupByVehicles[veh]
@@ -116,18 +133,18 @@ function YearMonthView({services, setFilteredServices, suppliers=[], orders=[], 
                                 <Card className={'mb-2'}>
                                     <Card.Header>
                                         <Stack direction="horizontal">
-                                            <Col className="fs-5 fw-bold">{veh}</Col><Col className='text-sm-end'><Badge>${amountByVehicles.find(a => a.vehicle === veh).amount}</Badge></Col>
+                                            <Col className="fs-5 fw-bold">{veh}</Col><Col className='text-end'><Badge>${amountByVehicles.find(a => a.vehicle === veh).amount}</Badge></Col>
                                         </Stack>
                                     </Card.Header>    
                                     <Card.Body>
                                         {values.map(trx => {                                            
                                             const migrated = trx.migratedHandWrittenSpareParts?.map(v => <ListGroupItem key={v.index}>
-                                                <Stack direction="horizontal">
-                                                    <Col>{trx.creationDate}</Col>
-                                                    <Col xs="8">{v.itemDescription}</Col>
-                                                    <Col className='text-sm-end'><Badge pill>{v.quantity > 0 && v.unitPrice && `${v.quantity} ${v.unit} @ $${v.unitPrice?.toFixed(2)}`}</Badge></Col>
-                                                    <Col className='text-sm-end'>$ {v.totalPrice?.toFixed(2) || 0}</Col>
-                                                </Stack>
+                                                <Row>
+                                                    <Col xs="4" lg="2">{trx.creationDate}</Col>
+                                                    <Col xs="8" lg="6">{v.itemDescription}</Col>
+                                                    <Col xs={false} lg="2" className='text-end'><Badge pill>{v.quantity > 0 && v.unitPrice && `${v.quantity} ${v.unit} @ $${v.unitPrice?.toFixed(2)}`}</Badge></Col>
+                                                    <Col xs={false} lg="2" className='text-end'>$ {v.totalPrice?.toFixed(2) || 0}</Col>
+                                                </Row>
                                             </ListGroupItem>)
 
                                             const usages = trx.sparePartUsages.map(v => {
@@ -136,12 +153,12 @@ function YearMonthView({services, setFilteredServices, suppliers=[], orders=[], 
                                                 const totalPrice = (v.quantity * order.unitPrice).toFixed(2) || 0
                                                 
                                                 return (<ListGroupItem key={v.id}>
-                                                        <Stack direction="horizontal">
-                                                            <Col>{trx.creationDate}</Col>
-                                                            <Col xs="8">{order.partName} { order && <div><OrderTooltip order={order} supplier={supplier} /></div> }</Col>
-                                                            <Col className='text-sm-end'><Badge pill>{v.quantity > 0 && order.unitPrice && `${v.quantity} ${order.unit} @ $${order.unitPrice?.toFixed(2)}`}</Badge></Col>
-                                                            <Col className='text-sm-end'>$ {totalPrice}</Col>
-                                                        </Stack>
+                                                        <Row>
+                                                            <Col xs="4" lg="2">{trx.creationDate}</Col>
+                                                            <Col xs="8" lg="6">{order.partName} { order && <div className="d-none d-lg-block"><OrderTooltip order={order} supplier={supplier} /></div> }</Col>
+                                                            <Col xs={false} lg="2" className='text-end'><Badge pill>{v.quantity > 0 && order.unitPrice && `${v.quantity} ${order.unit} @ $${order.unitPrice?.toFixed(2)}`}</Badge></Col>
+                                                            <Col xs={false} lg="2" className='text-end'>$ {totalPrice}</Col>
+                                                        </Row>
                                                     </ListGroupItem>)
                                             })
 

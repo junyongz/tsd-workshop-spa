@@ -33,6 +33,7 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
 
     const [showSuppliers, setShowSuppliers] = useState(false)
     const [selectedSupplier, setSelectedSupplier] = useState()
+    const [orderedSuppliers, setOrderedSuppliers] = useState()
 
     const [overview, setOverview] = useState(false)
 
@@ -184,6 +185,14 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
         })
     }
 
+    const orderSupplierByRecentOrder = () => {
+        setOrderedSuppliers([...suppliers])
+    }
+
+    const orderSupplierByName = () => {
+        setOrderedSuppliers([...suppliers].sort((a, b) => a.supplierName.toLowerCase().localeCompare(b.supplierName.toLowerCase())))
+    }
+
     const replaceOrders = useCallback(() => setFilteredOrders(orders.listing), [orders, setFilteredOrders] )
     useEffect(() => {
         if (selectedSearchOptions.length > 0) {
@@ -231,7 +240,7 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
                 { getPaginationItems(activePage, setActivePage, totalPages, 10) }
                 </Pagination>
                 </Col>
-                <Col className={'text-sm-end'}>
+                <Col className={'text-end'}>
                     <ButtonGroup>
                         <Button variant="secondary" onClick={() => setOverview(true)}><i className="bi bi-card-heading me-2"></i>Overview</Button>
                         <Button variant='success' onClick={() => setShowDialog(!showDialog)}><i className="bi bi-plus-circle-fill me-2"></i>Add New</Button>
@@ -241,14 +250,18 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
             {selectedSearchOptions.length === 0 && !overview && <Row>
                 <Col>
                     <Button variant="link" onClick={() => setShowSuppliers(true)}>{ selectedSupplier ? `Showing for ${suppliers.find(v => v.id === selectedSupplier.id).supplierName}` : 'Showing All'}</Button>
-                    <Offcanvas show={showSuppliers} placement="top" onHide={() => setShowSuppliers(false)}>
+                    <Offcanvas onShow={() => orderSupplierByRecentOrder()} show={showSuppliers} placement="top" onHide={() => setShowSuppliers(false)}>
                         <Offcanvas.Header closeButton>
-                        <Offcanvas.Title><Suppliers /> Suppliers</Offcanvas.Title>
+                            <Offcanvas.Title><Suppliers /> Suppliers</Offcanvas.Title>
                         </Offcanvas.Header>
                         <Offcanvas.Body>
+                            <Nav variant="pills" defaultActiveKey='recent'>
+                            <Nav.Item><Nav.Link onClick={() => orderSupplierByRecentOrder()} eventKey='recent'>By Recent Order</Nav.Link></Nav.Item>
+                            <Nav.Item><Nav.Link onClick={() => orderSupplierByName()} eventKey='name'>By Name</Nav.Link></Nav.Item>
+                            </Nav>
                             <Nav variant="underline" defaultActiveKey={selectedSupplier?.id} activeKey={selectedSupplier?.id}>
                                 {
-                                    suppliers.map(v => 
+                                    orderedSuppliers?.map(v => 
                                         <Nav.Item key={v.id}>
                                             <Nav.Link onClick={() => filterOrderBySupplier(v)} eventKey={v.id}>{v.supplierName}</Nav.Link>
                                         </Nav.Item>
@@ -292,7 +305,7 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
                                         </Row>                                    
                                     </Col>
                                     <Col xs={false} md="3"><SparePartNotes order={v} onNoteClick={() => recordNote(v)} sparePartUsages={sparePartUsages}></SparePartNotes></Col>
-                                    <Col xs={false} md="1" className="text-sm-end">
+                                    <Col xs={false} md="1" className="text-end">
                                         {!v.sheetName && 
                                         <OverlayTrigger trigger="click" placement="left" overlay={
                                             <Popover>

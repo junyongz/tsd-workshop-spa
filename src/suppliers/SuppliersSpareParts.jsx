@@ -280,11 +280,11 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
                     <ListGroup>
                         <ListGroupItem key={'header'}>
                                 <Row>
-                                    <Col xs="3" md="2"><Calendar /> Invoice Date</Col>
-                                    <Col xs="3" md="2"><Suppliers /> Supplier</Col>
-                                    <Col xs="6" md="4"><Tools /> Particular</Col>
-                                    <Col xs={false} md="3"><i className="bi bi-card-text"></i> Notes</Col>
-                                    <Col xs={false} md="1"></Col>
+                                    <Col xs="6" md="2"><Calendar /> Invoice Date</Col>
+                                    <Col xs="6" md="2"><Suppliers /> Supplier</Col>
+                                    <Col xs="12" md="4"><Tools /> Particular</Col>
+                                    <Col xs="6" md="3"><i className="bi bi-card-text"></i> Notes</Col>
+                                    <Col xs="6" md="1"></Col>
                                 </Row>
                         </ListGroupItem>
                     { (!filteredOrders || filteredOrders.length === 0) && <ListGroupItem>...</ListGroupItem> }        
@@ -292,10 +292,10 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
                         chunkedItems[activePage - 1]?.map(v => 
                             <ListGroupItem key={v.id}>
                                 <Row>
-                                    <Col xs="3" md="2">{v.invoiceDate}</Col>
-                                    <Col xs="3" md="2">{findSupplier(v.supplierId).supplierName} <div className="p-0 m-0">{ !v.sheetName && <Button className="p-0 text-decoration-none" variant="link"
+                                    <Col xs="6" md="2">{v.invoiceDate}</Col>
+                                    <Col xs="6" md="2">{findSupplier(v.supplierId).supplierName} <div className="p-0 m-0">{ !v.sheetName && <Button className="p-0 text-decoration-none" variant="link"
                                         onClick={(e) => viewOrder(v.deliveryOrderNo, e)}>{v.deliveryOrderNo}</Button>}{v.sheetName && <span>{v.deliveryOrderNo}</span>}</div></Col>
-                                    <Col xs="6" md="4">
+                                    <Col xs="12" md="4">
                                         <Row>
                                             <Col><Badge bg="info" pill>{v.itemCode}</Badge></Col>
                                         </Row>
@@ -304,8 +304,8 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
                                             <Col><Badge>{v.quantity} {v.unit} @ each ${v.unitPrice}</Badge>{remainingQuantity(v, sparePartUsages) < v.quantity && <Badge bg={remainingQuantity(v, sparePartUsages) === 0 ? 'danger' : 'warning' }>{remainingQuantity(v, sparePartUsages)} left</Badge>}</Col>
                                         </Row>                                    
                                     </Col>
-                                    <Col xs={false} md="3"><SparePartNotes order={v} onNoteClick={() => recordNote(v)} sparePartUsages={sparePartUsages}></SparePartNotes></Col>
-                                    <Col xs={false} md="1" className="text-end">
+                                    <Col xs="6" md="3"><SparePartNotes order={v} onNoteClick={() => recordNote(v)} sparePartUsages={sparePartUsages}></SparePartNotes></Col>
+                                    <Col xs="6" md="1" className="text-end">
                                         {!v.sheetName && 
                                         <OverlayTrigger trigger="click" placement="left" overlay={
                                             <Popover>

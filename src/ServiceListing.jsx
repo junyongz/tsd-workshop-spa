@@ -312,8 +312,8 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
                         <Row>
                           <Col xs="4" lg="2">{vvv.creationDate}</Col>
                           <Col xs="8" lg="6">{vvv.itemDescription}</Col>
-                          <Col xs={false} lg="2" className='text-end'><Badge pill>{vvv.quantity > 0 && vvv.unitPrice && `${vvv.quantity} ${vvv.unit} @ $${vvv.unitPrice?.toFixed(2)}`}</Badge></Col>
-                          <Col xs={false} lg="2" className='text-end'><Badge pill>$ {vvv.totalPrice}</Badge></Col>
+                          <Col xs="6" lg="2" className='text-end'><Badge pill>{vvv.quantity > 0 && vvv.unitPrice && `${vvv.quantity} ${vvv.unit} @ $${vvv.unitPrice?.toFixed(2)}`}</Badge></Col>
+                          <Col xs="6" lg="2" className='text-end'><Badge pill>$ {vvv.totalPrice}</Badge></Col>
                         </Row>
                       </ListGroupItem>
                       })
@@ -327,8 +327,8 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
                         <Row>
                           <Col xs="4" lg="2">{vvv.usageDate}</Col>
                           <Col xs="8" lg="6">{ order.itemCode && !order.partName.includes(order.itemCode) && <span className='text-secondary'>{order.itemCode}&nbsp;</span> }<span>{order.partName}</span> <div className="d-none d-lg-block"><OrderTooltip order={order} supplier={supplier} /></div></Col>
-                          <Col xs={false} lg="2" className='text-end'><Badge pill>{vvv.quantity > 0 && vvv.soldPrice && `${vvv.quantity} ${order.unit} @ $${vvv.soldPrice?.toFixed(2)}`}</Badge></Col>
-                          <Col xs={false} lg="2" className='text-end'>{v.completionDate ? <Badge pill>$ {totalPrice}</Badge> : <HoverPilledBadge onRemove={() => removeTransaction(v.id, vvv.id)}>$ {totalPrice}</HoverPilledBadge> }</Col>
+                          <Col xs="6" lg="2" className='text-lg-end'><Badge pill>{vvv.quantity > 0 && vvv.soldPrice && `${vvv.quantity} ${order.unit} @ $${vvv.soldPrice?.toFixed(2)}`}</Badge></Col>
+                          <Col xs="6" lg="2" className='text-end'>{v.completionDate ? <Badge pill>$ {totalPrice}</Badge> : <HoverPilledBadge onRemove={() => removeTransaction(v.id, vvv.id)}>$ {totalPrice}</HoverPilledBadge> }</Col>
                         </Row>
                       </ListGroupItem>
                       })

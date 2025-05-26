@@ -156,8 +156,8 @@ function YearMonthView({services, setFilteredServices, suppliers=[], orders=[], 
                                                         <Row>
                                                             <Col xs="4" lg="2">{trx.creationDate}</Col>
                                                             <Col xs="8" lg="6">{order.partName} { order && <div className="d-none d-lg-block"><OrderTooltip order={order} supplier={supplier} /></div> }</Col>
-                                                            <Col xs={false} lg="2" className='text-end'><Badge pill>{v.quantity > 0 && order.unitPrice && `${v.quantity} ${order.unit} @ $${order.unitPrice?.toFixed(2)}`}</Badge></Col>
-                                                            <Col xs={false} lg="2" className='text-end'>$ {totalPrice}</Col>
+                                                            <Col xs="6" lg="2" className='text-lg-end'><Badge pill>{v.quantity > 0 && order.unitPrice && `${v.quantity} ${order.unit} @ $${order.unitPrice?.toFixed(2)}`}</Badge></Col>
+                                                            <Col xs="6" lg="2" className='text-end'>$ {totalPrice}</Col>
                                                         </Row>
                                                     </ListGroupItem>)
                                             })

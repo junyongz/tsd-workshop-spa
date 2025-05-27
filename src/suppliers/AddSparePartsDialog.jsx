@@ -240,70 +240,68 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
                             <ListGroup.Item>
                                 <Row>
                                 { !editing && <Col xs="1"><span onClick={() => removeItem(i)} role="button" aria-label="remove" className="text-danger"><Trash /></span></Col> }
-                                    <Col xs="11">
-                                <Row>
-                                    <Col xs="12" lg="4" className="mb-2">
-                                        <InputGroup>
-                                        <InputGroup.Text><i className="bi bi-123"></i></InputGroup.Text>
-                                        <Typeahead
-                                            inputProps={{name: 'itemCode'}}
-                                            labelKey='itemCode'
-                                            options={sparePartsSelection.filter(v => !!v.itemCode)}
-                                            onChange={(opts) => afterChooseItemCode(opts, i)}
-                                            placeholder="Key in item code"
-                                            clearButton
-                                            allowNew
-                                            onBlur={(e) => updateSelectedItemCode(e, i)}
-                                            selected={v.selectedItemCode}
-                                            disabled={v.disabled}
-                                            />
-                                        </InputGroup>
-                                    </Col>
-                                    <Col xs="12" lg="8" className="mb-2">
-                                        <InputGroup>
-                                        <InputGroup.Text><Tools /></InputGroup.Text>
-                                        <Typeahead
-                                            inputProps={{required: true, name: 'partName'}}
-                                            labelKey='partName'
-                                            options={sparePartsSelection}
-                                            onChange={(opts) => afterChooseSparePart(opts, i)}
-                                            placeholder="Find a existing one as template"
-                                            renderMenuItemChildren={(option) => 
-                                                <div>
-                                                    <div>{option.partName}</div>
-                                                    {/** TODO: to add supplier info later on */} 
-                                                    <small className="text-secondary">${option?.unitPrice} per {option?.unit} | <Calendar /> {orders.mapping[option.orderId]?.invoiceDate}</small>
-                                                </div>
-                                            }
-                                            clearButton
-                                            allowNew
-                                            onBlur={(e) => updateSelectedSpartPart(e, i)}
-                                            selected={v.selectedSparePart}
-                                            disabled={v.disabled}
-                                            />
-                                        </InputGroup>
-                                    </Col>
-                                </Row>
-                                <Row>
-                                    <Col lg="4"></Col>
-                                    <Col xs="3" lg="2">
-                                        <Form.Control onChange={(e) => updatePriceByQuantity(e.target.value, i)} required disabled={v.disabled} type="number" min={decimalPointUomAvailable(v?.unit) ? 0.1 : 1} step={decimalPointUomAvailable(v?.unit) ? 0.1 : 1} name="quantity" placeholder="Quantity" value={v?.quantity}/>
-                                    </Col>
-                                    <Col xs="3" lg="1">
-                                        <Form.Control onChange={(e) => updateUnit(e.target.value, i)} required type="text" name="unit" placeholder="Unit" disabled={v.disabled} value={v?.unit}/>
-                                    </Col>
-                                    <Col xs="6" lg="3">
-                                        <InputGroup>
-                                            <InputGroup.Text><Dollar /></InputGroup.Text>
-                                            <Form.Control onChange={(e) => updatePriceByUnitPrice(e.target.value, i)} required disabled={v.disabled} type="number" min="0" step="0.01" name="unitPrice" placeholder="Price $" value={v?.unitPrice} />
-                                        </InputGroup>
-                                    </Col>
-                                    <Col xs="12" lg="2" className="text-end">
-                                        <span className="fs-4">$ { (Number.isFinite(v.quantity) && Number.isFinite(v.unitPrice)) ? (v.quantity * v.unitPrice).toFixed(2) : 0}</span>
-                                    </Col>
-                                </Row>
-                                </Col>
-                                <Col>
+                                <Col xs={!editing ? 11 : 12}>
+                                    <Row>
+                                        <Col xs="12" lg="4" className="mb-2">
+                                            <InputGroup>
+                                            <InputGroup.Text><i className="bi bi-123"></i></InputGroup.Text>
+                                            <Typeahead
+                                                inputProps={{name: 'itemCode'}}
+                                                labelKey='itemCode'
+                                                options={sparePartsSelection.filter(v => !!v.itemCode)}
+                                                onChange={(opts) => afterChooseItemCode(opts, i)}
+                                                placeholder="Key in item code"
+                                                clearButton
+                                                allowNew
+                                                onBlur={(e) => updateSelectedItemCode(e, i)}
+                                                selected={v.selectedItemCode}
+                                                disabled={v.disabled}
+                                                />
+                                            </InputGroup>
+                                        </Col>
+                                        <Col xs="12" lg="8" className="mb-2">
+                                            <InputGroup>
+                                            <InputGroup.Text><Tools /></InputGroup.Text>
+                                            <Typeahead
+                                                inputProps={{required: true, name: 'partName'}}
+                                                labelKey='partName'
+                                                options={sparePartsSelection}
+                                                onChange={(opts) => afterChooseSparePart(opts, i)}
+                                                placeholder="Find a existing one as template"
+                                                renderMenuItemChildren={(option) => 
+                                                    <div>
+                                                        <div>{option.partName}</div>
+                                                        {/** TODO: to add supplier info later on */} 
+                                                        <small className="text-secondary">${option?.unitPrice} per {option?.unit} | <Calendar /> {orders.mapping[option.orderId]?.invoiceDate}</small>
+                                                    </div>
+                                                }
+                                                clearButton
+                                                allowNew
+                                                onBlur={(e) => updateSelectedSpartPart(e, i)}
+                                                selected={v.selectedSparePart}
+                                                disabled={v.disabled}
+                                                />
+                                            </InputGroup>
+                                        </Col>
+                                    </Row>
+                                    <Row>
+                                        <Col lg="4"></Col>
+                                        <Col xs="3" lg="2">
+                                            <Form.Control onChange={(e) => updatePriceByQuantity(e.target.value, i)} required disabled={v.disabled} type="number" min={decimalPointUomAvailable(v?.unit) ? 0.1 : 1} step={decimalPointUomAvailable(v?.unit) ? 0.1 : 1} name="quantity" placeholder="Quantity" value={v?.quantity}/>
+                                        </Col>
+                                        <Col xs="3" lg="1">
+                                            <Form.Control onChange={(e) => updateUnit(e.target.value, i)} required type="text" name="unit" placeholder="Unit" disabled={v.disabled} value={v?.unit}/>
+                                        </Col>
+                                        <Col xs="6" lg="3">
+                                            <InputGroup>
+                                                <InputGroup.Text><Dollar /></InputGroup.Text>
+                                                <Form.Control onChange={(e) => updatePriceByUnitPrice(e.target.value, i)} required disabled={v.disabled} type="number" min="0" step="0.01" name="unitPrice" placeholder="Price $" value={v?.unitPrice} />
+                                            </InputGroup>
+                                        </Col>
+                                        <Col xs="12" lg="2" className="text-end">
+                                            <span className="fs-4">$ { (Number.isFinite(v.quantity) && Number.isFinite(v.unitPrice)) ? (v.quantity * v.unitPrice).toFixed(2) : 0}</span>
+                                        </Col>
+                                    </Row>
                                 </Col>
                                 </Row>
                             </ListGroup.Item>

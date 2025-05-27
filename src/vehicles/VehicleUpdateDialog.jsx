@@ -106,7 +106,7 @@ function VehicleUpdateDialog({isShow, setShowDialog, vehicle, setVehicles, compa
                 <Container>
                     <Form ref={formRef} validated={validated}>
                         <Row className="mb-3" lg="6">
-                            <Col xs="12" lg="6">
+                            <Col xs="12" lg="6" className="mb-2">
                                 <InputGroup>
                                 <InputGroup.Text><Truck /></InputGroup.Text>
                                 <FloatingLabel label="Vehicle No" controlId="floatingVehicleNo">
@@ -143,7 +143,7 @@ function VehicleUpdateDialog({isShow, setShowDialog, vehicle, setVehicles, compa
                             <Card>
                                 <Card.Body>
                                     <Row>
-                                    <Col>
+                                    <Col xs="12" lg="6">
                                         <InputGroup className="mb-3">
                                         <InputGroup.Text><Insurance /></InputGroup.Text>
                                         <FloatingLabel label="Insurance Expiry Date">
@@ -151,7 +151,7 @@ function VehicleUpdateDialog({isShow, setShowDialog, vehicle, setVehicles, compa
                                         </FloatingLabel>
                                         </InputGroup>
                                     </Col>
-                                    <Col>
+                                    <Col xs="12" lg="6">
                                         <InputGroup>
                                         <InputGroup.Text><Roadtax /></InputGroup.Text>
                                         <FloatingLabel label="Road Tax Expiry Date">
@@ -170,7 +170,7 @@ function VehicleUpdateDialog({isShow, setShowDialog, vehicle, setVehicles, compa
                                 <Card.Body>
                                 <Card.Subtitle className="mb-2"><Inspection /> Inspections</Card.Subtitle>
                                 <Row>
-                                    <Col>
+                                    <Col xs="12" lg="6">
                                         <InputGroup className="mb-2">
                                         <InputGroup.Text><Inspection /></InputGroup.Text>
                                         <FloatingLabel label="Inspection Due Date">

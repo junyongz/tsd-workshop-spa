@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, Col, Container, Form, ListGroup, ListGroupItem, Row, Stack } from "react-bootstrap";
+import { Button, Col, Container, Form, ListGroup, ListGroupItem, Row } from "react-bootstrap";
 import VehicleUpdateDialog from "./VehicleUpdateDialog";
 import formatThousandSeparator from "../utils/numberUtils";
 import VehicleServices from "./VehicleServices";

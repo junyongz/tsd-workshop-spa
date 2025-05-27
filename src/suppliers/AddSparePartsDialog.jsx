@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { Button, Col, Container, Form, InputGroup, ListGroup, Modal, Row } from "react-bootstrap";
 import { Typeahead } from "react-bootstrap-typeahead";
 import remainingQuantity, { decimalPointUomAvailable } from "../utils/quantityUtils";
-import { Calendar, Dollar, Suppliers, Tools } from "../Icons";
+import { Calendar, Dollar, Suppliers, Tools, Trash } from "../Icons";
 
 function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[], suppliers=[], spareParts=[], sparePartUsages=[], onSaveNewOrders}) {
     const formRef = useRef()
@@ -198,14 +198,14 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
                 <Container>
                     <Form ref={formRef} validated={validated}>
                         <Row className="mb-3">
-                            <Col xs="3">
+                            <Col xs={{span: 6, order: 1}} lg={{span: 3, order: 0}} className="mb-2">
                                 <InputGroup>
                                     <InputGroup.Text><Calendar /></InputGroup.Text>
                                     <Form.Control required type="date" name="invoiceDate" max={new Date().toISOString().split('T')[0]}
                                         placeholder="Key in Invoice Date" defaultValue={items[0]?.invoiceDate} disabled={editing}></Form.Control>
                                 </InputGroup>
                             </Col>
-                            <Col xs="5">
+                            <Col xs={{span: 12, order: 0}} lg={{span: 5, order: 1}} className="mb-2">
                                 <InputGroup>
                                     <InputGroup.Text><Suppliers /></InputGroup.Text>
                                     <Typeahead
@@ -221,7 +221,7 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
                                         />
                                 </InputGroup>
                             </Col>
-                            <Col xs="4" className="text-end">
+                            <Col xs={{span: 6, order: 2}} lg={{span: 4, order: 2}} className="text-end">
                                 <InputGroup>
                                     <InputGroup.Text><i className="bi bi-file-earmark-spreadsheet"></i></InputGroup.Text>
                                     <Form.Control type="text" required name="deliveryOrderNo" placeholder="Key in DO. #" defaultValue={items[0]?.deliveryOrderNo} disabled={editing}></Form.Control>
@@ -239,8 +239,10 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
                         {items?.map((v, i) =>
                             <ListGroup.Item>
                                 <Row>
-                                    { !editing && <Col xs="1"><span onClick={() => removeItem(i)} role="button" aria-label="remove"><i className="bi bi-x-lg text-danger"></i></span></Col> }
-                                    <Form.Group as={Col} className="mb-3 col-3" controlId="itemCode">
+                                { !editing && <Col xs="1"><span onClick={() => removeItem(i)} role="button" aria-label="remove" className="text-danger"><Trash /></span></Col> }
+                                    <Col xs="11">
+                                <Row>
+                                    <Col xs="12" lg="4" className="mb-2">
                                         <InputGroup>
                                         <InputGroup.Text><i className="bi bi-123"></i></InputGroup.Text>
                                         <Typeahead
@@ -256,8 +258,8 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
                                             disabled={v.disabled}
                                             />
                                         </InputGroup>
-                                    </Form.Group>
-                                    <Form.Group as={Col} className="mb-3" controlId="sparePart">
+                                    </Col>
+                                    <Col xs="12" lg="8" className="mb-2">
                                         <InputGroup>
                                         <InputGroup.Text><Tools /></InputGroup.Text>
                                         <Typeahead
@@ -280,25 +282,29 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
                                             disabled={v.disabled}
                                             />
                                         </InputGroup>
-                                    </Form.Group>
+                                    </Col>
                                 </Row>
                                 <Row>
-                                    <Col sm="5"></Col>
-                                    <Col sm="2">
+                                    <Col lg="4"></Col>
+                                    <Col xs="3" lg="2">
                                         <Form.Control onChange={(e) => updatePriceByQuantity(e.target.value, i)} required disabled={v.disabled} type="number" min={decimalPointUomAvailable(v?.unit) ? 0.1 : 1} step={decimalPointUomAvailable(v?.unit) ? 0.1 : 1} name="quantity" placeholder="Quantity" value={v?.quantity}/>
                                     </Col>
-                                    <Col sm="1" className="mb-3">
+                                    <Col xs="3" lg="1">
                                         <Form.Control onChange={(e) => updateUnit(e.target.value, i)} required type="text" name="unit" placeholder="Unit" disabled={v.disabled} value={v?.unit}/>
                                     </Col>
-                                    <Col sm="2">
+                                    <Col xs="6" lg="3">
                                         <InputGroup>
                                             <InputGroup.Text><Dollar /></InputGroup.Text>
                                             <Form.Control onChange={(e) => updatePriceByUnitPrice(e.target.value, i)} required disabled={v.disabled} type="number" min="0" step="0.01" name="unitPrice" placeholder="Price $" value={v?.unitPrice} />
                                         </InputGroup>
                                     </Col>
-                                    <Col className="mb-3 text-end">
+                                    <Col xs="12" lg="2" className="text-end">
                                         <span className="fs-4">$ { (Number.isFinite(v.quantity) && Number.isFinite(v.unitPrice)) ? (v.quantity * v.unitPrice).toFixed(2) : 0}</span>
                                     </Col>
+                                </Row>
+                                </Col>
+                                <Col>
+                                </Col>
                                 </Row>
                             </ListGroup.Item>
                         )}

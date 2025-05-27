@@ -105,8 +105,8 @@ function VehicleUpdateDialog({isShow, setShowDialog, vehicle, setVehicles, compa
             <Modal.Body>
                 <Container>
                     <Form ref={formRef} validated={validated}>
-                        <Row className="mb-3">
-                            <Col>
+                        <Row className="mb-3" lg="6">
+                            <Col xs="12" lg="6">
                                 <InputGroup>
                                 <InputGroup.Text><Truck /></InputGroup.Text>
                                 <FloatingLabel label="Vehicle No" controlId="floatingVehicleNo">
@@ -114,7 +114,7 @@ function VehicleUpdateDialog({isShow, setShowDialog, vehicle, setVehicles, compa
                                 </FloatingLabel>
                                 </InputGroup>
                             </Col>
-                            <Col>
+                            <Col xs="12" lg="6">
                                 <InputGroup>
                                 <InputGroup.Text><Trailer /></InputGroup.Text>
                                 <FloatingLabel label="Trailer No">
@@ -208,14 +208,14 @@ function VehicleUpdateDialog({isShow, setShowDialog, vehicle, setVehicles, compa
                                     </Col>
                                 </Row>
                                 <Row>
-                                    <Col>
+                                    <Col xs="12" lg="6">
                                         <Form.Group>
                                             <FloatingLabel label="Last Inspection Work">
                                             <Form.Control plaintext readOnly defaultValue={vehicle?.lastInspection ? `${vehicle?.lastInspection?.startDate}` : '-' } />
                                             </FloatingLabel>
                                         </Form.Group>
                                     </Col>
-                                    <Col>
+                                    <Col xs="12" lg="6">
                                         <Form.Group>
                                             <FloatingLabel label="Next Inspection Work (Estimated)">
                                             <Form.Control plaintext readOnly defaultValue={vehicle?.lastInspection ? addMonthsToDateStr(vehicle?.lastInspection?.startDate, 6) : '-'} /> 
@@ -233,21 +233,21 @@ function VehicleUpdateDialog({isShow, setShowDialog, vehicle, setVehicles, compa
                                     <Card.Body>
                                         <Card.Subtitle className="mb-2"><Services /> Services</Card.Subtitle>
                                         <Row>
-                                            <Col>
+                                            <Col xs="12" lg="4">
                                                 <Form.Group>
                                                     <FloatingLabel label="Latest Mileage">
                                                     <Form.Control plaintext readOnly defaultValue={vehicle?.latestMileageKm ? `${vehicle?.latestMileageKm} KM` : '-'} />
                                                     </FloatingLabel>
                                                 </Form.Group>
                                             </Col>
-                                            <Col>
+                                            <Col xs="12" lg="4">
                                                 <Form.Group>
                                                     <FloatingLabel label="Last Service">
                                                     <Form.Control plaintext readOnly defaultValue={vehicle?.lastService?.mileageKm ? `${vehicle?.lastService?.mileageKm} KM @ ${vehicle?.lastService?.startDate}` : '-' } /> 
                                                     </FloatingLabel>
                                                 </Form.Group>
                                             </Col>
-                                            <Col>
+                                            <Col xs="12" lg="4">
                                                 <Form.Group>
                                                     <FloatingLabel label={`Next Service (every ${formatThousandSeparator(maintenanceServiceKm)}KM)`}>
                                                     <Form.Control plaintext readOnly defaultValue={(vehicle?.lastService?.mileageKm && vehicle?.latestMileageKm) ? (((vehicle?.latestMileageKm - vehicle?.lastService?.mileageKm) > maintenanceServiceKm) ? 'Do it now!' : `${maintenanceServiceKm - (vehicle?.latestMileageKm - vehicle?.lastService?.mileageKm)} KM more to go`) : 'No Service/Distance Recorded' } /> 

@@ -1,6 +1,6 @@
-import { Badge, Container, Form, InputGroup, Nav, Navbar, Offcanvas, Row, Toast, ToastContainer } from "react-bootstrap";
+import { Badge, Container, Form, InputGroup, Nav, Navbar, Row, Toast, ToastContainer } from "react-bootstrap";
 import { Typeahead } from "react-bootstrap-typeahead";
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Calendar, Services, Suppliers, Tools, Truck } from "./Icons";
 
 export default function NavigationBar({
@@ -13,18 +13,17 @@ export default function NavigationBar({
     const navigate = useNavigate()
 
     return (
-        
         <Container fluid>
-          <Row>
-              <ToastContainer className="p-3" position={'top-left'} style={{ zIndex: 3 }}>
-                <Toast bg="warning" show={showToastBox} onClose={() => setShowToastBox(false)}>
-                  <Toast.Header>
-                    <strong className="me-auto">Warning</strong>
-                  </Toast.Header>
-                  <Toast.Body>{toastBoxMessage}</Toast.Body>
-                </Toast>
-              </ToastContainer>
-          </Row>
+            <Row>
+                <ToastContainer className="p-3" position={'top-left'} style={{ zIndex: 3 }}>
+                    <Toast bg="warning" show={showToastBox} onClose={() => setShowToastBox(false)}>
+                    <Toast.Header>
+                        <strong className="me-auto">Warning</strong>
+                    </Toast.Header>
+                    <Toast.Body>{toastBoxMessage}</Toast.Body>
+                    </Toast>
+                </ToastContainer>
+            </Row>
             <Navbar expand="md">
             <Navbar.Brand href="/" className="mb-3"><span className="fw-bold fs-1"><Truck /> TSD</span></Navbar.Brand>
             <Navbar.Toggle aria-controls="basic-navbar-nav" />
@@ -38,8 +37,8 @@ export default function NavigationBar({
                 {!searchByDate &&
                     <Form.Group>
                     <InputGroup>
-                        <InputGroup.Text className="d-none d-lg-inline"><Truck /></InputGroup.Text>
-                        <InputGroup.Text className="d-none d-lg-inline"><Tools /></InputGroup.Text>
+                        <InputGroup.Text><Truck /></InputGroup.Text>
+                        <InputGroup.Text><Tools /></InputGroup.Text>
                             <Typeahead
                                 allowNew
                                 disabled={location.pathname === '/vehicles'}

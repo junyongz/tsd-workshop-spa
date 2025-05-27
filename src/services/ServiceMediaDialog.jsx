@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Button, ButtonGroup, Card, Carousel, Col, Container, Form, Image, InputGroup, Modal, Row, Stack } from "react-bootstrap";
+import { Button, ButtonGroup, Card, Carousel, Col, Container, Form, Image, InputGroup, Modal, Row } from "react-bootstrap";
 import { Camera, Download, Trash } from "../Icons";
 import TransactionTypes from "../components/TransactionTypes";
 
@@ -127,7 +127,8 @@ function ServiceMediaDialog({isShow, setShowDialog, ws, onSaveMedia}) {
                             onSelect={(eventKey) => setCurrentIndex(eventKey)}>
                             { uploadedMedias.map((v, i) => 
                                 <Carousel.Item key={v.id}>
-                                    <Image src={v.dataUrl} className="d-block w-100" width={640} height={480}/>
+                                    {v.mediaType.startsWith('image') && <Image src={v.dataUrl} className="d-block w-100" width={640} height={480}/> }
+                                    {v.mediaType.startsWith('video') && <video autoPlay controls src={v.dataUrl} className="d-block w-100" width={640} height={480}/> }
                                     <Carousel.Caption>
                                         <ButtonGroup>
                                         <Button variant="success" onClick={() => {

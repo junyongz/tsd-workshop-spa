@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Badge, Button, ButtonGroup, Card, Col, Container, ListGroup, ListGroupItem, Row, Stack } from 'react-bootstrap';
+import { Badge, Button, ButtonGroup, Card, Col, Container, ListGroup, ListGroupItem, Row } from 'react-bootstrap';
 import Pagination from 'react-bootstrap/Pagination';
 import ServiceDialog from './ServiceDialog';
 import getPaginationItems from './utils/getPaginationItems';
@@ -275,8 +275,14 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
             <Card key={v.id} className={'mb-3'}>
               <Card.Header>
                 <Row>
-                  <Col><h5>{v.vehicleNo} <span className="text-body-secondary">started since {v.startDate}</span> <TransactionTypes service={v} /></h5> 
+                  <Col xs="12" lg="4"><h5>{v.vehicleNo} <span className="text-body-secondary">started since {v.startDate}</span></h5></Col>
+                  <Col xs="4" lg="4" className='mb-2'><TransactionTypes service={v} /></Col>
+                  <Col xs="8" lg="4" className='text-end'>
                   {v.mileageKm > 0 && <h6><span className="text-body-secondary">At {v.mileageKm} KM</span></h6> }
+                  </Col>
+                </Row>
+                <Row>
+                  <Col xs="12" lg="8" className="mb-2">
                   <CompletionLabel ws={v}
                     onCompletion={(date) => completeService(v, date)} 
                     onDelete={() => deleteService(v)}
@@ -284,7 +290,7 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
                     mediaForService={() => mediaForService(v)}></CompletionLabel>
                   </Col>
                   { false && <Col className={'text-end col-4'}><Badge pill><i className="bi bi-person-fill-gear me-1"></i>{'Tan Chwee Seng'}</Badge></Col> }
-                  <Col sm="4" className={'text-end'}>
+                  <Col xs="12" lg="4" className='text-lg-end'>
                     <h4>
                       $ {((v.migratedHandWrittenSpareParts?.reduce((acc, curr) => acc += curr.totalPrice, 0) || 0) + 
                           (v.sparePartUsages?.reduce((acc, curr) =>  acc + (curr.quantity * curr.soldPrice), 0) || 0)).toFixed(2)}

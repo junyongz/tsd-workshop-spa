@@ -19,6 +19,7 @@ import Vehicles from './vehicles/Vehicles';
 
 import { doFilterServices, doInAppFilterOrders, doInAppFilterServices } from './fuzzySearch';
 import { Container } from 'react-bootstrap';
+import SpareParts from './spare-parts/SpareParts';
 
 /***
  * Date: {
@@ -287,6 +288,11 @@ function App() {
             <Vehicles vehicles={vehicles} 
               setVehicles={setVehicles} 
               companies={companies} 
+            />} />
+          <Route path="/spare-parts" element={ 
+            <SpareParts vehicles={vehicles} 
+              orders={orders}
+              suppliers={suppliers}
             />} />
         </Routes>
         </Container>

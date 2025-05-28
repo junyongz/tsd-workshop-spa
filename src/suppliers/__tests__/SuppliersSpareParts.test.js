@@ -165,7 +165,7 @@ describe('SuppliersSpareParts Component', () => {
     
     const container = render(<SuppliersSpareParts {...defaultProps} />);
     
-    const deleteButtons = document.querySelectorAll('.bi-x-lg.text-danger')
+    const deleteButtons = document.querySelectorAll('.bi-trash3')
     expect(deleteButtons.length).toBe(3);
     
     fireEvent.click(deleteButtons[0]);

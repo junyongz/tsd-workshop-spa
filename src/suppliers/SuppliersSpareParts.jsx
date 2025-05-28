@@ -9,7 +9,7 @@ import NoteTakingDialog from "./NoteTakingDialog"
 import { clearState } from "../autoRefreshWorker"
 import SparePartNotes from "./SparePartNotes"
 import SupplierSparePartsYearMonthView from "./SupplierSparePartsYearMonthView"
-import { Calendar, Suppliers, Tools, Truck } from "../Icons"
+import { Calendar, Suppliers, Tools, Trash, Truck } from "../Icons"
 
 function SuppliersSpareParts({filteredOrders=[], setFilteredOrders, 
     selectedSearchOptions=[], filterServices=() => {},
@@ -315,10 +315,10 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
                                             </Popover.Body>
                                             </Popover>
                                         }>
-                                            <span role="button"><i className="bi bi-x-lg text-danger"></i>&nbsp;</span>
+                                            <span role="button" className="text-danger fs-5"><Trash />&nbsp;</span>
                                         </OverlayTrigger>
                                         }
-                                        <Truck role="button" onClick={() => recordUsage(v)} />
+                                        <span className="fs-5"><Truck role="button" onClick={() => recordUsage(v)} /></span>
                                     </Col>
                                 </Row>
                             </ListGroupItem>

@@ -239,7 +239,7 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
                         {items?.map((v, i) =>
                             <ListGroup.Item>
                                 <Row>
-                                { !editing && <Col xs="1"><span onClick={() => removeItem(i)} role="button" aria-label="remove" className="text-danger"><Trash /></span></Col> }
+                                { !editing && <Col xs="1"><span onClick={() => removeItem(i)} role="button" aria-label="remove" className="text-danger fs-5"><Trash /></span></Col> }
                                 <Col xs={!editing ? 11 : 12}>
                                     <Row>
                                         <Col xs="12" lg="4" className="mb-2">
@@ -306,7 +306,7 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
                                 </Row>
                             </ListGroup.Item>
                         )}
-                        <ListGroup.Item key={'total'}><Col className="text-end fs-4">$ {items?.reduce((pv, cv) => pv + ((cv.quantity && cv.unitPrice && cv.quantity * cv.unitPrice) || 0), 0).toFixed(2)}</Col></ListGroup.Item>
+                        <ListGroup.Item key={'total'}><Col className="text-end fs-5">$ {items?.reduce((pv, cv) => pv + ((cv.quantity && cv.unitPrice && cv.quantity * cv.unitPrice) || 0), 0).toFixed(2)}</Col></ListGroup.Item>
                         </ListGroup>
                         </Row>
                     </Form>

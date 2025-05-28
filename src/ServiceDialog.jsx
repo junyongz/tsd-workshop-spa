@@ -246,7 +246,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
                         {items?.map((v, i) =>
                         <ListGroup.Item key={i}>
                             <Row>                                
-                                <Col xs="12" lg="6" className="mb-3">
+                                <Col xs="12" lg="6" className="mb-3 mb-lg-0">
                                     <InputGroup>
                                     <InputGroup.Text><Tools /></InputGroup.Text>
                                     <Typeahead
@@ -278,23 +278,23 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
                                         />
                                     </InputGroup>
                                 </Col>
-                                <Col xs="6" lg="2" className="mb-3">
+                                <Col xs="6" lg="2" className="mb-3 mb-lg-0">
                                     <InputGroup>
                                         <Form.Control onChange={(e) => updatePriceByQuantity(e.target.value, i)} required step={decimalPointUomAvailable(v?.unit) ? 0.1 : 1} type="number" name="quantity" min="1" max={(v.selectedSpareParts[0] && remainingQuantity(orders?.mapping[v.selectedSpareParts[0].orderId], sparePartUsages)) || 0} placeholder="Quantity" value={v?.quantity}/>
                                         <InputGroup.Text>{v?.unit}</InputGroup.Text>
                                     </InputGroup>
                                 </Col>
-                                <Col xs="6" lg="2" className="mb-3">
+                                <Col xs="6" lg="2" className="mb-3 mb-lg-0">
                                     <InputGroup>
                                         <InputGroup.Text><Dollar /></InputGroup.Text>
                                         <Form.Control onChange={(e) => updatePriceByUnitPrice(e.target.value, i)} required type="number" step="0.10" name="unitPrice" placeholder="Price $" value={v?.unitPrice} />
                                     </InputGroup>
                                 </Col>
-                                <Col xs="6" lg="1" className="mb-3">
-                                    <FormLabel><Badge pill>$ {(v?.quantity * v?.unitPrice).toFixed(2) || 0}</Badge></FormLabel>
+                                <Col xs="6" lg="1" className="mb-3 mb-lg-0">
+                                    <FormLabel className="fs-5"><Badge pill>$ {(v?.quantity * v?.unitPrice).toFixed(2) || 0}</Badge></FormLabel>
                                 </Col>
                                 <Col xs="6" lg="1" className="text-end">
-                                <div><span className="text-danger" onClick={() => removeItem(i)} role="button"><Trash /></span></div>
+                                <div><span className="text-danger fs-5" onClick={() => removeItem(i)} role="button"><Trash /></span></div>
                                 </Col>
                             </Row>
                         </ListGroup.Item>

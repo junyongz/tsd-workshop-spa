@@ -32,6 +32,7 @@ export default function NavigationBar({
                     <Nav.Item><Nav.Link eventKey="home" onClick={() => navigate("/")}><Services /> Services {selectedSearchOptions.length > 0 && <Badge pill>{filteredServices.length}</Badge>}</Nav.Link></Nav.Item>
                     <Nav.Item><Nav.Link eventKey="orders" onClick={() => navigate("/orders")}><Suppliers /> Suppliers {selectedSearchOptions.length > 0 && <Badge pill>{filteredOrders.length}</Badge>}</Nav.Link></Nav.Item>
                     <Nav.Item><Nav.Link eventKey="vehicles" onClick={() => navigate("/vehicles")}><Truck /> Trucks</Nav.Link></Nav.Item>
+                    { process.env.NODE_ENV === 'development' && <Nav.Item><Nav.Link eventKey="spare-parts" onClick={() => navigate("/spare-parts")}><Tools /> Spare Parts</Nav.Link></Nav.Item> }
                 </Nav>
             <Form className="d-flex">
                 {!searchByDate &&

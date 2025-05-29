@@ -226,7 +226,7 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
     .then(resp => resp.json())
     .then(wsJson => {
       services.current.updateTransaction(wsJson)
-      setFilteredServices([...services.current.transactions])
+      keywordSearch()
     })
   }
 

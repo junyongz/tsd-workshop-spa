@@ -17,7 +17,7 @@ import ServiceTransactions from './ServiceTransactions';
 import NavigationBar from './NavigationBar';
 import Vehicles from './vehicles/Vehicles';
 
-import { doFilterServices, doInAppFilterOrders, doInAppFilterServices } from './fuzzySearch';
+import { doFilterServices, doInAppFilterOrders, doInAppFilterServices } from './search/fuzzySearch';
 import { Container } from 'react-bootstrap';
 import SpareParts from './spare-parts/SpareParts';
 
@@ -125,7 +125,7 @@ function App() {
 
   const clearFilterDate = () => {
     setSearchByDate(false)
-    setSearchOptions([])
+    setSelectedSearchOptions([])
     setFilteredServices(services.current.transactions)
     setFilteredOrders(orders.current.listing)
   }
@@ -254,7 +254,7 @@ function App() {
                   setFilteredServices(services.current.transactions) 
                 }
                 else {
-                  doFilterServices(selectedSearchOptions)}
+                  doFilterServices(selectedSearchOptions, services, setFilteredServices, sparePartUsages, orders, setFilteredOrders, storeSelectedSearchOptions)}
                 }
               }
               selectedSearchOptions={selectedSearchOptions}

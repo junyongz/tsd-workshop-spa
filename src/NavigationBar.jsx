@@ -47,6 +47,7 @@ export default function NavigationBar({
                                 id="search-multiple"
                                 labelKey="name"
                                 multiple
+                                clearButton
                                 onFocus={(evt) => evt.target.setAttribute('size', 70)}
                                 onBlur={(evt) => evt.target.setAttribute('size', 20)}
                                 onChange={filterServices}

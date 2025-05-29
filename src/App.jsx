@@ -87,7 +87,8 @@ function App() {
       return
     }
 
-    if (options.map(opt => opt.name).every(v => searchedOptions.current.has(v))) {
+    if (options.length === searchedOptions.current.size && 
+          options.map(opt => opt.name).every(v => searchedOptions.current.has(v))) {
       doInAppFilterServices(options, services, orders, setFilteredServices);
       doInAppFilterOrders(options, orders, setFilteredOrders, sparePartUsages)
       setSelectedSearchOptions(options)

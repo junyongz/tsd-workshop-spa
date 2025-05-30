@@ -201,8 +201,9 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
                             <Col xs={{span: 6, order: 1}} lg={{span: 3, order: 0}} className="mb-2">
                                 <InputGroup>
                                     <InputGroup.Text><Calendar /></InputGroup.Text>
-                                    <Form.Control required type="date" name="invoiceDate" max={new Date().toISOString().split('T')[0]}
-                                        placeholder="Key in Invoice Date" defaultValue={items[0]?.invoiceDate} disabled={editing}></Form.Control>
+                                    <Form.Control required type="date" name="invoiceDate"
+                                        placeholder="Key in Invoice Date" 
+                                        defaultValue={items[0]?.invoiceDate} disabled={editing}></Form.Control>
                                 </InputGroup>
                             </Col>
                             <Col xs={{span: 12, order: 0}} lg={{span: 5, order: 1}} className="mb-2">

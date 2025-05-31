@@ -28,3 +28,9 @@
 2. Websocket for the backend status
 3. Electron based app
 4. Spare parts forecasting based on mileage (KM)
+
+## Support This Project
+
+If you find this project useful, consider donating!
+
+[Stripe Donate](https://buy.stripe.com/7sY5kCbtj2dR8b1cCRfEk00)

@@ -173,7 +173,7 @@ describe('SuppliersSpareParts Component', () => {
     
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith(
-        'http://test-api/supplier-spare-parts/1',
+        'http://test-api/api/supplier-spare-parts/1',
         expect.objectContaining({ method: 'DELETE' })
       );
       expect(defaultProps.setLoading).toHaveBeenCalledTimes(2);
@@ -201,7 +201,7 @@ describe('SuppliersSpareParts Component', () => {
     
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith(
-        'http://test-api/supplier-spare-parts',
+        'http://test-api/api/supplier-spare-parts',
         expect.objectContaining({
           method: 'POST',
           body: JSON.stringify(newOrders)

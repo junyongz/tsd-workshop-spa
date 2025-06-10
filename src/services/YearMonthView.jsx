@@ -15,7 +15,7 @@ function YearMonthView({services, setFilteredServices, suppliers=[], orders=[], 
     const [trxsGroupByVehicles, setTrxsGroupByVehicles] = useState({})
 
     const fetchByYearAndMonth = async (year, month) => {
-        return fetch(`${apiUrl}/workshop-services?year=${year}&month=${month}`)
+        return fetch(`${apiUrl}/api/workshop-services?year=${year}&month=${month}`)
         .then(resp => resp.json())
         .then(yearMonthWss => {
             yearMonthWss.forEach(ws => services.current.updateTransaction(ws))

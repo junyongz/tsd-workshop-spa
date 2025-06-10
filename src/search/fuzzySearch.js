@@ -28,7 +28,7 @@ export const doInAppFilterServices = (options=[], services, orders, setFilteredS
       }
     }
 
-    if (searchedFilteredServices.length == 0) {
+    if (searchedFilteredServices.length === 0) {
       searchedFilteredServices.push(...vehicleMatchedTrxs)
     }
 
@@ -56,7 +56,7 @@ export const doFilterServices = (options=[], services, setFilteredServices, spar
     if (services.current) {
       const keywords = options.map(opt => `keyword=${opt.name}`).join('&')
 
-      fetch(`${apiUrl}/workshop-services?${keywords}`)
+      fetch(`${apiUrl}/api/workshop-services?${keywords}`)
         .then(resp => resp.json())
         .then(wss => {
           wss.forEach(ws => services.current.updateTransaction(ws))

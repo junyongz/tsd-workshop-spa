@@ -29,11 +29,11 @@ function ServiceMediaDialog({isShow, setShowDialog, ws, onSaveMedia}) {
     }
 
     const onShow = () => {
-        fetch(`${apiUrl}/workshop-services/${ws.id}/medias`)
+        fetch(`${apiUrl}/api/workshop-services/${ws.id}/medias`)
             .then(resp => resp.json())
             .then(medias => {
                 Promise.allSettled(medias.map(md =>
-                    fetch(`${apiUrl}/workshop-services/${ws.id}/medias/${md.id}/data`)
+                    fetch(`${apiUrl}/api/workshop-services/${ws.id}/medias/${md.id}/data`)
                         .then(resp => resp.blob())
                         .then(blob => { return {...md, dataUrl: URL.createObjectURL(blob) } })
                 ))
@@ -42,7 +42,7 @@ function ServiceMediaDialog({isShow, setShowDialog, ws, onSaveMedia}) {
     }
 
     const removeMedia = (media, idx) => {
-        fetch(`${apiUrl}/workshop-services/${media.serviceId}/medias/${media.id}`, 
+        fetch(`${apiUrl}/api/workshop-services/${media.serviceId}/medias/${media.id}`, 
             { method: 'DELETE' })
             .then(resp => {
                 if (resp.ok) {
@@ -128,7 +128,7 @@ function ServiceMediaDialog({isShow, setShowDialog, ws, onSaveMedia}) {
                             { uploadedMedias.map((v, i) => 
                                 <Carousel.Item key={v.id}>
                                     {v.mediaType.startsWith('image') && <Image src={v.dataUrl} className="d-block w-100" width={640} height={480}/> }
-                                    {v.mediaType.startsWith('video') && <video autoPlay controls src={v.dataUrl} className="d-block w-100" width={640} height={480}/> }
+                                    {v.mediaType.startsWith('video') && <video autoPlay controls  src={v.dataUrl} className="d-block w-100" width={640} height={480}/> }
                                     <Carousel.Caption>
                                         <ButtonGroup>
                                         <Button variant="success" onClick={() => {

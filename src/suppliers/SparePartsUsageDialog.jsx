@@ -67,7 +67,7 @@ function SparePartsUsageDialog({isShow, setShowDialog, vehicles,
                 setSelectedVehicles([veh])
             }
 
-            fetch(`${apiUrl}/workshop-services?vehicleId=${veh.id}`, {
+            fetch(`${apiUrl}/api/workshop-services?vehicleId=${veh.id}`, {
                 mode: 'cors',
                 headers: {
                     'Content-type': 'application/json'

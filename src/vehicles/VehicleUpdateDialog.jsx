@@ -69,7 +69,7 @@ function VehicleUpdateDialog({isShow, setShowDialog, vehicle, setVehicles, compa
             nextTrailerInspectionDate: nativeForm['nextTrailerInspectionDate'] ? nativeForm['nextTrailerInspectionDate'].value : nativeForm['nextInspectionDate'].value
         }
 
-        fetch(`${apiUrl}/vehicles`, {
+        fetch(`${apiUrl}/api/vehicles`, {
             method: 'POST', 
             body: JSON.stringify(toSave), 
             headers: {
@@ -267,7 +267,7 @@ function VehicleUpdateDialog({isShow, setShowDialog, vehicle, setVehicles, compa
                                 <Card>
                                     <Card.Body className="p-3 mx-auto">
                                     <Image width={640} height={640} 
-                                        src={`${apiUrl}/vehicles/${vehicle.id}/gps`}></Image>
+                                        src={`${apiUrl}/api/vehicles/${vehicle.id}/gps`}></Image>
                                     </Card.Body>
                                 </Card>
                             </Col>

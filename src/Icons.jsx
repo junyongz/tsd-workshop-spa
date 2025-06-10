@@ -68,3 +68,7 @@ export function Camera() {
 export function Download() {
     return (<i className="bi bi-download"></i>)
 }
+
+export function Foreman() {
+    return (<i className="bi bi-person-fill-gear"></i>)
+}

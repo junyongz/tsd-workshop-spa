@@ -1,6 +1,6 @@
 async function fetchSupplierSparePartsWithFetchMode(apiUrl, orders, setFilteredOrders, fetchMode) {
 
-    return fetch(`${apiUrl}/supplier-spare-parts?fetch=${fetchMode}`, {mode: 'cors'})
+    return fetch(`${apiUrl}/api/supplier-spare-parts?fetch=${fetchMode}`, {mode: 'cors'})
     .then(res => res.json())
     .then(response => {
         orders.current = { listing: response, 

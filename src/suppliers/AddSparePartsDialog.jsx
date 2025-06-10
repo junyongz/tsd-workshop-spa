@@ -53,7 +53,7 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
         const invoiceDate = nativeForm.querySelector('[name="invoiceDate"]')
         const deliveryOrderNo = nativeForm.querySelector('[name="deliveryOrderNo"]')
 
-        const payload = items.map((v, i) => {
+        const payload = items.filter(v => !v.disabled).map((v, i) => {
                 return {
                     id: v.id,
                     invoiceDate: invoiceDate.value,

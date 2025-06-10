@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Badge, Button, ButtonGroup, Card, Col, Container, ListGroup, ListGroupItem, Row } from 'react-bootstrap';
 import Pagination from 'react-bootstrap/Pagination';
-import ServiceDialog from './ServiceDialog';
+import ServiceDialog from './services/ServiceDialog';
 import getPaginationItems from './utils/getPaginationItems';
 import HoverPilledBadge from './components/HoverPilledBadge';
 import CompletionLabel from './components/CompletionLabel';
@@ -10,17 +10,18 @@ import { clearState } from './autoRefreshWorker';
 import OrderTooltip from './services/OrderTooltip';
 import YearMonthView from './services/YearMonthView';
 import TransactionTypes from './components/TransactionTypes';
-import { Calendar } from './Icons';
+import { Calendar, Foreman, NoteTaking } from './Icons';
 import ServiceNoteTakingDialog from './services/ServiceNoteTakingDialog';
 import ServiceMediaDialog from './services/ServiceMediaDialog';
+import imageCompression from 'browser-image-compression';
 
 function ServiceListing({services, filteredServices=[], setFilteredServices,
     keywordSearch = () => {}, refreshSparePartUsages=() => {}, 
     refreshSpareParts=() => {},
     vehicles, setVehicles, spareParts, sparePartUsages=[],
-    orders=[], suppliers=[],
+    orders=[], suppliers=[], taskTemplates=[],
     onNewVehicleCreated=() => {}, setLoading=()=>{},
-    selectedSearchOptions}) {
+    selectedSearchOptions, onNewServiceCreated, removeTask}) {
 
   const apiUrl = process.env.REACT_APP_API_URL
   const [showModal, setShowModal] = useState(false)
@@ -83,39 +84,10 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
     setShowMedia(true)
   }
 
-  // { id: ?, creationDate: ?, sparePartUsages: [{}, {} ]}
-  const onNewServiceCreated = (service) => {
-    setLoading(true)
-    requestAnimationFrame(() => {
-      fetch(`${apiUrl}/workshop-services`, {
-        method: 'POST', 
-        body: JSON.stringify(service), 
-        headers: {
-          'Content-type': 'application/json'
-        }
-      })
-      .then(res => {
-        if (!res.ok) {
-          console.trace("Issue with POST workshop-services: " + JSON.stringify(res.body))
-          throw Error("not good")
-        }
-        return res.json()
-      })
-      .then(service => {
-        services.current.addNewTransaction(service)
-        keywordSearch()
-      })
-      .then(() => Promise.all([refreshSpareParts(), refreshSparePartUsages()]))
-      .then(() => clearState())
-      .finally(() => setLoading(false))
-    })
-    
-  }
-
   const removeTransaction = (serviceId, sparePartUsageId) => {
     setLoading(true)
     requestAnimationFrame(() => {
-      fetch(`${apiUrl}/spare-part-utilizations/${sparePartUsageId}`, {
+      fetch(`${apiUrl}/api/spare-part-utilizations/${sparePartUsageId}`, {
         method: 'DELETE', 
         headers: {
           'Content-type': 'application/json'
@@ -140,7 +112,7 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
     requestAnimationFrame(() => {
       service.completionDate = date
  
-      fetch(`${apiUrl}/workshop-services?op=COMPLETE`, {
+      fetch(`${apiUrl}/api/workshop-services?op=COMPLETE`, {
         method: 'POST', 
         body: JSON.stringify(service), 
         headers: {
@@ -160,7 +132,7 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
   const onSaveNote = (service) => {
     setLoading(true)
     requestAnimationFrame(() => { 
-      fetch(`${apiUrl}/workshop-services?op=NOTE`, {
+      fetch(`${apiUrl}/api/workshop-services?op=NOTE`, {
         method: 'POST', 
         body: JSON.stringify(service), 
         headers: {
@@ -179,11 +151,19 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
 
   const onSaveMedia = (service, file, afterSaveMedia) => {
     setLoading(true)
-    requestAnimationFrame(() => { 
-      const formData = new FormData()
-      formData.append("file", file)
+    requestAnimationFrame(async () => {
 
-      fetch(`${apiUrl}/workshop-services/${service.id}/medias`, {
+      let compressedFile = file
+      if (file.type.startsWith('image')) {
+        compressedFile = await imageCompression(file, {
+          maxSizeMB: 1, maxWidthOrHeight: 1080, useWebWorker: true,
+        })
+      }
+
+      const formData = new FormData()
+      formData.append("file", compressedFile, file.name)
+
+      fetch(`${apiUrl}/api/workshop-services/${service.id}/medias`, {
         method: 'POST', 
         body: formData
       })
@@ -201,7 +181,7 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
   const deleteService = (ws) => {
     setLoading(true)
     requestAnimationFrame(() => {
-      fetch(`${apiUrl}/workshop-services/${ws.id}`, {
+      fetch(`${apiUrl}/api/workshop-services/${ws.id}`, {
         method: 'DELETE',
         headers: {
           'Content-type': 'application/json'
@@ -222,7 +202,7 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
   }
 
   const loadWorkshopService = (ws) => {
-    fetch(`${apiUrl}/workshop-services/${ws.id}`)
+    fetch(`${apiUrl}/api/workshop-services/${ws.id}`)
     .then(resp => resp.json())
     .then(wsJson => {
       services.current.updateTransaction(wsJson)
@@ -245,7 +225,7 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
       <ServiceDialog isShow={showModal} setShow={setShowModal} trx={serviceTransaction} 
         onNewServiceCreated={onNewServiceCreated} 
         vehicles={vehicles} setVehicles={setVehicles} 
-        spareParts={spareParts}
+        spareParts={spareParts} taskTemplates={taskTemplates}
         orders={orders}
         suppliers={suppliers}
         sparePartUsages={sparePartUsages}
@@ -293,7 +273,8 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
                   <Col xs="12" lg="4" className='text-lg-end'>
                     <h4>
                       $ {((v.migratedHandWrittenSpareParts?.reduce((acc, curr) => acc += curr.totalPrice, 0) || 0) + 
-                          (v.sparePartUsages?.reduce((acc, curr) =>  acc + (curr.quantity * curr.soldPrice), 0) || 0)).toFixed(2)}
+                          (v.sparePartUsages?.reduce((acc, curr) =>  acc + (curr.quantity * curr.soldPrice), 0) || 0) +
+                          (v.tasks?.reduce((acc, curr) => acc += curr.quotedPrice, 0) || 0)).toFixed(2)}
                     </h4>
                   </Col>
                 </Row>
@@ -339,9 +320,24 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
                       </ListGroupItem>
                       })
                     }
-                    {((!v.migratedHandWrittenSpareParts || v.migratedHandWrittenSpareParts.length === 0)
-                    && (!v.sparePartUsages || v.sparePartUsages.length === 0) && v.completionDate) && 
+                    {v.tasks?.map(vvv => {
+                      const task = taskTemplates.find(t => t.id === vvv.taskId)
+
+                      return <ListGroupItem key={vvv.id}>
+                        <Row>
+                          <Col xs="4" lg="2">{vvv.recordedDate}</Col>
+                          <Col xs="12" lg="5"><Foreman /> {task.workmanshipTask} ({task.component.subsystem} - {task.component.componentName})</Col>
+                          <Col xs="8" lg="3"><NoteTaking /> {vvv.remarks}</Col>
+                          <Col xs="4" lg="2" className='text-end'>{v.completionDate ? <Badge pill>$ {vvv.quotedPrice?.toFixed(2)}</Badge> : <HoverPilledBadge onRemove={() => removeTask(v.id, vvv.id)}>$ {vvv.quotedPrice?.toFixed(2)}</HoverPilledBadge> }</Col>                        
+                        </Row>
+                      </ListGroupItem>
+                      })
+                    }
+                    {((!v.migratedHandWrittenSpareParts)
+                    && (!v.sparePartUsages)
+                    && v.completionDate) && 
                     <Button onClick={() => loadWorkshopService(v)} variant='outline-secondary'><i className="bi bi-three-dots"></i></Button>}
+                    {v.sparePartsCount === 0 && v.workmanshipTasksCount === 0 && <ListGroup.Item>Refer to the notes (if there is something)</ListGroup.Item>}
                     </ListGroup>
                   </Col>
                 </Row>

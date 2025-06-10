@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { Route, Routes} from 'react-router-dom';
 import ServiceListing from './ServiceListing';
 import Spinner from 'react-bootstrap/Spinner';
@@ -12,7 +12,7 @@ import fetchVehicles from './vehicles/fetchVehicles';
 import fetchSuppliers from './suppliers/fetchSuppliers';
 import fetchSparePartUsages from './spare-parts/fetchSparePartUsages';
 import fetchServices, { fetchFewPagesServices } from './fetchServices';
-import autoRefreshWorker from './autoRefreshWorker';
+import autoRefreshWorker, { clearState } from './autoRefreshWorker';
 import ServiceTransactions from './ServiceTransactions';
 import NavigationBar from './NavigationBar';
 import Vehicles from './vehicles/Vehicles';
@@ -20,12 +20,10 @@ import Vehicles from './vehicles/Vehicles';
 import { doFilterServices, doInAppFilterOrders, doInAppFilterServices } from './search/fuzzySearch';
 import { Container } from 'react-bootstrap';
 import SpareParts from './spare-parts/SpareParts';
-
-/***
- * Date: {
- *  vehicle: [transactions]
- * }
- */
+import fetchTasks from './services/fetchTasks';
+import InProgressTaskFocusListing from './services/InProgressTaskFocusListing';
+import saveService from './services/saveService';
+import removeServiceTask from './services/removeServiceTask';
 
 function App() {
   const apiUrl = process.env.REACT_APP_API_URL
@@ -73,6 +71,7 @@ function App() {
   const [suppliers, setSuppliers] = useState([])
   const [vehicles, setVehicles] = useState([])
   const [spareParts, setSpareParts] = useState([])
+  const [taskTemplates, setTaskTemplates] = useState([])
   // for ordering purpose, adding for service can only take addAllowed = true
   const [orderSpareParts, setOrderSpareParts] = useState([])
   
@@ -137,7 +136,7 @@ function App() {
       return
     }
 
-    return fetch(`${apiUrl}/vehicles`, {
+    return fetch(`${apiUrl}/api/vehicles`, {
         method: 'POST',
         body: JSON.stringify({
           vehicleNo: vehicleNo,
@@ -166,11 +165,23 @@ function App() {
   const refreshSupplierSpareParts = useCallback(() => fetchSupplierSpareParts(apiUrl, orders, setFilteredOrders), [apiUrl])
   const refreshWithUsageSupplierSpareParts = useCallback(() => fetchWithUsageSupplierSpareParts(apiUrl, orders, setFilteredOrders), [apiUrl])
 
+  const keywordSearch = () => {
+    if (!selectedSearchOptions || selectedSearchOptions.length === 0) {
+      setFilteredServices([...services.current.transactions]) 
+    }
+    else {
+      doFilterServices(selectedSearchOptions, services, setFilteredServices, sparePartUsages, orders, setFilteredOrders, storeSelectedSearchOptions)
+    }
+  }
+  const onNewServiceCreated = saveService.bind(this, setLoading, services, keywordSearch, refreshSpareParts, refreshSparePartUsages, clearState)
+  const removeTask = removeServiceTask.bind(this, setLoading, services, keywordSearch, clearState);
+
   useEffect(() => {
       let sparePartFetchTimer
       setLoading(true)
       requestAnimationFrame(async () => {
         fetchSuppliers(apiUrl, setSuppliers)
+        .then(() => fetchTasks(setTaskTemplates))
         .then(() => refreshWithUsageSupplierSpareParts()
           .then(() => Promise.all([
                   refreshFewPagesServices(),
@@ -204,7 +215,7 @@ function App() {
       return () => { 
         clearInterval(fetchStatsTimer)
         clearTimeout(sparePartFetchTimer)
-      };
+    };
       
   }, [refreshServices, refreshSupplierSpareParts, refreshSparePartUsages, refreshCompanies, refreshSpareParts, apiUrl]);
 
@@ -248,16 +259,10 @@ function App() {
               vehicles={vehicles}
               setVehicles={setVehicles}
               spareParts={spareParts}
+              taskTemplates={taskTemplates}
               setFilteredServices={setFilteredServices}
               filteredServices={filteredServices}
-              keywordSearch={() => {
-                if (!selectedSearchOptions || selectedSearchOptions.length === 0) {
-                  setFilteredServices(services.current.transactions) 
-                }
-                else {
-                  doFilterServices(selectedSearchOptions, services, setFilteredServices, sparePartUsages, orders, setFilteredOrders, storeSelectedSearchOptions)}
-                }
-              }
+              keywordSearch={keywordSearch}
               selectedSearchOptions={selectedSearchOptions}
               orders={orders.current}
               suppliers={suppliers}
@@ -266,6 +271,18 @@ function App() {
               refreshSpareParts={refreshSpareParts}
               onNewVehicleCreated={onNewVehicleCreated}
               setLoading={setLoading}
+              onNewServiceCreated={onNewServiceCreated}
+              removeTask={removeTask}
+            />
+          } />
+          <Route exact path="/workmanships" element={
+            <InProgressTaskFocusListing services={services}
+              taskTemplates={taskTemplates}
+              filteredServices={filteredServices}
+              orders={orders.current}
+              suppliers={suppliers}
+              onNewServiceCreated={onNewServiceCreated}
+              removeTask={removeTask}
             />
           } />
           <Route path="/orders" element={

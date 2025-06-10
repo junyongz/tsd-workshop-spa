@@ -1,22 +1,27 @@
 import { useRef, useState } from "react";
-import { Modal, Button, Container, Col, Row, FormLabel, Badge, ListGroup, InputGroup, Nav } from "react-bootstrap";
+import { Modal, Button, Container, Col, Row, InputGroup, Nav } from "react-bootstrap";
 import { Typeahead } from "react-bootstrap-typeahead";
 import Form from "react-bootstrap/Form";
-import remainingQuantity, { decimalPointUomAvailable } from "./utils/quantityUtils";
-import { Calendar, Dollar, Inspection, MaintenanceServices, Repair, Suppliers, Tools, Trash, Truck } from "./Icons";
+import { Calendar, Inspection, MaintenanceServices, Repair, Truck } from "../Icons";
+import SparePartsSubDialog from "./SparePartsSubDialog";
+import TaskSubDialog from "./TaskSubDialog";
 
 function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[], 
-    spareParts, orders=[], suppliers=[], sparePartUsages=[],
+    spareParts, orders=[], suppliers=[], sparePartUsages=[], taskTemplates=[],
     onNewVehicleCreated=() => {}}) {
 
     const apiUrl = process.env.REACT_APP_API_URL
 
     const [items, setItems] = useState([{partName: 'Choose one ...', quantity: 1, unit: 'pc', unitPrice: 0, selectedSpareParts: []}])
+    const [tasks, setTasks] = useState([])
+
     const [validated, setValidated] = useState(false)
     const formRef = useRef()
     const repairSwitchRef = useRef()
     const maintSwitchRef = useRef()
     const inspectionSwitchRef = useRef()
+
+    const [tabView, setTabView] = useState('spareParts')
     
     const [selectedVehicles, setSelectedVehicles] = useState(trx?.current?.vehicleNo ? [vehicles.find(veh => veh.vehicleNo === trx.current.vehicleNo)] : [])
     const [selectedExistingService, setSelectedExistingService] = useState()
@@ -24,55 +29,33 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
 
     const handleClose = () => {
         setItems([{partName: 'Choose one ...', quantity: 1, unit: 'pc', unitPrice: 0, selectedSpareParts:[]}])
+        setTasks([{}])
         setValidated(false)
         setShow(false)
         setSelectedExistingService()
         setSelectedVehicles([])
+        setTabView('spareParts')
     }
 
     const addNewItem = () => {
         setValidated(false)
-        setItems(prev => {
-            return [...prev, {partName: 'Choose one ...', quantity: 1, unit: 'pc', unitPrice: 0, selectedSpareParts:[]}]
-        })
-    }
-
-    const removeItem = (i) => {
-        setItems(prev => {
-            const newItems = [...prev]
-            newItems.splice(i, 1)
-            return newItems
-        })
+        // check view tab
+        if (tabView === 'spareParts') {
+            setItems(prev => {
+                return [...prev, {partName: 'Choose one ...', quantity: 1, unit: 'pc', unitPrice: 0, selectedSpareParts:[]}]
+            })
+        }
+        else if (tabView === 'workmanship') {
+            setTasks(prev => {
+                return [...prev, {}]
+            })
+        }
     }
 
     const afterChooseDate = (dateVal) => {
         if (!trx?.current?.vehicleNo) {
             setSelectedStartDate(dateVal)
         }
-    }
-
-    const afterChooseSparePart = ([sparePart], i) => {
-        setItems(prevs => {
-            const newItems = [...prevs]
-            newItems[i] = {...prevs[i], ...sparePart, quantity: 1, selectedSpareParts: (sparePart && [sparePart]) || []}
-            return newItems
-        })
-    }
-
-    const updatePriceByQuantity = (val, i) => {
-        setItems(prevs => {
-            const newItems = [...prevs]
-            newItems[i] = {...newItems[i], quantity: val}
-            return newItems
-        })
-    }
-
-    const updatePriceByUnitPrice = (val, i) => {
-        setItems(prevs => {
-            const newItems = [...prevs]
-            newItems[i] = {...newItems[i], unitPrice: val}
-            return newItems
-        })
     }
 
     const addOrUpdateVehicles = ([veh]) => {
@@ -87,7 +70,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
             
             if (isFinite(veh.id)) {
                 // not allow to add more than 1 service for same vehicle
-                fetch(`${apiUrl}/workshop-services?vehicleId=${veh.id}`, {
+                fetch(`${apiUrl}/api/workshop-services?vehicleId=${veh.id}`, {
                     mode: 'cors',
                     headers: {
                         'Content-type': 'application/json'
@@ -126,10 +109,27 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
         const nativeForm = formRef.current
 
         checkVehicleValidity(nativeForm['vehicle'])
+        if (items.some(itm => !itm.selectedSpareParts || itm.selectedSpareParts.length === 0)) {
+            nativeForm['sparePartsCompleted'].setCustomValidity('Please key spare parts')
+            setTabView('all')
+        }
+        else {
+            nativeForm['sparePartsCompleted'].setCustomValidity('')
+        }
+        if (tasks.some(itm => !itm.taskId)) {
+            nativeForm['tasksCompleted'].setCustomValidity('Please key tasks')
+            setTabView('all')
+        }
+        else {
+            nativeForm['tasksCompleted'].setCustomValidity('')
+        }
+
         if (nativeForm.checkValidity() === false) {
             setValidated(true)
             return
         }
+        nativeForm['sparePartsCompleted'].setCustomValidity('')
+        nativeForm['tasksCompleted'].setCustomValidity('')
         nativeForm['vehicle'].setCustomValidity('')
 
         // { id: ?, creationDate: ?, sparePartUsages: [{}, {} ]}
@@ -141,13 +141,21 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
             transactionTypes: Array.from(nativeForm['transactionTypes']).filter(tt => tt.checked).map(tt => tt.value),
             mileageKm: nativeForm['mileageKm'].value,
             notes: selectedExistingService?.notes,
-            sparePartUsages: items.map((v, i) => {
+            sparePartUsages: items.map(v => {
                 return {
                     vehicleNo: selectedVehicles[0].vehicleNo,
                     usageDate: nativeForm['startDate'].value,
                     quantity: v.quantity,
                     soldPrice: parseFloat(v.unitPrice),
                     orderId: v.selectedSpareParts[0].orderId,
+                }
+            }),
+            tasks: tasks.map(v => {
+                return {
+                    recordedDate: nativeForm['startDate'].value,
+                    taskId: v.taskId,
+                    quotedPrice: v.quotedPrice,
+                    remarks: v.remarks
                 }
             })
         }
@@ -230,76 +238,28 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
                         </Row>
                         <Row>
                             <Col className="text-end">
-                                <Button size="sm" onClick={addNewItem}><i className="bi bi-plus-circle-fill me-2"></i>{items.length === 0 ? 'Add New' : 'Add More' }</Button>
+                                <Button disabled={tabView === 'all'} size="sm" onClick={addNewItem}><i className="bi bi-plus-circle-fill me-2"></i>{items.length === 0 ? 'Add New' : 'Add More' }</Button>
                             </Col>
                         </Row>
                         
-                        <Nav variant="pills" defaultActiveKey="spareParts" className="mb-1">
+                        <Nav variant="underline" activeKey={tabView} className="mb-1" onSelect={(key) => setTabView(key)}>
                             <Nav.Item>
-                                <Nav.Link eventKey={'spareParts'}>Spare Parts</Nav.Link>
+                                <Nav.Link eventKey='spareParts'>Spare Parts</Nav.Link>
                             </Nav.Item>
                             <Nav.Item>
-                                <Nav.Link disabled eventKey={'workmanship'}>Workmanship</Nav.Link>
+                                <Nav.Link eventKey='workmanship'>Workmanship</Nav.Link>
+                            </Nav.Item>
+                            <Nav.Item>
+                                <Nav.Link eventKey='all'>All</Nav.Link>
                             </Nav.Item>
                         </Nav>
-                        <ListGroup>
-                        {items?.map((v, i) =>
-                        <ListGroup.Item key={i}>
-                            <Row>                                
-                                <Col xs="12" lg="6" className="mb-3 mb-lg-0">
-                                    <InputGroup>
-                                    <InputGroup.Text><Tools /></InputGroup.Text>
-                                    <Typeahead
-                                        inputProps={{required:true, name: 'partName'}}
-                                        labelKey={(option) => 
-                                            `${(option.itemCode && !option.partName.includes(option.itemCode)) ? (option.itemCode + ' ') : ''}${option.partName}`
-                                        }
-                                        options={spareParts}
-                                        onChange={(opts) => afterChooseSparePart(opts, i)}
-                                        placeholder="Find a spare part..."
-                                        renderMenuItemChildren={(option) => {
-                                            const order = orders?.mapping[option.orderId]
-                                            const supplier = suppliers.find(s => s.id === option.supplierId)
-                                            const quantityLeft = remainingQuantity(order, sparePartUsages)
-                                              
-                                            if (quantityLeft === 0) {
-                                                return;
-                                            }
-
-                                            return <div>
-                                                <div>{ order.itemCode && !order.partName.includes(order.itemCode) && <span className='text-secondary'>{order.itemCode}&nbsp;</span> } {option.partName}</div>
-                                                {/** TODO: to add supplier info later on */} 
-                                                <small className="text-secondary">${option.unitPrice} / {quantityLeft} left / <Suppliers /> {supplier.supplierName} / {order.invoiceDate}</small>
-                                            </div>
-                                            }
-                                        }
-                                        clearButton
-                                        selected={v.selectedSpareParts}
-                                        />
-                                    </InputGroup>
-                                </Col>
-                                <Col xs="6" lg="2" className="mb-3 mb-lg-0">
-                                    <InputGroup>
-                                        <Form.Control onChange={(e) => updatePriceByQuantity(e.target.value, i)} required step={decimalPointUomAvailable(v?.unit) ? 0.1 : 1} type="number" name="quantity" min="1" max={(v.selectedSpareParts[0] && remainingQuantity(orders?.mapping[v.selectedSpareParts[0].orderId], sparePartUsages)) || 0} placeholder="Quantity" value={v?.quantity}/>
-                                        <InputGroup.Text>{v?.unit}</InputGroup.Text>
-                                    </InputGroup>
-                                </Col>
-                                <Col xs="6" lg="2" className="mb-3 mb-lg-0">
-                                    <InputGroup>
-                                        <InputGroup.Text><Dollar /></InputGroup.Text>
-                                        <Form.Control onChange={(e) => updatePriceByUnitPrice(e.target.value, i)} required type="number" step="0.10" name="unitPrice" placeholder="Price $" value={v?.unitPrice} />
-                                    </InputGroup>
-                                </Col>
-                                <Col xs="6" lg="1" className="mb-3 mb-lg-0">
-                                    <FormLabel className="fs-5"><Badge pill>$ {(v?.quantity * v?.unitPrice).toFixed(2) || 0}</Badge></FormLabel>
-                                </Col>
-                                <Col xs="6" lg="1" className="text-end">
-                                <div><span className="text-danger fs-5" onClick={() => removeItem(i)} role="button"><Trash /></span></div>
-                                </Col>
-                            </Row>
-                        </ListGroup.Item>
-                        )}
-                        </ListGroup>                        
+                        {(tabView === 'spareParts' || tabView === 'all') && <div className="mb-1"><SparePartsSubDialog 
+                            items={items} setItems={setItems}
+                            orders={orders} sparePartUsages={sparePartUsages}
+                            spareParts={spareParts} suppliers={suppliers} /></div>}
+                        {(tabView === 'workmanship' || tabView === 'all') && <TaskSubDialog tasks={tasks} setTasks={setTasks} taskTemplates={taskTemplates} />}
+                        <Form.Control type="output" name="sparePartsCompleted" className="d-none" />
+                        <Form.Control type="output" name="tasksCompleted" className="d-none" />
                     </Form>
                 </Container>
             </Modal.Body>

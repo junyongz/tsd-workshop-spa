@@ -22,7 +22,7 @@ export default function Vehicles({vehicles=[], setVehicles, companies=[]}) {
     }
 
     useEffect(() => {
-        fetch(`${apiUrl}/workshop-services?type=SERVICE`, {
+        fetch(`${apiUrl}/api/workshop-services?type=SERVICE`, {
             method: 'GET', 
             headers: {
               'Content-type': 'application/json'
@@ -36,7 +36,7 @@ export default function Vehicles({vehicles=[], setVehicles, companies=[]}) {
             }, {}))
           })
 
-          fetch(`${apiUrl}/workshop-services?type=INSPECTION`, {
+          fetch(`${apiUrl}/api/workshop-services?type=INSPECTION`, {
             method: 'GET', 
             headers: {
               'Content-type': 'application/json'
@@ -105,6 +105,5 @@ export default function Vehicles({vehicles=[], setVehicles, companies=[]}) {
         </Col>
         </Row>
         </Container>
-
     )
 }

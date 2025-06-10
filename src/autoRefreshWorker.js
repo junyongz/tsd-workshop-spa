@@ -20,7 +20,7 @@ export default async function autoRefreshWorker(setLoading, refresherByTableName
         }
     }
 
-    return fetch(`${apiUrl}/stats/dbtables`, {mode: 'cors'})
+    return fetch(`${apiUrl}/api/stats/dbtables`, {mode: 'cors'})
         .then(res => res.json())
         .then(response => {
             // get and check

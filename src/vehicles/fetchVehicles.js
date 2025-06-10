@@ -1,5 +1,5 @@
 export default async function fetchVehicles(apiUrl = '', setVehicles, setSearchOptions) {
-    return fetch(`${apiUrl}/vehicles`, {mode: 'cors'})
+    return fetch(`${apiUrl}/api/vehicles`, {mode: 'cors'})
       .then(res => res.json())
       .then(response => {
           setVehicles(response)

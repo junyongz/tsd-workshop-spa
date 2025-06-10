@@ -75,7 +75,7 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
     const onSaveNewOrders = (newOrders=[], callback=() => {}) => {
         setLoading(true)
         requestAnimationFrame(() => {
-            fetch(`${apiUrl}/supplier-spare-parts`, {
+            fetch(`${apiUrl}/api/supplier-spare-parts`, {
                 method: 'POST',
                 body: JSON.stringify(newOrders),
                 mode: 'cors',
@@ -110,7 +110,7 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
     const onSaveNewSparePartUsage = (spu) => {
         setLoading(true)
         requestAnimationFrame(() => {
-            fetch(`${apiUrl}/spare-part-utilizations`, {
+            fetch(`${apiUrl}/api/spare-part-utilizations`, {
                 method: 'POST',
                 body: JSON.stringify(spu),
                 mode: 'cors',
@@ -128,7 +128,7 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
     const removeOrder = (order) => {
         setLoading(true)
         requestAnimationFrame(() => {
-            fetch(`${apiUrl}/supplier-spare-parts/${order.id}`, {
+            fetch(`${apiUrl}/api/supplier-spare-parts/${order.id}`, {
                 method: 'DELETE',
                 mode: 'cors',
                 headers: {
@@ -156,7 +156,7 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
     const onUpdateOrder = (order, note) => {
         setLoading(true)
         requestAnimationFrame(() => {
-            fetch(`${apiUrl}/supplier-spare-parts${note ? '?op=NOTES' : ''}`, {
+            fetch(`${apiUrl}/api/supplier-spare-parts${note ? '?op=NOTES' : ''}`, {
                 method: 'POST',
                 mode: 'cors',
                 headers: {

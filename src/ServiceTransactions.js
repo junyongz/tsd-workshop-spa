@@ -12,8 +12,18 @@ class ServiceTransactions {
     }
 
     addNewTransaction(newService) {
+        // special for workmanship task
+        const doMergeTasks = (oldTasks=[], newTasks=[]) =>
+            [...oldTasks.map(ot => ({
+                ...ot,
+                ...newTasks.find(nt => nt.id === ot.id)
+            })), ...newTasks.filter(nt => oldTasks.findIndex(ot => ot.id === nt.id) === -1)]
+        
+
         const existingIdx = this.transactionIndexs[newService.id]
         if (existingIdx === undefined) {
+            newService.sparePartsCount = newService.sparePartUsages?.length
+            newService.workmanshipTasksCount = newService.tasks?.length
             this.transactions.push(newService)
             this.transactions.sort((a, b) => 
                 (b.completionDate === null) - (a.completionDate === null) || 
@@ -24,6 +34,9 @@ class ServiceTransactions {
         else {
             const oldService = this.transactions[existingIdx]
             newService.sparePartUsages = [...oldService.sparePartUsages, ...newService.sparePartUsages]
+            newService.tasks = doMergeTasks(oldService.tasks, newService.tasks)
+            newService.sparePartsCount = newService.sparePartUsages?.length
+            newService.workmanshipTasksCount = newService.tasks?.length
             this.transactions[existingIdx] = newService
         }
     }
@@ -46,6 +59,11 @@ class ServiceTransactions {
     removeTransaction(serviceId, sparePartUsageId) {
         const service = this.transactions[this.transactionIndexs[serviceId]]
         service.sparePartUsages.splice(service.sparePartUsages.findIndex(v => v.id === sparePartUsageId), 1)
+    }
+
+    removeTask(serviceId, taskId) {
+        const service = this.transactions[this.transactionIndexs[serviceId]]
+        service.tasks.splice(service.tasks.findIndex(v => v.id === taskId), 1)
     }
 
     services() {

@@ -1,6 +1,6 @@
 export default async function fetchSpareParts (apiUrl, setSpareParts, setSearchOptions, setOrderSpareParts) {
 
-    return fetch(`${apiUrl}/spare-parts`, {mode: 'cors'})
+    return fetch(`${apiUrl}/api/spare-parts`, {mode: 'cors'})
       .then(res => res.json())
       .then((response=[]) => {
           setSpareParts(response.filter(sp => sp.addAllowed).sort((sp1, sp2) => sp2.orderId - sp1.orderId))

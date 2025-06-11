@@ -12,13 +12,11 @@ class ServiceTransactions {
     }
 
     addNewTransaction(newService) {
-        // special for workmanship task
-        const doMergeTasks = (oldTasks=[], newTasks=[]) =>
-            [...oldTasks.map(ot => ({
+        const doMergeById = (prev=[], current=[]) =>
+            [...prev.map(ot => ({
                 ...ot,
-                ...newTasks.find(nt => nt.id === ot.id)
-            })), ...newTasks.filter(nt => oldTasks.findIndex(ot => ot.id === nt.id) === -1)]
-        
+                ...current.find(nt => nt.id === ot.id)
+            })), ...current.filter(nt => prev.findIndex(ot => ot.id === nt.id) === -1)] 
 
         const existingIdx = this.transactionIndexs[newService.id]
         if (existingIdx === undefined) {
@@ -33,8 +31,8 @@ class ServiceTransactions {
         }
         else {
             const oldService = this.transactions[existingIdx]
-            newService.sparePartUsages = [...oldService.sparePartUsages, ...newService.sparePartUsages]
-            newService.tasks = doMergeTasks(oldService.tasks, newService.tasks)
+            newService.sparePartUsages = doMergeById(oldService.sparePartUsages, newService.sparePartUsages)
+            newService.tasks = doMergeById(oldService.tasks, newService.tasks)
             newService.sparePartsCount = newService.sparePartUsages?.length
             newService.workmanshipTasksCount = newService.tasks?.length
             this.transactions[existingIdx] = newService

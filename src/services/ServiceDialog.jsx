@@ -13,7 +13,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
     const apiUrl = process.env.REACT_APP_API_URL
 
     const [items, setItems] = useState([{partName: 'Choose one ...', quantity: 1, unit: 'pc', unitPrice: 0, selectedSpareParts: []}])
-    const [tasks, setTasks] = useState([])
+    const [tasks, setTasks] = useState()
 
     const [validated, setValidated] = useState(false)
     const formRef = useRef()
@@ -116,7 +116,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
         else {
             nativeForm['sparePartsCompleted'].setCustomValidity('')
         }
-        if (tasks.some(itm => !itm.taskId)) {
+        if (tasks?.some(itm => !itm.taskId)) {
             nativeForm['tasksCompleted'].setCustomValidity('Please key tasks')
             setTabView('all')
         }
@@ -141,16 +141,18 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
             transactionTypes: Array.from(nativeForm['transactionTypes']).filter(tt => tt.checked).map(tt => tt.value),
             mileageKm: nativeForm['mileageKm'].value,
             notes: selectedExistingService?.notes,
+            sparePartsMargin: selectedExistingService?.sparePartsMargin,
             sparePartUsages: items.map(v => {
                 return {
                     vehicleNo: selectedVehicles[0].vehicleNo,
                     usageDate: nativeForm['startDate'].value,
                     quantity: v.quantity,
-                    soldPrice: parseFloat(v.unitPrice),
+                    soldPrice: parseFloat(v.unitPrice * (1+(selectedExistingService?.sparePartsMargin||0)/100)),
+                    margin: selectedExistingService?.sparePartsMargin||0,
                     orderId: v.selectedSpareParts[0].orderId,
                 }
             }),
-            tasks: tasks.map(v => {
+            tasks: (tasks || []).map(v => {
                 return {
                     recordedDate: nativeForm['startDate'].value,
                     taskId: v.taskId,
@@ -177,7 +179,8 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
             setSelectedExistingService({id: trx?.current?.id, 
                 startDate: trx?.current?.startDate, 
                 mileageKm: trx?.current?.mileageKm, 
-                notes: trx?.current?.notes})
+                notes: trx?.current?.notes,
+                sparePartsMargin: trx?.current?.sparePartsMargin})
         }
     }
 
@@ -254,6 +257,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
                             </Nav.Item>
                         </Nav>
                         {(tabView === 'spareParts' || tabView === 'all') && <div className="mb-1"><SparePartsSubDialog 
+                            sparePartsMargin={selectedExistingService?.sparePartsMargin}
                             items={items} setItems={setItems}
                             orders={orders} sparePartUsages={sparePartUsages}
                             spareParts={spareParts} suppliers={suppliers} /></div>}

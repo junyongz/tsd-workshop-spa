@@ -18,10 +18,10 @@ describe('YearMonthView Component', () => {
     { index: 2, itemDescription: 'Tire Replacement', totalPrice: 200, quantity: 4, unit: 'pcs', unitPrice: 50 },
     { index: 3, itemDescription: 'Brake Pads', totalPrice: 300, quantity: 2, unit: 'set', unitPrice: 150 },
     { index: 4, itemDescription: 'Filter Change', totalPrice: 160, quantity: 2, unit: 'pcs', unitPrice: 80 },
-    { id: 10, orderId: 1, supplierId: 1, creationDate: '2023-01-05', itemDescription: 'Diesel Change',  quantity: 2 },
-    { id: 20, orderId: 2, supplierId: 2, creationDate: '2023-01-06', itemDescription: 'Tire Rotation',  quantity: 4 },
-    { id: 30, orderId: 3, supplierId: 1, creationDate: '2023-01-07', itemDescription: 'Brake Lining',  quantity: 2 },
-    { id: 40, orderId: 4, supplierId: 2, creationDate: '2023-01-08', itemDescription: 'Air Balloon Change',  quantity: 2 }
+    { id: 10, orderId: 1, supplierId: 1, creationDate: '2023-01-05', itemDescription: 'Diesel Change',  quantity: 2, soldPrice: 35 },
+    { id: 20, orderId: 2, supplierId: 2, creationDate: '2023-01-06', itemDescription: 'Tire Rotation',  quantity: 4, soldPrice: 60 },
+    { id: 30, orderId: 3, supplierId: 1, creationDate: '2023-01-07', itemDescription: 'Brake Lining',  quantity: 2, soldPrice: 150 },
+    { id: 40, orderId: 4, supplierId: 2, creationDate: '2023-01-08', itemDescription: 'Air Balloon Change',  quantity: 2, soldPrice: 80 }
   ];
 
   const mockServices = {

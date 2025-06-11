@@ -4,7 +4,7 @@ import { Dollar, Suppliers, Tools, Trash } from "../Icons";
 import remainingQuantity, { decimalPointUomAvailable } from "../utils/quantityUtils";
 
 export default function SparePartsSubDialog({
-    items, setItems, spareParts, orders, suppliers, sparePartUsages
+    items, setItems, spareParts, orders, suppliers, sparePartUsages, sparePartsMargin
 }) {
     const afterChooseSparePart = ([sparePart], i) => {
         setItems(prevs => {
@@ -84,11 +84,11 @@ export default function SparePartsSubDialog({
                     <Col xs="6" lg="2" className="mb-3 mb-lg-0">
                         <InputGroup>
                             <InputGroup.Text><Dollar /></InputGroup.Text>
-                            <Form.Control onChange={(e) => updatePriceByUnitPrice(e.target.value, i)} required type="number" step="0.10" name="unitPrice" placeholder="Price $" value={v?.unitPrice} />
+                            <Form.Control onChange={(e) => updatePriceByUnitPrice(e.target.value, i)} required type="number" step="0.10" name="unitPrice" placeholder="Price $" value={(v?.unitPrice * (1 + (sparePartsMargin || 0)/100) || 0).toFixed(2)} />
                         </InputGroup>
                     </Col>
                     <Col xs="6" lg="1" className="mb-3 mb-lg-0">
-                        <FormLabel className="fs-5 text-end"><span>$&nbsp;{(v?.quantity * v?.unitPrice).toFixed(2) || 0}</span></FormLabel>
+                        <FormLabel className="fs-5 text-end"><span>$&nbsp;{(v?.quantity * v?.unitPrice * (1 + (sparePartsMargin || 0)/100)).toFixed(2) || 0}</span></FormLabel>
                     </Col>
                     <Col xs="6" lg="1" className="text-end">
                     <Button variant="danger" className="fs-5" onClick={() => removeItem(i)}><Trash /></Button>

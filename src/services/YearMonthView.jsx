@@ -2,10 +2,10 @@ import { useEffect, useRef, useState } from "react"
 import { Badge, Button, ButtonGroup, Card, Col, Container, Dropdown, DropdownButton, ListGroup, ListGroupItem, Row, Stack } from "react-bootstrap"
 import OrderTooltip from "./OrderTooltip"
 import { ScrollSpy } from "bootstrap"
-import { Services } from "../Icons"
+import { Foreman, NoteTaking, Services } from "../Icons"
 import { months3EngChars } from "../utils/dateUtils"
 
-function YearMonthView({services, setFilteredServices, suppliers=[], orders=[], backToService}) {
+function YearMonthView({services, setFilteredServices, suppliers=[], orders=[], backToService, taskTemplates}) {
     const apiUrl = process.env.REACT_APP_API_URL
 
     const currentDate = new Date()
@@ -42,7 +42,10 @@ function YearMonthView({services, setFilteredServices, suppliers=[], orders=[], 
             (services.flatMap(s => s.migratedHandWrittenSpareParts || []).reduce((pv, cv) => pv + (cv.totalPrice || 0), 0) +
             services.flatMap(s => s.sparePartUsages).reduce((acc, curr) => {
                 const order = orders?.mapping[curr.orderId] 
-                return acc + (curr.quantity * order.unitPrice)}, 0)).toFixed(2)
+                return acc + (curr.quantity * order.unitPrice)}, 0) + 
+            services.flatMap(s => s.tasks || []).reduce((acc, curr) => {
+                return acc + curr.quotedPrice}, 0)
+            ).toFixed(2)
          }
     }).sort((a, b) => b.amount - a.amount)
 
@@ -142,7 +145,7 @@ function YearMonthView({services, setFilteredServices, suppliers=[], orders=[], 
                                                 <Row>
                                                     <Col xs="4" lg="2">{trx.creationDate}</Col>
                                                     <Col xs="8" lg="6">{v.itemDescription}</Col>
-                                                    <Col xs={false} lg="2" className='text-end'><Badge pill>{v.quantity > 0 && v.unitPrice && `${v.quantity} ${v.unit} @ $${v.unitPrice?.toFixed(2)}`}</Badge></Col>
+                                                    <Col xs={false} lg="2" className='text-end'>{v.quantity > 0 && v.unitPrice && `${v.quantity} ${v.unit} @ $${v.unitPrice?.toFixed(2)}`}</Col>
                                                     <Col xs={false} lg="2" className='text-end'>$ {v.totalPrice?.toFixed(2) || 0}</Col>
                                                 </Row>
                                             </ListGroupItem>)
@@ -155,14 +158,31 @@ function YearMonthView({services, setFilteredServices, suppliers=[], orders=[], 
                                                 return (<ListGroupItem key={v.id}>
                                                         <Row>
                                                             <Col xs="4" lg="2">{trx.creationDate}</Col>
-                                                            <Col xs="8" lg="6">{order.partName} { order && <div className="d-none d-lg-block"><OrderTooltip order={order} supplier={supplier} /></div> }</Col>
-                                                            <Col xs="6" lg="2" className='text-lg-end'><Badge pill>{v.quantity > 0 && order.unitPrice && `${v.quantity} ${order.unit} @ $${order.unitPrice?.toFixed(2)}`}</Badge></Col>
+                                                            <Col xs="8" lg="4">{order.partName} { order && <div className="d-none d-lg-block"><OrderTooltip order={order} supplier={supplier} /></div> }</Col>
+                                                            <Col xs="6" lg="4" className='text-lg-end'>
+                                                                {v.quantity > 0 && order.unitPrice && `${v.quantity} ${order.unit} @ $${v.soldPrice?.toFixed(2)}`}
+                                                                {v.margin > 0 && <div><span className="text-secondary">original: ${order.unitPrice?.toFixed(2)} <i className="bi bi-arrow-up"></i>{v.margin}%</span></div> }
+                                                            </Col>
                                                             <Col xs="6" lg="2" className='text-end'>$ {totalPrice}</Col>
                                                         </Row>
                                                     </ListGroupItem>)
                                             })
 
-                                            return (migrated || []).concat(usages)
+                                            const tasks =trx.tasks?.map(vvv => {
+                                                const task = taskTemplates.find(t => t.id === vvv.taskId)
+
+                                                return <ListGroupItem key={vvv.id}>
+                                                    <Row>
+                                                    <Col xs="4" lg="2">{vvv.recordedDate}</Col>
+                                                    <Col xs="12" lg="5"><Foreman /> {task.workmanshipTask} ({task.component.subsystem} - {task.component.componentName})</Col>
+                                                    <Col xs="8" lg="3"><NoteTaking /> {vvv.remarks}</Col>
+                                                    <Col xs="4" lg="2" className='text-end'>$ {vvv.quotedPrice?.toFixed(2)}</Col>                        
+                                                    </Row>
+                                                </ListGroupItem>
+                                                })
+                    
+
+                                            return ((migrated || []).concat(usages) || []).concat(tasks)
                                         })}
                                     </Card.Body>
                                 </Card>

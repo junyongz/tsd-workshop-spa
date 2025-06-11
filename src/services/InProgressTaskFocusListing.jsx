@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Button, Card, Col, Container, Form, ListGroup, ListGroupItem, Row } from 'react-bootstrap';
+import { Button, Card, Col, Container, Form, InputGroup, ListGroup, ListGroupItem, Modal, Nav, Row } from 'react-bootstrap';
 import OrderTooltip from './OrderTooltip';
 import { Foreman, Tools } from '../Icons';
 import TaskSubDialog from './TaskSubDialog';
@@ -13,16 +13,27 @@ function InProgressTaskFocusListing({filteredServices=[],
   const formRef = useRef()
   const inProgressServices = filteredServices.filter(ws => !!!ws.completionDate)
 
+  const [spareParts, setSpareParts] = useState([])
+  const [originalSpareParts, setOriginalSpareParts] = useState([])
+
+  const [selectedSparePart, setSelectedSparePart] = useState()
+
   const [targetedService, setTargetedService] = useState()
   const [tasks, setTasks] = useState([])
   const [originalTasks, setOriginalTasks] = useState([])
-  const showTaskSubDialog = (ws, i) => {
+  const showTaskSubDialog = (ws) => {
     setTargetedService(ws)
     const theTasks = [...ws.tasks].map(v => {
         return {...v, rid: generateUniqueId(), selectedTask: [taskTemplates.find(t => t.id === v.taskId)]}
     }).sort((t1, t2) => t1.id - t2.id)
     setTasks(theTasks)
     setOriginalTasks(theTasks)
+
+    const theSpus = ws.sparePartUsages.map(spu => {
+      return {...spu, order: orders.mapping[spu.orderId], margin: spu.margin || 0}
+    })
+    setSpareParts(theSpus)
+    setOriginalSpareParts(theSpus)
   }
 
   const addNewTask = () => {
@@ -35,11 +46,13 @@ function InProgressTaskFocusListing({filteredServices=[],
   }
 
   const saveChange = () => {
-    if (originalTasks === tasks) {
+    if (originalTasks === tasks && originalSpareParts === spareParts) {
       setTargetedService()
       const emptyArray = []
       setTasks(emptyArray)
       setOriginalTasks(emptyArray)
+      setSpareParts(emptyArray)
+      setOriginalSpareParts(emptyArray)
       return
     }
     const nativeForm = formRef.current
@@ -51,7 +64,7 @@ function InProgressTaskFocusListing({filteredServices=[],
 
     const service = {
         ...targetedService,
-        sparePartUsages: [],
+        sparePartUsages: [...spareParts],
         tasks: tasks.map(v => {
             return {
                 ...v,
@@ -68,8 +81,65 @@ function InProgressTaskFocusListing({filteredServices=[],
     showAllInProgressTasks()
   }
 
+  const changeMargin = (margin) => {
+    if (selectedSparePart) {
+      setSpareParts(prev => {
+        const newItems = [...prev].map(v => {
+          if (v.id === selectedSparePart.id) {
+            v.soldPrice = v.order.unitPrice * (1 + (margin/100))
+            v.margin = margin
+          }
+          return v
+        })
+        return newItems
+      })
+      setSelectedSparePart({...selectedSparePart, soldPrice: selectedSparePart.order.unitPrice * (1 + (margin/100)), margin: margin})
+      return
+    }
+
+    setTargetedService({...targetedService, sparePartsMargin: margin})
+    setSpareParts(prev => {
+      const newItems = [...prev].map(v => {
+        v.soldPrice = v.order.unitPrice * (1 + (margin/100))
+        v.margin = margin
+        return v
+      })
+      return newItems
+    })
+  }
+
+  const handleClose = () => {
+    setSelectedSparePart()
+  }
+
   return (
     <Container fluid className='fs-4'>
+        {selectedSparePart && selectedSparePart.order && <Row>
+          <Col>
+          <Modal show onHide={handleClose} onEscapeKeyDown={(e) => e.preventDefault()} size="md">
+            <Modal.Header>
+            <Modal.Title>Margin for 1 Item</Modal.Title>
+            </Modal.Header>
+            <Modal.Body className='fs-4 text-center'>
+              <div>{selectedSparePart.order.partName}</div>
+              <div>{selectedSparePart.quantity} {selectedSparePart.order.unit} @ ${selectedSparePart.soldPrice?.toFixed(2)} </div>
+              <div className="text-secondary">original: ${selectedSparePart.order.unitPrice?.toFixed(2)} </div>
+              <Nav className='justify-content-center' variant='pills' activeKey={selectedSparePart.margin} onSelect={(v) => changeMargin(v)}>
+                {[20, 30, 40].map(v => 
+                <Nav.Item><Nav.Link eventKey={v}>{v}%</Nav.Link></Nav.Item>)}
+                <Nav.Item className='ms-3'><InputGroup>
+                  <Form.Control onChange={(e) => changeMargin(parseFloat(e.target.value))} 
+                  style={{width: '6rem'}} required min="0" max="300" size="lg" 
+                  type="number" step={10} name="sparePartsMargin" value={selectedSparePart.margin}/><InputGroup.Text>%</InputGroup.Text>
+                  </InputGroup></Nav.Item>
+              </Nav>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="primary" onClick={handleClose}><i className="bi bi-save2 me-2"></i> OK</Button>
+            </Modal.Footer>
+          </Modal>
+          </Col>
+        </Row> }
         <Row className='a'>
         {
         !targetedService && inProgressServices.map((v, i) =>
@@ -93,7 +163,7 @@ function InProgressTaskFocusListing({filteredServices=[],
                 <h4>
                     $ {((v.migratedHandWrittenSpareParts?.reduce((acc, curr) => acc += curr.totalPrice, 0) || 0) + 
                         (v.sparePartUsages?.reduce((acc, curr) =>  acc + (curr.quantity * curr.soldPrice), 0) || 0) +
-                        (v.tasks?.reduce((acc, curr) => acc += curr.quotedPrice, 0) || 0)).toFixed(2)}
+                        (v.tasks?.reduce((acc, curr) => acc + (curr.quotedPrice || 0), 0) || 0)).toFixed(2)}
                 </h4>
                 </Col>
                 <Col xs="12" lg="6" className='text-lg-end'><Tools /> {v.sparePartsCount} <Foreman /> {v.workmanshipTasksCount}</Col>
@@ -107,7 +177,8 @@ function InProgressTaskFocusListing({filteredServices=[],
         <Row>
             {targetedService && 
             <Container>
-                <Row className='mb-3 position-sticky top-0' style={{zIndex: 6}}>
+                <div className='position-sticky top-0' style={{zIndex: 6}}>
+                <Row className='mb-1'>
                     { false && <Col xs="6">
                     <Button className='w-100' variant='outline-warning' size='lg' 
                         onClick={() => showAllInProgressTasks()}><i className="bi bi-arrow-left-circle-fill"></i> Go Back</Button>
@@ -124,14 +195,15 @@ function InProgressTaskFocusListing({filteredServices=[],
                   <Col xs="12" lg="4" className='text-center'>
                     <h4>
                       $ {((targetedService.migratedHandWrittenSpareParts?.reduce((acc, curr) => acc += curr.totalPrice, 0) || 0) + 
-                          (targetedService.sparePartUsages?.reduce((acc, curr) =>  acc + (curr.quantity * curr.soldPrice), 0) || 0) +
-                          (targetedService.tasks?.reduce((acc, curr) => acc += curr.quotedPrice, 0) || 0)).toFixed(2)}
+                          (spareParts?.reduce((acc, curr) =>  acc + (curr.quantity * curr.soldPrice), 0) || 0) +
+                          (tasks?.reduce((acc, curr) => acc + curr.quotedPrice, 0) || 0)).toFixed(2)}
                     </h4>
                   </Col>
                   <Col xs="12" lg="4" className='text-center text-lg-end'>
                   <h4><span className="text-body-secondary">{targetedService.mileageKm || '-'} KM</span></h4>
                   </Col>
                 </Row>
+                </div>
                 <Row className='mb-3'>
                     <Col>
                     <Card>
@@ -149,25 +221,39 @@ function InProgressTaskFocusListing({filteredServices=[],
                 <Row>
                     <Col>
                     <Card>
-                        <Card.Header><Tools /> Spare Parts</Card.Header>
+                        <Card.Header>
+                          <Row>
+                          <Col xs="12" lg="6"><Tools /> Spare Parts</Col>
+                          <Col xs="12" lg="6" className='text-end'>
+                            {spareParts.length > 0 && <Nav className='justify-content-end' variant='pills' activeKey={targetedService.sparePartsMargin} onSelect={(v) => changeMargin(v)}>
+                              {[20, 30, 40].map(v => 
+                              <Nav.Item><Nav.Link eventKey={v}>{v}%</Nav.Link></Nav.Item>)}
+                              <Nav.Item className='ms-2'><InputGroup><Form.Control onChange={(e) => changeMargin(parseFloat(e.target.value))} style={{width: '6rem'}} required min="0" max="300" size="lg" type="number" step={10} name="sparePartsMargin" value={targetedService.sparePartsMargin} /><InputGroup.Text>%</InputGroup.Text></InputGroup></Nav.Item>
+                            </Nav> }
+                          </Col>
+                          </Row>
+                        </Card.Header>
                         <Card.Body>
                         <ListGroup>
-                {targetedService.sparePartUsages?.map(vvv => {
-                      const order = orders?.mapping[vvv.orderId] || {}
+                  {spareParts?.map(vvv => {
+                      const order = vvv.order
                       const supplier = suppliers.find(s => s.id === order.supplierId)
                       const totalPrice = (vvv.quantity * vvv.soldPrice).toFixed(2)
 
                       return <ListGroupItem key={vvv.id}>
-                        <Row>
+                        <Row onClick={() => setSelectedSparePart(vvv)} role='button'>
                           <Col xs="4" lg="2">{vvv.usageDate}</Col>
-                          <Col xs="8" lg="6">{ order.itemCode && !order.partName.includes(order.itemCode) && <span className='text-secondary'>{order.itemCode}&nbsp;</span> }<span>{order.partName}</span> <div className="d-none d-lg-block"><OrderTooltip order={order} supplier={supplier} /></div></Col>
-                          <Col xs="6" lg="2" className='text-lg-end'>{vvv.quantity > 0 && vvv.soldPrice && `${vvv.quantity} ${order.unit} @ $${vvv.soldPrice?.toFixed(2)}`}</Col>
+                          <Col xs="8" lg="4">{ order.itemCode && !order.partName.includes(order.itemCode) && <span className='text-secondary'>{order.itemCode}&nbsp;</span> }<span>{order.partName}</span> <div className="d-none d-lg-block"><OrderTooltip order={order} supplier={supplier} /></div></Col>
+                          <Col xs="6" lg="4" className='text-lg-end'>
+                          {vvv.quantity > 0 && vvv.soldPrice && `${vvv.quantity} ${order.unit} @ $${vvv.soldPrice?.toFixed(2)}`} 
+                          <div><span className="text-secondary">original: ${order.unitPrice?.toFixed(2)} {vvv.margin > 0 && <><i className="bi bi-arrow-up"></i>{vvv.margin}%</>}</span></div>  
+                          </Col>
                           <Col xs="6" lg="2" className='text-end'>$ {totalPrice}</Col>
                         </Row>
                       </ListGroupItem>
                       })
                     }
-                    {targetedService.sparePartUsages.length === 0 && <ListGroupItem>Nothing added yet</ListGroupItem>}
+                    {spareParts.length === 0 && <ListGroupItem>Nothing added yet</ListGroupItem>}
                     </ListGroup>
                     </Card.Body>
                     </Card>

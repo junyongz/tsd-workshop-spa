@@ -4,11 +4,11 @@ import { Button, Col, Dropdown, Form, Image, InputGroup, ListGroup, Row } from "
 import { Typeahead } from "react-bootstrap-typeahead";
 
 let searchTimer;
-export default function TaskSubDialog({taskTemplates, tasks, setTasks, removeTask, showImage}) {
+export default function TaskSubDialog({taskTemplates, tasks, setTasks, removeTask}) {
     const afterChooseTask = ([task], i) => {
         setTasks(prevs => {
             const newItems = [...prevs]
-            newItems[i] = {...prevs[i], taskId: task?.id, quotedPrice: task?.unitPrice, selectedTask: (task && [task]) || []}
+            newItems[i] = {...prevs[i], taskId: task?.id, quotedPrice: parseFloat(task?.unitPrice), selectedTask: (task && [task]) || []}
             return newItems
         })
 
@@ -17,6 +17,7 @@ export default function TaskSubDialog({taskTemplates, tasks, setTasks, removeTas
 
         if (task?.workmanshipTask) {
             searchTimer = setTimeout(() => {
+                
                 fetch(`${apiUrl}/api/mig-tasks?workshopTasks=${task.workmanshipTask}&subsystem=${task.component.subsystem}`)
                 .then(resp => resp.json())
                 .then(json => {
@@ -31,13 +32,12 @@ export default function TaskSubDialog({taskTemplates, tasks, setTasks, removeTas
                 })
             }, 600)
         }
-
     }
     
     const afterChangeUnitPrice = (val, i) => {
         setTasks(prevs => {
             const newItems = [...prevs]
-            newItems[i] = {...prevs[i], quotedPrice: val}
+            newItems[i] = {...prevs[i], quotedPrice: parseFloat(val)}
             return newItems
         })
     }

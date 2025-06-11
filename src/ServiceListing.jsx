@@ -55,7 +55,8 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
       transactionTypes: service.transactionTypes,
       mileageKm: service.mileageKm,
       notes: service.notes,
-      items: [{ partName: 'Engine Oil 20w-50' }]
+      items: [{ partName: 'Engine Oil 20w-50' }],
+      sparePartsMargin: service.sparePartsMargin
     };
     setShowModal(true)
   }
@@ -219,7 +220,7 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
   return (
     <Container fluid>
     {
-      yearMonthView && <YearMonthView services={services} setFilteredServices={setFilteredServices} suppliers={suppliers} orders={orders} backToService={() => setYearMonthView(false)}></YearMonthView>
+      yearMonthView && <YearMonthView services={services} setFilteredServices={setFilteredServices} suppliers={suppliers} orders={orders} taskTemplates={taskTemplates} backToService={() => setYearMonthView(false)}></YearMonthView>
     }
     { !yearMonthView && <Container fluid>
       <ServiceDialog isShow={showModal} setShow={setShowModal} trx={serviceTransaction} 
@@ -314,7 +315,10 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
                         <Row>
                           <Col xs="4" lg="2">{vvv.usageDate}</Col>
                           <Col xs="8" lg="6">{ order.itemCode && !order.partName.includes(order.itemCode) && <span className='text-secondary'>{order.itemCode}&nbsp;</span> }<span>{order.partName}</span> <div className="d-none d-lg-block"><OrderTooltip order={order} supplier={supplier} /></div></Col>
-                          <Col xs="6" lg="2" className='text-lg-end'><Badge pill>{vvv.quantity > 0 && vvv.soldPrice && `${vvv.quantity} ${order.unit} @ $${vvv.soldPrice?.toFixed(2)}`}</Badge></Col>
+                          <Col xs="6" lg="2" className='text-lg-end'>
+                            {vvv.quantity > 0 && vvv.soldPrice && `${vvv.quantity} ${order.unit} @ $${vvv.soldPrice?.toFixed(2)}`}
+                            {vvv.margin > 0 && <div><span className="text-secondary">original: ${order.unitPrice?.toFixed(2)} <i className="bi bi-arrow-up"></i>{vvv.margin}%</span></div> }
+                          </Col>
                           <Col xs="6" lg="2" className='text-end'>{v.completionDate ? <Badge pill>$ {totalPrice}</Badge> : <HoverPilledBadge onRemove={() => removeTransaction(v.id, vvv.id)}>$ {totalPrice}</HoverPilledBadge> }</Col>
                         </Row>
                       </ListGroupItem>

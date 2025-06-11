@@ -152,17 +152,9 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
 
   const onSaveMedia = (service, file, afterSaveMedia) => {
     setLoading(true)
-    requestAnimationFrame(async () => {
-
-      let compressedFile = file
-      if (file.type.startsWith('image')) {
-        compressedFile = await imageCompression(file, {
-          maxSizeMB: 1, maxWidthOrHeight: 1080, useWebWorker: true,
-        })
-      }
-
+    requestAnimationFrame(() => {
       const formData = new FormData()
-      formData.append("file", compressedFile, file.name)
+      formData.append("file", file, file.name)
 
       fetch(`${apiUrl}/api/workshop-services/${service.id}/medias`, {
         method: 'POST', 

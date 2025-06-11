@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { Button, ButtonGroup, Card, Carousel, Col, Container, Form, Image, InputGroup, Modal, Row } from "react-bootstrap";
 import { Camera, Download, Trash } from "../Icons";
 import TransactionTypes from "../components/TransactionTypes";
+import imageCompression from 'browser-image-compression';
 
 function ServiceMediaDialog({isShow, setShowDialog, ws, onSaveMedia}) {
     const apiUrl = process.env.REACT_APP_API_URL
@@ -61,8 +62,22 @@ function ServiceMediaDialog({isShow, setShowDialog, ws, onSaveMedia}) {
 
     const afterUploadMedia = (event) => {
         const selectedFile = event.target.files[0];
-        setUploadedFile(selectedFile)
-        setPreviewDataUrl(URL.createObjectURL(selectedFile))
+
+        const doWork = (file) => {
+            setUploadedFile(file)
+            setPreviewDataUrl(URL.createObjectURL(file)) 
+        }
+
+        if (selectedFile.type.startsWith('image')) {
+            imageCompression(selectedFile, {
+                maxSizeMB: 1, maxWidthOrHeight: 1080, useWebWorker: true,
+            }).then(compressedFile => {
+                doWork(compressedFile)
+            })
+        }
+        else {
+            doWork(selectedFile)
+        }
     }
 
     const validateSave = () => {

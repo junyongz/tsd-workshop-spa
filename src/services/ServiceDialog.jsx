@@ -29,7 +29,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
 
     const handleClose = () => {
         setItems([{partName: 'Choose one ...', quantity: 1, unit: 'pc', unitPrice: 0, selectedSpareParts:[]}])
-        setTasks([{}])
+        setTasks()
         setValidated(false)
         setShow(false)
         setSelectedExistingService()

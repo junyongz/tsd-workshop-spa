@@ -1,4 +1,4 @@
-import { Badge, ButtonGroup, Container, Dropdown, Form, InputGroup, Nav, Navbar, NavDropdown, NavLink, Row, Toast, ToastContainer } from "react-bootstrap";
+import { Badge, ButtonGroup, Col, Container, Dropdown, Form, InputGroup, Nav, Navbar, NavDropdown, NavLink, Row, Toast, ToastContainer } from "react-bootstrap";
 import { Typeahead } from "react-bootstrap-typeahead";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Calendar, Foreman, Services, Suppliers, Tools, Truck } from "./Icons";
@@ -13,7 +13,7 @@ export default function NavigationBar({
     const navigate = useNavigate()
 
     return (
-        <Container fluid>
+        <Container fluid className="position-sticky top-0 z-3 shadow mt-2 px-3 rounded" style={{backgroundColor: 'var(--bs-body-bg)'}}>
             <Row>
                 <ToastContainer className="p-3" position={'top-left'} style={{ zIndex: 3 }}>
                     <Toast bg="warning" show={showToastBox} onClose={() => setShowToastBox(false)}>
@@ -24,11 +24,11 @@ export default function NavigationBar({
                     </Toast>
                 </ToastContainer>
             </Row>
-            <Navbar expand="md">
-            <Navbar.Brand href="/" className="mb-3"><span className="fw-bold fs-1"><Truck /> TSD</span></Navbar.Brand>
+            <Navbar expand="lg" className="mb-3">
+            <Navbar.Brand href="/"><span className="fw-bold fs-1"><Truck /> TSD</span></Navbar.Brand>
             <Navbar.Toggle aria-controls="basic-navbar-nav" />
             <Navbar.Collapse>
-                <Nav variant="underline" className="me-auto mb-3" defaultActiveKey="home">
+                <Nav variant="underline" defaultActiveKey="home">
                     <Dropdown as={ButtonGroup}>
                     <Nav.Item><Nav.Link eventKey="home" onClick={() => navigate("/")}><Services /> Services {selectedSearchOptions.length > 0 && <Badge pill>{filteredServices.length}</Badge>}</Nav.Link></Nav.Item>
                     <Dropdown.Toggle as={NavLink} ></Dropdown.Toggle>
@@ -41,9 +41,8 @@ export default function NavigationBar({
                     <Nav.Item><Nav.Link eventKey="vehicles" onClick={() => navigate("/vehicles")}><Truck /> Trucks</Nav.Link></Nav.Item>
                     { process.env.NODE_ENV === 'development' && <Nav.Item><Nav.Link eventKey="spare-parts" onClick={() => navigate("/spare-parts")}><Tools /> Spare Parts</Nav.Link></Nav.Item> }
                 </Nav>
-            <Form className="d-flex">
+                <Form className="d-flex ms-auto responsive-width">
                 {!searchByDate &&
-                    <Form.Group>
                     <InputGroup>
                         <InputGroup.Text><Truck /></InputGroup.Text>
                         <InputGroup.Text><Tools /></InputGroup.Text>
@@ -55,8 +54,6 @@ export default function NavigationBar({
                                 labelKey="name"
                                 multiple
                                 clearButton
-                                onFocus={(evt) => evt.target.setAttribute('size', 70)}
-                                onBlur={(evt) => evt.target.setAttribute('size', 20)}
                                 onChange={filterServices}
                                 options={searchOptions}
                                 placeholder="Choose by vehicle(s) and/or spart part(s)"
@@ -64,20 +61,17 @@ export default function NavigationBar({
                             />
                         <InputGroup.Text><Calendar role={location.pathname === '/vehicles'  ? '' : 'button'} onClick={location.pathname === '/vehicles' ? ()=>{} : () => setSearchByDate(true)} /></InputGroup.Text>
                     </InputGroup>
-                    </Form.Group>
                 }
                 {searchByDate && 
-                <Form.Group>
                 <InputGroup>
                     <InputGroup.Text>Choose a date</InputGroup.Text>
                     <InputGroup.Text><i className="bi bi-x-circle" role="button" onClick={clearFilterDate}></i></InputGroup.Text>
                     <Form.Control disabled={location.pathname === '/vehicles'} type='date' placeholder='Choose a date' onChange={(e) => filterByDate(e.target.value)}></Form.Control>
                 </InputGroup>
-                </Form.Group>
                 }
                 </Form>
-                </Navbar.Collapse>
-                </Navbar>
+            </Navbar.Collapse>
+            </Navbar>
         </Container>
     )
 }

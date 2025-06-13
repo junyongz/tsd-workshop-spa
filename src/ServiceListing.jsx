@@ -333,7 +333,7 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
                     && (!v.sparePartUsages)
                     && v.completionDate) && 
                     <Button onClick={() => loadWorkshopService(v)} variant='outline-secondary'><i className="bi bi-three-dots"></i></Button>}
-                    {v.sparePartsCount === 0 && v.workmanshipTasksCount === 0 && <ListGroup.Item>Refer to the notes (if there is something)</ListGroup.Item>}
+                    {v.sparePartsCount === 0 && v.workmanshipTasksCount === 0 && !v.migratedHandWrittenSpareParts && <ListGroup.Item>Refer to the notes (if there is something)</ListGroup.Item>}
                     </ListGroup>
                   </Col>
                 </Row>

@@ -14,3 +14,13 @@
 .blurred {
   filter: blur(5px);
 }
+
+.responsive-width {
+  width: 100%;
+}
+
+@media (min-width: 992px) {
+  .responsive-width {
+    width: 50%;
+  }
+}

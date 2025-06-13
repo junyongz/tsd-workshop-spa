@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Button, Col, Container, Form, ListGroup, ListGroupItem, Row } from "react-bootstrap";
+import { Button, Card, Col, Container, Form, ListGroup, ListGroupItem, Row } from "react-bootstrap";
 import VehicleUpdateDialog from "./VehicleUpdateDialog";
 import formatThousandSeparator from "../utils/numberUtils";
 import VehicleServices from "./VehicleServices";
 import { Company, Inspection, Insurance, Roadtax, Services, Truck } from "../Icons";
 
-export default function Vehicles({vehicles=[], setVehicles, companies=[]}) {
+export default function Vehicles({vehicles=[], setVehicles, companies=[], selectedSearchOptions=[]}) {
 
     const apiUrl = process.env.REACT_APP_API_URL
 
@@ -69,40 +69,44 @@ export default function Vehicles({vehicles=[], setVehicles, companies=[]}) {
             </Col>
         </Row>
         <Row className="mb-3">
-        <Col>
-            <ListGroup>
-                <ListGroupItem key={'header'}>
-                    <Row>
-                        <Col xs={!showInternalOnly ? "5" : "6" } md={!showInternalOnly ? "2" : "3" }><Truck /> Plate No</Col>
-                        {!showInternalOnly && <Col xs="6" md="2"><Company /> Company</Col> }
-                        <Col xs={!showInternalOnly ? "5" : "6" } md={!showInternalOnly ? "2" : "3" }>Last Recorded Mileage</Col>
-                        <Col xs={false} md="3">Dates</Col>
-                        <Col xs={false} md="3"><Services /> Last Services</Col>
-                    </Row>
-                </ListGroupItem>
-                { vehicles.filter(veh => !showInternalOnly || (showInternalOnly && companies.find(co => co.id === veh.companyId)?.internal))
-                    .map(v => 
-                    <ListGroupItem key={v.id}>
-                        <Row>
-                            <Col xs={!showInternalOnly ? "5" : "6" } md={!showInternalOnly ? "2" : "3" }><Button variant="link" onClick={() => showVehicle(v.id)}>{v.vehicleNo}</Button><span>{v.trailerNo}</span></Col>
-                            {!showInternalOnly && <Col xs="6" md="2">{companies.find(co => co.id === v.companyId)?.companyName}</Col>}
-                            <Col xs={!showInternalOnly ? "5" : "6" } md={!showInternalOnly ? "2" : "3" }>{v.latestMileageKm ? `${formatThousandSeparator(v.latestMileageKm)} KM` : '-'}</Col>
-                            <Col xs={false} md="3">
-                            {v.insuranceExpiryDate && <div><Insurance /> <span className="text-secondary">Insurance</span> {v.insuranceExpiryDate}</div>}
-                            {v.roadTaxExpiryDate && <div><Roadtax /> <span className="text-secondary">Roadtax</span> {v.roadTaxExpiryDate}</div>}
-                            {v.inspectionDueDate && <div><Inspection /> <span className="text-secondary">Inspection</span> {v.inspectionDueDate}</div>}
-                            </Col>
-                            <Col xs={false} md="3"> 
+            { vehicles.filter(veh => !showInternalOnly || (showInternalOnly && companies.find(co => co.id === veh.companyId)?.internal))
+                .filter(veh => !selectedSearchOptions || selectedSearchOptions.length === 0 || selectedSearchOptions.some(sso => sso.name === veh.vehicleNo))
+                .map(v => 
+                    <Col xs="12" sm="6" md="4" lg="3" className="mb-3">
+                    <Card role="button" key={v.id} onClick={() => showVehicle(v.id)}>
+                        <Card.Header>
+                            <Row>
+                                <Col xs="12" lg="6"><h3>{v.vehicleNo}</h3></Col>
+                                <Col xs="12" lg="6" className="align-content-center text-lg-end"><h5>{v.trailerNo}</h5></Col>
+                            </Row>
+                            {!showInternalOnly && <h5>{ companies.find(co => co.id === v.companyId)?.companyName }</h5>}
+                        </Card.Header>
+                        <Card.Body>
+                            <Row className="mb-1 fs-5">
+                                <Col>
+                                {v.latestMileageKm ? `${formatThousandSeparator(v.latestMileageKm)} KM` : '-'}
+                                </Col>
+                            </Row>
+                            <Row className="mb-1">
+                                <Col>
+                                {v.insuranceExpiryDate && <div><Insurance /> <span className="text-secondary">Insurance</span> {v.insuranceExpiryDate}</div>}
+                                {v.roadTaxExpiryDate && <div><Roadtax /> <span className="text-secondary">Roadtax</span> {v.roadTaxExpiryDate}</div>}
+                                {v.inspectionDueDate && <div><Inspection /> <span className="text-secondary">Inspection</span> {v.inspectionDueDate}</div>}
+                                </Col>
+                            </Row>
+                            <Row className="mb-1">
+                                <Col>
                                 <VehicleServices lastService={serviceByVehicle[v.vehicleNo]} 
                                     lastInspection={inspectionByVehicle[v.vehicleNo]} 
                                     vehicle={v} />
-                             </Col>
-                        </Row>
-                    </ListGroupItem>
-                  )
-                }
-            </ListGroup>
-        </Col>
+                                </Col>
+                            </Row>
+                        </Card.Body>
+                    </Card>
+                    </Col>
+                )
+            }
+            
         </Row>
         </Container>
     )

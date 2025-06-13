@@ -48,7 +48,6 @@ export default function NavigationBar({
                         <InputGroup.Text><Tools /></InputGroup.Text>
                             <Typeahead
                                 allowNew
-                                disabled={location.pathname === '/vehicles'}
                                 newSelectionPrefix="Search for... "
                                 id="search-multiple"
                                 labelKey="name"

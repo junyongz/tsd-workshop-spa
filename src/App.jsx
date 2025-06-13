@@ -283,6 +283,8 @@ function App() {
               suppliers={suppliers}
               onNewServiceCreated={onNewServiceCreated}
               removeTask={removeTask}
+              vehicles={vehicles}
+              companies={companies}
             />
           } />
           <Route path="/orders" element={
@@ -305,7 +307,8 @@ function App() {
           <Route path="/vehicles" element={ 
             <Vehicles vehicles={vehicles} 
               setVehicles={setVehicles} 
-              companies={companies} 
+              companies={companies}
+              selectedSearchOptions={selectedSearchOptions}
             />} />
           <Route path="/spare-parts" element={ 
             <SpareParts vehicles={vehicles} 

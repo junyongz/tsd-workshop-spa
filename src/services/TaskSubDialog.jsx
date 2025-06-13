@@ -163,7 +163,7 @@ export default function TaskSubDialog({taskTemplates, tasks, setTasks, removeTas
                             {v.selectedTask && v.selectedTask[0] && <InputGroup.Text role="button" onClick={() => afterChangeUnitPrice((v.selectedTask[0].unitPrice), i)}>${v.selectedTask[0].unitPrice}</InputGroup.Text> }
                         </InputGroup>
                     </Col>
-                    <Col xs="12" lg="3" className="mb-3">
+                    <Col xs={{span: 12, order: 2}} lg={{span: 3, order: 0}}  className="mb-3 order-xs-5">
                         <InputGroup>
                             <InputGroup.Text><Dollar /></InputGroup.Text>
                             <Form.Control size="lg" onChange={(e) => afterChangeUnitPrice(e.target.value, i) } required type="number" step="10" name="quotedPrice" placeholder="Price $" value={v?.quotedPrice} />
@@ -195,7 +195,7 @@ export default function TaskSubDialog({taskTemplates, tasks, setTasks, removeTas
                             </Dropdown.Menu>
                         </Dropdown>
                     </Col>
-                    <Col xs="12" lg="1" className="text-end">
+                    <Col xs={{span: "12", order: 'last'}} lg="1" className="text-end order-xs-last">
                         <Button size="lg" variant="danger" onClick={() => removeItem(v, i)}><Trash /></Button>
                     </Col>
                     </Row>

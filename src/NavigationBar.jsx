@@ -28,7 +28,7 @@ export default function NavigationBar({
             <Navbar.Brand href="/"><span className="fw-bold fs-1"><Truck /> TSD</span></Navbar.Brand>
             <Navbar.Toggle aria-controls="basic-navbar-nav" />
             <Navbar.Collapse>
-                <Nav variant="underline" defaultActiveKey="home">
+                <Nav variant="underline" defaultActiveKey={location.pathname === '/' ? 'home' : location.pathname.substring(1)}>
                     <Dropdown as={ButtonGroup}>
                     <Nav.Item><Nav.Link eventKey="home" onClick={() => navigate("/")}><Services /> Services {selectedSearchOptions.length > 0 && <Badge pill>{filteredServices.length}</Badge>}</Nav.Link></Nav.Item>
                     <Dropdown.Toggle as={NavLink} ></Dropdown.Toggle>

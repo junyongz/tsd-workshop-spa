@@ -233,10 +233,10 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
             </Row>
             {!overview && <Row>
                 <Col>
-                <Pagination className='d-flex d-lg-none'>
+                <Pagination className='d-flex d-lg-none fw-lighter'>
                 { getPaginationItems(activePage, setActivePage, totalPages, 3) }
                 </Pagination>
-                <Pagination className='d-none d-lg-flex'>
+                <Pagination className='d-none d-lg-flex fw-lighter'>
                 { getPaginationItems(activePage, setActivePage, totalPages, 10) }
                 </Pagination>
                 </Col>
@@ -292,7 +292,7 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
                         chunkedItems[activePage - 1]?.map(v => 
                             <ListGroupItem key={v.id}>
                                 <Row>
-                                    <Col xs="6" md="2">{v.invoiceDate}</Col>
+                                    <Col xs="6" md="2" className="fw-lighter">{v.invoiceDate}</Col>
                                     <Col xs="6" md="2">{findSupplier(v.supplierId).supplierName} <div className="p-0 m-0">{ !v.sheetName && <Button className="p-0 text-decoration-none" variant="link"
                                         onClick={(e) => viewOrder(v.deliveryOrderNo, e)}>{v.deliveryOrderNo}</Button>}{v.sheetName && <span>{v.deliveryOrderNo}</span>}</div></Col>
                                     <Col xs="12" md="4">
@@ -330,10 +330,10 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
             <Row>
                 <Col>
                 <Pagination>
-                <Pagination className='d-flex d-lg-none'>
+                <Pagination className='d-flex d-lg-none fw-lighter'>
                 { getPaginationItems(activePage, setActivePage, totalPages, 3) }
                 </Pagination>
-                <Pagination className='d-none d-lg-flex'>
+                <Pagination className='d-none d-lg-flex fw-lighter'>
                 { getPaginationItems(activePage, setActivePage, totalPages, 10) }
                 </Pagination>
                 </Pagination>

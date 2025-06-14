@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import Badge from "react-bootstrap/Badge";
 import './HoverPilledBadge.css';
+import { Trash } from "../Icons";
 
 
 const HoverPilledBadge = ({ onRemove, children }) => {
@@ -11,13 +12,13 @@ const HoverPilledBadge = ({ onRemove, children }) => {
       <Badge
         pill
         bg="primary"
-        className="hover-badge"
+        className="hover-badge w-75"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         onClick={() => isHovered && onRemove()} // Only trigger onRemove when showing the "X"
         role="button"
       >
-        {isHovered ? 'x' : children}
+        {isHovered ? <Trash /> : children}
       </Badge>
     );
 };

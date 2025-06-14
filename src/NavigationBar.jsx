@@ -13,7 +13,7 @@ export default function NavigationBar({
     const navigate = useNavigate()
 
     return (
-        <Container fluid className="position-sticky top-0 z-3 shadow mt-2 px-3 rounded" style={{backgroundColor: 'var(--bs-body-bg)'}}>
+        <Container fluid className="position-sticky top-0 shadow mt-2 px-3 rounded" style={{backgroundColor: 'var(--bs-body-bg)', zIndex: 4}}>
             <Row>
                 <ToastContainer className="p-3" position={'top-left'} style={{ zIndex: 3 }}>
                     <Toast bg="warning" show={showToastBox} onClose={() => setShowToastBox(false)}>
@@ -41,7 +41,7 @@ export default function NavigationBar({
                     <Nav.Item><Nav.Link eventKey="vehicles" onClick={() => navigate("/vehicles")}><Truck /> Trucks</Nav.Link></Nav.Item>
                     { process.env.NODE_ENV === 'development' && <Nav.Item><Nav.Link eventKey="spare-parts" onClick={() => navigate("/spare-parts")}><Tools /> Spare Parts</Nav.Link></Nav.Item> }
                 </Nav>
-                <Form className="d-flex ms-auto responsive-width">
+                <Form className="d-flex ms-auto responsive-width-50">
                 {!searchByDate &&
                     <InputGroup>
                         <InputGroup.Text><Truck /></InputGroup.Text>

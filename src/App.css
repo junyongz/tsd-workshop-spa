@@ -15,12 +15,22 @@
   filter: blur(5px);
 }
 
-.responsive-width {
+.responsive-width-50 {
   width: 100%;
 }
 
 @media (min-width: 992px) {
-  .responsive-width {
+  .responsive-width-50 {
     width: 50%;
+  }
+}
+
+.responsive-width-25 {
+  width: 100%;
+}
+
+@media (min-width: 992px) {
+  .responsive-width-25 {
+    width: 25%;
   }
 }

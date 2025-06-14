@@ -10,10 +10,9 @@ import { clearState } from './autoRefreshWorker';
 import OrderTooltip from './services/OrderTooltip';
 import YearMonthView from './services/YearMonthView';
 import TransactionTypes from './components/TransactionTypes';
-import { Calendar, Foreman, NoteTaking } from './Icons';
+import { Calendar, Foreman, NoteTaking, Tools } from './Icons';
 import ServiceNoteTakingDialog from './services/ServiceNoteTakingDialog';
 import ServiceMediaDialog from './services/ServiceMediaDialog';
-import imageCompression from 'browser-image-compression';
 
 function ServiceListing({services, filteredServices=[], setFilteredServices,
     keywordSearch = () => {}, refreshSparePartUsages=() => {}, 
@@ -229,10 +228,10 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
         ws={serviceTransaction.current} onSaveMedia={onSaveMedia}/> }
       <Row className='mb-3'>
         <Col>
-          <Pagination className='d-flex d-lg-none'>
+          <Pagination className='d-flex d-lg-none fw-lighter'>
           { getPaginationItems(activePage, setActivePage, totalPages, 3) }
           </Pagination>
-          <Pagination className='d-none d-lg-flex'>
+          <Pagination className='d-none d-lg-flex fw-lighter'>
           { getPaginationItems(activePage, setActivePage, totalPages, 10) }
           </Pagination>
         </Col>
@@ -244,13 +243,14 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
         </Col>
       </Row>
       {
-        chunkedItems[activePage - 1]?.map((v, i) =>
+        chunkedItems[activePage - 1]?.map(v =>
             <Card key={v.id} className={'mb-3'}>
               <Card.Header>
                 <Row>
-                  <Col xs="12" lg="4"><h5>{v.vehicleNo} <span className="text-body-secondary">started since {v.startDate}</span></h5></Col>
-                  <Col xs="4" lg="4" className='mb-2'><TransactionTypes service={v} /></Col>
-                  <Col xs="8" lg="4" className='text-end'>
+                  <Col xs="12" lg="2"><h5>{v.vehicleNo}</h5></Col>
+                  <Col xs="12" lg={{span: 12, order: 5}}><h5 className="text-body-secondary">started since {v.startDate}</h5></Col>
+                  <Col xs="4" lg="8" className='mb-2'><TransactionTypes service={v} /></Col>
+                  <Col xs="8" lg="2" className='text-end'>
                   {v.mileageKm > 0 && <h6><span className="text-body-secondary">At {v.mileageKm} KM</span></h6> }
                   </Col>
                 </Row>
@@ -263,7 +263,7 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
                     mediaForService={() => mediaForService(v)}></CompletionLabel>
                   </Col>
                   { false && <Col className={'text-end col-4'}><Badge pill><i className="bi bi-person-fill-gear me-1"></i>{'Tan Chwee Seng'}</Badge></Col> }
-                  <Col xs="12" lg="4" className='text-lg-end'>
+                  <Col xs="12" lg="4" className='text-lg-end fw-semibold'>
                     <h4>
                       $ {((v.migratedHandWrittenSpareParts?.reduce((acc, curr) => acc += curr.totalPrice, 0) || 0) + 
                           (v.sparePartUsages?.reduce((acc, curr) =>  acc + (curr.quantity * curr.soldPrice), 0) || 0) +
@@ -275,12 +275,11 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
               <Card.Body>
               <Container fluid>
                 <Row className='mb-3'>
-                  <Col></Col>
-                  <Col sm="2" className={'text-end'}>
+                  <Col className='text-end'>
                   {
                   !v.completionDate && 
-                    <Button size="sm" variant='secondary' onClick={() => addNewItemForVehicle(v)}>
-                      <i className="bi bi-truck-front-fill"></i> <span className='d-none d-lg-inline'>Add Item</span></Button>
+                    <Button className='responsive-width-25' variant='secondary' onClick={() => addNewItemForVehicle(v)}>
+                      <Tools /> <Foreman /> <span>Add Item</span></Button>
                      }
                   </Col>
                 </Row>
@@ -305,13 +304,13 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
 
                       return <ListGroupItem key={vvv.id}>
                         <Row>
-                          <Col xs="4" lg="2">{vvv.usageDate}</Col>
-                          <Col xs="8" lg="6">{ order.itemCode && !order.partName.includes(order.itemCode) && <span className='text-secondary'>{order.itemCode}&nbsp;</span> }<span>{order.partName}</span> <div className="d-none d-lg-block"><OrderTooltip order={order} supplier={supplier} /></div></Col>
-                          <Col xs="6" lg="2" className='text-lg-end'>
+                          <Col xs="12" lg="2" className='fw-lighter'>{vvv.usageDate}</Col>
+                          <Col xs="12" lg="6" className='fw-semibold'>{ order.itemCode && !order.partName.includes(order.itemCode) && <span className='text-secondary'>{order.itemCode}&nbsp;</span> }<span>{order.partName}</span> <div className="d-none d-lg-block"><OrderTooltip order={order} supplier={supplier} /></div></Col>
+                          <Col xs="8" lg="2" className='text-lg-end'>
                             {vvv.quantity > 0 && vvv.soldPrice && `${vvv.quantity} ${order.unit} @ $${vvv.soldPrice?.toFixed(2)}`}
-                            {vvv.margin > 0 && <div><span className="text-secondary">original: ${order.unitPrice?.toFixed(2)} <i className="bi bi-arrow-up"></i>{vvv.margin}%</span></div> }
+                            {vvv.margin > 0 && <div><span className="text-secondary fw-lighter">original: ${order.unitPrice?.toFixed(2)} <i className="bi bi-arrow-up"></i>{vvv.margin}%</span></div> }
                           </Col>
-                          <Col xs="6" lg="2" className='text-end'>{v.completionDate ? <Badge pill>$ {totalPrice}</Badge> : <HoverPilledBadge onRemove={() => removeTransaction(v.id, vvv.id)}>$ {totalPrice}</HoverPilledBadge> }</Col>
+                          <Col xs="4" lg="2" className='text-end'>{v.completionDate ? <Badge pill>$ {totalPrice}</Badge> : <HoverPilledBadge onRemove={() => removeTransaction(v.id, vvv.id)}>$ {totalPrice}</HoverPilledBadge> }</Col>
                         </Row>
                       </ListGroupItem>
                       })
@@ -321,8 +320,8 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
 
                       return <ListGroupItem key={vvv.id}>
                         <Row>
-                          <Col xs="4" lg="2">{vvv.recordedDate}</Col>
-                          <Col xs="12" lg="5"><Foreman /> {task.workmanshipTask} ({task.component.subsystem} - {task.component.componentName})</Col>
+                          <Col xs="4" lg="2" className='fw-lighter'>{vvv.recordedDate}</Col>
+                          <Col xs="12" lg="5" className='fw-semibold'><Foreman /> {task.workmanshipTask} ({task.component.subsystem} - {task.component.componentName})</Col>
                           <Col xs="8" lg="3"><NoteTaking /> {vvv.remarks}</Col>
                           <Col xs="4" lg="2" className='text-end'>{v.completionDate ? <Badge pill>$ {vvv.quotedPrice?.toFixed(2)}</Badge> : <HoverPilledBadge onRemove={() => removeTask(v.id, vvv.id)}>$ {vvv.quotedPrice?.toFixed(2)}</HoverPilledBadge> }</Col>                        
                         </Row>
@@ -343,10 +342,10 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
            
         )
       }
-      <Pagination className='d-flex d-lg-none'>
+      <Pagination className='d-flex d-lg-none fw-lighter'>
       { getPaginationItems(activePage, setActivePage, totalPages, 3) }
       </Pagination>
-      <Pagination className='d-none d-lg-flex'>
+      <Pagination className='d-none d-lg-flex fw-lighter'>
       { getPaginationItems(activePage, setActivePage, totalPages, 10) }
       </Pagination>
     </Container> }

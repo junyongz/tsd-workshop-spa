@@ -235,8 +235,8 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
           { getPaginationItems(activePage, setActivePage, totalPages, 10) }
           </Pagination>
         </Col>
-        <Col className={'text-end'}>
-          <ButtonGroup>
+        <Col className='text-end'>
+          <ButtonGroup className='responsive-width-50'>
             <Button variant='secondary' onClick={() => viewByYearMonth()}><Calendar />&nbsp;Calendar View</Button>
             <Button variant='success' onClick={() => addNewServiceTransaction(new Date().toISOString().split('T')[0])}><i className="bi bi-plus-circle-fill me-2"></i>Add New</Button>
           </ButtonGroup>
@@ -291,7 +291,7 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
                         <Row>
                           <Col xs="4" lg="2">{vvv.creationDate}</Col>
                           <Col xs="8" lg="6">{vvv.itemDescription}</Col>
-                          <Col xs="6" lg="2" className='text-end'><Badge pill>{vvv.quantity > 0 && vvv.unitPrice && `${vvv.quantity} ${vvv.unit} @ $${vvv.unitPrice?.toFixed(2)}`}</Badge></Col>
+                          <Col xs="6" lg="2" className='text-lg-end'><Badge pill>{vvv.quantity > 0 && vvv.unitPrice && `${vvv.quantity} ${vvv.unit} @ $${vvv.unitPrice?.toFixed(2)}`}</Badge></Col>
                           <Col xs="6" lg="2" className='text-end'><Badge pill>$ {vvv.totalPrice}</Badge></Col>
                         </Row>
                       </ListGroupItem>
@@ -305,7 +305,7 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
                       return <ListGroupItem key={vvv.id}>
                         <Row>
                           <Col xs="12" lg="2" className='fw-lighter'>{vvv.usageDate}</Col>
-                          <Col xs="12" lg="6" className='fw-semibold'>{ order.itemCode && !order.partName.includes(order.itemCode) && <span className='text-secondary'>{order.itemCode}&nbsp;</span> }<span>{order.partName}</span> <div className="d-none d-lg-block"><OrderTooltip order={order} supplier={supplier} /></div></Col>
+                          <Col xs="12" lg="6">{ order.itemCode && !order.partName.includes(order.itemCode) && <span className='fw-lighter text-secondary'>{order.itemCode}&nbsp;</span> }<span className='fw-semibold'>{order.partName}</span> <div><OrderTooltip order={order} supplier={supplier} /></div></Col>
                           <Col xs="8" lg="2" className='text-lg-end'>
                             {vvv.quantity > 0 && vvv.soldPrice && `${vvv.quantity} ${order.unit} @ $${vvv.soldPrice?.toFixed(2)}`}
                             {vvv.margin > 0 && <div><span className="text-secondary fw-lighter">original: ${order.unitPrice?.toFixed(2)} <i className="bi bi-arrow-up"></i>{vvv.margin}%</span></div> }

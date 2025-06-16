@@ -143,10 +143,10 @@ function YearMonthView({services, setFilteredServices, suppliers=[], orders=[], 
                                         {values.map(trx => {                                            
                                             const migrated = trx.migratedHandWrittenSpareParts?.map(v => <ListGroupItem key={v.index}>
                                                 <Row>
-                                                    <Col xs="4" lg="2">{trx.creationDate}</Col>
-                                                    <Col xs="8" lg="6">{v.itemDescription}</Col>
-                                                    <Col xs={false} lg="2" className='text-end'>{v.quantity > 0 && v.unitPrice && `${v.quantity} ${v.unit} @ $${v.unitPrice?.toFixed(2)}`}</Col>
-                                                    <Col xs={false} lg="2" className='text-end'>$ {v.totalPrice?.toFixed(2) || 0}</Col>
+                                                    <Col xs="12" lg="2" className="fw-lighter">{trx.creationDate}</Col>
+                                                    <Col xs="12" lg="6" className="fw-semibold">{v.itemDescription}</Col>
+                                                    <Col xs="6" lg="2" className='text-lg-end'>{v.quantity > 0 && v.unitPrice && `${v.quantity} ${v.unit} @ $${v.unitPrice?.toFixed(2)}`}</Col>
+                                                    <Col xs="6" lg="2" className='text-end'>$ {v.totalPrice?.toFixed(2) || 0}</Col>
                                                 </Row>
                                             </ListGroupItem>)
 
@@ -157,13 +157,13 @@ function YearMonthView({services, setFilteredServices, suppliers=[], orders=[], 
                                                 
                                                 return (<ListGroupItem key={v.id}>
                                                         <Row>
-                                                            <Col xs="4" lg="2">{trx.creationDate}</Col>
-                                                            <Col xs="8" lg="4">{order.partName} { order && <div className="d-none d-lg-block"><OrderTooltip order={order} supplier={supplier} /></div> }</Col>
+                                                            <Col xs="12" lg="2" className="fw-lighter">{trx.creationDate}</Col>
+                                                            <Col xs="12" lg="4"><span className="fw-semibold">{order.partName}</span> { order && <div><OrderTooltip order={order} supplier={supplier} /></div> }</Col>
                                                             <Col xs="6" lg="4" className='text-lg-end'>
                                                                 {v.quantity > 0 && order.unitPrice && `${v.quantity} ${order.unit} @ $${v.soldPrice?.toFixed(2)}`}
-                                                                {v.margin > 0 && <div><span className="text-secondary">original: ${order.unitPrice?.toFixed(2)} <i className="bi bi-arrow-up"></i>{v.margin}%</span></div> }
+                                                                {v.margin > 0 && <div><span className="text-secondary fw-lighter">original: ${order.unitPrice?.toFixed(2)} <i className="bi bi-arrow-up"></i>{v.margin}%</span></div> }
                                                             </Col>
-                                                            <Col xs="6" lg="2" className='text-end'>$ {totalPrice}</Col>
+                                                            <Col xs="6" lg="2" className='text-end fw-semibold'>$ {totalPrice}</Col>
                                                         </Row>
                                                     </ListGroupItem>)
                                             })

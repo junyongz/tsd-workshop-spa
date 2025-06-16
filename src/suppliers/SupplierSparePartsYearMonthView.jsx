@@ -151,10 +151,10 @@ function SupplierSparePartsYearMonthView({orders=[], suppliers=[], backToOrders}
                                                 <Card.Body>
                                                     {groupByDO[v].map(order => <ListGroupItem key={order.id}>
                                                             <Row>
-                                                                <Col xs="4" lg="2">{order.itemCode} </Col>
-                                                                <Col xs="8" lg="6">{order.partName} </Col>
-                                                                <Col xs="6" lg="2" className='text-lg-end'><Badge pill>{order.quantity > 0 && order.unitPrice && `${order.quantity} ${order.unit} @ $${order.unitPrice?.toFixed(2)}`}</Badge></Col>
-                                                                <Col xs="6" lg="2" className='text-end'>$ {(order.quantity * order.unitPrice).toFixed(2) || 0}</Col>
+                                                                <Col xs="12" lg="2" className="fw-lighter">{order.itemCode} </Col>
+                                                                <Col xs="12" lg="6" className="fw-semibold">{order.partName} </Col>
+                                                                <Col xs="6" lg="2" className='text-lg-end'>{order.quantity > 0 && order.unitPrice && `${order.quantity} ${order.unit} @ $${order.unitPrice?.toFixed(2)}`}</Col>
+                                                                <Col xs="6" lg="2" className='text-end fw-semibold'>$ {(order.quantity * order.unitPrice).toFixed(2) || 0}</Col>
                                                             </Row>
                                                         </ListGroupItem>)}
                                                         <ListGroupItem>

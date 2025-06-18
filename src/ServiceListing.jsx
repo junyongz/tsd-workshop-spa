@@ -3,7 +3,6 @@ import { Badge, Button, ButtonGroup, Card, Col, Container, ListGroup, ListGroupI
 import Pagination from 'react-bootstrap/Pagination';
 import ServiceDialog from './services/ServiceDialog';
 import getPaginationItems from './utils/getPaginationItems';
-import HoverPilledBadge from './components/HoverPilledBadge';
 import CompletionLabel from './components/CompletionLabel';
 import { chunkArray } from './utils/arrayUtils';
 import { clearState } from './autoRefreshWorker';

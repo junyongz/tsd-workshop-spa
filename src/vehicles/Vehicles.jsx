@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { Button, Card, Col, Container, Form, ListGroup, ListGroupItem, Row } from "react-bootstrap";
+import { useEffect, useState } from "react";
+import { Card, Col, Container, Form, Row } from "react-bootstrap";
 import VehicleUpdateDialog from "./VehicleUpdateDialog";
 import formatThousandSeparator from "../utils/numberUtils";
 import VehicleServices from "./VehicleServices";
-import { Company, Inspection, Insurance, Roadtax, Services, Truck } from "../Icons";
+import { Inspection, Insurance, Roadtax } from "../Icons";
 
 export default function Vehicles({vehicles=[], setVehicles, companies=[], selectedSearchOptions=[]}) {
 

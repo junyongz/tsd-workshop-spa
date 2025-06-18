@@ -12,7 +12,7 @@ const HoverPilledBadge = ({ onRemove, children }) => {
       <Badge
         pill
         bg="dark"
-        className="hover-badge w-75 fs-5"
+        className="hover-badge w-50 fs-6"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         onClick={() => isHovered && onRemove()} // Only trigger onRemove when showing the "X"

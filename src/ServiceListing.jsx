@@ -304,13 +304,13 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
 
                       return <ListGroupItem key={vvv.id}>
                         <Row>
-                          <Col xs="12" lg="2" className='fw-lighter'>{vvv.usageDate}</Col>
-                          <Col xs="12" lg="6">{ order.itemCode && !order.partName.includes(order.itemCode) && <span className='fw-lighter text-secondary'>{order.itemCode}&nbsp;</span> }<span className='fw-semibold'>{order.partName}</span> <div><OrderTooltip order={order} supplier={supplier} /></div></Col>
-                          <Col xs="8" lg="2" className='text-lg-end'>
+                          <Col xs={{span: 6, order: 1}} lg="2" className='fw-lighter'>{vvv.usageDate}</Col>
+                          <Col xs={{span: 12, order: 3}} lg="6">{ order.itemCode && !order.partName.includes(order.itemCode) && <span className='fw-lighter text-secondary'>{order.itemCode}&nbsp;</span> }<span className='fw-semibold'>{order.partName}</span> <div><OrderTooltip order={order} supplier={supplier} /></div></Col>
+                          <Col xs={{span: 12, order: 4}} lg="2" className='text-end'>
                             {vvv.quantity > 0 && vvv.soldPrice && `${vvv.quantity} ${order.unit} @ $${vvv.soldPrice?.toFixed(2)}`}
                             {vvv.margin > 0 && <div><span className="text-secondary fw-lighter">original: ${order.unitPrice?.toFixed(2)} <i className="bi bi-arrow-up"></i>{vvv.margin}%</span></div> }
                           </Col>
-                          <Col xs="4" lg="2" className='text-end'>{v.completionDate ? <span className='fw-semibold fs-5'>$ {totalPrice}</span> : <HoverPilledBadge onRemove={() => removeTransaction(v.id, vvv.id)}>$ {totalPrice}</HoverPilledBadge> }</Col>
+                          <Col xs={{span: 6, order: 2}} lg={{span: 2, order: 'last'}} className='text-end'>{v.completionDate ? <span className='fw-semibold fs-5'>$ {totalPrice}</span> : <HoverPilledBadge onRemove={() => removeTransaction(v.id, vvv.id)}>$ {totalPrice}</HoverPilledBadge> }</Col>
                         </Row>
                       </ListGroupItem>
                       })
@@ -320,10 +320,10 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
 
                       return <ListGroupItem key={vvv.id}>
                         <Row>
-                          <Col xs="4" lg="2" className='fw-lighter'>{vvv.recordedDate}</Col>
-                          <Col xs="12" lg="5" className='fw-semibold'><Foreman /> {task.workmanshipTask} ({task.component.subsystem} - {task.component.componentName})</Col>
-                          <Col xs="8" lg="3"><NoteTaking /> {vvv.remarks}</Col>
-                          <Col xs="4" lg="2" className='text-end'>{v.completionDate ? <Badge pill>$ {vvv.quotedPrice?.toFixed(2)}</Badge> : <HoverPilledBadge onRemove={() => removeTask(v.id, vvv.id)}>$ {vvv.quotedPrice?.toFixed(2)}</HoverPilledBadge> }</Col>                        
+                          <Col xs={{span: 6, order: 1}} lg="2" className='fw-lighter'>{vvv.recordedDate}</Col>
+                          <Col xs={{span: 12, order: 3}} lg="5" className='fw-semibold'><Foreman /> {task.workmanshipTask} ({task.component.subsystem} - {task.component.componentName})</Col>
+                          <Col xs={{span: 12, order: 4}} lg="3"><NoteTaking /> {vvv.remarks}</Col>
+                          <Col xs={{span: 6, order: 2}} lg={{span: 2, order: 'last'}} className='text-end'>{v.completionDate ? <Badge pill>$ {vvv.quotedPrice?.toFixed(2)}</Badge> : <HoverPilledBadge onRemove={() => removeTask(v.id, vvv.id)}>$ {vvv.quotedPrice?.toFixed(2)}</HoverPilledBadge> }</Col>                        
                         </Row>
                       </ListGroupItem>
                       })

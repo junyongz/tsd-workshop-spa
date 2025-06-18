@@ -57,11 +57,11 @@ export default function CalendarView({
        }
     }, [])
 
-    const AllEvents = ({events, onDoClickNew}) => {
+    const AllEvents = ({events=[], onDoClickNew}) => {
         return (
             <ListGroup>
                 <ListGroup.Item key={'add-new'} className="text-end"><Button className="responsive-width-25" onClick={() => onDoClickNew()}>Add New</Button></ListGroup.Item>
-                { events.filter(evt => sameDay(evt.date, choosenDate))
+                { choosenDate && events.filter(evt => sameDay(evt.date, choosenDate))
                     .map(evt => <ListGroup.Item key={evt.id}>
                         <Row>
                         <Col xs="10"><span className="fw-semibold">{ evt.display }</span></Col> 
@@ -70,7 +70,7 @@ export default function CalendarView({
                         </Row>
                         </ListGroup.Item>) 
                 }
-                {events.filter(evt => sameDay(evt.date, choosenDate)).length === 0 && <ListGroup.Item key={'no-item'}>Nothing scheduled yet</ListGroup.Item>}
+                { (!choosenDate || events.filter(evt => sameDay(evt.date, choosenDate)).length === 0) && <ListGroup.Item key={'no-item'}>Nothing scheduled yet</ListGroup.Item>}
             </ListGroup>
         )
     }
@@ -88,7 +88,7 @@ export default function CalendarView({
             <Row>
                 <Modal show={showEventsDialog} onHide={() => setShowEventDialog(false)}>
                     <Modal.Header closeButton>
-                        Schedules for {choosenDate.toISOString().split('T')[0]}
+                        Schedules for {choosenDate?.toISOString().split('T')[0]}
                     </Modal.Header>
                     <Modal.Body>
                         <AllEvents events={events} onDoClickNew={() => { onClickNew(choosenDate); setShowEventDialog(false)}} />
@@ -97,7 +97,10 @@ export default function CalendarView({
             </Row>
             <Row>
             <Col xs='6'><h1><span className="fw-bold">{months3EngChars[requiredDate.getMonth()]}</span> <span className="fw-lighter">{requiredDate.getFullYear()}</span></h1></Col>
-            <Col xs='6' className="text-end"><ButtonGroup><Button onClick={() => setMonth(m => m-1)}>&lt;</Button><Button onClick={() => { setMonth(todayDate.getMonth()); setChoosenDate(todayDate) }}>Today</Button><Button onClick={() => setMonth(m => m+1)}>&gt;</Button></ButtonGroup></Col>
+            <Col xs='6' className="text-end"><ButtonGroup>
+                <Button onClick={() => { setMonth(m => m-1); setChoosenDate() }}>&lt;</Button>
+                <Button onClick={() => { setMonth(todayDate.getMonth()); setChoosenDate(todayDate) }}>Today</Button>
+                <Button onClick={() => { setMonth(m => m+1); setChoosenDate() }}>&gt;</Button></ButtonGroup></Col>
             </Row>
             <div className="calendar-grid" style={{'--weeks': rowsRequired}}>
                 {days3EngCharsStartWithSun.map((day) => (

@@ -240,8 +240,8 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
                 { getPaginationItems(activePage, setActivePage, totalPages, 10) }
                 </Pagination>
                 </Col>
-                <Col className={'text-end'}>
-                    <ButtonGroup>
+                <Col className="text-end">
+                    <ButtonGroup className='responsive-width-50'>
                         <Button variant="secondary" onClick={() => setOverview(true)}><i className="bi bi-card-heading me-2"></i>Overview</Button>
                         <Button variant='success' onClick={() => setShowDialog(!showDialog)}><i className="bi bi-plus-circle-fill me-2"></i>Add New</Button>
                     </ButtonGroup>

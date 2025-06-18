@@ -136,7 +136,7 @@ function YearMonthView({services, setFilteredServices, suppliers=[], orders=[], 
                                 <Card className={'mb-2'}>
                                     <Card.Header>
                                         <Stack direction="horizontal">
-                                            <Col className="fs-5 fw-bold">{veh}</Col><Col className='text-end'><Badge>${amountByVehicles.find(a => a.vehicle === veh).amount}</Badge></Col>
+                                            <Col className="fs-5 fw-bold">{veh}</Col><Col className='text-end fw-semibold fs-5'>${amountByVehicles.find(a => a.vehicle === veh).amount}</Col>
                                         </Stack>
                                     </Card.Header>    
                                     <Card.Body>
@@ -176,7 +176,7 @@ function YearMonthView({services, setFilteredServices, suppliers=[], orders=[], 
                                                     <Col xs="4" lg="2">{vvv.recordedDate}</Col>
                                                     <Col xs="12" lg="5"><Foreman /> {task.workmanshipTask} ({task.component.subsystem} - {task.component.componentName})</Col>
                                                     <Col xs="8" lg="3"><NoteTaking /> {vvv.remarks}</Col>
-                                                    <Col xs="4" lg="2" className='text-end'>$ {vvv.quotedPrice?.toFixed(2)}</Col>                        
+                                                    <Col xs="4" lg="2" className='text-end fw-semibold'>$ {vvv.quotedPrice?.toFixed(2)}</Col>                        
                                                     </Row>
                                                 </ListGroupItem>
                                                 })

@@ -133,7 +133,7 @@ function InProgressTaskFocusListing({filteredServices=[],
                 <Nav.Item className='ms-3'><InputGroup>
                   <Form.Control onChange={(e) => changeMargin(parseFloat(e.target.value))} 
                   style={{width: '6rem'}} required min="0" max="300" size="lg" 
-                  type="number" step={10} name="sparePartsMargin" value={selectedSparePart.margin}/><InputGroup.Text>%</InputGroup.Text>
+                  type="number" step={5} name="sparePartsMargin" value={selectedSparePart.margin}/><InputGroup.Text>%</InputGroup.Text>
                   </InputGroup></Nav.Item>
               </Nav>
             </Modal.Body>
@@ -230,7 +230,7 @@ function InProgressTaskFocusListing({filteredServices=[],
                             {spareParts.length > 0 && <Nav className='justify-content-end' variant='pills' activeKey={targetedService.sparePartsMargin} onSelect={(v) => changeMargin(v)}>
                               {[20, 30, 40].map(v => 
                               <Nav.Item><Nav.Link eventKey={v}>{v}%</Nav.Link></Nav.Item>)}
-                              <Nav.Item className='ms-2'><InputGroup><Form.Control onChange={(e) => changeMargin(parseFloat(e.target.value))} style={{width: '6rem'}} required min="0" max="300" size="lg" type="number" step={10} name="sparePartsMargin" value={targetedService.sparePartsMargin} /><InputGroup.Text>%</InputGroup.Text></InputGroup></Nav.Item>
+                              <Nav.Item className='ms-2'><InputGroup><Form.Control onChange={(e) => changeMargin(parseFloat(e.target.value))} style={{width: '6rem'}} required min="0" max="300" size="lg" type="number" step={5} name="sparePartsMargin" value={targetedService.sparePartsMargin} /><InputGroup.Text>%</InputGroup.Text></InputGroup></Nav.Item>
                             </Nav> }
                           </Col>
                           </Row>

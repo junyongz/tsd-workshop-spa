@@ -1,0 +1,25 @@
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-template-rows: 5vh repeat(auto-fill, 1fr);
+  column-gap: 5px;
+  height: 45vh
+}
+
+.calendar-grid > .calendar-day {
+    padding-bottom: 5px;
+}
+
+@media (min-width: 768px) {
+    .calendar-grid {
+        height: 65vh;
+        grid-template-rows: 5vh repeat(var(--weeks), 1fr);
+    }
+}
+
+@media (min-width: 1200px) {
+    .calendar-grid {
+        height: 80vh;
+        grid-template-rows: 5vh repeat(var(--weeks), 1fr);
+    }
+}

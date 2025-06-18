@@ -310,7 +310,7 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
                             {vvv.quantity > 0 && vvv.soldPrice && `${vvv.quantity} ${order.unit} @ $${vvv.soldPrice?.toFixed(2)}`}
                             {vvv.margin > 0 && <div><span className="text-secondary fw-lighter">original: ${order.unitPrice?.toFixed(2)} <i className="bi bi-arrow-up"></i>{vvv.margin}%</span></div> }
                           </Col>
-                          <Col xs="4" lg="2" className='text-end'>{v.completionDate ? <Badge pill>$ {totalPrice}</Badge> : <HoverPilledBadge onRemove={() => removeTransaction(v.id, vvv.id)}>$ {totalPrice}</HoverPilledBadge> }</Col>
+                          <Col xs="4" lg="2" className='text-end'>{v.completionDate ? <span className='fw-semibold fs-5'>$ {totalPrice}</span> : <HoverPilledBadge onRemove={() => removeTransaction(v.id, vvv.id)}>$ {totalPrice}</HoverPilledBadge> }</Col>
                         </Row>
                       </ListGroupItem>
                       })

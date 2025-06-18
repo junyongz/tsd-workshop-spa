@@ -24,6 +24,7 @@ import fetchTasks from './services/fetchTasks';
 import InProgressTaskFocusListing from './services/InProgressTaskFocusListing';
 import saveService from './services/saveService';
 import removeServiceTask from './services/removeServiceTask';
+import SchedulingCalendarView from './schedule/SchedulingCalendarView';
 
 function App() {
   const apiUrl = process.env.REACT_APP_API_URL
@@ -132,7 +133,7 @@ function App() {
 
   const onNewVehicleCreated = async (vehicleNo) => {
     if (!/([A-Z]{1,3})\s([\d]{1,4})(\s([A-Z]{1,2}))?/.test(vehicleNo)) {
-      alert('Wrong vehicle no format')
+      alert('Wrong vehicle no format: ' + vehicleNo)
       return
     }
 
@@ -310,6 +311,9 @@ function App() {
               companies={companies}
               selectedSearchOptions={selectedSearchOptions}
             />} />
+          <Route path="/schedules" element={
+            <SchedulingCalendarView vehicles={vehicles} onNewVehicleCreated={onNewVehicleCreated} />
+          } />
           <Route path="/spare-parts" element={ 
             <SpareParts vehicles={vehicles} 
               orders={orders}

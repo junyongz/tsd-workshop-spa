@@ -1,4 +1,4 @@
-import { Badge, ButtonGroup, Col, Container, Dropdown, Form, InputGroup, Nav, Navbar, NavDropdown, NavLink, Row, Toast, ToastContainer } from "react-bootstrap";
+import { Badge, ButtonGroup, Container, Dropdown, Form, InputGroup, Nav, Navbar, NavDropdown, NavLink, Row, Toast, ToastContainer } from "react-bootstrap";
 import { Typeahead } from "react-bootstrap-typeahead";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Calendar, Foreman, Services, Suppliers, Tools, Truck } from "./Icons";
@@ -37,6 +37,7 @@ export default function NavigationBar({
                     </Dropdown.Menu>
                     </Dropdown>
                     { false && <Nav.Item><Nav.Link eventKey="home" onClick={() => navigate("/")}><Services /> Services {selectedSearchOptions.length > 0 && <Badge pill>{filteredServices.length}</Badge>}</Nav.Link></Nav.Item> }
+                    <Nav.Item><Nav.Link eventKey="schedules" onClick={() => navigate("/schedules")}><Calendar /> Schedules</Nav.Link></Nav.Item>
                     <Nav.Item><Nav.Link eventKey="orders" onClick={() => navigate("/orders")}><Suppliers /> Suppliers {selectedSearchOptions.length > 0 && <Badge pill>{filteredOrders.length}</Badge>}</Nav.Link></Nav.Item>
                     <Nav.Item><Nav.Link eventKey="vehicles" onClick={() => navigate("/vehicles")}><Truck /> Trucks</Nav.Link></Nav.Item>
                     { process.env.NODE_ENV === 'development' && <Nav.Item><Nav.Link eventKey="spare-parts" onClick={() => navigate("/spare-parts")}><Tools /> Spare Parts</Nav.Link></Nav.Item> }

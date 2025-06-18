@@ -9,4 +9,11 @@ export function addMonthsToDateStr(dateVal, monthNum) {
     return `${aDate.getFullYear()}-${(aDate.getMonth()+1).toString().padStart(2,0)}-${aDate.getDate().toString().padStart(2,0)}`
 }
 
+export function sameDay(aDate=new Date(), anotherDate=new Date()) {
+    return aDate.getFullYear() === anotherDate.getFullYear() &&
+            aDate.getMonth() === anotherDate.getMonth() &&
+            aDate.getDate() === anotherDate.getDate()
+}
+
 export const months3EngChars = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+export const days3EngCharsStartWithSun = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']

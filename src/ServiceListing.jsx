@@ -13,6 +13,7 @@ import TransactionTypes from './components/TransactionTypes';
 import { Calendar, Foreman, NoteTaking, Tools } from './Icons';
 import ServiceNoteTakingDialog from './services/ServiceNoteTakingDialog';
 import ServiceMediaDialog from './services/ServiceMediaDialog';
+import HoverPriceTag from './components/HoverPriceTag';
 
 function ServiceListing({services, filteredServices=[], setFilteredServices,
     keywordSearch = () => {}, refreshSparePartUsages=() => {}, 
@@ -303,14 +304,14 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
                       const totalPrice = (vvv.quantity * vvv.soldPrice).toFixed(2)
 
                       return <ListGroupItem key={vvv.id}>
+                        {v.completionDate ? <div className='price-tag text-center'>$ {totalPrice}</div> : <HoverPriceTag className="text-center" onRemove={() => removeTransaction(v.id, vvv.id)}>$ {totalPrice}</HoverPriceTag>}
                         <Row>
                           <Col xs={{span: 6, order: 1}} lg="2" className='fw-lighter'>{vvv.usageDate}</Col>
                           <Col xs={{span: 12, order: 3}} lg="6">{ order.itemCode && !order.partName.includes(order.itemCode) && <span className='fw-lighter text-secondary'>{order.itemCode}&nbsp;</span> }<span className='fw-semibold'>{order.partName}</span> <div><OrderTooltip order={order} supplier={supplier} /></div></Col>
-                          <Col xs={{span: 12, order: 4}} lg="2" className='text-end'>
+                          <Col xs={{span: 12, order: 4}} lg="4" className='text-end'>
                             {vvv.quantity > 0 && vvv.soldPrice && `${vvv.quantity} ${order.unit} @ $${vvv.soldPrice?.toFixed(2)}`}
                             {vvv.margin > 0 && <div><span className="text-secondary fw-lighter">original: ${order.unitPrice?.toFixed(2)} <i className="bi bi-arrow-up"></i>{vvv.margin}%</span></div> }
                           </Col>
-                          <Col xs={{span: 6, order: 2}} lg={{span: 2, order: 'last'}} className='text-end'>{v.completionDate ? <span className='fw-semibold fs-5'>$ {totalPrice}</span> : <HoverPilledBadge onRemove={() => removeTransaction(v.id, vvv.id)}>$ {totalPrice}</HoverPilledBadge> }</Col>
                         </Row>
                       </ListGroupItem>
                       })
@@ -319,11 +320,11 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
                       const task = taskTemplates.find(t => t.id === vvv.taskId)
 
                       return <ListGroupItem key={vvv.id}>
+                        {v.completionDate ? <div className='price-tag text-center'>$ {vvv.quotedPrice?.toFixed(2)}</div> : <HoverPriceTag onRemove={() => removeTask(v.id, vvv.id)}>$ {vvv.quotedPrice?.toFixed(2)}</HoverPriceTag>}
                         <Row>
                           <Col xs={{span: 6, order: 1}} lg="2" className='fw-lighter'>{vvv.recordedDate}</Col>
-                          <Col xs={{span: 12, order: 3}} lg="5" className='fw-semibold'><Foreman /> {task.workmanshipTask} ({task.component.subsystem} - {task.component.componentName})</Col>
-                          <Col xs={{span: 12, order: 4}} lg="3"><NoteTaking /> {vvv.remarks}</Col>
-                          <Col xs={{span: 6, order: 2}} lg={{span: 2, order: 'last'}} className='text-end'>{v.completionDate ? <Badge pill>$ {vvv.quotedPrice?.toFixed(2)}</Badge> : <HoverPilledBadge onRemove={() => removeTask(v.id, vvv.id)}>$ {vvv.quotedPrice?.toFixed(2)}</HoverPilledBadge> }</Col>                        
+                          <Col xs={{span: 12, order: 3}} lg="4" className='fw-semibold'><Foreman /> {task.workmanshipTask} ({task.component.subsystem} - {task.component.componentName})</Col>
+                          <Col xs={{span: 12, order: 4}} lg="6"><NoteTaking /> {vvv.remarks}</Col>
                         </Row>
                       </ListGroupItem>
                       })

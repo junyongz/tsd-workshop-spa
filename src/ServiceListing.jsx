@@ -288,11 +288,11 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
                     <ListGroup>
                     {v.migratedHandWrittenSpareParts?.map(vvv => {
                       return <ListGroupItem key={vvv.index}>
+                        {vvv.totalPrice && <div className='price-tag text-center'>$ {vvv.totalPrice?.toFixed(2)}</div>}
                         <Row>
-                          <Col xs="4" lg="2">{vvv.creationDate}</Col>
+                          <Col xs="4" lg="2" className='fw-lighter'>{vvv.creationDate}</Col>
                           <Col xs="8" lg="6">{vvv.itemDescription}</Col>
-                          <Col xs="6" lg="2" className='text-lg-end'><Badge pill>{vvv.quantity > 0 && vvv.unitPrice && `${vvv.quantity} ${vvv.unit} @ $${vvv.unitPrice?.toFixed(2)}`}</Badge></Col>
-                          <Col xs="6" lg="2" className='text-end'><Badge pill>$ {vvv.totalPrice}</Badge></Col>
+                          <Col xs="12" lg="4" className='fw-lighter text-end'>{vvv.quantity > 0 && vvv.unitPrice && `${vvv.quantity} ${vvv.unit} @ $${vvv.unitPrice?.toFixed(2)}`}</Col>
                         </Row>
                       </ListGroupItem>
                       })

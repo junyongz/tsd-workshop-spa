@@ -7,7 +7,7 @@
 }
 
 .calendar-grid > .calendar-day {
-    padding-bottom: 5px;
+    padding-bottom: 0.3rem;
 }
 
 @media (min-width: 768px) {

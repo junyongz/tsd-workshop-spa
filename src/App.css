@@ -19,7 +19,7 @@
   width: 100%;
 }
 
-@media (min-width: 992px) {
+@media (min-width: 1200px) {
   .responsive-width-50 {
     width: 50%;
   }

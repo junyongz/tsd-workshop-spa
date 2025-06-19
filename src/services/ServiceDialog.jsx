@@ -46,9 +46,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
             })
         }
         else if (tabView === 'workmanship') {
-            setTasks(prev => {
-                return [...prev, {}]
-            })
+            setTasks(prev => (!prev && [{}]) || [...prev, {}])
         }
     }
 
@@ -193,7 +191,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
                 <Container fluid>
                     <Form ref={formRef} validated={validated}>
                         <Row className="mb-1">
-                            <Col xs="12" lg="2" className="mb-1">
+                            <Col xs="12" lg="3" className="mb-1">
                                 <InputGroup>
                                 <InputGroup.Text><Calendar /></InputGroup.Text>
                                     <Form.Control onChange={(e) => afterChooseDate(e.target.value)} name="startDate" 
@@ -202,7 +200,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
                                         required type="date"></Form.Control>
                                 </InputGroup>
                             </Col>
-                            <Col xs="12" lg="8" className="mb-1">
+                            <Col xs="12" lg="6" className="mb-1">
                                 <InputGroup>
                                 <InputGroup.Text><Truck /></InputGroup.Text>
                                 <Typeahead
@@ -224,7 +222,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
                                     selected={selectedVehicles} />
                                 </InputGroup>
                             </Col>
-                            <Col xs="12" lg="2" className="mb-1">
+                            <Col xs="12" lg="3" className="mb-1">
                                 <InputGroup>
                                     <Form.Control name="mileageKm" defaultValue={selectedExistingService?.mileageKm || selectedVehicles[0]?.latestMileageKm}></Form.Control>
                                     <InputGroup.Text>KM</InputGroup.Text>
@@ -232,8 +230,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
                             </Col>
                         </Row>
                         <Row>
-                            <Col xs={false} lg="2"></Col>
-                            <Col xs="12" lg="10">
+                            <Col className="text-center">
                             <Form.Check ref={repairSwitchRef} inline name="transactionTypes" type="switch" defaultChecked={trx.current?.transactionTypes?.includes('REPAIR')} value="REPAIR" label={ <span onClick={() => repairSwitchRef.current.click()}><Repair /> Repair</span> }></Form.Check>
                             <Form.Check ref={maintSwitchRef} inline name="transactionTypes" type="switch" defaultChecked={trx.current?.transactionTypes?.includes('SERVICE')}value="SERVICE" label={ <span onClick={() => maintSwitchRef.current.click()}><MaintenanceServices /> Maintenance Service</span> }></Form.Check>
                             <Form.Check ref={inspectionSwitchRef} inline name="transactionTypes" type="switch" defaultChecked={trx.current?.transactionTypes?.includes('INSPECTION')}value="INSPECTION"  label={ <span onClick={() => inspectionSwitchRef.current.click()}><Inspection /> Inspection</span> }></Form.Check>

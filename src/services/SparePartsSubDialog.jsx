@@ -43,7 +43,7 @@ export default function SparePartsSubDialog({
             {items?.map((v, i) =>
             <ListGroup.Item key={i}>
                 <Row>                                
-                    <Col xs="12" lg="6" className="mb-3 mb-lg-0">
+                    <Col xs="12" xl="6" className="mb-3 mb-xl-0">
                         <InputGroup>
                         <InputGroup.Text><Tools /></InputGroup.Text>
                         <Typeahead
@@ -75,22 +75,22 @@ export default function SparePartsSubDialog({
                             />
                         </InputGroup>
                     </Col>
-                    <Col xs="6" lg="2" className="mb-3 mb-lg-0">
+                    <Col xs="6" xl="2" className="mb-3 mb-xl-0">
                         <InputGroup>
                             <Form.Control onChange={(e) => updatePriceByQuantity(e.target.value, i)} required step={decimalPointUomAvailable(v?.unit) ? 0.1 : 1} type="number" name="quantity" min="1" max={(v.selectedSpareParts[0] && remainingQuantity(orders?.mapping[v.selectedSpareParts[0].orderId], sparePartUsages)) || 0} placeholder="Quantity" value={v?.quantity}/>
                             <InputGroup.Text>{v?.unit}</InputGroup.Text>
                         </InputGroup>
                     </Col>
-                    <Col xs="6" lg="2" className="mb-3 mb-lg-0">
+                    <Col xs="6" xl="2" className="mb-3 mb-xl-0">
                         <InputGroup>
                             <InputGroup.Text><Dollar /></InputGroup.Text>
                             <Form.Control onChange={(e) => updatePriceByUnitPrice(e.target.value, i)} required type="number" step="0.10" name="unitPrice" placeholder="Price $" value={(v?.unitPrice * (1 + (sparePartsMargin || 0)/100) || 0).toFixed(2)} />
                         </InputGroup>
                     </Col>
-                    <Col xs="6" lg="1" className="mb-3 mb-lg-0">
+                    <Col xs="6" xl="1" className="mb-3 mb-xl-0">
                         <FormLabel className="fs-5 text-end"><span>$&nbsp;{(v?.quantity * v?.unitPrice * (1 + (sparePartsMargin || 0)/100)).toFixed(2) || 0}</span></FormLabel>
                     </Col>
-                    <Col xs="6" lg="1" className="text-end">
+                    <Col xs="6" xl="1" className="text-end">
                     <Button variant="danger" className="fs-5" onClick={() => removeItem(i)}><Trash /></Button>
                     </Col>
                 </Row>

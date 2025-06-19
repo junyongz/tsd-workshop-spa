@@ -4,6 +4,7 @@ import OrderTooltip from "./OrderTooltip"
 import { ScrollSpy } from "bootstrap"
 import { Foreman, NoteTaking, Services } from "../Icons"
 import { months3EngChars } from "../utils/dateUtils"
+import useTheme from "../utils/useTheme"
 
 function YearMonthView({services, setFilteredServices, suppliers=[], orders=[], backToService, taskTemplates}) {
     const apiUrl = process.env.REACT_APP_API_URL
@@ -11,6 +12,8 @@ function YearMonthView({services, setFilteredServices, suppliers=[], orders=[], 
     const currentDate = new Date()
     const [year, setYear] = useState(currentDate.getFullYear())
     const [month, setMonth] = useState(currentDate.getMonth())
+
+    const theme = useTheme()
 
     const [trxsGroupByVehicles, setTrxsGroupByVehicles] = useState({})
 
@@ -51,12 +54,16 @@ function YearMonthView({services, setFilteredServices, suppliers=[], orders=[], 
 
     const DropDownYears = () => {
         return (
-            <DropdownButton id="dropdown-year" as={ButtonGroup} title={year} variant="success" >
+            <DropdownButton id="dropdown-year" as={ButtonGroup} title={year} variant={((theme == 'dark') ? 'light': 'dark')} >
             { services.current.availableYears().map(
                 v => <Dropdown.Item key={v} onClick={() => changeYear(v)} eventKey={v}>{v}</Dropdown.Item> )
             }
             </DropdownButton> 
         )
+    }
+
+    const calcVariant = (i=0) => {
+        return month === i ? ((theme == 'dark') ? 'outline-light': 'outline-dark') : ((theme == 'dark') ? 'light': 'dark')
     }
 
     const scrollSpyDataZoneRef = useRef()
@@ -82,10 +89,10 @@ function YearMonthView({services, setFilteredServices, suppliers=[], orders=[], 
                 <Col xs="6" lg="10">
                     <ButtonGroup className="d-flex d-lg-none">
                     <DropDownYears />
-                    <DropdownButton id="dropdown-month" as={ButtonGroup} title={months3EngChars[month]} variant="primary" >
+                    <DropdownButton id="dropdown-month" as={ButtonGroup} title={months3EngChars[month]} variant={((theme == 'dark') ? 'light': 'dark')} >
                         {
                             months3EngChars.map((v, i) => 
-                                    <Dropdown.Item key={v} variant={month === i ? 'outline-primary' : 'primary'} onClick={() => changeMonth(i)}>{v}</Dropdown.Item>
+                                    <Dropdown.Item key={v} variant={calcVariant(i)} onClick={() => changeMonth(i)}>{v}</Dropdown.Item>
                                 )
                         }
                     </DropdownButton>
@@ -95,7 +102,7 @@ function YearMonthView({services, setFilteredServices, suppliers=[], orders=[], 
                     <DropDownYears />
                         {
                             months3EngChars.map((v, i) => 
-                                <Button aria-current={v} key={v} variant={month === i ? 'outline-primary' : 'primary'} onClick={() => changeMonth(i)}>{v}</Button>
+                                <Button aria-current={v} key={v} variant={calcVariant(i)} onClick={() => changeMonth(i)}>{v}</Button>
                             )
                         }
                     </ButtonGroup>
@@ -146,7 +153,7 @@ function YearMonthView({services, setFilteredServices, suppliers=[], orders=[], 
                                                     <Col xs="12" lg="2" className="fw-lighter">{trx.creationDate}</Col>
                                                     <Col xs="12" lg="6" className="fw-semibold">{v.itemDescription}</Col>
                                                     <Col xs="6" lg="2" className='text-lg-end'>{v.quantity > 0 && v.unitPrice && `${v.quantity} ${v.unit} @ $${v.unitPrice?.toFixed(2)}`}</Col>
-                                                    <Col xs="6" lg="2" className='text-end'>$ {v.totalPrice?.toFixed(2) || 0}</Col>
+                                                    <Col xs="6" lg="2" className='text-end fw-semibold'>$ {v.totalPrice?.toFixed(2) || 0}</Col>
                                                 </Row>
                                             </ListGroupItem>)
 

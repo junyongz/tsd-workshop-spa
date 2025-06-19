@@ -89,7 +89,7 @@ describe('YearMonthView Component', () => {
       const yearButton = screen.getAllByRole('button', { name: '2023' });
       expect(yearButton[1]).toBeInTheDocument();
 
-      expect(screen.getAllByRole('button', { name: 'Jan' })[1]).toHaveClass('btn-outline-primary');
+      expect(screen.getAllByRole('button', { name: 'Jan' })[1]).toHaveClass('btn-outline-dark');
 
       expect(screen.getAllByText('Truck A').length).toBe(3);
       expect(screen.getAllByText('Truck B').length).toBe(3);
@@ -110,7 +110,7 @@ describe('YearMonthView Component', () => {
     await waitFor(() => {
       fireEvent.click(screen.getByRole('button', {current: 'Jun'}));
 
-      expect(screen.getByRole('button', { current: 'Jun' })).toHaveClass('btn-outline-primary');
+      expect(screen.getByRole('button', { current: 'Jun' })).toHaveClass('btn-outline-dark');
     })
   });
 

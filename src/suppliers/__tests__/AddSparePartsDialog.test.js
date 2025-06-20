@@ -74,6 +74,7 @@ describe('AddSparePartsDialog Component', () => {
 
     expect(document.querySelectorAll('.list-group-item').length).toBe(2)
     fireEvent.click(screen.getAllByRole('button', { name: 'remove' })[0]); // Remove first item
+     fireEvent.click(screen.getAllByRole('button', { name: 'remove' })[0]); // to click 1 more time
     expect(document.querySelectorAll('.list-group-item').length).toBe(1)
   });
 

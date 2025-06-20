@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react"
-import { Container, ListGroup, ListGroupItem, Row, Col, Pagination, Button, Badge, Nav, Offcanvas, OverlayTrigger, Popover, ButtonGroup } from "react-bootstrap"
-import getPaginationItems from "../utils/getPaginationItems"
+import { Container, ListGroup, ListGroupItem, Row, Col, Button, Badge, Nav, Offcanvas, ButtonGroup } from "react-bootstrap"
 import { chunkArray } from "../utils/arrayUtils"
 import AddSparePartsDialog from "./AddSparePartsDialog"
 import SparePartsUsageDialog from "./SparePartsUsageDialog"
@@ -10,6 +9,8 @@ import { clearState } from "../autoRefreshWorker"
 import SparePartNotes from "./SparePartNotes"
 import SupplierSparePartsYearMonthView from "./SupplierSparePartsYearMonthView"
 import { Calendar, Suppliers, Tools, Trash, Truck } from "../Icons"
+import ResponsivePagination from "../components/ResponsivePagination"
+import PromptDeletionIcon from "../components/PromptDeletionIcon"
 
 function SuppliersSpareParts({filteredOrders=[], setFilteredOrders, 
     selectedSearchOptions=[], filterServices=() => {},
@@ -233,12 +234,8 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
             </Row>
             {!overview && <Row>
                 <Col>
-                <Pagination className='d-flex d-lg-none fw-lighter'>
-                { getPaginationItems(activePage, setActivePage, totalPages, 3) }
-                </Pagination>
-                <Pagination className='d-none d-lg-flex fw-lighter'>
-                { getPaginationItems(activePage, setActivePage, totalPages, 10) }
-                </Pagination>
+                <ResponsivePagination activePage={activePage} setActivePage={setActivePage} 
+                    totalPages={totalPages} />
                 </Col>
                 <Col className="text-end">
                     <ButtonGroup className='responsive-width-50'>
@@ -305,20 +302,9 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
                                         </Row>                                    
                                     </Col>
                                     <Col xs="6" md="3"><SparePartNotes order={v} onNoteClick={() => recordNote(v)} sparePartUsages={sparePartUsages}></SparePartNotes></Col>
-                                    <Col xs="6" md="1" className="text-end">
-                                        {!v.sheetName && 
-                                        <OverlayTrigger trigger="click" placement="left" overlay={
-                                            <Popover>
-                                            <Popover.Header as="h3">Are you sure?</Popover.Header>
-                                            <Popover.Body>
-                                                <Button className="p-0 text-decoration-none" variant="link" onClick={() => removeOrder(v)}>Yes</Button>
-                                            </Popover.Body>
-                                            </Popover>
-                                        }>
-                                            <span role="button" className="text-danger fs-5"><Trash />&nbsp;</span>
-                                        </OverlayTrigger>
-                                        }
-                                        <span className="fs-5"><Truck role="button" onClick={() => recordUsage(v)} /></span>
+                                    <Col xs="6" md="1" className="text-end fs-5">
+                                        {!v.sheetName && !v.disabled && <PromptDeletionIcon confirmDelete={() => removeOrder(v)} /> }
+                                        <span><Truck role="button" onClick={() => recordUsage(v)} /></span>
                                     </Col>
                                 </Row>
                             </ListGroupItem>
@@ -329,14 +315,8 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
             </Row>
             <Row>
                 <Col>
-                <Pagination>
-                <Pagination className='d-flex d-lg-none fw-lighter'>
-                { getPaginationItems(activePage, setActivePage, totalPages, 3) }
-                </Pagination>
-                <Pagination className='d-none d-lg-flex fw-lighter'>
-                { getPaginationItems(activePage, setActivePage, totalPages, 10) }
-                </Pagination>
-                </Pagination>
+                <ResponsivePagination activePage={activePage} setActivePage={setActivePage} 
+                    totalPages={totalPages} />
                 </Col>
             </Row>
             </React.Fragment> }

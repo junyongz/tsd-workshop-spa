@@ -169,7 +169,7 @@ describe('SuppliersSpareParts Component', () => {
     expect(deleteButtons.length).toBe(3);
     
     fireEvent.click(deleteButtons[0]);
-    fireEvent.click(await screen.findByText('Yes'));
+    fireEvent.click(screen.getAllByRole('button', { name: 'remove' })[0]);
     
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith(

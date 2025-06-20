@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Badge, Button, ButtonGroup, Card, Col, Container, ListGroup, ListGroupItem, Row } from 'react-bootstrap';
-import Pagination from 'react-bootstrap/Pagination';
 import ServiceDialog from './services/ServiceDialog';
-import getPaginationItems from './utils/getPaginationItems';
 import CompletionLabel from './components/CompletionLabel';
 import { chunkArray } from './utils/arrayUtils';
 import { clearState } from './autoRefreshWorker';
@@ -13,6 +11,7 @@ import { Calendar, Foreman, NoteTaking, Tools } from './Icons';
 import ServiceNoteTakingDialog from './services/ServiceNoteTakingDialog';
 import ServiceMediaDialog from './services/ServiceMediaDialog';
 import HoverPriceTag from './components/HoverPriceTag';
+import ResponsivePagination from './components/ResponsivePagination';
 
 function ServiceListing({services, filteredServices=[], setFilteredServices,
     keywordSearch = () => {}, refreshSparePartUsages=() => {}, 
@@ -228,12 +227,8 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
         ws={serviceTransaction.current} onSaveMedia={onSaveMedia}/> }
       <Row className='mb-3'>
         <Col>
-          <Pagination className='d-flex d-lg-none fw-lighter'>
-          { getPaginationItems(activePage, setActivePage, totalPages, 3) }
-          </Pagination>
-          <Pagination className='d-none d-lg-flex fw-lighter'>
-          { getPaginationItems(activePage, setActivePage, totalPages, 10) }
-          </Pagination>
+          <ResponsivePagination activePage={activePage} setActivePage={setActivePage} 
+              totalPages={totalPages} />
         </Col>
         <Col className='text-end'>
           <ButtonGroup className='responsive-width-50'>
@@ -342,12 +337,8 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
            
         )
       }
-      <Pagination className='d-flex d-lg-none fw-lighter'>
-      { getPaginationItems(activePage, setActivePage, totalPages, 3) }
-      </Pagination>
-      <Pagination className='d-none d-lg-flex fw-lighter'>
-      { getPaginationItems(activePage, setActivePage, totalPages, 10) }
-      </Pagination>
+      <ResponsivePagination activePage={activePage} setActivePage={setActivePage} 
+          totalPages={totalPages} />
     </Container> }
     </Container>
   );

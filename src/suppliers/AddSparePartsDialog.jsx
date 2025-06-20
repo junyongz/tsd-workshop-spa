@@ -2,7 +2,8 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { Button, Col, Container, Form, InputGroup, ListGroup, Modal, Row } from "react-bootstrap";
 import { Typeahead } from "react-bootstrap-typeahead";
 import remainingQuantity, { decimalPointUomAvailable } from "../utils/quantityUtils";
-import { Calendar, Dollar, Suppliers, Tools, Trash } from "../Icons";
+import { Calendar, Dollar, Suppliers, Tools } from "../Icons";
+import PromptDeletionIcon from "../components/PromptDeletionIcon";
 
 function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[], suppliers=[], spareParts=[], sparePartUsages=[], onSaveNewOrders}) {
     const formRef = useRef()
@@ -240,7 +241,7 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
                         {items?.map((v, i) =>
                             <ListGroup.Item>
                                 <Row>
-                                { !editing && <Col xs="1"><span onClick={() => removeItem(i)} role="button" aria-label="remove" className="text-danger fs-5"><Trash /></span></Col> }
+                                { !editing && <Col xs="1"><PromptDeletionIcon confirmDelete={() => removeItem(v, i)} flip/></Col> }
                                 <Col xs={!editing ? 11 : 12}>
                                     <Row>
                                         <Col xs="12" lg="4" className="mb-2">

@@ -4,6 +4,11 @@
   
   /* Style when hovered */
 .hover-badge:hover {
-  background-color: var(--bs-danger) !important;
+  background-color: var(--bs-warning) !important;
   color: var(--bs-body-bg) !important;
+}
+
+.hover-badge.clicked:hover {
+  background-color: var(--bs-danger) !important;
+  color: var(--bs-body-color) !important;
 }

@@ -1,22 +1,17 @@
 import React, { useRef, useState } from "react";
 import { Badge, Button, ButtonGroup, Collapse, Form, InputGroup, OverlayTrigger, Popover } from "react-bootstrap";
 import InputGroupText from "react-bootstrap/esm/InputGroupText";
-import { Calendar, Camera, NoteTaking, Trash } from "../Icons";
+import { Calendar, Camera, NoteTaking } from "../Icons";
 import PhotoGallery from "./PhotoGallery";
+import PromptDeletionButton from "./PromptDeletionButton";
 
 const CompletionLabel = ({ws, onCompletion, onDelete, noteForService, mediaForService}) => {
     const apiUrl = process.env.REACT_APP_API_URL
 
-    const [promptDelete, setPromptDelete] = useState(false)
     const [openNote, setOpenNote] = useState(false)
     const [openMedia, setOpenMedia] = useState(false)
     const [uploadedMedias, setUploadedMedias] = useState([])
     const completionDateRef = useRef()
-
-    const confirmDelete = () => {
-        onDelete()
-        setPromptDelete(false)
-    }
 
     const confirmComplete = () => {
         if (!completionDateRef.current.reportValidity()) {
@@ -64,11 +59,7 @@ const CompletionLabel = ({ws, onCompletion, onDelete, noteForService, mediaForSe
                         </Popover>}>
                         <Button variant="outline-success" size="sm"><i className="bi bi-hand-thumbs-up"></i> Complete Service</Button>
                 </OverlayTrigger>
-                { promptDelete && <Button variant="outline-warning" onClick={() => setPromptDelete(false)}>X</Button> }
-                <Button variant={promptDelete ? 'outline-danger' : 'outline-warning'}
-                    onClick={() => promptDelete ? confirmDelete() : setPromptDelete(true)}>
-                    <Trash />
-                </Button>
+                <PromptDeletionButton confirmDelete={onDelete} />
                 <Button variant='outline-success' onClick={noteForService}><NoteTaking /></Button>
                 <Button variant='outline-success' onClick={mediaForService}><Camera /> {ws.uploadedMediasCount > 0 && <Badge className="position-absolute top-0 start-100 translate-middle" pill>{ws.uploadedMediasCount}</Badge>}</Button>
             </ButtonGroup>

@@ -106,8 +106,6 @@ function App() {
   const clearFilterDate = () => {
     setSearchByDate(false)
     setSelectedSearchDate()
-    transactions.current.refresh()
-    supplierOrders.current.refresh()
   }
 
   const onNewVehicleCreated = async (vehicleNo) => {

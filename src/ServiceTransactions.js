@@ -26,10 +26,6 @@ class ServiceTransactions {
             }))
     }
 
-    refresh() {
-        this.#refreshServices()
-    }
-
     addNewTransaction(newService) {
         const doMergeById = (prev=[], current=[]) =>
             [...prev.map(ot => ({

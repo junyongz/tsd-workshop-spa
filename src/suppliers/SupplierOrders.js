@@ -28,10 +28,6 @@ class SupplierOrders {
         this.#setOrders([...this.#ordersList].sort((a, b) => a.invoiceDate < b.invoiceDate))
     }
 
-    refresh() {
-        this.#doSetOrders()
-    }
-
     byId(id=0) {
         return this.#ordersMapping[id]
     }

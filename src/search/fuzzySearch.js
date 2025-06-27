@@ -1,3 +1,5 @@
+import SupplierOrders from "../suppliers/SupplierOrders"
+
 export const doFilterServices = (options=[], transactions, setSelectedSearchOptions) => {
     const apiUrl = process.env.REACT_APP_API_URL
 
@@ -30,7 +32,7 @@ export function applyFilterOnOrders(selectedSearchOptions=[], selectedSearchDate
         ) && (!selectedSupplier || o.supplierId === selectedSupplier.id))
 }
 
-export function applyFilterOnServices(selectedSearchOptions=[], selectedSearchDate, services=[], supplierOrders=new supplierOrders()) {
+export function applyFilterOnServices(selectedSearchOptions=[], selectedSearchDate, services=[], supplierOrders=new SupplierOrders()) {
   if (selectedSearchDate) {
     return services.filter(ws => ws.startDate === selectedSearchDate)
   }
@@ -62,7 +64,7 @@ export function applyFilterOnServices(selectedSearchOptions=[], selectedSearchDa
     }
 
     return (vehicleMatched && selectedSearchOptions.length > 1 && foundSpareParts) 
-            || (vehicleMatched && selectedSearchOptions.length == 1)
+            || (vehicleMatched && selectedSearchOptions.length === 1)
             || (!vehicleMatched && foundSpareParts)
   })
 }

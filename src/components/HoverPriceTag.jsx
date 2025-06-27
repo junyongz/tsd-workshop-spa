@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import './HoverPilledBadge.css';
-import PromptDeletionIcon from "./PromptDeletionIcon";
 import { Trash } from "../Icons";
 
 const HoverPriceTag = ({onRemove, children }) => {

@@ -5,9 +5,10 @@ import Form from "react-bootstrap/Form";
 import { Calendar, Inspection, MaintenanceServices, Repair, Truck } from "../Icons";
 import SparePartsSubDialog from "./SparePartsSubDialog";
 import TaskSubDialog from "./TaskSubDialog";
+import SupplierOrders from "../suppliers/SupplierOrders";
 
 function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[], 
-    spareParts, orders=[], suppliers=[], sparePartUsages=[], taskTemplates=[],
+    spareParts, orders=new SupplierOrders(), suppliers=[], sparePartUsages=[], taskTemplates=[],
     onNewVehicleCreated=() => {}}) {
 
     const apiUrl = process.env.REACT_APP_API_URL

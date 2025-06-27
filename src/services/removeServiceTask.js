@@ -1,5 +1,5 @@
 export default function removeServiceTask (
-    setLoading, services, keywordSearch, clearState,
+    setLoading, transactions, clearState,
     serviceId, taskId
 ) {
     const apiUrl = process.env.REACT_APP_API_URL
@@ -17,8 +17,7 @@ export default function removeServiceTask (
         if (deleteId !== taskId) {
           throw Error("seems nothing deleted")
         }
-        services.current.removeTask(serviceId, taskId)
-        keywordSearch()
+        transactions.current.removeTask(serviceId, taskId)
       })
       .then(() => clearState())
       .finally(() => setLoading(false))

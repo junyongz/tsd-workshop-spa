@@ -1,6 +1,9 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, createEvent } from '@testing-library/react';
 import SuppliersSpareParts from '../SuppliersSpareParts';  
+import SupplierOrders from '../SupplierOrders';
+
+import { test, expect } from '@jest/globals'
 
 // Mock dependencies
 jest.mock('../../utils/getPaginationItems', () => () => [<div key="1">Pagination</div>]);
@@ -18,48 +21,48 @@ global.matchMedia = jest.fn();
 
 describe('SuppliersSpareParts Component', () => {
 
-    const mockOrders = [
-        {
-          id: 1,
-          invoiceDate: '2023-01-01',
-          supplierId: 1,
-          itemCode: 'ABC123',
-          partName: 'Engine Oil',
-          quantity: 10,
-          unit: 'ltr',
-          unitPrice: 5,
-          deliveryOrderNo: 'DO001'
-        },
-        {
-          id: 2,
-          invoiceDate: '2023-01-02',
-          supplierId: 2,
-          itemCode: 'XYZ789',
-          partName: 'Air Filter',
-          quantity: 5,
-          unit: 'pcs',
-          unitPrice: 15,
-          deliveryOrderNo: 'DO002'
-        },
-        {
-          id: 3,
-          invoiceDate: '2023-01-03',
-          supplierId: 1,
-          itemCode: 'DEF456',
-          partName: 'Brake Pads',
-          quantity: 8,
-          unit: 'set',
-          unitPrice: 25,
-          deliveryOrderNo: 'DO003'
-        }
-    ];
-    
-    const mockSuppliers = [
-        { id: 1, supplierName: 'Supplier A' },
-        { id: 2, supplierName: 'Supplier B' }
-    ]; 
+  const mockOrders = [
+      {
+        id: 1,
+        invoiceDate: '2023-01-01',
+        supplierId: 1,
+        itemCode: 'ABC123',
+        partName: 'Engine Oil',
+        quantity: 10,
+        unit: 'ltr',
+        unitPrice: 5,
+        deliveryOrderNo: 'DO001'
+      },
+      {
+        id: 2,
+        invoiceDate: '2023-01-02',
+        supplierId: 2,
+        itemCode: 'XYZ789',
+        partName: 'Air Filter',
+        quantity: 5,
+        unit: 'pcs',
+        unitPrice: 15,
+        deliveryOrderNo: 'DO002'
+      },
+      {
+        id: 3,
+        invoiceDate: '2023-01-03',
+        supplierId: 1,
+        itemCode: 'DEF456',
+        partName: 'Brake Pads',
+        quantity: 8,
+        unit: 'set',
+        unitPrice: 25,
+        deliveryOrderNo: 'DO003'
+      }
+  ];
+  
+  const mockSuppliers = [
+      { id: 1, supplierName: 'Supplier A' },
+      { id: 2, supplierName: 'Supplier B' }
+  ]; 
 
-    let defaultProps;
+  let defaultProps;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -74,14 +77,11 @@ describe('SuppliersSpareParts Component', () => {
     })
 
     defaultProps = {
-        filteredOrders: [...mockOrders],
+        orders: [...mockOrders],
         setFilteredOrders: jest.fn(),
         selectedSearchOptions: [],
         filterServices: jest.fn(),
-        orders: {listing: [...mockOrders], mapping: [...mockOrders].reduce((acc, item) => {
-          acc[item.id] = item;
-          return acc;
-        }, {})},
+        supplierOrders: {current: new SupplierOrders([...mockOrders], jest.fn())},
         suppliers: [...mockSuppliers],
         spareParts: [],
         vehicles: [],
@@ -91,12 +91,13 @@ describe('SuppliersSpareParts Component', () => {
         refreshServices: jest.fn(),
         onNewVehicleCreated: jest.fn(),
         setLoading: jest.fn(),
-        showToastMessage: (msg) => console.error(msg)
+        showToastMessage: (msg) => console.error(msg),
+        setTotalFilteredOrders: jest.fn()
     };
   });
 
   test('renders component with no orders', () => {
-    const container = render(<SuppliersSpareParts {...defaultProps} filteredOrders={[]} orders={[]} />);
+    const container = render(<SuppliersSpareParts {...defaultProps} orders={[]} />);
     
     expect(screen.getByText('Add New')).toBeInTheDocument();
     expect(screen.getByText('Showing All')).toBeInTheDocument();
@@ -122,7 +123,7 @@ describe('SuppliersSpareParts Component', () => {
     container.unmount()
   });
 
-  test('opens Add Spare Parts dialog when clicking Add New button', () => {
+  test('opens Add Spare Parts dialog when clicking Add New button', async () => {
     const container = render(<SuppliersSpareParts {...defaultProps} />);
     
     fireEvent.click(screen.getByText('Add New'));
@@ -137,14 +138,10 @@ describe('SuppliersSpareParts Component', () => {
     fireEvent.click(screen.getByText('Showing All'));
     expect(screen.getByText('Suppliers')).toBeInTheDocument();
     
-    fireEvent.click(screen.getAllByText('Supplier A')[0]);
-    expect(defaultProps.setFilteredOrders).toHaveBeenCalledWith(
-      expect.arrayContaining([
-        expect.objectContaining({ supplierId: 1 }),
-        expect.objectContaining({ supplierId: 1 })
-      ])
-    );
-
+    fireEvent.click(Array.from(document.querySelectorAll('.nav-link'))
+      .filter(el => el.textContent === 'Supplier A')[0]);
+    await waitFor(() => expect(screen.getAllByRole("listitem")).toHaveLength(2))
+    
     container.unmount()
   });
 
@@ -207,22 +204,20 @@ describe('SuppliersSpareParts Component', () => {
           body: JSON.stringify(newOrders)
         })
       );
-      expect(defaultProps.setFilteredOrders).toHaveBeenCalled();
       expect(defaultProps.refreshSpareParts).toHaveBeenCalled();
+      expect(defaultProps.supplierOrders.current.list()).toHaveLength(6);
     });
 
     container.unmount()
   });
 
-  test('updates filtered orders when selectedSearchOptions change', () => {
-    const { rerender, container } = render(<SuppliersSpareParts {...defaultProps} />);
-    
-    rerender(<SuppliersSpareParts 
+  test('updates filtered orders when selectedSearchOptions change', async () => {
+    render(<SuppliersSpareParts 
       {...defaultProps}
-      selectedSearchOptions={['option1', 'option2']}
+      selectedSearchOptions={[{name: 'engine'}, {name: 'brake'}]}
     />);
-    
-    expect(defaultProps.setFilteredOrders).toHaveBeenCalledWith(mockOrders);
+
+    expect(screen.getAllByRole("listitem")).toHaveLength(2)
   });
 
   test('displays correct quantities and supplier info for all orders', () => {

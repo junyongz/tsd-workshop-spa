@@ -1,5 +1,5 @@
 export default function saveService( 
-    setLoading, services, keywordSearch, 
+    setLoading, transactions, 
     refreshSpareParts, refreshSparePartUsages,
     clearState, service
 ) {
@@ -22,8 +22,7 @@ export default function saveService(
         return res.json()
       })
       .then(service => {
-        services.current.addNewTransaction(service)
-        keywordSearch()
+        transactions.current.addNewTransaction(service)
       })
       .then(() => Promise.all([refreshSpareParts(), refreshSparePartUsages()]))
       .then(() => clearState())

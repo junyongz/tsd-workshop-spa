@@ -6,14 +6,15 @@ import TaskSubDialog from './TaskSubDialog';
 import generateUniqueId from '../utils/randomUtils';
 import TransactionTypes from '../components/TransactionTypes';
 import { isInternal } from '../companies/companyEvaluation';
+import SupplierOrders from '../suppliers/SupplierOrders';
 
-function InProgressTaskFocusListing({filteredServices=[],
-    orders=[], suppliers=[], taskTemplates=[], onNewServiceCreated, removeTask, 
+function InProgressTaskFocusListing({services=[],
+    orders=new SupplierOrders(), suppliers=[], taskTemplates=[], onNewServiceCreated, removeTask, 
     vehicles=[], companies=[]}) {
 
   const [validated, setValidated] = useState(false)
   const formRef = useRef()
-  const inProgressServices = filteredServices.filter(ws => !!!ws.completionDate)
+  const inProgressServices = services.filter(ws => !!!ws.completionDate)
                                 .filter(ws => !isInternal(companies, vehicles, ws))
 
   const [spareParts, setSpareParts] = useState([])
@@ -33,7 +34,7 @@ function InProgressTaskFocusListing({filteredServices=[],
     setOriginalTasks(theTasks)
 
     const theSpus = ws.sparePartUsages.map(spu => {
-      return {...spu, order: orders.mapping[spu.orderId], margin: spu.margin || 0}
+      return {...spu, order: orders.byId(spu.orderId), margin: spu.margin || 0}
     })
     setSpareParts(theSpus)
     setOriginalSpareParts(theSpus)

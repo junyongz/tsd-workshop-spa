@@ -23,7 +23,6 @@ export default function ResponsivePagination({
         return () => window.removeEventListener('resize', settingResponsivePageNum)
     }, [])
 
-
     return (
         <Pagination className='fw-lighter'>
         { getPaginationItems(activePage, setActivePage, totalPages, pageNum) }

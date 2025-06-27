@@ -1,8 +1,8 @@
-import React from 'react';
-import { render, screen, fireEvent, within, act, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, within, waitFor } from '@testing-library/react';
 import YearMonthView from '../YearMonthView';
 import { ScrollSpy } from 'bootstrap';
-import { wait } from '@testing-library/user-event/dist/cjs/utils/index.js';
+import { useNavigate } from 'react-router-dom';
+
 
 // Mock OrderTooltip
 jest.mock('../OrderTooltip', () => ({ order, supplier }) => (
@@ -11,6 +11,7 @@ jest.mock('../OrderTooltip', () => ({ order, supplier }) => (
 
 // Mock ScrollSpy
 jest.mock('bootstrap')
+jest.mock('react-router-dom')
 
 describe('YearMonthView Component', () => {
   const allServices = [
@@ -33,7 +34,7 @@ describe('YearMonthView Component', () => {
           'Truck C': [ { creationDate: '2023-01-03', sparePartUsages: allServices.slice(7), migratedHandWrittenSpareParts: allServices.slice(3, 4) } ]
         };
       },
-      updateTransaction(ws) {
+      updateTransactions(wss) {
 
       },
       availableYears() {
@@ -59,11 +60,9 @@ describe('YearMonthView Component', () => {
   ];
 
   const defaultProps = {
-    services: mockServices,
+    transactions: mockServices,
     suppliers: mockSuppliers,
-    orders: {listing: mockOrders, mapping: mockOrders.reduce((acc, curr) => {acc[curr.id] = curr; return acc}, {})},
-    backToService: jest.fn(),
-    setFilteredServices: jest.fn()
+    orders: {byId: (id) => mockOrders.find(o => o.id === id)}
   };
 
   beforeAll(() => {
@@ -121,7 +120,7 @@ describe('YearMonthView Component', () => {
 
     await waitFor(() => {
       fireEvent.click(screen.getByRole('button', { name: 'Back to Service' }));
-      expect(defaultProps.backToService).toHaveBeenCalledTimes(1);
+      expect(useNavigate()).toHaveBeenCalledWith('/')
     })
   });
 

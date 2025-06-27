@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { Container, ListGroup, ListGroupItem, Row, Col, Button, Badge, Nav, Offcanvas, ButtonGroup } from "react-bootstrap"
 import { chunkArray } from "../utils/arrayUtils"
 import AddSparePartsDialog from "./AddSparePartsDialog"
@@ -8,20 +8,19 @@ import NoteTakingDialog from "./NoteTakingDialog"
 import { clearState } from "../autoRefreshWorker"
 import SparePartNotes from "./SparePartNotes"
 import SupplierSparePartsYearMonthView from "./SupplierSparePartsYearMonthView"
-import { Calendar, Suppliers, Tools, Trash, Truck } from "../Icons"
+import { Calendar, Suppliers, Tools, Truck } from "../Icons"
 import ResponsivePagination from "../components/ResponsivePagination"
 import PromptDeletionIcon from "../components/PromptDeletionIcon"
+import SupplierOrders from "./SupplierOrders"
+import { applyFilterOnOrders } from "../search/fuzzySearch"
 
-function SuppliersSpareParts({filteredOrders=[], setFilteredOrders, 
-    selectedSearchOptions=[], filterServices=() => {},
-    orders=[], suppliers=[], spareParts=[], vehicles=[], sparePartUsages=[],
+function SuppliersSpareParts({orders=[], setTotalFilteredOrders, 
+    selectedSearchOptions=[], selectedSearchDate, supplierOrders = {current: new SupplierOrders()}, suppliers=[], spareParts=[], vehicles=[], sparePartUsages=[],
     refreshSpareParts=() => {}, refreshSparePartUsages=() =>{}, refreshServices=()=>{},
     onNewVehicleCreated=() => {}, setLoading=()=>{}, showToastMessage}) {
     const apiUrl = process.env.REACT_APP_API_URL
 
     const [activePage, setActivePage] = useState(1)
-    const chunkedItems = chunkArray(filteredOrders, 80)
-    const totalPages = chunkedItems.length;
 
     const [showDialog, setShowDialog] = useState(false)
     const [existingOrder, setExistingOrder] = useState()
@@ -35,6 +34,10 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
     const [showSuppliers, setShowSuppliers] = useState(false)
     const [selectedSupplier, setSelectedSupplier] = useState()
     const [orderedSuppliers, setOrderedSuppliers] = useState()
+
+    const filteredOrders = applyFilterOnOrders(selectedSearchOptions, selectedSearchDate, orders, sparePartUsages, selectedSupplier)
+    const chunkedItems = chunkArray(filteredOrders, 80)
+    const totalPages = chunkedItems.length;
 
     const [overview, setOverview] = useState(false)
 
@@ -53,22 +56,15 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
     }
 
     const viewOrder = (no) => {
-        setExistingOrder(orders.listing.filter(o => o.deliveryOrderNo === no))
+        setExistingOrder(orders.filter(o => o.deliveryOrderNo === no))
         setShowDialog(true)
     }
 
     const filterOrderBySupplier = (supplier) => {
         if (!selectedSupplier) {
-            setFilteredOrders(filteredOrders.filter(s => s.supplierId === supplier.id))
             setSelectedSupplier(supplier)
         }
         else {
-            if (selectedSearchOptions.length > 0) {
-                filterServices(selectedSearchOptions)
-            }
-            else {
-                setFilteredOrders(orders.listing)
-            }
             setSelectedSupplier()
         }
     }
@@ -85,20 +81,8 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
                 }
             })
             .then(res => res.json())
-            .then(response => {
-                response.forEach(o => {
-                    const idx = orders.listing.findIndex(oo => oo.id === o.id)
-                    if (idx >= 0) {
-                        orders.listing[idx] = o
-                    }
-                    else {
-                        orders.listing.push(o)
-                    }
-                    orders.mapping[o.id] = o
-                })
-                // orders.push(...response)
-                orders.listing.sort((a, b) => a.invoiceDate < b.invoiceDate)
-                setFilteredOrders((selectedSupplier && orders.listing.filter(s => s.supplierId === selectedSupplier.id)) || orders.listing)
+            .then(ordersJson => {
+                supplierOrders.current.updateOrders(ordersJson)
             })
             .then(() => refreshSpareParts())
             .then(() => callback && callback())
@@ -142,9 +126,7 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
                 }
             })
             .then(_ => {
-                orders.listing.splice(orders.listing.findIndex(o => o.id === order.id), 1)
-                delete orders.mapping[order.id]
-                setFilteredOrders((selectedSupplier && orders.listing.filter(s => s.supplierId === selectedSupplier.id)) || orders.listing)
+                supplierOrders.current.removeOrder(order)
                 return Promise.all([refreshSparePartUsages(),
                 refreshSpareParts(),
                 refreshServices()])
@@ -176,9 +158,7 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
                     showToastMessage(`failed to update order, response: ${JSON.stringify(json)}`)
                 }
                 else {
-                    orders.mapping[order.id] = order
-                    orders.listing[orders.listing.findIndex(o => o.id === order.id)] = order
-                    setFilteredOrders((selectedSupplier && orders.listing.filter(s => s.supplierId === selectedSupplier.id)) || orders.listing)
+                    supplierOrders.current.updateOrders(json)
                 }
             })
             .then(() => clearState())
@@ -194,17 +174,12 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
         setOrderedSuppliers([...suppliers].sort((a, b) => a.supplierName.toLowerCase().localeCompare(b.supplierName.toLowerCase())))
     }
 
-    const replaceOrders = useCallback(() => setFilteredOrders(orders.listing), [orders, setFilteredOrders] )
     useEffect(() => {
-        if (selectedSearchOptions.length > 0) {
-            setSelectedSupplier()
+        if (selectedSearchOptions.length > 0 || selectedSearchDate) {
             setActivePage(1)
+            setTotalFilteredOrders(filteredOrders.length)
         }
-        else {
-            // as good as changing from some search option to no option at all, so just set all
-            replaceOrders()
-        }
-    }, [selectedSearchOptions, replaceOrders])
+    }, [selectedSearchOptions, selectedSearchDate, selectedSupplier])
 
     return (
         <Container fluid>
@@ -213,7 +188,7 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
                     setShowDialog={setShowDialog}
                     suppliers={suppliers}
                     spareParts={spareParts}
-                    orders={orders}
+                    supplierOrders={supplierOrders.current}
                     existingOrder={existingOrder}
                     onSaveNewOrders={onSaveNewOrders}
                     sparePartUsages={sparePartUsages}
@@ -244,7 +219,7 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
                     </ButtonGroup>
                 </Col>
             </Row> }
-            {selectedSearchOptions.length === 0 && !overview && <Row>
+            {!overview && <Row>
                 <Col>
                     <Button variant="link" onClick={() => setShowSuppliers(true)}>{ selectedSupplier ? `Showing for ${suppliers.find(v => v.id === selectedSupplier.id).supplierName}` : 'Showing All'}</Button>
                     <Offcanvas onShow={() => orderSupplierByRecentOrder()} show={showSuppliers} placement="top" onHide={() => setShowSuppliers(false)}>
@@ -287,7 +262,7 @@ function SuppliersSpareParts({filteredOrders=[], setFilteredOrders,
                     { (!filteredOrders || filteredOrders.length === 0) && <ListGroupItem>...</ListGroupItem> }        
                     { filteredOrders && filteredOrders.length > 0 &&
                         chunkedItems[activePage - 1]?.map(v => 
-                            <ListGroupItem key={v.id}>
+                            <ListGroupItem key={v.id} role="listitem">
                                 <Row>
                                     <Col xs="6" md="2" className="fw-lighter">{v.invoiceDate}</Col>
                                     <Col xs="6" md="2">{findSupplier(v.supplierId).supplierName} <div className="p-0 m-0">{ !v.sheetName && <Button className="p-0 text-decoration-none" variant="link"

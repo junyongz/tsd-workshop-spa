@@ -5,21 +5,26 @@ import CompletionLabel from './components/CompletionLabel';
 import { chunkArray } from './utils/arrayUtils';
 import { clearState } from './autoRefreshWorker';
 import OrderTooltip from './services/OrderTooltip';
-import YearMonthView from './services/YearMonthView';
 import TransactionTypes from './components/TransactionTypes';
 import { Calendar, Foreman, NoteTaking, Tools } from './Icons';
 import ServiceNoteTakingDialog from './services/ServiceNoteTakingDialog';
 import ServiceMediaDialog from './services/ServiceMediaDialog';
 import HoverPriceTag from './components/HoverPriceTag';
 import ResponsivePagination from './components/ResponsivePagination';
+import { applyFilterOnServices } from './search/fuzzySearch';
+import { useNavigate } from 'react-router-dom';
+import SupplierOrders from './suppliers/SupplierOrders';
 
-function ServiceListing({services, filteredServices=[], setFilteredServices,
-    keywordSearch = () => {}, refreshSparePartUsages=() => {}, 
+function ServiceListing({services, transactions,
+    setTotalFilteredServices,
+    refreshSparePartUsages=() => {}, 
     refreshSpareParts=() => {},
     vehicles, setVehicles, spareParts, sparePartUsages=[],
-    orders=[], suppliers=[], taskTemplates=[],
+    orders=new SupplierOrders(), suppliers=[], taskTemplates=[],
     onNewVehicleCreated=() => {}, setLoading=()=>{},
-    selectedSearchOptions, onNewServiceCreated, removeTask}) {
+    selectedSearchOptions, setSelectedSearchOptions, 
+    selectedSearchDate,
+    onNewServiceCreated, removeTask}) {
 
   const apiUrl = process.env.REACT_APP_API_URL
   const [showModal, setShowModal] = useState(false)
@@ -28,14 +33,11 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
   const serviceTransaction = useRef()
 
   const [activePage, setActivePage] = useState(1)
+  const filteredServices = applyFilterOnServices(selectedSearchOptions, selectedSearchDate, services, orders)
   const chunkedItems = chunkArray(filteredServices, 10)
   const totalPages = chunkedItems.length;
 
-  const [yearMonthView, setYearMonthView] = useState(false)
-
-  const viewByYearMonth = () => {
-    setYearMonthView(true)
-  }
+  const navigate = useNavigate()
 
   const addNewServiceTransaction = (startDate) => {
     serviceTransaction.current = {
@@ -97,8 +99,7 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
         if (deleteId !== sparePartUsageId) {
           throw Error("seems nothing deleted")
         }
-        services.current.removeTransaction(serviceId, sparePartUsageId)
-        keywordSearch()
+        transactions.current.removeTransaction(serviceId, sparePartUsageId)
       })
       .then(() => Promise.all([refreshSpareParts(), refreshSparePartUsages()]))
       .then(() => clearState())
@@ -120,8 +121,7 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
       })
       .then(res => res.json())
       .then(newService => {
-        services.current.updateTransaction(newService)
-        keywordSearch()
+        transactions.current.updateTransaction(newService)
       })
       .then(() => clearState())
       .finally(() => setLoading(false))
@@ -140,8 +140,7 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
       })
       .then(res => res.json())
       .then(newService => {
-        services.current.updateForNote(newService)
-        keywordSearch()
+        transactions.current.updateForNote(newService)
       })
       .then(() => clearState())
       .finally(() => setLoading(false))
@@ -183,8 +182,7 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
         if (ws.id !== id) {
           throw Error(`seems nothing deleted, returning ${JSON.stringify(id)}`)
         }
-        services.current.removeService(ws)
-        keywordSearch()
+        transactions.current.removeService(ws)
       })
       .then(() => clearState())
       .then(() => refreshSparePartUsages())
@@ -196,23 +194,19 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
     fetch(`${apiUrl}/api/workshop-services/${ws.id}`)
     .then(resp => resp.json())
     .then(wsJson => {
-      services.current.updateTransaction(wsJson)
-      keywordSearch()
+      transactions.current.updateTransaction(wsJson)
     })
   }
 
   useEffect(() => {
-    if (selectedSearchOptions && selectedSearchOptions.length > 0) {
+    if (selectedSearchOptions.length > 0 || selectedSearchDate) {
       setActivePage(1)
+      setTotalFilteredServices(filteredServices.length)
     }
-  }, [selectedSearchOptions])
+  }, [selectedSearchOptions, selectedSearchDate])
 
   return (
-    <Container fluid>
-    {
-      yearMonthView && <YearMonthView services={services} setFilteredServices={setFilteredServices} suppliers={suppliers} orders={orders} taskTemplates={taskTemplates} backToService={() => setYearMonthView(false)}></YearMonthView>
-    }
-    { !yearMonthView && <Container fluid>
+      <Container fluid>
       <ServiceDialog isShow={showModal} setShow={setShowModal} trx={serviceTransaction} 
         onNewServiceCreated={onNewServiceCreated} 
         vehicles={vehicles} setVehicles={setVehicles} 
@@ -232,7 +226,7 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
         </Col>
         <Col className='text-end'>
           <ButtonGroup className='responsive-width-50'>
-            <Button variant='secondary' onClick={() => viewByYearMonth()}><Calendar />&nbsp;Calendar View</Button>
+            <Button variant='secondary' onClick={() => { setSelectedSearchOptions([]); navigate('/services-overview')}}><Calendar />&nbsp;Calendar View</Button>
             <Button variant='success' onClick={() => addNewServiceTransaction(new Date().toISOString().split('T')[0])}><i className="bi bi-plus-circle-fill me-2"></i>Add New</Button>
           </ButtonGroup>
         </Col>
@@ -293,7 +287,7 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
                       })
                     }
                     {v.sparePartUsages?.map(vvv => {
-                      const order = orders?.mapping[vvv.orderId] || {}
+                      const order = orders.byId(vvv.orderId) || {}
                       const supplier = suppliers.find(s => s.id === order.supplierId)
                       const totalPrice = (vvv.quantity * vvv.soldPrice).toFixed(2)
 
@@ -334,12 +328,10 @@ function ServiceListing({services, filteredServices=[], setFilteredServices,
               </Container>
               </Card.Body>
             </Card>
-           
         )
       }
       <ResponsivePagination activePage={activePage} setActivePage={setActivePage} 
           totalPages={totalPages} />
-    </Container> }
     </Container>
   );
 }

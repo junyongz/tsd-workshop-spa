@@ -5,8 +5,8 @@ import { Calendar } from "../Icons"
 import { months3EngChars } from "../utils/dateUtils"
 
 // {[supplier]}
-const filterOrdersBySupplier = (orders={listing:[],mapping:[]}, suppliers=[], year, month) => {
-    const matchedYearMonthOrders = orders.listing.filter(order => {
+const filterOrdersBySupplier = (orders=[], suppliers=[], year, month) => {
+    const matchedYearMonthOrders = orders.filter(order => {
         const invoiceDate = new Date(order.invoiceDate)
         if (invoiceDate.getFullYear() === year && invoiceDate.getMonth() === month) {
             return true
@@ -42,7 +42,7 @@ function SupplierSparePartsYearMonthView({orders=[], suppliers=[], backToOrders}
 
     const trxsGroupBySuppliers = filterOrdersBySupplier(orders, suppliers, year, month)
     const sortedKeys = Object.keys(trxsGroupBySuppliers).sort((a, b) => a > b ? -1 : 1)
-    const availableYears = Array.from(new Set(orders.listing.map(order => 
+    const availableYears = Array.from(new Set(orders.map(order => 
         new Date(order.invoiceDate).getFullYear()))).sort((a, b) => b - a)
 
     const amountBySuppliers = sortedKeys.map(supplier => {

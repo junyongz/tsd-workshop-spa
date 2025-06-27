@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Button, Col, Container, ListGroup, ListGroupItem, Row } from "react-bootstrap";
 import { Camera, NoteTaking } from "../Icons";
+import SupplierOrders from "../suppliers/SupplierOrders";
 
-export default function SpareParts({orders, suppliers=[]}) {
+export default function SpareParts({orders=new SupplierOrders(), suppliers=[]}) {
 
     const [spareParts, setSpareParts] = useState([
         {id: 1000, partNo: '44350-1610', description: 'Power Steering Pump',
@@ -52,7 +53,7 @@ export default function SpareParts({orders, suppliers=[]}) {
                             </Col>
                             <Col xs="6" lg="3">
                                 {v.orderIds?.map(oid => 
-                                    <div>{suppliers.find(sp => sp.id === orders.current.mapping[oid]?.supplierId)?.supplierName}</div>
+                                    <div>{suppliers.find(sp => sp.id === orders.byId(oid)?.supplierId)?.supplierName}</div>
                                 )}
                             </Col>
                             </Row>

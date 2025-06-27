@@ -5,9 +5,13 @@ import { ScrollSpy } from "bootstrap"
 import { Foreman, NoteTaking, Services } from "../Icons"
 import { months3EngChars } from "../utils/dateUtils"
 import useTheme from "../utils/useTheme"
+import { useNavigate } from "react-router-dom"
+import SupplierOrders from "../suppliers/SupplierOrders"
 
-function YearMonthView({services, setFilteredServices, suppliers=[], orders=[], backToService, taskTemplates}) {
+function YearMonthView({transactions, suppliers=[], orders=new SupplierOrders(), taskTemplates}) {
     const apiUrl = process.env.REACT_APP_API_URL
+
+    const navigate = useNavigate()
 
     const currentDate = new Date()
     const [year, setYear] = useState(currentDate.getFullYear())
@@ -21,9 +25,8 @@ function YearMonthView({services, setFilteredServices, suppliers=[], orders=[], 
         return fetch(`${apiUrl}/api/workshop-services?year=${year}&month=${month}`)
         .then(resp => resp.json())
         .then(yearMonthWss => {
-            yearMonthWss.forEach(ws => services.current.updateTransaction(ws))
-            setFilteredServices([...services.current.transactions])
-            setTrxsGroupByVehicles(services.current.filterByYearMonthGroupByVehicle(year, month-1))
+            transactions.current.updateTransactions(yearMonthWss)
+            setTrxsGroupByVehicles(transactions.current.filterByYearMonthGroupByVehicle(year, month-1))
         })
     }
 
@@ -35,7 +38,6 @@ function YearMonthView({services, setFilteredServices, suppliers=[], orders=[], 
         fetchByYearAndMonth(year, month+1).finally(() => setMonth(month))
     }
     
-    //services.current.filterByYearMonthGroupByVehicle(year, month)
     const sortedKeys = Object.keys(trxsGroupByVehicles).sort((a, b) => a > b ? -1 : 1)
 
     const amountByVehicles = sortedKeys.map(veh => {
@@ -44,7 +46,7 @@ function YearMonthView({services, setFilteredServices, suppliers=[], orders=[], 
         return {vehicle: veh, amount: 
             (services.flatMap(s => s.migratedHandWrittenSpareParts || []).reduce((pv, cv) => pv + (cv.totalPrice || 0), 0) +
             services.flatMap(s => s.sparePartUsages).reduce((acc, curr) => {
-                const order = orders?.mapping[curr.orderId] 
+                const order = orders.byId(curr.orderId)
                 return acc + (curr.quantity * order.unitPrice)}, 0) + 
             services.flatMap(s => s.tasks || []).reduce((acc, curr) => {
                 return acc + curr.quotedPrice}, 0)
@@ -54,8 +56,8 @@ function YearMonthView({services, setFilteredServices, suppliers=[], orders=[], 
 
     const DropDownYears = () => {
         return (
-            <DropdownButton id="dropdown-year" as={ButtonGroup} title={year} variant={((theme == 'dark') ? 'light': 'dark')} >
-            { services.current.availableYears().map(
+            <DropdownButton id="dropdown-year" as={ButtonGroup} title={year} variant={((theme === 'dark') ? 'light': 'dark')} >
+            { transactions.current.availableYears().map(
                 v => <Dropdown.Item key={v} onClick={() => changeYear(v)} eventKey={v}>{v}</Dropdown.Item> )
             }
             </DropdownButton> 
@@ -63,7 +65,7 @@ function YearMonthView({services, setFilteredServices, suppliers=[], orders=[], 
     }
 
     const calcVariant = (i=0) => {
-        return month === i ? ((theme == 'dark') ? 'outline-light': 'outline-dark') : ((theme == 'dark') ? 'light': 'dark')
+        return month === i ? ((theme === 'dark') ? 'outline-light': 'outline-dark') : ((theme === 'dark') ? 'light': 'dark')
     }
 
     const scrollSpyDataZoneRef = useRef()
@@ -89,7 +91,7 @@ function YearMonthView({services, setFilteredServices, suppliers=[], orders=[], 
                 <Col xs="6" lg="10">
                     <ButtonGroup className="d-flex d-lg-none">
                     <DropDownYears />
-                    <DropdownButton id="dropdown-month" as={ButtonGroup} title={months3EngChars[month]} variant={((theme == 'dark') ? 'light': 'dark')} >
+                    <DropdownButton id="dropdown-month" as={ButtonGroup} title={months3EngChars[month]} variant={((theme === 'dark') ? 'light': 'dark')} >
                         {
                             months3EngChars.map((v, i) => 
                                     <Dropdown.Item key={v} variant={calcVariant(i)} onClick={() => changeMonth(i)}>{v}</Dropdown.Item>
@@ -108,7 +110,7 @@ function YearMonthView({services, setFilteredServices, suppliers=[], orders=[], 
                     </ButtonGroup>
                 </Col>
                 <Col xs="6" lg="2" className="text-end">
-                    <Button variant="outline-secondary" onClick={backToService}><Services /> Back to Service</Button>
+                    <Button variant="outline-secondary" onClick={() => navigate("/")}><Services /> Back to Service</Button>
                 </Col>
             </Row>
             <Row className="mb-3">
@@ -158,7 +160,7 @@ function YearMonthView({services, setFilteredServices, suppliers=[], orders=[], 
                                             </ListGroupItem>)
 
                                             const usages = trx.sparePartUsages.map(v => {
-                                                const order = orders?.mapping[v.orderId]
+                                                const order = orders.byId(v.orderId)
                                                 const supplier = suppliers.find(s => s.id === order.supplierId)
                                                 const totalPrice = (v.quantity * order.unitPrice).toFixed(2) || 0
                                                 

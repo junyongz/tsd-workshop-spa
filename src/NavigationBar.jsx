@@ -5,10 +5,10 @@ import { Calendar, Foreman, Services, Suppliers, Tools, Truck } from "./Icons";
 
 export default function NavigationBar({
     showToastBox, setShowToastBox, toastBoxMessage,
-    searchOptions, selectedSearchOptions, filteredOrders, filteredServices,
-    filterServices, searchByDate, setSearchByDate, clearFilterDate, filterByDate
-
+    searchOptions, selectedSearchOptions, selectedSearchDate, setSelectedSearchDate, totalFilteredServices, totalFilteredOrders,
+    filterServices, searchByDate, setSearchByDate, clearFilterDate
 }) {
+    
     const location = useLocation()
     const navigate = useNavigate()
 
@@ -30,15 +30,15 @@ export default function NavigationBar({
             <Navbar.Collapse>
                 <Nav variant="underline" defaultActiveKey={location.pathname === '/' ? 'home' : location.pathname.substring(1)}>
                     <Dropdown as={ButtonGroup}>
-                    <Nav.Item><Nav.Link eventKey="home" onClick={() => navigate("/")}><Services /> Services {selectedSearchOptions.length > 0 && <Badge pill>{filteredServices.length}</Badge>}</Nav.Link></Nav.Item>
+                    <Nav.Item><Nav.Link eventKey="home" onClick={() => navigate("/")}><Services /> Services {(selectedSearchOptions.length > 0 || selectedSearchDate) && totalFilteredServices > 0 && <Badge pill>{totalFilteredServices}</Badge>}</Nav.Link></Nav.Item>
                     <Dropdown.Toggle as={NavLink} ></Dropdown.Toggle>
                     <Dropdown.Menu>
                         <NavDropdown.Item eventKey={'task'} onClick={() => navigate("/workmanships")}><Foreman /> Workmanship</NavDropdown.Item>
                     </Dropdown.Menu>
                     </Dropdown>
-                    { false && <Nav.Item><Nav.Link eventKey="home" onClick={() => navigate("/")}><Services /> Services {selectedSearchOptions.length > 0 && <Badge pill>{filteredServices.length}</Badge>}</Nav.Link></Nav.Item> }
+                    { false && <Nav.Item><Nav.Link eventKey="home" onClick={() => navigate("/")}><Services /> Services {(selectedSearchOptions.length > 0 || selectedSearchDate) && totalFilteredServices > 0 && <Badge pill>{totalFilteredServices}</Badge>}</Nav.Link></Nav.Item> }
                     <Nav.Item><Nav.Link eventKey="schedules" onClick={() => navigate("/schedules")}><Calendar /> Schedules</Nav.Link></Nav.Item>
-                    <Nav.Item><Nav.Link eventKey="orders" onClick={() => navigate("/orders")}><Suppliers /> Suppliers {selectedSearchOptions.length > 0 && <Badge pill>{filteredOrders.length}</Badge>}</Nav.Link></Nav.Item>
+                    <Nav.Item><Nav.Link eventKey="orders" onClick={() => navigate("/orders")}><Suppliers /> Suppliers {(selectedSearchOptions.length > 0 || selectedSearchDate) && totalFilteredOrders > 0 && <Badge pill>{totalFilteredOrders}</Badge>}</Nav.Link></Nav.Item>
                     <Nav.Item><Nav.Link eventKey="vehicles" onClick={() => navigate("/vehicles")}><Truck /> Trucks</Nav.Link></Nav.Item>
                     { process.env.NODE_ENV === 'development' && <Nav.Item><Nav.Link eventKey="spare-parts" onClick={() => navigate("/spare-parts")}><Tools /> Spare Parts</Nav.Link></Nav.Item> }
                 </Nav>
@@ -49,6 +49,7 @@ export default function NavigationBar({
                         <InputGroup.Text><Tools /></InputGroup.Text>
                             <Typeahead
                                 allowNew
+                                disabled={location.pathname === '/services-overview'}
                                 newSelectionPrefix="Search for... "
                                 id="search-multiple"
                                 labelKey="name"
@@ -66,7 +67,7 @@ export default function NavigationBar({
                 <InputGroup>
                     <InputGroup.Text>Choose a date</InputGroup.Text>
                     <InputGroup.Text><i className="bi bi-x-circle" role="button" onClick={clearFilterDate}></i></InputGroup.Text>
-                    <Form.Control disabled={location.pathname === '/vehicles'} type='date' placeholder='Choose a date' onChange={(e) => filterByDate(e.target.value)}></Form.Control>
+                    <Form.Control disabled={location.pathname === '/vehicles'} type='date' placeholder='Choose a date' onChange={(e) => setSelectedSearchDate(e.target.value)}></Form.Control>
                 </InputGroup>
                 }
                 </Form>

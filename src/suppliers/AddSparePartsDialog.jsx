@@ -4,8 +4,9 @@ import { Typeahead } from "react-bootstrap-typeahead";
 import remainingQuantity, { decimalPointUomAvailable } from "../utils/quantityUtils";
 import { Calendar, Dollar, Suppliers, Tools } from "../Icons";
 import PromptDeletionIcon from "../components/PromptDeletionIcon";
+import SupplierOrders from "./SupplierOrders";
 
-function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[], suppliers=[], spareParts=[], sparePartUsages=[], onSaveNewOrders}) {
+function AddSparePartsDialog({isShow, setShowDialog, orders=new SupplierOrders(), existingOrder=[], suppliers=[], spareParts=[], sparePartUsages=[], onSaveNewOrders}) {
     const formRef = useRef()
     const [validated, setValidated] = useState(false)
 
@@ -273,8 +274,7 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=[], existingOrder=[]
                                                 renderMenuItemChildren={(option) => 
                                                     <div>
                                                         <div>{option.partName}</div>
-                                                        {/** TODO: to add supplier info later on */} 
-                                                        <small className="text-secondary">${option?.unitPrice} per {option?.unit} | <Calendar /> {orders.mapping[option.orderId]?.invoiceDate}</small>
+                                                        <small className="text-secondary">${option?.unitPrice} per {option?.unit} | <Calendar /> {orders.byId(option.orderId)?.invoiceDate}</small>
                                                     </div>
                                                 }
                                                 clearButton

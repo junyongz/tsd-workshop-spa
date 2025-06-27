@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import AddSparePartsDialog from '../AddSparePartsDialog';
@@ -26,7 +25,7 @@ describe('AddSparePartsDialog Component', () => {
   const defaultProps = {
     isShow: true,
     setShowDialog: jest.fn(),
-    orders: { listing: mockOrders, mapping: mockOrders.reduce((acc, curr) => {acc[curr.id] = curr; return acc}, {}) },
+    orders: {byId: (id) => mockOrders.find(o => o.id === id)},
     existingOrder: undefined,
     suppliers: mockSuppliers,
     spareParts: mockSpareParts,
@@ -74,7 +73,7 @@ describe('AddSparePartsDialog Component', () => {
 
     expect(document.querySelectorAll('.list-group-item').length).toBe(2)
     fireEvent.click(screen.getAllByRole('button', { name: 'remove' })[0]); // Remove first item
-     fireEvent.click(screen.getAllByRole('button', { name: 'remove' })[0]); // to click 1 more time
+    fireEvent.click(screen.getAllByRole('button', { name: 'remove' })[0]); // to click 1 more time
     expect(document.querySelectorAll('.list-group-item').length).toBe(1)
   });
 

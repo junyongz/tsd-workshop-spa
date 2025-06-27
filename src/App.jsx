@@ -17,7 +17,7 @@ import ServiceTransactions from './ServiceTransactions';
 import NavigationBar from './NavigationBar';
 import Vehicles from './vehicles/Vehicles';
 
-import { doFilterServices, doInAppFilterOrders, doInAppFilterServices } from './search/fuzzySearch';
+import { doFilterServices } from './search/fuzzySearch';
 import { Container } from 'react-bootstrap';
 import SpareParts from './spare-parts/SpareParts';
 import fetchTasks from './services/fetchTasks';
@@ -25,6 +25,8 @@ import InProgressTaskFocusListing from './services/InProgressTaskFocusListing';
 import saveService from './services/saveService';
 import removeServiceTask from './services/removeServiceTask';
 import SchedulingCalendarView from './schedule/SchedulingCalendarView';
+import YearMonthView from './services/YearMonthView';
+import SupplierOrders from './suppliers/SupplierOrders';
 
 function App() {
   const apiUrl = process.env.REACT_APP_API_URL
@@ -33,11 +35,14 @@ function App() {
   const [loadingTime, setLoadingTime] = useState(0)
 
   // the services and orders from supplier
-  const services = useRef(new ServiceTransactions([]))
-  const [filteredServices, setFilteredServices] = useState()
+  
+  const [services, setServices] = useState([])
+  const [totalFilteredServices, setTotalFilteredServices] = useState(0)
+  const transactions = useRef(new ServiceTransactions([], setServices))
 
-  const orders = useRef({listing:[], mapping:{}})
-  const [filteredOrders, setFilteredOrders] = useState()
+  const [orders, setOrders] = useState([])
+  const [totalFilteredOrders, setTotalFilteredOrders] = useState(0)
+  const supplierOrders = useRef(new SupplierOrders([], setOrders))
 
   const [sparePartUsages, setSparePartUsages] = useState([])
 
@@ -60,12 +65,13 @@ function App() {
   const [selectedSearchOptions, setSelectedSearchOptions] = useState([])
   const searchedOptions = useRef(new Set())
   const storeSelectedSearchOptions = (opts=[]) => {
-    setSelectedSearchOptions(opts)
+    setSelectedSearchOptions([...opts])
     if (opts && opts.length > 0) {
       opts.forEach(opt => searchedOptions.current.add(opt.name))
     }
   }
   const [searchByDate, setSearchByDate] = useState(false)
+  const [selectedSearchDate, setSelectedSearchDate] = useState()
 
   // domain data
   const [companies, setCompanies] = useState([])
@@ -78,57 +84,30 @@ function App() {
   
   const filterTimeoutRef = useRef()
 
+  // to be used on .filter
   const filterServices = (options=[]) => {
     if (!options || options.length === 0) {
       clearTimeout(filterTimeoutRef.current)
-      setFilteredServices(services.current.transactions)
-      setFilteredOrders(orders.current.listing)
       storeSelectedSearchOptions([])
       return
     }
 
     if (options.length === searchedOptions.current.size && 
           options.map(opt => opt.name).every(v => searchedOptions.current.has(v))) {
-      doInAppFilterServices(options, services, orders, setFilteredServices);
-      doInAppFilterOrders(options, orders, setFilteredOrders, sparePartUsages)
       setSelectedSearchOptions(options)
     }
     else {
       clearTimeout(filterTimeoutRef.current)
       filterTimeoutRef.current = setTimeout(() => doFilterServices(
-        options, services, setFilteredServices, sparePartUsages, orders, setFilteredOrders, storeSelectedSearchOptions), 600)
-    }
-  }
-
-  const filterByDate = (val) => {
-    if (services.current) {
-      const searchedFilteredServices = []
-      for (const v of services.current.transactions) {
-        if (v.startDate === val) {
-          searchedFilteredServices.push(v)
-        }
-      }
-
-      searchedFilteredServices.sort((left, right) => left.startDate < right.startDate)
-      setFilteredServices(searchedFilteredServices)
-    }
-
-    if (orders.current) {
-      const searchedFilteredOrders = []
-      for (const order of orders.current.listing) {
-        if (order.invoiceDate === val) {
-          searchedFilteredOrders.push(order)
-        }
-      }
-      setFilteredOrders(searchedFilteredOrders)
+        options, transactions, storeSelectedSearchOptions), 600)
     }
   }
 
   const clearFilterDate = () => {
     setSearchByDate(false)
-    setSelectedSearchOptions([])
-    setFilteredServices(services.current.transactions)
-    setFilteredOrders(orders.current.listing)
+    setSelectedSearchDate()
+    transactions.current.refresh()
+    supplierOrders.current.refresh()
   }
 
   const onNewVehicleCreated = async (vehicleNo) => {
@@ -160,22 +139,14 @@ function App() {
 
   const refreshSpareParts = useCallback(() => fetchSpareParts(apiUrl, setSpareParts, setSearchOptions, setOrderSpareParts), [apiUrl])
 
-  const refreshServices = useCallback(() => fetchServices(apiUrl, services, setFilteredServices, searchedOptions), [apiUrl])
-  const refreshFewPagesServices = useCallback(() => fetchFewPagesServices(apiUrl, services, setFilteredServices, searchedOptions), [apiUrl])
+  const refreshServices = useCallback(() => fetchServices(apiUrl, transactions, searchedOptions), [apiUrl])
+  const refreshFewPagesServices = useCallback(() => fetchFewPagesServices(apiUrl, transactions, searchedOptions), [apiUrl])
 
-  const refreshSupplierSpareParts = useCallback(() => fetchSupplierSpareParts(apiUrl, orders, setFilteredOrders), [apiUrl])
-  const refreshWithUsageSupplierSpareParts = useCallback(() => fetchWithUsageSupplierSpareParts(apiUrl, orders, setFilteredOrders), [apiUrl])
+  const refreshSupplierSpareParts = useCallback(() => fetchSupplierSpareParts(apiUrl, supplierOrders), [apiUrl])
+  const refreshWithUsageSupplierSpareParts = useCallback(() => fetchWithUsageSupplierSpareParts(apiUrl, supplierOrders), [apiUrl])
 
-  const keywordSearch = () => {
-    if (!selectedSearchOptions || selectedSearchOptions.length === 0) {
-      setFilteredServices([...services.current.transactions]) 
-    }
-    else {
-      doFilterServices(selectedSearchOptions, services, setFilteredServices, sparePartUsages, orders, setFilteredOrders, storeSelectedSearchOptions)
-    }
-  }
-  const onNewServiceCreated = saveService.bind(this, setLoading, services, keywordSearch, refreshSpareParts, refreshSparePartUsages, clearState)
-  const removeTask = removeServiceTask.bind(this, setLoading, services, keywordSearch, clearState);
+  const onNewServiceCreated = saveService.bind(this, setLoading, transactions, refreshSpareParts, refreshSparePartUsages, clearState)
+  const removeTask = removeServiceTask.bind(this, setLoading, transactions, clearState);
 
   useEffect(() => {
       let sparePartFetchTimer
@@ -242,14 +213,15 @@ function App() {
         <NavigationBar
             {...{
             clearFilterDate,
-            filterByDate,
             filterServices,
-            filteredOrders,
-            filteredServices,
+            totalFilteredOrders,
+            totalFilteredServices,
             searchByDate,
             searchOptions,
             selectedSearchOptions,
             setSearchByDate,
+            selectedSearchDate,
+            setSelectedSearchDate,
             setShowToastBox,
             showToastBox,
             toastBoxMessage}}
@@ -257,15 +229,16 @@ function App() {
         <Routes>
           <Route exact path="/" element={
             <ServiceListing services={services}
+              transactions={transactions}
+              setTotalFilteredServices={setTotalFilteredServices}
               vehicles={vehicles}
               setVehicles={setVehicles}
               spareParts={spareParts}
               taskTemplates={taskTemplates}
-              setFilteredServices={setFilteredServices}
-              filteredServices={filteredServices}
-              keywordSearch={keywordSearch}
+              setSelectedSearchOptions={setSelectedSearchOptions}
               selectedSearchOptions={selectedSearchOptions}
-              orders={orders.current}
+              selectedSearchDate={selectedSearchDate}
+              orders={supplierOrders.current}
               suppliers={suppliers}
               sparePartUsages={sparePartUsages}
               refreshSparePartUsages={refreshSparePartUsages}
@@ -276,11 +249,17 @@ function App() {
               removeTask={removeTask}
             />
           } />
+          <Route exact path="/services-overview" element={
+            <YearMonthView transactions={transactions} 
+              suppliers={suppliers} 
+              orders={supplierOrders.current}
+              taskTemplates={taskTemplates} 
+            />
+          } />
           <Route exact path="/workmanships" element={
             <InProgressTaskFocusListing services={services}
               taskTemplates={taskTemplates}
-              filteredServices={filteredServices}
-              orders={orders.current}
+              orders={supplierOrders.current}
               suppliers={suppliers}
               onNewServiceCreated={onNewServiceCreated}
               removeTask={removeTask}
@@ -289,9 +268,10 @@ function App() {
             />
           } />
           <Route path="/orders" element={
-            <SuppliersSpareParts filteredOrders={filteredOrders} 
-              setFilteredOrders={setFilteredOrders} 
-              orders={orders.current} 
+            <SuppliersSpareParts
+              orders={orders}
+              supplierOrders={supplierOrders} 
+              setTotalFilteredOrders={setTotalFilteredOrders}
               suppliers={suppliers} 
               spareParts={orderSpareParts} 
               vehicles={vehicles}
@@ -302,6 +282,7 @@ function App() {
               onNewVehicleCreated={onNewVehicleCreated}
               setLoading={setLoading}
               selectedSearchOptions={selectedSearchOptions}
+              selectedSearchDate={selectedSearchDate}
               filterServices={filterServices}
               showToastMessage={showToastMessage}
             />} />
@@ -316,7 +297,7 @@ function App() {
           } />
           <Route path="/spare-parts" element={ 
             <SpareParts vehicles={vehicles} 
-              orders={orders}
+              orders={supplierOrders.current}
               suppliers={suppliers}
             />} />
         </Routes>

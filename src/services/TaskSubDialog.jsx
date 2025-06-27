@@ -153,7 +153,6 @@ export default function TaskSubDialog({taskTemplates, tasks, setTasks, removeTas
                             renderMenuItemChildren={(option) => 
                                 <div>
                                     <div>{option.workmanshipTask} ({option.component.subsystem} - {option.component.componentName})</div>
-                                    {/** TODO: to add supplier info later on */} 
                                     <small className="text-secondary">{option.description} ${option.unitPrice} (Complexity: {option.complexity.toLowerCase()}, estimated: {option.labourHours}H)</small>
                                 </div>
                             }

@@ -63,8 +63,8 @@ export function applyFilterOnServices(selectedSearchOptions=[], selectedSearchDa
       }
     }
 
-    return (vehicleMatched && selectedSearchOptions.length > 1 && foundSpareParts) 
+    return (vehicleMatched && selectedSearchOptions.length > 1)
             || (vehicleMatched && selectedSearchOptions.length === 1)
-            || (!vehicleMatched && selectedSearchOptions.length === 1 && foundSpareParts)
+            || (!vehicleMatched && selectedSearchOptions.length >= 1 && foundSpareParts)
   })
 }

@@ -16,6 +16,7 @@ export const doFilterServices = (options=[], transactions, setSelectedSearchOpti
     setSelectedSearchOptions(options)
 }
 
+// TODO how to get rid of this sparePartUsages
 export function applyFilterOnOrders(selectedSearchOptions=[], selectedSearchDate, orders=[], sparePartUsages, selectedSupplier) {
   // either no selected search options, or part name, code, notes or usage vehicle no matched
   if (selectedSearchDate) {

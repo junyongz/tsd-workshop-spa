@@ -131,7 +131,6 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
         nativeForm['tasksCompleted'].setCustomValidity('')
         nativeForm['vehicle'].setCustomValidity('')
 
-        // { id: ?, creationDate: ?, sparePartUsages: [{}, {} ]}
         const service = {
             id: selectedExistingService?.id,
             vehicleId: selectedVehicles[0].id,

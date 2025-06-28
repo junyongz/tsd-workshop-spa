@@ -72,3 +72,7 @@ export function Download() {
 export function Foreman() {
     return (<i className="bi bi-person-fill-gear"></i>)
 }
+
+export function EmptyBox() {
+    return (<i className="bi bi-dropbox"></i>)
+}

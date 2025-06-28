@@ -8,7 +8,7 @@ import NoteTakingDialog from "./NoteTakingDialog"
 import { clearState } from "../autoRefreshWorker"
 import SparePartNotes from "./SparePartNotes"
 import SupplierSparePartsYearMonthView from "./SupplierSparePartsYearMonthView"
-import { Calendar, Suppliers, Tools, Truck } from "../Icons"
+import { Calendar, EmptyBox, Suppliers, Tools, Truck } from "../Icons"
 import ResponsivePagination from "../components/ResponsivePagination"
 import PromptDeletionIcon from "../components/PromptDeletionIcon"
 import SupplierOrders from "./SupplierOrders"
@@ -136,6 +136,36 @@ function SuppliersSpareParts({orders=[], setTotalFilteredOrders,
         })
     }
 
+    const depleteOrder = (order) => {
+        setLoading(true)
+        requestAnimationFrame(() => {
+            fetch(`${apiUrl}/api/supplier-spare-parts?op=DEPLETE`, {
+                method: 'POST',
+                mode: 'cors',
+                headers: {
+                    'Content-type': 'application/json'
+                },
+                body: JSON.stringify([order])
+            })
+            .then(res => {
+                if (!res.ok) {
+                    showToastMessage(`failed to deplete order ${JSON.stringify(order)}`)
+                }
+                return res.json()
+            })
+            .then(json => {
+                if (json.status === 500 || json.code === 'SPP-001') {
+                    showToastMessage(`failed to update order, response: ${JSON.stringify(json)}`)
+                }
+                else {
+                    supplierOrders.current.updateOrders(json)
+                }
+            })
+            .then(() => clearState())
+            .finally(() => setLoading(false))
+        })
+    }
+
     const onUpdateOrder = (order, note) => {
         setLoading(true)
         requestAnimationFrame(() => {
@@ -154,7 +184,7 @@ function SuppliersSpareParts({orders=[], setTotalFilteredOrders,
                 return res.json()
             })
             .then(json => {
-                if (json.status === 500 || json.code === 'SP-QUANTITY-002') {
+                if (json.status === 500 || json.code === 'SP-QUANTITY-002' || json.code === 'SPP-001') {
                     showToastMessage(`failed to update order, response: ${JSON.stringify(json)}`)
                 }
                 else {
@@ -261,8 +291,10 @@ function SuppliersSpareParts({orders=[], setTotalFilteredOrders,
                         </ListGroupItem>
                     { (!filteredOrders || filteredOrders.length === 0) && <ListGroupItem>...</ListGroupItem> }        
                     { filteredOrders && filteredOrders.length > 0 &&
-                        chunkedItems[activePage - 1]?.map(v => 
-                            <ListGroupItem key={v.id} role="listitem">
+                        chunkedItems[activePage - 1]?.map(v => {
+                            const quantityLeft = remainingQuantity(v, sparePartUsages)
+
+                            return <ListGroupItem key={v.id} role="listitem">
                                 <Row>
                                     <Col xs="6" md="2" className="fw-lighter">{v.invoiceDate}</Col>
                                     <Col xs="6" md="2">{findSupplier(v.supplierId).supplierName} <div className="p-0 m-0">{ !v.sheetName && <Button className="p-0 text-decoration-none" variant="link"
@@ -273,17 +305,21 @@ function SuppliersSpareParts({orders=[], setTotalFilteredOrders,
                                         </Row>
                                         <Row>
                                             <Col sm="8">{v.partName}</Col>
-                                            <Col><Badge>{v.quantity} {v.unit} @ each ${v.unitPrice}</Badge>{remainingQuantity(v, sparePartUsages) < v.quantity && <Badge bg={remainingQuantity(v, sparePartUsages) === 0 ? 'danger' : 'warning' }>{remainingQuantity(v, sparePartUsages)} left</Badge>}</Col>
+                                            <Col><Badge>{v.quantity} {v.unit} @ each ${v.unitPrice}</Badge>
+                                              {quantityLeft < v.quantity && <Badge bg={quantityLeft === 0 ? 'danger' : 'warning' }>{quantityLeft} left</Badge>}
+                                              {v.status === 'DEPLETED' && <Badge bg="danger">Nothing left</Badge>}
+                                            </Col>
                                         </Row>                                    
                                     </Col>
                                     <Col xs="6" md="3"><SparePartNotes order={v} onNoteClick={() => recordNote(v)} sparePartUsages={sparePartUsages}></SparePartNotes></Col>
                                     <Col xs="6" md="1" className="text-end fs-5">
-                                        {!v.sheetName && !v.disabled && <PromptDeletionIcon confirmDelete={() => removeOrder(v)} /> }
-                                        <span><Truck role="button" onClick={() => recordUsage(v)} /></span>
+                                        {!v.sheetName && !v.disabled && quantityLeft === v.quantity && <PromptDeletionIcon confirmDelete={() => removeOrder(v)} /> }
+                                        {quantityLeft === v.quantity && v.status === 'ACTIVE' && <span role="button" className="me-2" onClick={() => depleteOrder(v)}><EmptyBox /></span>} 
+                                        {quantityLeft > 0 && v.status === 'ACTIVE' && <span role="button" className="me-2" onClick={() => recordUsage(v)}><Truck /></span>}
                                     </Col>
                                 </Row>
                             </ListGroupItem>
-                        )
+                        })
                     }
                     </ListGroup>
                 </Col>

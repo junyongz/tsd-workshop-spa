@@ -161,6 +161,7 @@ function SuppliersSpareParts({orders=[], setTotalFilteredOrders,
                     supplierOrders.current.updateOrders(json)
                 }
             })
+            .then(() => refreshSpareParts())
             .then(() => clearState())
             .finally(() => setLoading(false))
         })

@@ -1,4 +1,4 @@
-export default async function fetchSpareParts (apiUrl, setSpareParts, setSearchOptions, setOrderSpareParts) {
+export default async function fetchSpareParts (apiUrl, setSpareParts, setOrderSpareParts) {
 
     return fetch(`${apiUrl}/api/spare-parts`, {mode: 'cors'})
       .then(res => res.json())

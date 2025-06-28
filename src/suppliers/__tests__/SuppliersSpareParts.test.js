@@ -31,7 +31,8 @@ describe('SuppliersSpareParts Component', () => {
         quantity: 10,
         unit: 'ltr',
         unitPrice: 5,
-        deliveryOrderNo: 'DO001'
+        deliveryOrderNo: 'DO001',
+        status: 'ACTIVE'
       },
       {
         id: 2,
@@ -42,7 +43,8 @@ describe('SuppliersSpareParts Component', () => {
         quantity: 5,
         unit: 'pcs',
         unitPrice: 15,
-        deliveryOrderNo: 'DO002'
+        deliveryOrderNo: 'DO002',
+        status: 'ACTIVE'
       },
       {
         id: 3,
@@ -53,7 +55,8 @@ describe('SuppliersSpareParts Component', () => {
         quantity: 8,
         unit: 'set',
         unitPrice: 25,
-        deliveryOrderNo: 'DO003'
+        deliveryOrderNo: 'DO003',
+        status: 'ACTIVE'
       }
   ];
   

@@ -135,7 +135,7 @@ function App() {
 
   const refreshSparePartUsages = useCallback(() => fetchSparePartUsages(apiUrl, setSparePartUsages, showToastMessage), [apiUrl])
 
-  const refreshSpareParts = useCallback(() => fetchSpareParts(apiUrl, setSpareParts, setSearchOptions, setOrderSpareParts), [apiUrl])
+  const refreshSpareParts = useCallback(() => fetchSpareParts(apiUrl, setSpareParts, setOrderSpareParts), [apiUrl])
 
   const refreshServices = useCallback(() => fetchServices(apiUrl, transactions, searchedOptions), [apiUrl])
   const refreshFewPagesServices = useCallback(() => fetchFewPagesServices(apiUrl, transactions, searchedOptions), [apiUrl])

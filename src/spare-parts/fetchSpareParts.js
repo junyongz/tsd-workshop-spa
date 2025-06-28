@@ -22,14 +22,6 @@ export default async function fetchSpareParts (apiUrl, setSpareParts, setSearchO
                   return {orderId: sp.orderId, invoiceDate: sp.invoiceDate, unit: sp.unit, unitPrice: sp.unitPrice, supplierId: sp.supplierId, itemCode: sp.itemCode, partName: sp.partName}
               })
               .sort((sp1, sp2) => sp2.orderId - sp1.orderId))
-
-          setSearchOptions((prevs=[]) => 
-            Array.from(new Set([...prevs.map(pv => pv.name), 
-              ...response.map(sp => `${(sp.itemCode && !sp.partName.includes(sp.itemCode)) ? (sp.itemCode + ' ') : ''}${sp.partName}`)]))
-            .map(vv => {
-              return { name: vv }
-            })
-          )
       })
       .catch(error => {
         console.error('There was an error fetching the spare parts:', error);

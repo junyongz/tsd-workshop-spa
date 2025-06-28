@@ -14,8 +14,9 @@ import ResponsivePagination from './components/ResponsivePagination';
 import { applyFilterOnServices } from './search/fuzzySearch';
 import { useNavigate } from 'react-router-dom';
 import SupplierOrders from './suppliers/SupplierOrders';
+import ServiceTransactions from './ServiceTransactions';
 
-function ServiceListing({services, transactions,
+function ServiceListing({services, transactions = {current: new ServiceTransactions()},
     setTotalFilteredServices,
     refreshSparePartUsages=() => {}, 
     refreshSpareParts=() => {},

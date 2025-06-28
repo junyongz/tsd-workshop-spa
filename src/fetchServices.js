@@ -1,4 +1,6 @@
-export async function fetchFewPagesServices(apiUrl, transactions, searchedOptions) {
+import ServiceTransactions from "./ServiceTransactions";
+
+export async function fetchFewPagesServices(apiUrl, transactions = {current: new ServiceTransactions()}, searchedOptions) {
 
   return fetch(`${apiUrl}/api/workshop-services?pageNumber=0&pageSize=30`, {mode: 'cors'})
         .then(res => res.json())
@@ -12,7 +14,7 @@ export async function fetchFewPagesServices(apiUrl, transactions, searchedOption
         });
 }
 
-export default async function fetchServices(apiUrl, transactions, searchedOptions) {
+export default async function fetchServices(apiUrl, transactions = {current: new ServiceTransactions()}, searchedOptions) {
 
     return fetch(`${apiUrl}/api/workshop-services`, {mode: 'cors'})
           .then(res => res.json())

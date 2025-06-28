@@ -54,10 +54,10 @@ export function applyFilterOnServices(selectedSearchOptions=[], selectedSearchDa
     }
 
     for (const item of ws.sparePartUsages || []) {
-      if (selectedSearchOptions.some(val => supplierOrders.byId[item.orderId]?.partName
+      if (selectedSearchOptions.some(val => supplierOrders.byId(item.orderId)?.partName
           .toUpperCase().includes(val.name.toUpperCase()))
         || selectedSearchOptions.some(val => val.name.toUpperCase().includes(
-            supplierOrders.byId[item.orderId]?.partName.toUpperCase()))) {
+            supplierOrders.byId(item.orderId)?.partName.toUpperCase()))) {
         foundSpareParts = true
         break
       }

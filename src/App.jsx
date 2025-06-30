@@ -64,8 +64,13 @@ function App() {
   const [searchOptions, setSearchOptions] = useState([])
   const [selectedSearchOptions, setSelectedSearchOptions] = useState([])
   const searchedOptions = useRef(new Set())
+  const clearCount = () => {
+    setTotalFilteredOrders(0)
+    setTotalFilteredServices(0)
+  }
   const storeSelectedSearchOptions = (opts=[]) => {
     setSelectedSearchOptions([...opts])
+    clearCount()
     if (opts && opts.length > 0) {
       opts.forEach(opt => searchedOptions.current.add(opt.name))
     }
@@ -89,12 +94,14 @@ function App() {
     if (!options || options.length === 0) {
       clearTimeout(filterTimeoutRef.current)
       storeSelectedSearchOptions([])
+      clearCount()
       return
     }
 
     if (options.length === searchedOptions.current.size && 
           options.map(opt => opt.name).every(v => searchedOptions.current.has(v))) {
-      setSelectedSearchOptions(options)
+      setSelectedSearchOptions([...options])
+      clearCount()
     }
     else {
       clearTimeout(filterTimeoutRef.current)

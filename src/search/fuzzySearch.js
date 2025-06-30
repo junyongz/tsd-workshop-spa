@@ -33,7 +33,7 @@ export function applyFilterOnOrders(selectedSearchOptions=[], selectedSearchDate
         ) && (!selectedSupplier || o.supplierId === selectedSupplier.id))
 }
 
-export function applyFilterOnServices(selectedSearchOptions=[], selectedSearchDate, services=[], supplierOrders=new SupplierOrders()) {
+export function applyFilterOnServices(selectedSearchOptions=[], selectedSearchDate, vehicles=[{vehicleNo:''}], services=[], supplierOrders=new SupplierOrders()) {
   if (selectedSearchDate) {
     return services.filter(ws => ws.startDate === selectedSearchDate)
   }
@@ -41,6 +41,10 @@ export function applyFilterOnServices(selectedSearchOptions=[], selectedSearchDa
   if (!selectedSearchOptions || selectedSearchOptions.length === 0) {
     return services
   }
+
+  const vehicleNosMatching = selectedSearchOptions.map(so => vehicles.findIndex(veh => veh.vehicleNo === so.name) >= 0)
+  const allSearchOptionsAreVehicles = vehicleNosMatching.every(p => p)
+  const atLeastOneSearchOptionIsVehicle = vehicleNosMatching.some(p => p)
 
   return services.filter(ws => {
     const vehicleMatched = selectedSearchOptions.some(val => ws.vehicleNo === val.name)
@@ -64,8 +68,8 @@ export function applyFilterOnServices(selectedSearchOptions=[], selectedSearchDa
       }
     }
 
-    return (vehicleMatched && selectedSearchOptions.length > 1)
+    return (vehicleMatched && selectedSearchOptions.length > 1 && (allSearchOptionsAreVehicles || foundSpareParts))
             || (vehicleMatched && selectedSearchOptions.length === 1)
-            || (!vehicleMatched && selectedSearchOptions.length >= 1 && foundSpareParts)
+            || ((!vehicleMatched && !atLeastOneSearchOptionIsVehicle) && selectedSearchOptions.length >= 1 && foundSpareParts)
   })
 }

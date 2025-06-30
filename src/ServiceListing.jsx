@@ -20,10 +20,10 @@ function ServiceListing({services, transactions = {current: new ServiceTransacti
     setTotalFilteredServices,
     refreshSparePartUsages=() => {}, 
     refreshSpareParts=() => {},
-    vehicles, setVehicles, spareParts, sparePartUsages=[],
+    vehicles=[{vehicleNo:''}], setVehicles, spareParts, sparePartUsages=[],
     orders=new SupplierOrders(), suppliers=[], taskTemplates=[],
     onNewVehicleCreated=() => {}, setLoading=()=>{},
-    selectedSearchOptions, setSelectedSearchOptions, 
+    selectedSearchOptions=[{name:''}], setSelectedSearchOptions, 
     selectedSearchDate,
     onNewServiceCreated, removeTask}) {
 
@@ -34,7 +34,7 @@ function ServiceListing({services, transactions = {current: new ServiceTransacti
   const serviceTransaction = useRef()
 
   const [activePage, setActivePage] = useState(1)
-  const filteredServices = applyFilterOnServices(selectedSearchOptions, selectedSearchDate, services, orders)
+  const filteredServices = applyFilterOnServices(selectedSearchOptions, selectedSearchDate, vehicles, services, orders)
   const chunkedItems = chunkArray(filteredServices, 10)
   const totalPages = chunkedItems.length;
 

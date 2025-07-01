@@ -69,7 +69,7 @@ function App() {
     setTotalFilteredServices(0)
   }
   const storeSelectedSearchOptions = (opts=[]) => {
-    setSelectedSearchOptions([...opts])
+    setSelectedSearchOptions(opts)
     clearCount()
     if (opts && opts.length > 0) {
       opts.forEach(opt => searchedOptions.current.add(opt.name))
@@ -91,8 +91,8 @@ function App() {
 
   // to be used on .filter
   const filterServices = (options=[]) => {
+    clearTimeout(filterTimeoutRef.current)
     if (!options || options.length === 0) {
-      clearTimeout(filterTimeoutRef.current)
       storeSelectedSearchOptions([])
       clearCount()
       return
@@ -100,11 +100,10 @@ function App() {
 
     if (options.length === searchedOptions.current.size && 
           options.map(opt => opt.name).every(v => searchedOptions.current.has(v))) {
-      setSelectedSearchOptions([...options])
+      setSelectedSearchOptions(options)
       clearCount()
     }
     else {
-      clearTimeout(filterTimeoutRef.current)
       filterTimeoutRef.current = setTimeout(() => doFilterServices(
         options, transactions, storeSelectedSearchOptions), 600)
     }
@@ -144,7 +143,11 @@ function App() {
 
   const refreshSpareParts = useCallback(() => fetchSpareParts(apiUrl, setSpareParts, setOrderSpareParts), [apiUrl])
 
-  const refreshServices = useCallback(() => fetchServices(apiUrl, transactions, searchedOptions), [apiUrl])
+  const refreshServices = useCallback(() =>
+      selectedSearchOptions.length > 0
+          ? fetchServices(apiUrl, transactions, searchedOptions).then(() => filterServices(selectedSearchOptions))
+          : fetchServices(apiUrl, transactions, searchedOptions)
+  , [apiUrl, selectedSearchOptions])
   const refreshFewPagesServices = useCallback(() => fetchFewPagesServices(apiUrl, transactions, searchedOptions), [apiUrl])
 
   const refreshSupplierSpareParts = useCallback(() => fetchSupplierSpareParts(apiUrl, supplierOrders), [apiUrl])
@@ -178,6 +181,10 @@ function App() {
         })
       })
 
+      return () => clearTimeout(sparePartFetchTimer)
+  }, []);
+
+  useEffect(() => {
       const fetchStatsTimer = setInterval(() => {
         autoRefreshWorker(setLoading, 
           {
@@ -189,12 +196,8 @@ function App() {
         )
       }, 30000)
 
-      return () => { 
-        clearInterval(fetchStatsTimer)
-        clearTimeout(sparePartFetchTimer)
-    };
-      
-  }, [refreshServices, refreshSupplierSpareParts, refreshSparePartUsages, refreshCompanies, refreshSpareParts, apiUrl]);
+      return () => clearInterval(fetchStatsTimer)
+  }, [refreshServices])
 
   useEffect(() => {
     let loadingTimer 

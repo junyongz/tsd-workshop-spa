@@ -204,7 +204,7 @@ function ServiceListing({services, transactions = {current: new ServiceTransacti
       setActivePage(1)
       setTotalFilteredServices(filteredServices.length)
     }
-  }, [selectedSearchOptions, selectedSearchDate])
+  }, [services, selectedSearchOptions, selectedSearchDate])
 
   return (
       <Container fluid>

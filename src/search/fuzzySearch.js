@@ -1,6 +1,7 @@
+import ServiceTransactions from "../ServiceTransactions"
 import SupplierOrders from "../suppliers/SupplierOrders"
 
-export const doFilterServices = (options=[], transactions, setSelectedSearchOptions) => {
+export const doFilterServices = (options=[], transactions = {current: new ServiceTransactions()}, setSelectedSearchOptions) => {
     const apiUrl = process.env.REACT_APP_API_URL
 
     if (transactions.current) {

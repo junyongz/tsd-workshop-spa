@@ -1,6 +1,6 @@
 export default function saveService( 
     setLoading, transactions, 
-    refreshSpareParts, refreshSparePartUsages,
+    refreshSparePartUsages,
     clearState, service
 ) {
     const apiUrl = process.env.REACT_APP_API_URL
@@ -24,7 +24,7 @@ export default function saveService(
       .then(service => {
         transactions.current.addNewTransaction(service)
       })
-      .then(() => Promise.all([refreshSpareParts(), refreshSparePartUsages()]))
+      .then(() => refreshSparePartUsages())
       .then(() => clearState())
       .finally(() => setLoading(false))
     })

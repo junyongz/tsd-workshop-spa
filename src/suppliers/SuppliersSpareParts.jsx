@@ -8,15 +8,15 @@ import NoteTakingDialog from "./NoteTakingDialog"
 import { clearState } from "../autoRefreshWorker"
 import SparePartNotes from "./SparePartNotes"
 import SupplierSparePartsYearMonthView from "./SupplierSparePartsYearMonthView"
-import { Calendar, EmptyBox, Suppliers, Tools, Truck } from "../Icons"
+import { Calendar, EmptyBox, Notes, Suppliers, Tools, Truck } from "../Icons"
 import ResponsivePagination from "../components/ResponsivePagination"
 import PromptDeletionIcon from "../components/PromptDeletionIcon"
 import SupplierOrders from "./SupplierOrders"
 import { applyFilterOnOrders } from "../search/fuzzySearch"
 
 function SuppliersSpareParts({orders=[], setTotalFilteredOrders, 
-    selectedSearchOptions=[], selectedSearchDate, supplierOrders = {current: new SupplierOrders()}, suppliers=[], spareParts=[], vehicles=[], sparePartUsages=[],
-    refreshSpareParts=() => {}, refreshSparePartUsages=() =>{}, refreshServices=()=>{},
+    selectedSearchOptions=[], selectedSearchDate, supplierOrders = {current: new SupplierOrders()}, suppliers=[], vehicles=[], sparePartUsages=[],
+    refreshSparePartUsages=() =>{}, refreshServices=()=>{},
     onNewVehicleCreated=() => {}, setLoading=()=>{}, showToastMessage}) {
     const apiUrl = process.env.REACT_APP_API_URL
 
@@ -84,7 +84,6 @@ function SuppliersSpareParts({orders=[], setTotalFilteredOrders,
             .then(ordersJson => {
                 supplierOrders.current.updateOrders(ordersJson)
             })
-            .then(() => refreshSpareParts())
             .then(() => callback && callback())
             .then(() => clearState())
             .catch(e => showToastMessage('failed to save orders: ' + e))
@@ -128,7 +127,6 @@ function SuppliersSpareParts({orders=[], setTotalFilteredOrders,
             .then(_ => {
                 supplierOrders.current.removeOrder(order)
                 return Promise.all([refreshSparePartUsages(),
-                refreshSpareParts(),
                 refreshServices()])
             })
             .then(() => clearState())
@@ -161,7 +159,6 @@ function SuppliersSpareParts({orders=[], setTotalFilteredOrders,
                     supplierOrders.current.updateOrders(json)
                 }
             })
-            .then(() => refreshSpareParts())
             .then(() => clearState())
             .finally(() => setLoading(false))
         })
@@ -218,7 +215,6 @@ function SuppliersSpareParts({orders=[], setTotalFilteredOrders,
                 <AddSparePartsDialog isShow={showDialog} 
                     setShowDialog={setShowDialog}
                     suppliers={suppliers}
-                    spareParts={spareParts}
                     supplierOrders={supplierOrders.current}
                     existingOrder={existingOrder}
                     onSaveNewOrders={onSaveNewOrders}
@@ -245,8 +241,8 @@ function SuppliersSpareParts({orders=[], setTotalFilteredOrders,
                 </Col>
                 <Col className="text-end">
                     <ButtonGroup className='responsive-width-50'>
-                        <Button variant="secondary" onClick={() => setOverview(true)}><i className="bi bi-card-heading me-2"></i>Overview</Button>
-                        <Button variant='success' onClick={() => setShowDialog(!showDialog)}><i className="bi bi-plus-circle-fill me-2"></i>Add New</Button>
+                        <Button variant="secondary" onClick={() => setOverview(true)}><i className="bi bi-card-heading"></i> Overview</Button>
+                        <Button variant='success' onClick={() => setShowDialog(!showDialog)}><i className="bi bi-plus-circle-fill"></i> Add New</Button>
                     </ButtonGroup>
                 </Col>
             </Row> }
@@ -286,7 +282,7 @@ function SuppliersSpareParts({orders=[], setTotalFilteredOrders,
                                     <Col xs="6" md="2"><Calendar /> Invoice Date</Col>
                                     <Col xs="6" md="2"><Suppliers /> Supplier</Col>
                                     <Col xs="12" md="4"><Tools /> Particular</Col>
-                                    <Col xs="6" md="3"><i className="bi bi-card-text"></i> Notes</Col>
+                                    <Col xs="6" md="3"><Notes /> Notes</Col>
                                     <Col xs="6" md="1"></Col>
                                 </Row>
                         </ListGroupItem>

@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { Button, Col, Container, Form, InputGroup, Modal, Row } from "react-bootstrap";
-import { NoteTaking } from "../Icons";
+import { Notes, NoteTaking } from "../Icons";
 import TransactionTypes from "../components/TransactionTypes";
 
 function ServiceNoteTakingDialog({isShow, setShowDialog, ws, onSaveNote}) {
@@ -27,7 +27,7 @@ function ServiceNoteTakingDialog({isShow, setShowDialog, ws, onSaveNote}) {
         <Modal show={isShow} onHide={handleClose} size="lg">
             <Modal.Header closeButton>
             <Modal.Title>
-                <div><i className="bi bi-card-text"></i> {ws.vehicleNo} started since {ws.startDate} <TransactionTypes service={ws}/></div>
+                <div><Notes /> {ws.vehicleNo} started since {ws.startDate} <TransactionTypes service={ws}/></div>
             </Modal.Title>
             </Modal.Header>
             <Modal.Body>

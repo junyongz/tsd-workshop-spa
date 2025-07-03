@@ -5,7 +5,7 @@ import remainingQuantity, { decimalPointUomAvailable } from "../utils/quantityUt
 import SupplierOrders from "../suppliers/SupplierOrders";
 
 export default function SparePartsSubDialog({
-    items, setItems, spareParts, orders=new SupplierOrders(), suppliers, sparePartUsages, sparePartsMargin
+    items, setItems, orders=new SupplierOrders(), suppliers, sparePartUsages, sparePartsMargin
 }) {
     const afterChooseSparePart = ([sparePart], i) => {
         setItems(prevs => {
@@ -52,21 +52,16 @@ export default function SparePartsSubDialog({
                             labelKey={(option) => 
                                 `${(option.itemCode && !option.partName.includes(option.itemCode)) ? (option.itemCode + ' ') : ''}${option.partName}`
                             }
-                            options={spareParts}
+                            options={orders.list().filter(mo => remainingQuantity(mo, sparePartUsages) > 0)}
                             onChange={(opts) => afterChooseSparePart(opts, i)}
                             placeholder="Find a spare part..."
-                            renderMenuItemChildren={(option) => {
-                                const order = orders.byId(option.orderId)
-                                const supplier = suppliers.find(s => s.id === option.supplierId)
+                            renderMenuItemChildren={(order) => {
+                                const supplier = suppliers.find(s => s.id === order.supplierId)
                                 const quantityLeft = remainingQuantity(order, sparePartUsages)
-                                    
-                                if (quantityLeft === 0) {
-                                    return;
-                                }
 
                                 return <div>
-                                    <div>{ order.itemCode && !order.partName.includes(order.itemCode) && <span className='text-secondary'>{order.itemCode}&nbsp;</span> } {option.partName}</div>
-                                    <small className="text-secondary">${option.unitPrice} / {quantityLeft} left / <Suppliers /> {supplier.supplierName} / {order.invoiceDate}</small>
+                                    <div>{ order.itemCode && !order.partName.includes(order.itemCode) && <span className='text-secondary'>{order.itemCode}&nbsp;</span> } {order.partName}</div>
+                                    <small className="text-secondary">${order.unitPrice} / {quantityLeft} left / <Suppliers /> {supplier.supplierName} / {order.invoiceDate}</small>
                                 </div>
                                 }
                             }
@@ -77,7 +72,7 @@ export default function SparePartsSubDialog({
                     </Col>
                     <Col xs="6" xl="2" className="mb-3 mb-xl-0">
                         <InputGroup>
-                            <Form.Control onChange={(e) => updatePriceByQuantity(e.target.value, i)} required step={decimalPointUomAvailable(v?.unit) ? 0.1 : 1} type="number" name="quantity" min="1" max={(v.selectedSpareParts[0] && remainingQuantity(orders.byId(v.selectedSpareParts[0].orderId), sparePartUsages)) || 0} placeholder="Quantity" value={v?.quantity}/>
+                            <Form.Control onChange={(e) => updatePriceByQuantity(e.target.value, i)} required step={decimalPointUomAvailable(v?.unit) ? 0.1 : 1} type="number" name="quantity" min="1" max={(v.selectedSpareParts[0] && remainingQuantity(v.selectedSpareParts[0], sparePartUsages)) || 0} placeholder="Quantity" value={v?.quantity}/>
                             <InputGroup.Text>{v?.unit}</InputGroup.Text>
                         </InputGroup>
                     </Col>

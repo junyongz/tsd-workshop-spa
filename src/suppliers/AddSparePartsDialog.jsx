@@ -6,7 +6,7 @@ import { Calendar, Dollar, Suppliers, Tools } from "../Icons";
 import PromptDeletionIcon from "../components/PromptDeletionIcon";
 import SupplierOrders from "./SupplierOrders";
 
-function AddSparePartsDialog({isShow, setShowDialog, orders=new SupplierOrders(), existingOrder=[], suppliers=[], spareParts=[], sparePartUsages=[], onSaveNewOrders}) {
+function AddSparePartsDialog({isShow, setShowDialog, supplierOrders=new SupplierOrders(), existingOrder=[], suppliers=[], sparePartUsages=[], onSaveNewOrders}) {
     const formRef = useRef()
     const [validated, setValidated] = useState(false)
 
@@ -18,10 +18,8 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=new SupplierOrders()
     const editing = items && items[0]?.deliveryOrderNo
 
     const [selectedSupplier, setSelectedSupplier] = useState([])
-    const [sparePartsSelection, setSparePartsSelection] = useState(spareParts)
 
     const dialogOpened = () => {
-        setSparePartsSelection(spareParts)
     }
 
     const handleClose = () => {
@@ -67,7 +65,8 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=new SupplierOrders()
                     quantity: v.quantity,
                     unit: v.unit,
                     unitPrice: parseFloat(v.unitPrice),
-                    totalPrice: v.quantity * v.unitPrice
+                    totalPrice: v.quantity * v.unitPrice,
+                    sparePartId: v.sparePartId
                 }
             })
         
@@ -93,31 +92,29 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=new SupplierOrders()
         })
     }
 
-    const afterChooseSupplier = ([supplier]) => {
-        if (supplier) {
-            setSelectedSupplier([supplier])
-            setSparePartsSelection((spareParts.filter(sp => sp.supplierId === supplier.id)) || spareParts)
-        }
-        else {
-            setSelectedSupplier([])
-            setSparePartsSelection(spareParts)
-        }
+    // retain sparePartId at all cost! oh well
+    // make sure dont delete the one in SupplierOrders
+    const deleteExistingFields = (sparePart) => {
+        delete sparePart.id // we dont want the item.id get replaced
+        delete sparePart.supplierId
+        delete sparePart.invoiceDate
+        delete sparePart.quantity
+        delete sparePart.deliveryOrderNo
+        delete sparePart.notes
     }
 
     const afterChooseItemCode = ([sparePart], i) => {
         if (sparePart && suppliers.findIndex(s => s.id === sparePart.supplierId) >= 0) {
             setSelectedSupplier([suppliers.find(s => s.id === sparePart.supplierId)])
         }
-        if (sparePart && sparePart.id) {
-            delete sparePart.id // we dont want the item.id get replaced
-        }
         setItems(prevs => {
             const newItem = [...prevs]
             newItem[i] = {...prevs[i], ...sparePart, 
                 selectedSparePart: (sparePart && 
-                    spareParts.findIndex(sp => sp.itemCode === sparePart.itemCode) >= 0 
-                    && spareParts.filter(sp => sp.itemCode === sparePart.itemCode)) || [...prevs[i].selectedSparePart], 
+                    supplierOrders.list().findIndex(sp => sp.itemCode === sparePart.itemCode) >= 0 
+                    && supplierOrders.list().filter(sp => sp.itemCode === sparePart.itemCode)) || [...prevs[i].selectedSparePart], 
                 selectedItemCode: (sparePart && [sparePart]) || []}
+            deleteExistingFields(newItem[i])
             return newItem
         })
     }
@@ -126,14 +123,12 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=new SupplierOrders()
         if (sparePart && suppliers.findIndex(s => s.id === sparePart.supplierId) >= 0) {
             setSelectedSupplier([suppliers.find(s => s.id === sparePart.supplierId)])
         }
-        if (sparePart && sparePart.id) {
-            delete sparePart.id // we dont want the item.id get replaced
-        }
         setItems(prevs => {
             const newItem = [...prevs]
             newItem[i] = {...prevs[i], ...sparePart, 
                 selectedSparePart: (sparePart && [sparePart]) || [], 
                 selectedItemCode: (sparePart && sparePart.itemCode && [sparePart]) || [...prevs[i].selectedItemCode]}
+            deleteExistingFields(newItem[i])
             return newItem
         })
     }
@@ -216,7 +211,7 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=new SupplierOrders()
                                         id="supplier-select"
                                         labelKey='supplierName'
                                         options={suppliers}
-                                        onChange={(supplier) => afterChooseSupplier(supplier)}
+                                        onChange={setSelectedSupplier}
                                         placeholder="Choose a supplier"
                                         selected={selectedSupplier}
                                         disabled={editing}
@@ -251,7 +246,9 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=new SupplierOrders()
                                             <Typeahead
                                                 inputProps={{name: 'itemCode'}}
                                                 labelKey='itemCode'
-                                                options={sparePartsSelection.filter(v => !!v.itemCode)}
+                                                options={supplierOrders.list()
+                                                    .filter(mo => selectedSupplier.length > 0 ? mo.supplierId === selectedSupplier[0].id : true)
+                                                    .filter(mo => !!mo.itemCode)}
                                                 onChange={(opts) => afterChooseItemCode(opts, i)}
                                                 placeholder="Key in item code"
                                                 clearButton
@@ -268,13 +265,13 @@ function AddSparePartsDialog({isShow, setShowDialog, orders=new SupplierOrders()
                                             <Typeahead
                                                 inputProps={{required: true, name: 'partName'}}
                                                 labelKey='partName'
-                                                options={sparePartsSelection}
+                                                options={supplierOrders.list().filter(mo => selectedSupplier.length > 0 ? mo.supplierId === selectedSupplier[0].id : true)}
                                                 onChange={(opts) => afterChooseSparePart(opts, i)}
                                                 placeholder="Find a existing one as template"
                                                 renderMenuItemChildren={(option) => 
                                                     <div>
                                                         <div>{option.partName}</div>
-                                                        <small className="text-secondary">${option?.unitPrice} per {option?.unit} | <Calendar /> {orders.byId(option.orderId)?.invoiceDate}</small>
+                                                        <small className="text-secondary">${option?.unitPrice} per {option?.unit} | <Calendar /> {option.invoiceDate}</small>
                                                     </div>
                                                 }
                                                 clearButton

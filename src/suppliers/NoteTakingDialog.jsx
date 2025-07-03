@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { Button, Col, Container, Form, InputGroup, Modal, Row } from "react-bootstrap";
+import { Notes } from "../Icons";
 
 function NoteTakingDialog({isShow, setShowDialog, onUpdateOrder=()=>{}, noteSparePart}) {
     const formRef = useRef()
@@ -25,7 +26,7 @@ function NoteTakingDialog({isShow, setShowDialog, onUpdateOrder=()=>{}, noteSpar
         <Modal show={isShow} onHide={handleClose} size="lg">
             <Modal.Header closeButton>
             <Modal.Title>
-                <div><i className="bi bi-card-text"></i> {noteSparePart.partName} ({noteSparePart.remaining} left)</div>
+                <div><Notes /> {noteSparePart.partName} ({noteSparePart.remaining} left)</div>
                 <div className="text-body-secondary fs-6">Order {noteSparePart.deliveryOrderNo} from {noteSparePart.supplierName} @ {noteSparePart.invoiceDate} </div>
             </Modal.Title>
             </Modal.Header>

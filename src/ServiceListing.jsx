@@ -19,8 +19,7 @@ import ServiceTransactions from './ServiceTransactions';
 function ServiceListing({services, transactions = {current: new ServiceTransactions()},
     setTotalFilteredServices,
     refreshSparePartUsages=() => {}, 
-    refreshSpareParts=() => {},
-    vehicles=[{vehicleNo:''}], setVehicles, spareParts, sparePartUsages=[],
+    vehicles=[{vehicleNo:''}], setVehicles, sparePartUsages=[],
     orders=new SupplierOrders(), suppliers=[], taskTemplates=[],
     onNewVehicleCreated=() => {}, setLoading=()=>{},
     selectedSearchOptions=[{name:''}], setSelectedSearchOptions, 
@@ -102,7 +101,7 @@ function ServiceListing({services, transactions = {current: new ServiceTransacti
         }
         transactions.current.removeTransaction(serviceId, sparePartUsageId)
       })
-      .then(() => Promise.all([refreshSpareParts(), refreshSparePartUsages()]))
+      .then(() => refreshSparePartUsages())
       .then(() => clearState())
       .finally(() => setLoading(false))
     })
@@ -211,7 +210,7 @@ function ServiceListing({services, transactions = {current: new ServiceTransacti
       <ServiceDialog isShow={showModal} setShow={setShowModal} trx={serviceTransaction} 
         onNewServiceCreated={onNewServiceCreated} 
         vehicles={vehicles} setVehicles={setVehicles} 
-        spareParts={spareParts} taskTemplates={taskTemplates}
+        taskTemplates={taskTemplates}
         orders={orders}
         suppliers={suppliers}
         sparePartUsages={sparePartUsages}

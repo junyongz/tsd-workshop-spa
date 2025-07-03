@@ -89,7 +89,6 @@ describe('SuppliersSpareParts Component', () => {
         spareParts: [],
         vehicles: [],
         sparePartUsages: [],
-        refreshSpareParts: jest.fn(),
         refreshSparePartUsages: jest.fn(),
         refreshServices: jest.fn(),
         onNewVehicleCreated: jest.fn(),
@@ -207,7 +206,6 @@ describe('SuppliersSpareParts Component', () => {
           body: JSON.stringify(newOrders)
         })
       );
-      expect(defaultProps.refreshSpareParts).toHaveBeenCalled();
       expect(defaultProps.supplierOrders.current.list()).toHaveLength(6);
     });
 

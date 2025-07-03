@@ -3,7 +3,6 @@ import { Route, Routes} from 'react-router-dom';
 import ServiceListing from './ServiceListing';
 import Spinner from 'react-bootstrap/Spinner';
 import SuppliersSpareParts from './suppliers/SuppliersSpareParts';
-import fetchSpareParts from './spare-parts/fetchSpareParts';
 
 import './App.css'
 import fetchCompanies from './companies/fetchCompanies';
@@ -82,10 +81,7 @@ function App() {
   const [companies, setCompanies] = useState([])
   const [suppliers, setSuppliers] = useState([])
   const [vehicles, setVehicles] = useState([])
-  const [spareParts, setSpareParts] = useState([])
   const [taskTemplates, setTaskTemplates] = useState([])
-  // for ordering purpose, adding for service can only take addAllowed = true
-  const [orderSpareParts, setOrderSpareParts] = useState([])
   
   const filterTimeoutRef = useRef()
 
@@ -141,8 +137,6 @@ function App() {
 
   const refreshSparePartUsages = useCallback(() => fetchSparePartUsages(apiUrl, setSparePartUsages, showToastMessage), [apiUrl])
 
-  const refreshSpareParts = useCallback(() => fetchSpareParts(apiUrl, setSpareParts, setOrderSpareParts), [apiUrl])
-
   const refreshServices = useCallback(() =>
       selectedSearchOptions.length > 0
           ? fetchServices(apiUrl, transactions, searchedOptions).then(() => filterServices(selectedSearchOptions))
@@ -153,7 +147,7 @@ function App() {
   const refreshSupplierSpareParts = useCallback(() => fetchSupplierSpareParts(apiUrl, supplierOrders), [apiUrl])
   const refreshWithUsageSupplierSpareParts = useCallback(() => fetchWithUsageSupplierSpareParts(apiUrl, supplierOrders), [apiUrl])
 
-  const onNewServiceCreated = saveService.bind(this, setLoading, transactions, refreshSpareParts, refreshSparePartUsages, clearState)
+  const onNewServiceCreated = saveService.bind(this, setLoading, transactions, refreshSparePartUsages, clearState)
   const removeTask = removeServiceTask.bind(this, setLoading, transactions, clearState);
 
   useEffect(() => {
@@ -173,10 +167,8 @@ function App() {
         .then( () => setLoading(false) ))
         .then(() => {
           sparePartFetchTimer = setTimeout(() => {
-            Promise.all([
-              refreshSupplierSpareParts(),
-              refreshSpareParts()
-            ]).then(() => refreshServices())
+              refreshSupplierSpareParts()
+              .then(() => refreshServices())
           })
         })
       })
@@ -190,7 +182,6 @@ function App() {
           {
             'workshop_service': refreshServices,
             'mig_supplier_spare_parts': refreshSupplierSpareParts,
-            'mig_spare_parts': refreshSpareParts,
             'spare_part_usages': refreshSparePartUsages,
           }
         )
@@ -241,7 +232,6 @@ function App() {
               setTotalFilteredServices={setTotalFilteredServices}
               vehicles={vehicles}
               setVehicles={setVehicles}
-              spareParts={spareParts}
               taskTemplates={taskTemplates}
               setSelectedSearchOptions={setSelectedSearchOptions}
               selectedSearchOptions={selectedSearchOptions}
@@ -250,7 +240,6 @@ function App() {
               suppliers={suppliers}
               sparePartUsages={sparePartUsages}
               refreshSparePartUsages={refreshSparePartUsages}
-              refreshSpareParts={refreshSpareParts}
               onNewVehicleCreated={onNewVehicleCreated}
               setLoading={setLoading}
               onNewServiceCreated={onNewServiceCreated}
@@ -281,10 +270,8 @@ function App() {
               supplierOrders={supplierOrders} 
               setTotalFilteredOrders={setTotalFilteredOrders}
               suppliers={suppliers} 
-              spareParts={orderSpareParts} 
               vehicles={vehicles}
               sparePartUsages={sparePartUsages}
-              refreshSpareParts={refreshSpareParts}
               refreshSparePartUsages={refreshSparePartUsages}
               refreshServices={refreshServices}
               onNewVehicleCreated={onNewVehicleCreated}

@@ -66,6 +66,26 @@ class SupplierOrders {
         this.#doSetOrders()
     }
 
+    updateOrdersSparePartId(sparePartId=1000, orderIds=[]) {
+        this.#ordersList.filter(o => o.sparePartId === sparePartId)
+            .map(o => {
+                delete o.sparePartId 
+                return o
+            })
+            .forEach(o => {
+                const idx = this.forIndex(o.id)
+                this.#ordersList[idx] = o
+            })
+
+        orderIds.forEach(oid => {
+            const idx = this.forIndex(oid)
+            this.#ordersList[idx].sparePartId = sparePartId
+        })
+
+        this.#refreshIndexes()
+        this.#doSetOrders()
+    }
+
     list() {
         return this.#ordersList
     }

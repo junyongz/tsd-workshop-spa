@@ -65,6 +65,10 @@ export function Camera() {
     return (<i className="bi bi-camera"></i>)
 }
 
+export function Medias() {
+    return (<i className="bi bi-image"></i>)
+}
+
 export function Download() {
     return (<i className="bi bi-download"></i>)
 }
@@ -75,4 +79,8 @@ export function Foreman() {
 
 export function EmptyBox() {
     return (<i className="bi bi-dropbox"></i>)
+}
+
+export function Notes() {
+    return (<i className="bi bi-card-text"></i>)
 }

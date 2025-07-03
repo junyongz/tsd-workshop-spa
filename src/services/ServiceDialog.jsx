@@ -8,7 +8,7 @@ import TaskSubDialog from "./TaskSubDialog";
 import SupplierOrders from "../suppliers/SupplierOrders";
 
 function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[], 
-    spareParts, orders=new SupplierOrders(), suppliers=[], sparePartUsages=[], taskTemplates=[],
+    orders=new SupplierOrders(), suppliers=[], sparePartUsages=[], taskTemplates=[],
     onNewVehicleCreated=() => {}}) {
 
     const apiUrl = process.env.REACT_APP_API_URL
@@ -147,7 +147,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
                     quantity: v.quantity,
                     soldPrice: parseFloat(v.unitPrice * (1+(selectedExistingService?.sparePartsMargin||0)/100)),
                     margin: selectedExistingService?.sparePartsMargin||0,
-                    orderId: v.selectedSpareParts[0].orderId,
+                    orderId: v.selectedSpareParts[0].id,
                 }
             }),
             tasks: (tasks || []).map(v => {
@@ -257,7 +257,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
                             sparePartsMargin={selectedExistingService?.sparePartsMargin}
                             items={items} setItems={setItems}
                             orders={orders} sparePartUsages={sparePartUsages}
-                            spareParts={spareParts} suppliers={suppliers} /></div>}
+                            suppliers={suppliers} /></div>}
                         {(tabView === 'workmanship' || tabView === 'all') && <TaskSubDialog tasks={tasks} setTasks={setTasks} taskTemplates={taskTemplates} />}
                         <Form.Control type="output" name="sparePartsCompleted" className="d-none" />
                         <Form.Control type="output" name="tasksCompleted" className="d-none" />

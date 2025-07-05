@@ -4,12 +4,13 @@ import { Company, Medias, Notes, NoteTaking, Suppliers, Tools, Trash, Truck } fr
 import SupplierOrders from "../suppliers/SupplierOrders"
 import SparePartMediaSubDialog from "./SparePartMediaSubDialog"
 import SparePartSupplierSubDialog from "./SparePartSupplierSubDialog"
+import { clearState } from "../autoRefreshWorker"
 
 function SparePartDialog({isShow, setShowDialog, 
         sparePart, setSparePart,
         orders=new SupplierOrders(), 
         suppliers=[{id: 1000, supplierName: ''}],
-        afterSave=() => {}}) {
+        afterSave=() => {}, afterRemoveMedia=() => {}}) {
 
     const apiUrl = process.env.REACT_APP_API_URL
 
@@ -29,13 +30,38 @@ function SparePartDialog({isShow, setShowDialog,
     const [activeSupplierId, setActiveSupplierId] = useState('')
     const [uploadedFiles, setUploadedFiles] = useState([])
 
+    const [uploadedMedias, setUploadedMedias] = useState([])
+
+    const subscribers = useRef([])
+    const subscribe = (callback) => {
+        subscribers.current.push(callback);
+        return () => subscribers.current = subscribers.current.filter((cb) => cb !== callback);
+    };
+    const postHandeClose = () => {
+        subscribers.current.forEach((callback) => callback());
+    };
+
     const onShowingDialog = () => {
         const matchedOrders = orders.list().filter(o => o.sparePartId === sparePart.id)
         // setSelectedSuppliers(sparePart.supplierIds.map(spid => suppliers.find(s => s.id === spid)))
-        setSelectedSuppliers(Array.from(new Set(matchedOrders.map(mo => mo.supplierId))).map(spid => suppliers.find(s => s.id === spid)))
+        setSelectedSuppliers(Array.from(new Set(matchedOrders.map(mo => mo.supplierId)))
+                    .map(spid => suppliers.find(s => s.id === spid)))
         setMatchingOrders(matchedOrders)
-        setActiveSupplierId(sparePart.supplierIds[0])
+        setActiveSupplierId(matchedOrders.length > 0 && matchedOrders[0].supplierId)
         setTabKey('detail')
+
+        if (sparePart && sparePart.id) {
+            fetch(`${apiUrl}/api/spare-parts/${sparePart.id}/medias`)
+                .then(resp => resp.json())
+                .then(medias => {
+                    Promise.allSettled(medias.map(md =>
+                        fetch(`${apiUrl}/api/spare-parts/${sparePart.id}/medias/${md.id}/data`)
+                            .then(resp => resp.blob())
+                            .then(blob => { return {...md, dataUrl: URL.createObjectURL(blob) } })
+                    ))
+                    .then(datas => setUploadedMedias(datas.map(res => res.value)))
+                })
+        }
     }
 
     const handleClose = () => {
@@ -44,6 +70,9 @@ function SparePartDialog({isShow, setShowDialog,
         setSparePart()
         setMaxSelectedOrdersShown(5)
         setUploadedFiles([])
+        uploadedMedias.forEach(media => URL.revokeObjectURL(media.dataUrl))
+        setUploadedMedias([])
+        postHandeClose()
     }
 
     const saveChange = () => {
@@ -85,6 +114,11 @@ function SparePartDialog({isShow, setShowDialog,
         })
         .then(res => res.json())
         .then(response => {
+            const doAfterSave = () => {
+                response.orderIds = sparePartToSave.orderIds
+                afterSave(response)
+            }
+
             if (uploadedFiles.length > 0) {
                 const formData = new FormData()
                 uploadedFiles.forEach(file => formData.append("file", file, file.name))
@@ -100,34 +134,38 @@ function SparePartDialog({isShow, setShowDialog,
                         throw new Error("uploaded media failed")
                     }
                 })
+                .finally(() => doAfterSave())
             }
-
-            response.orderIds = sparePartToSave.orderIds
-            afterSave(response)
+            else {
+                doAfterSave()
+            }
         })
-        .finally(() => handleClose())
+        .finally(() => {
+            handleClose()
+            clearState()
+        })
     }
 
     const afterKeyInPartNo = (val) => {
         setSparePart(sp => {
-            return {...sp, partNo: val, oems: [...sp.oems], compatibleTrucks: [...sp.compatibleTrucks], supplierIds: [...sp.supplierIds]}
+            return {...sp, partNo: val, oems: [...sp.oems], compatibleTrucks: [...sp.compatibleTrucks]}
         })
     }
 
     const afterKeyInPartName = (val) => {
         setSparePart(sp => {
-            return {...sp, partName: val, oems: [...sp.oems], compatibleTrucks: [...sp.compatibleTrucks], supplierIds: [...sp.supplierIds]}
+            return {...sp, partName: val, oems: [...sp.oems], compatibleTrucks: [...sp.compatibleTrucks]}
         })
     }
     const afterKeyInPartDescription = (val) => {
         setSparePart(sp => {
-            return {...sp, description: val, oems: [...sp.oems], compatibleTrucks: [...sp.compatibleTrucks], supplierIds: [...sp.supplierIds]}
+            return {...sp, description: val, oems: [...sp.oems], compatibleTrucks: [...sp.compatibleTrucks]}
         })
     }
 
     const addNewOem = () => {
         setSparePart(sp => {
-            return {...sp, oems: [...sp.oems, {}], compatibleTrucks: [...sp.compatibleTrucks], supplierIds: [...sp.supplierIds]}
+            return {...sp, oems: [...sp.oems, {}], compatibleTrucks: [...sp.compatibleTrucks]}
         })
     }
 
@@ -135,7 +173,7 @@ function SparePartDialog({isShow, setShowDialog,
         setSparePart(sp => {
             const newOems = [...sp.oems]
             newOems.splice(i, 1)
-            return {...sp, oems: newOems, compatibleTrucks: [...sp.compatibleTrucks], supplierIds: [...sp.supplierIds]}
+            return {...sp, oems: newOems, compatibleTrucks: [...sp.compatibleTrucks]}
         })
     }
 
@@ -143,7 +181,7 @@ function SparePartDialog({isShow, setShowDialog,
         setSparePart(sp => {
             const newOems = [...sp.oems]
             newOems[i].name = val
-            return {...sp, oems: newOems, compatibleTrucks: [...sp.compatibleTrucks], supplierIds: [...sp.supplierIds]}
+            return {...sp, oems: newOems, compatibleTrucks: [...sp.compatibleTrucks]}
         })  
     }
 
@@ -151,13 +189,13 @@ function SparePartDialog({isShow, setShowDialog,
         setSparePart(sp => {
             const newOems = [...sp.oems]
             newOems[i].url = val
-            return {...sp, oems: newOems, compatibleTrucks: [...sp.compatibleTrucks], supplierIds: [...sp.supplierIds]}
+            return {...sp, oems: newOems, compatibleTrucks: [...sp.compatibleTrucks]}
         })  
     }
 
     const addNewTruck = () => {
         setSparePart(sp => {
-            return {...sp, oems: [...sp.oems], compatibleTrucks: [...sp.compatibleTrucks, {}], supplierIds: [...sp.supplierIds]}
+            return {...sp, oems: [...sp.oems], compatibleTrucks: [...sp.compatibleTrucks, {}]}
         })
     }
 
@@ -165,7 +203,7 @@ function SparePartDialog({isShow, setShowDialog,
         setSparePart(sp => {
             const newTrucks = [...sp.compatibleTrucks]
             newTrucks.splice(i, 1)
-            return {...sp, oems: [...sp.oems], compatibleTrucks: newTrucks, supplierIds: [...sp.supplierIds]}
+            return {...sp, oems: [...sp.oems], compatibleTrucks: newTrucks}
         })
     }
 
@@ -173,7 +211,7 @@ function SparePartDialog({isShow, setShowDialog,
         setSparePart(sp => {
             const newTrucks = [...sp.compatibleTrucks]
             newTrucks[i].make = val
-            return {...sp, oems: [...sp.oems], compatibleTrucks: newTrucks, supplierIds: [...sp.supplierIds]}
+            return {...sp, oems: [...sp.oems], compatibleTrucks: newTrucks}
         })  
     }
 
@@ -181,7 +219,7 @@ function SparePartDialog({isShow, setShowDialog,
         setSparePart(sp => {
             const newTrucks = [...sp.compatibleTrucks]
             newTrucks[i].model = val
-            return {...sp, oems: [...sp.oems], compatibleTrucks: newTrucks, supplierIds: [...sp.supplierIds]}
+            return {...sp, oems: [...sp.oems], compatibleTrucks: newTrucks}
         })  
     }
 
@@ -299,8 +337,10 @@ function SparePartDialog({isShow, setShowDialog,
                                     orders={orders}
                                     suppliers={suppliers} />
                             </Tab>
-                            <Tab eventKey='gallery' title={<div><Medias /> Gallery {uploadedFiles.length > 0 && <Badge pill>{uploadedFiles.length}</Badge>}</div>}>
-                                <SparePartMediaSubDialog sparePart={sparePart} uploadedFiles={uploadedFiles} setUploadedFiles={setUploadedFiles} />
+                            <Tab eventKey='gallery' title={<div><Medias /> Gallery {(uploadedMedias.length > 0 || uploadedFiles.length > 0) && <Badge pill>{uploadedMedias.length + uploadedFiles.length}</Badge>}</div>}>
+                                <SparePartMediaSubDialog sparePart={sparePart} uploadedMedias={uploadedMedias} setUploadedMedias={setUploadedMedias} 
+                                    uploadedFiles={uploadedFiles} setUploadedFiles={setUploadedFiles} subscribe={subscribe}
+                                    afterRemoveMedia={afterRemoveMedia}/>
                             </Tab>
                         </Tabs>
                     </Form>

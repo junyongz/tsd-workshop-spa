@@ -8,7 +8,7 @@ export default function PhotoGallery({uploadedMedias}) {
             prevIcon={<Button><i className="bi bi-chevron-left"></i></Button>}>
             { uploadedMedias.map(v => 
                 <Carousel.Item key={v.id}>
-                    <Image src={v.dataUrl} className="d-block w-100" width={640} height={480}/>
+                    <Image src={v.dataUrl} className="d-block w-100" style={{width: '640px'}}/>
                     <Carousel.Caption>
                         <Button variant="success" onClick={() => {
                             const link = document.createElement('a')

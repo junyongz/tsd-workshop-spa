@@ -1,6 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import AddSparePartsDialog from '../AddSparePartsDialog';
+import SupplierOrders from '../SupplierOrders';
 
 describe('AddSparePartsDialog Component', () => {
   const mockSuppliers = [
@@ -8,14 +9,9 @@ describe('AddSparePartsDialog Component', () => {
     { id: 2, supplierName: 'Supplier B' }
   ];
 
-  const mockSpareParts = [
-    { id: 1, supplierId: 1, itemCode: 'ABC123', partName: 'Engine Oil', unitPrice: 50, unit: 'ltr', orderId: 1 },
-    { id: 2, supplierId: 2, itemCode: 'XYZ789', partName: 'Tire', unitPrice: 75, unit: 'pcs', orderId: 2 }
-  ];
-
   const mockOrders = [
-    { id: 1, invoiceDate: '2023-01-01' },
-    { id: 2, invoiceDate: '2023-01-02' }
+    { id: 1, supplierId: 1, invoiceDate: '2023-01-01', itemCode: 'ABC123', partName: 'Engine Oil', unitPrice: 50, unit: 'ltr'},
+    { id: 2, supplierId: 2, invoiceDate: '2023-01-02', itemCode: 'XYZ789', partName: 'Tire', unitPrice: 75, unit: 'pcs' }
   ];
 
   const mockSparePartUsages = [
@@ -25,10 +21,9 @@ describe('AddSparePartsDialog Component', () => {
   const defaultProps = {
     isShow: true,
     setShowDialog: jest.fn(),
-    orders: {byId: (id) => mockOrders.find(o => o.id === id)},
+    supplierOrders: new SupplierOrders(mockOrders, jest.fn()),
     existingOrder: undefined,
     suppliers: mockSuppliers,
-    spareParts: mockSpareParts,
     sparePartUsages: mockSparePartUsages,
     onSaveNewOrders: jest.fn()
   };

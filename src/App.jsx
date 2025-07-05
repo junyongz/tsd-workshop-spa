@@ -294,6 +294,7 @@ function App() {
             <SpareParts vehicles={vehicles} 
               orders={supplierOrders.current}
               suppliers={suppliers}
+              selectedSearchOptions={selectedSearchOptions}
             />} />
         </Routes>
         </Container>

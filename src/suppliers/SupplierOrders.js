@@ -69,7 +69,8 @@ class SupplierOrders {
     #doRemoveSparePart(sparePartId=1000) {
         this.#ordersList.filter(o => o.sparePartId === sparePartId)
             .map(o => {
-                delete o.sparePartId 
+                // null and undefined can be very different
+                o.sparePartId = null
                 return o
             })
             .forEach(o => {

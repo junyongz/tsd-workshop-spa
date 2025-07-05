@@ -55,7 +55,7 @@ export default function SpareParts({orders=new SupplierOrders(), suppliers=[], s
 
     const afterSave = (sparePart) => {
         const existing = spareParts.findIndex(sp => sp.id === sparePart.id)
-        const lastSparePart = existing >= 0 ? spareParts[spareParts.length - 1] : undefined
+        const lastSparePart = existing === -1 ? spareParts[spareParts.length - 1] : undefined
 
         setSpareParts(prev => {
             const newItems = [...prev]
@@ -65,13 +65,17 @@ export default function SpareParts({orders=new SupplierOrders(), suppliers=[], s
                 return newItems
             }
             else {
-                newItems.splice(newItems.length - 1, 1)
+                // only remove the last one, if there is more to load, it's ok to keep on adding
+                if (activePage !== totalPages) {
+                    newItems.splice(newItems.length - 1, 1)
+                }
                 return [sparePart, ...newItems]
             }
         })
 
+        // so not to load again for the same media
         if (lastSparePart) {
-            setUploadedMedias(prev => [...prev.filter(um => um.sparePart.id !== lastSparePart.id)])
+            setUploadedMedias(prev => [...prev.filter(um => um.sparePartId !== lastSparePart.id)])
         }
 
         // to add parameter to this function
@@ -110,35 +114,10 @@ export default function SpareParts({orders=new SupplierOrders(), suppliers=[], s
         })
         .then(resp => resp.json())
         .then(deleteId => {
-            fetch(`${apiUrl}/api/spare-parts?pageNumber=${activePage}&pageSize=${pageSize}`, {
-                mode: 'cors',
-                headers: {
-                    'Content-type': 'application/json'
-                }
-            })
-            .then(resp => {
-                setTotalCount(parseInt(resp.headers.get('X-Total-Elements')))
-                setTotalPages(parseInt(resp.headers.get('X-Total-Pages')))
-
-                return resp.json()
-            })
-            .then(spJson => {
-                setSpareParts(prev => {
-                    const newItems = [...prev]
-                    newItems.splice(newItems.findIndex(sp => sp.id === deleteId), 1)
-
-                    const lastSp = spJson[spJson.length-1]
-                    if (newItems[newItems.length - 1].id !== lastSp.id) {
-                        newItems.push(lastSp)
-                    }
-                    return newItems.sort((a, b) => b.creationDate - a.creationDate)
-                })
-            })
-            .finally(() => {
-                orders.removeSparePart(deleteId)
-            })
+            orders.removeSparePart(deleteId)
         })
         .finally(() => {
+            setActivePage(1)
             clearState()
         })
     }

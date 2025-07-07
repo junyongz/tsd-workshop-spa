@@ -3,7 +3,7 @@ import { Button, Card, Col, Container, Modal, Row, Stack } from "react-bootstrap
 import SupplierOrders from "../suppliers/SupplierOrders";
 import SparePartDialog from "./SparePartDialog";
 import PromptDeletionIcon from "../components/PromptDeletionIcon";
-import { Company, Suppliers, Truck } from "../Icons";
+import { Company, HandPointer, Suppliers, Truck } from "../Icons";
 import { clearState } from "../autoRefreshWorker";
 import PhotoGallery from "../components/PhotoGallery";
 
@@ -272,7 +272,7 @@ export default function SpareParts({orders=new SupplierOrders(), suppliers=[], s
         </Row>
         { activePage < totalPages  && <Row className="mb-3">
             <Col className="text-center">
-                <span role="button" id="more-button" onClick={() => setActivePage(prev => prev+1)}>Total {totalSpareParts} items. Continue to load more.</span>
+                <span role="button" id="more-button" onClick={() => setActivePage(prev => prev+1)}>Total {totalSpareParts} items. <HandPointer /> Click to load more.</span>
             </Col>
         </Row> }
         </Container>

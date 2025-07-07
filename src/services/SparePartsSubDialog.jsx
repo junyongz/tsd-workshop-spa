@@ -52,7 +52,7 @@ export default function SparePartsSubDialog({
                             labelKey={(option) => 
                                 `${(option.itemCode && !option.partName.includes(option.itemCode)) ? (option.itemCode + ' ') : ''}${option.partName}`
                             }
-                            options={orders.list().filter(mo => remainingQuantity(mo, sparePartUsages) > 0)}
+                            options={orders.list().filter(mo => remainingQuantity(mo, sparePartUsages) > 0).filter(mo => mo.status === 'ACTIVE')}
                             onChange={(opts) => afterChooseSparePart(opts, i)}
                             placeholder="Find a spare part..."
                             renderMenuItemChildren={(order) => {

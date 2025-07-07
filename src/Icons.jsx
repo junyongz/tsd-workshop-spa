@@ -84,3 +84,7 @@ export function EmptyBox() {
 export function Notes() {
     return (<i className="bi bi-card-text"></i>)
 }
+
+export function HandPointer() {
+    return (<i className="bi bi-hand-index-fill" />)
+}

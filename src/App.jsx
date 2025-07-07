@@ -298,6 +298,7 @@ function App() {
               orders={supplierOrders.current}
               suppliers={suppliers}
               selectedSearchOptions={selectedSearchOptions}
+              totalSpareParts={totalSpareParts}
               setTotalSpareParts={setTotalSpareParts}
             />} />
         </Routes>

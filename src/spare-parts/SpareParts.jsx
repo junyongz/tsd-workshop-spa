@@ -7,7 +7,7 @@ import { Company, Suppliers, Truck } from "../Icons";
 import { clearState } from "../autoRefreshWorker";
 import PhotoGallery from "../components/PhotoGallery";
 
-export default function SpareParts({orders=new SupplierOrders(), suppliers=[], selectedSearchOptions=[], setTotalSpareParts}) {
+export default function SpareParts({orders=new SupplierOrders(), suppliers=[], selectedSearchOptions=[], totalSpareParts=0, setTotalSpareParts}) {
     const apiUrl = process.env.REACT_APP_API_URL
 
     const [showSparePartDialog, setShowSparePartDialog] = useState(false)
@@ -272,7 +272,7 @@ export default function SpareParts({orders=new SupplierOrders(), suppliers=[], s
         </Row>
         { activePage < totalPages  && <Row className="mb-3">
             <Col className="text-center">
-                <span role="button" onClick={() => setActivePage(prev => prev+1)}>Load more... </span>
+                <span role="button" onClick={() => setActivePage(prev => prev+1)}>Total {totalSpareParts} items. Continue to load more.</span>
             </Col>
         </Row> }
         </Container>

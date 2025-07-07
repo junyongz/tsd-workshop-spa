@@ -6,7 +6,7 @@ import { Calendar, Foreman, Services, Suppliers, Tools, Truck } from "./Icons";
 export default function NavigationBar({
     showToastBox, setShowToastBox, toastBoxMessage,
     searchOptions, selectedSearchOptions, selectedSearchDate, setSelectedSearchDate, totalFilteredServices, totalFilteredOrders,
-    filterServices, searchByDate, setSearchByDate, clearFilterDate
+    filterServices, searchByDate, setSearchByDate, clearFilterDate, totalSpareParts
 }) {
     
     const location = useLocation()
@@ -40,7 +40,7 @@ export default function NavigationBar({
                     <Nav.Item><Nav.Link eventKey="schedules" onClick={() => navigate("/schedules")}><Calendar /> Schedules</Nav.Link></Nav.Item>
                     <Nav.Item><Nav.Link eventKey="orders" onClick={() => navigate("/orders")}><Suppliers /> Suppliers {(selectedSearchOptions.length > 0 || selectedSearchDate) && totalFilteredOrders > 0 && <Badge pill>{totalFilteredOrders}</Badge>}</Nav.Link></Nav.Item>
                     <Nav.Item><Nav.Link eventKey="vehicles" onClick={() => navigate("/vehicles")}><Truck /> Trucks</Nav.Link></Nav.Item>
-                    { process.env.NODE_ENV === 'development' && <Nav.Item><Nav.Link eventKey="spare-parts" onClick={() => navigate("/spare-parts")}><Tools /> Spare Parts</Nav.Link></Nav.Item> }
+                    <Nav.Item><Nav.Link eventKey="spare-parts" onClick={() => navigate("/spare-parts")}><Tools /> Spare Parts {totalSpareParts > 0 && <Badge pill>{totalSpareParts}</Badge>}</Nav.Link></Nav.Item>
                 </Nav>
                 <Form className="d-flex ms-auto responsive-width-50">
                 {!searchByDate &&

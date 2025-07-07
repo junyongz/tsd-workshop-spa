@@ -7,7 +7,7 @@ import { Company, Suppliers, Truck } from "../Icons";
 import { clearState } from "../autoRefreshWorker";
 import PhotoGallery from "../components/PhotoGallery";
 
-export default function SpareParts({orders=new SupplierOrders(), suppliers=[], selectedSearchOptions=[]}) {
+export default function SpareParts({orders=new SupplierOrders(), suppliers=[], selectedSearchOptions=[], setTotalSpareParts}) {
     const apiUrl = process.env.REACT_APP_API_URL
 
     const [showSparePartDialog, setShowSparePartDialog] = useState(false)
@@ -17,8 +17,13 @@ export default function SpareParts({orders=new SupplierOrders(), suppliers=[], s
 
     const pageSize = 4
     const [activePage, setActivePage] = useState(1)
-    const [totalCount, setTotalCount] = useState(-1)
     const [totalPages, setTotalPages] = useState(0)
+
+    const [prevSelectedSearchOptions, setPrevSelectedSearchOptions] = useState(selectedSearchOptions)
+    if (prevSelectedSearchOptions !== selectedSearchOptions) {
+        setActivePage(1)
+        setPrevSelectedSearchOptions(selectedSearchOptions)
+    }
 
     // update existing dont need to append, based on sparePart state (by id)
     // add new one, add to the beginning, and remove the last one
@@ -135,14 +140,16 @@ export default function SpareParts({orders=new SupplierOrders(), suppliers=[], s
     }
 
     useEffect(() => {
-        fetch(`${apiUrl}/api/spare-parts?pageNumber=${activePage}&pageSize=${pageSize}`, {
+        const keywords = selectedSearchOptions.map(opt => `keyword=${opt.name}`).join('&')
+
+        fetch(`${apiUrl}/api/spare-parts?pageNumber=${activePage}&pageSize=${pageSize}${keywords.trim().length > 0 ? ('&' + keywords) : ''}`, {
             mode: 'cors',
             headers: {
                 'Content-type': 'application/json'
             }
         })
         .then(resp => {
-            setTotalCount(parseInt(resp.headers.get('X-Total-Elements')))
+            setTotalSpareParts(parseInt(resp.headers.get('X-Total-Elements')))
             setTotalPages(parseInt(resp.headers.get('X-Total-Pages')))
 
             return resp.json()
@@ -164,7 +171,15 @@ export default function SpareParts({orders=new SupplierOrders(), suppliers=[], s
                 ))
         })
 
-    }, [activePage])
+        return () => {
+            // but the clean up would looking at previous render value instead latest value
+            if (activePage > 1 && selectedSearchOptions.length > 0) {
+                // always reset to page 1 for search options changed
+                setActivePage(1)
+            }
+        }
+
+    }, [activePage, selectedSearchOptions])
 
     return (
         <Container fluid>
@@ -200,7 +215,7 @@ export default function SpareParts({orders=new SupplierOrders(), suppliers=[], s
         <Row>
             <Col>
                 <Row>
-                    { spareParts.filter(sp => matchSearchOptions(sp)).map(v => {
+                    { spareParts.map(v => {
                     const matchedOrders = orders.list().filter(o => o.sparePartId === v.id)
                     const supplierIds = Array.from(new Set(matchedOrders.map(mo => mo.supplierId)))
 

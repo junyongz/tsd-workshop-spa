@@ -77,6 +77,8 @@ function App() {
   const [searchByDate, setSearchByDate] = useState(false)
   const [selectedSearchDate, setSelectedSearchDate] = useState()
 
+  const [totalSpareParts, setTotalSpareParts] = useState(0)
+
   // domain data
   const [companies, setCompanies] = useState([])
   const [suppliers, setSuppliers] = useState([])
@@ -223,7 +225,8 @@ function App() {
             setSelectedSearchDate,
             setShowToastBox,
             showToastBox,
-            toastBoxMessage}}
+            toastBoxMessage,
+            totalSpareParts}}
           ></NavigationBar>
         <Routes>
           <Route exact path="/" element={
@@ -295,6 +298,7 @@ function App() {
               orders={supplierOrders.current}
               suppliers={suppliers}
               selectedSearchOptions={selectedSearchOptions}
+              setTotalSpareParts={setTotalSpareParts}
             />} />
         </Routes>
         </Container>

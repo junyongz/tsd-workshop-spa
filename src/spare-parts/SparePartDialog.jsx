@@ -31,6 +31,7 @@ function SparePartDialog({isShow, setShowDialog,
     const [uploadedFiles, setUploadedFiles] = useState([])
 
     const [uploadedMedias, setUploadedMedias] = useState([])
+    const [hasPrevOrder, setHasPrevOrder] = useState(true)
 
     const subscribers = useRef([])
     const subscribe = (callback) => {
@@ -73,6 +74,7 @@ function SparePartDialog({isShow, setShowDialog,
         uploadedMedias.forEach(media => URL.revokeObjectURL(media.dataUrl))
         setUploadedMedias([])
         postHandeClose()
+        setHasPrevOrder(true)
     }
 
     const saveChange = () => {
@@ -83,20 +85,22 @@ function SparePartDialog({isShow, setShowDialog,
             return
         }
 
-        if (selectedSuppliers.length == 0) {
-            alert('Sorry, no suppliers added')
-            return
-        }
- 
-        if (matchingOrders.length == 0) {
-            alert('Sorry, no orders added')
-            return
-        }
+        if (hasPrevOrder) {
+            if (selectedSuppliers.length == 0) {
+                alert('Sorry, no suppliers added')
+                return
+            }
+    
+            if (matchingOrders.length == 0) {
+                alert('Sorry, no orders added')
+                return
+            }
 
-        const noOrdersSuppliers = selectedSuppliers.filter(sp => matchingOrders.filter(mo => mo.supplierId === sp.id).length === 0)
-        if (noOrdersSuppliers.length > 0) {
-            alert('Sorry, following suppliers has no orders: ' + noOrdersSuppliers.map(sp => sp.supplierName).join(', '))
-            return
+            const noOrdersSuppliers = selectedSuppliers.filter(sp => matchingOrders.filter(mo => mo.supplierId === sp.id).length === 0)
+            if (noOrdersSuppliers.length > 0) {
+                alert('Sorry, following suppliers has no orders: ' + noOrdersSuppliers.map(sp => sp.supplierName).join(', '))
+                return
+            }
         }
 
         const sparePartToSave = {...sparePart, 
@@ -335,7 +339,9 @@ function SparePartDialog({isShow, setShowDialog,
                                     matchingOrders={matchingOrders}
                                     setMatchingOrders={setMatchingOrders}
                                     orders={orders}
-                                    suppliers={suppliers} />
+                                    suppliers={suppliers}
+                                    hasPrevOrder={hasPrevOrder} 
+                                    setHasPrevOrder={setHasPrevOrder} />
                             </Tab>
                             <Tab eventKey='gallery' title={<div><Medias /> Gallery {(uploadedMedias.length > 0 || uploadedFiles.length > 0) && <Badge pill>{uploadedMedias.length + uploadedFiles.length}</Badge>}</div>}>
                                 <SparePartMediaSubDialog sparePart={sparePart} uploadedMedias={uploadedMedias} setUploadedMedias={setUploadedMedias} 

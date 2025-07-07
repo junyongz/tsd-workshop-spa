@@ -1,6 +1,6 @@
 import { Token, Typeahead } from "react-bootstrap-typeahead";
 import SupplierOrders from "../suppliers/SupplierOrders";
-import { Col, InputGroup, Nav, Row } from "react-bootstrap";
+import { Col, Form, InputGroup, Nav, Row } from "react-bootstrap";
 import { Suppliers, Tools, Trash } from "../Icons";
 import { getOptionLabel } from "react-bootstrap-typeahead/types/utils";
 import { useEffect } from "react";
@@ -10,8 +10,8 @@ export default function SparePartSupplierSubDialog({
     selectedSuppliers=[], setSelectedSuppliers,
     activeSupplierId, setActiveSupplierId, 
     orders = new SupplierOrders(), suppliers=[],
-    matchingOrders=[], setMatchingOrders}) {
-
+    matchingOrders=[], setMatchingOrders,
+    hasPrevOrder, setHasPrevOrder}) {
 
     const ShowMoreToken = () => {
         // tabIndex is important for typeahead/react to populate correct target/currentTarget, 
@@ -75,6 +75,15 @@ export default function SparePartSupplierSubDialog({
 
     return (
     <Row>
+        <Col xs="12" className="mb-3">
+            <Form.Check
+                onClick={() => setHasPrevOrder(!hasPrevOrder)}
+                defaultChecked={hasPrevOrder}
+                type="switch"
+                id="custom-switch"
+                label={`Did we order this spare part before?`}
+            />
+        </Col>
         <Col xs="12" className="mb-3 text-end">
         {/** <Form.Label><Suppliers /> Suppliers</Form.Label> */}
             <InputGroup className="mb-1">

@@ -122,6 +122,8 @@ test('filters spare parts based on search options, then remove search options la
     expect(global.fetch).nthCalledWith(9, "http://localhost:8080/api/spare-parts/1002/medias")
     expect(global.fetch).nthCalledWith(10, "http://localhost:8080/api/spare-parts/1002/medias/3004/data")
 
+    expect(screen.getAllByRole("menuitem")).toHaveLength(3)
+
     rerender(
         <SpareParts
         orders={mockOrders}
@@ -142,6 +144,7 @@ test('filters spare parts based on search options, then remove search options la
     catch (err) {
         expect(err.message).toEqual(expect.stringContaining("Unable to find an element with the text: Air Tank"))
     }
+    expect(screen.getAllByRole("menuitem")).toHaveLength(1)
 
     expect(global.fetch).nthCalledWith(11, "http://localhost:8080/api/spare-parts?pageNumber=1&pageSize=4", {"headers": {"Content-type": "application/json"}, "mode": "cors"})
     expect(global.fetch).nthCalledWith(12, "http://localhost:8080/api/spare-parts/1003/medias")

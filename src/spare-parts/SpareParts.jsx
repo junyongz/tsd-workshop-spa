@@ -222,7 +222,7 @@ export default function SpareParts({orders=new SupplierOrders(), suppliers=[], s
                     matchedOrders.sort((a, b) => a.unitPrice - b.unitPrice)
                     const hasVariousPrices = Array.from(new Set(matchedOrders.map(mo => mo.unitPrice))).length > 1
 
-                    return <Col xs="12" sm="6" md="4" lg="3" className="mb-3" key={v.id}>
+                    return <Col xs="12" sm="6" md="4" lg="3" role="menuitem" className="mb-3" key={v.id}>
                             <Card>
                             <Card.Header role="button" onClick={() => showDialogFor(v)}>
                                 <div className="fs-5">

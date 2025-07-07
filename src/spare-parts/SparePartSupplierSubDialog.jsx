@@ -2,7 +2,7 @@ import { Token, Typeahead } from "react-bootstrap-typeahead";
 import SupplierOrders from "../suppliers/SupplierOrders";
 import { Col, Form, InputGroup, Nav, Row } from "react-bootstrap";
 import { Suppliers, Tools, Trash } from "../Icons";
-import { getOptionLabel } from "react-bootstrap-typeahead/types/utils";
+import  getOptionLabel from "react-bootstrap-typeahead/types/utils/getOptionLabel";
 import { useEffect } from "react";
 
 export default function SparePartSupplierSubDialog({

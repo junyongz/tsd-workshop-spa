@@ -241,14 +241,14 @@ export default function SpareParts({orders=new SupplierOrders(), suppliers=[], s
                             </Col>
                             <Col xs="6">
                             <Company />
-                                {v.oems.map(o => 
-                                    <div><a href={o.url}>{o.name}</a></div>
+                                {v.oems.map((o, i) => 
+                                    <div key={i}><a href={o.url}>{o.name}</a></div>
                                 )}
                             </Col>
                             <Col xs="6" className="mb-3">
                             <Truck />
-                                {v.compatibleTrucks?.map(t => 
-                                    <div>{t.make} {t.model}</div>
+                                {v.compatibleTrucks?.map((t, i) => 
+                                    <div key={i}>{t.make} {t.model}</div>
                                 )}
                             </Col>
 
@@ -272,7 +272,7 @@ export default function SpareParts({orders=new SupplierOrders(), suppliers=[], s
         </Row>
         { activePage < totalPages  && <Row className="mb-3">
             <Col className="text-center">
-                <span role="button" onClick={() => setActivePage(prev => prev+1)}>Total {totalSpareParts} items. Continue to load more.</span>
+                <span role="button" id="more-button" onClick={() => setActivePage(prev => prev+1)}>Total {totalSpareParts} items. Continue to load more.</span>
             </Col>
         </Row> }
         </Container>

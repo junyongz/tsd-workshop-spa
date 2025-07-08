@@ -15,7 +15,7 @@ export default function SpareParts({orders=new SupplierOrders(), suppliers=[], s
     const [uploadedMedias, setUploadedMedias] = useState([])
     const [currentPreviewSparePart, setCurrentPreviewSparePart] = useState()
 
-    const pageSize = 4
+    const pageSize = 10
     const [activePage, setActivePage] = useState(1)
     const [totalPages, setTotalPages] = useState(0)
 
@@ -120,9 +120,15 @@ export default function SpareParts({orders=new SupplierOrders(), suppliers=[], s
         .then(resp => resp.json())
         .then(deleteId => {
             orders.removeSparePart(deleteId)
+
+            setSpareParts(prev => {
+                const newItems = [...prev]
+                newItems.splice(newItems.findIndex(sp => sp.id === deleteId), 1)
+                return newItems
+            })
+            setTotalSpareParts(totalSpareParts-1)
         })
         .finally(() => {
-            setActivePage(1)
             clearState()
         })
     }

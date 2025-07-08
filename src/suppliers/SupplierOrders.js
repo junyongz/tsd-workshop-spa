@@ -28,7 +28,9 @@ class SupplierOrders {
     }
 
     #doSetOrders() {
-        this.dispatch([...this.#ordersList].sort((a, b) => a.invoiceDate < b.invoiceDate))
+        this.dispatch([...this.#ordersList].sort(
+            (a, b) => a.invoiceDate === b.invoiceDate ? b.id > a.id : a.invoiceDate < b.invoiceDate)
+        )
     }
 
     byId(id=0) {

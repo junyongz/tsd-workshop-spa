@@ -10,7 +10,7 @@ export const doFilterServices = (options=[], transactions = {current: new Servic
       fetch(`${apiUrl}/api/workshop-services?${keywords}`)
         .then(resp => resp.json())
         .then(wss => {
-          transactions.current.updateTransactions(wss)
+          transactions.updateTransactions(wss)
         })
     }
 

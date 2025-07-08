@@ -2,12 +2,15 @@ class SupplierOrders {
     #ordersList
     #ordersMapping
     #ordersIndexes
-    #setOrders
-    constructor(orders=[], setOrders) {
+    constructor(orders=[], dispatch) {
         this.#ordersList = orders
         this.#refreshIndexes()
         this.#refreshMapping()
-        this.#setOrders = setOrders
+        this.dispatch = dispatch
+    }
+
+    acceptDispatch(dispatch) {
+        this.dispatch = dispatch
     }
 
     #refreshIndexes() {
@@ -25,7 +28,7 @@ class SupplierOrders {
     }
 
     #doSetOrders() {
-        this.#setOrders([...this.#ordersList].sort((a, b) => a.invoiceDate < b.invoiceDate))
+        this.dispatch([...this.#ordersList].sort((a, b) => a.invoiceDate < b.invoiceDate))
     }
 
     byId(id=0) {

@@ -1,11 +1,14 @@
 class ServiceTransactions {
-    #setServices
     #transactions
     #transactionIndexes
-    constructor(transactions = [], setServices) {
+    constructor(transactions = [], dispatch) {
         this.#transactions = transactions
-        this.#setServices = setServices
         this.#refreshIndexes()
+        this.dispatch = dispatch
+    }
+
+    acceptDispatch(dispatch) {
+        this.dispatch = dispatch
     }
 
     #refreshIndexes = () => {
@@ -16,7 +19,7 @@ class ServiceTransactions {
     }
 
     #refreshServices() {
-        this.#setServices([...this.#transactions].sort((a, b) => {
+        this.dispatch([...this.#transactions].sort((a, b) => {
                 if (!a.completionDate && !b.completionDate) {
                     return b.startDate.localeCompare(a.startDate);
                 }
@@ -24,6 +27,7 @@ class ServiceTransactions {
                 if (!b.completionDate) return 1;
                 return b.startDate.localeCompare(a.startDate);
             }))
+        
     }
 
     addNewTransaction(newService) {

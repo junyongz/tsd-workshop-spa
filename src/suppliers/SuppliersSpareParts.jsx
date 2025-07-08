@@ -11,14 +11,16 @@ import SupplierSparePartsYearMonthView from "./SupplierSparePartsYearMonthView"
 import { Calendar, EmptyBox, Notes, Suppliers, Tools, Truck } from "../Icons"
 import ResponsivePagination from "../components/ResponsivePagination"
 import PromptDeletionIcon from "../components/PromptDeletionIcon"
-import SupplierOrders from "./SupplierOrders"
 import { applyFilterOnOrders } from "../search/fuzzySearch"
+import { useSupplierOrders } from "./SupplierOrderContextProvider"
 
-function SuppliersSpareParts({orders=[], setTotalFilteredOrders, 
-    selectedSearchOptions=[], selectedSearchDate, supplierOrders = {current: new SupplierOrders()}, suppliers=[], vehicles=[], sparePartUsages=[],
+function SuppliersSpareParts({setTotalFilteredOrders, 
+    selectedSearchOptions=[], selectedSearchDate, suppliers=[], vehicles=[], sparePartUsages=[],
     refreshSparePartUsages=() =>{}, refreshServices=()=>{},
     onNewVehicleCreated=() => {}, setLoading=()=>{}, showToastMessage}) {
     const apiUrl = process.env.REACT_APP_API_URL
+
+    const supplierOrders = useSupplierOrders()
 
     const [activePage, setActivePage] = useState(1)
 
@@ -35,7 +37,7 @@ function SuppliersSpareParts({orders=[], setTotalFilteredOrders,
     const [selectedSupplier, setSelectedSupplier] = useState()
     const [orderedSuppliers, setOrderedSuppliers] = useState()
 
-    const filteredOrders = applyFilterOnOrders(selectedSearchOptions, selectedSearchDate, orders, sparePartUsages, selectedSupplier)
+    const filteredOrders = applyFilterOnOrders(selectedSearchOptions, selectedSearchDate, supplierOrders.list(), sparePartUsages, selectedSupplier)
     const chunkedItems = chunkArray(filteredOrders, 80)
     const totalPages = chunkedItems.length;
 
@@ -56,7 +58,7 @@ function SuppliersSpareParts({orders=[], setTotalFilteredOrders,
     }
 
     const viewOrder = (no) => {
-        setExistingOrder(orders.filter(o => o.deliveryOrderNo === no))
+        setExistingOrder(supplierOrders.list().filter(o => o.deliveryOrderNo === no))
         setShowDialog(true)
     }
 
@@ -82,7 +84,7 @@ function SuppliersSpareParts({orders=[], setTotalFilteredOrders,
             })
             .then(res => res.json())
             .then(ordersJson => {
-                supplierOrders.current.updateOrders(ordersJson)
+                supplierOrders.updateOrders(ordersJson)
             })
             .then(() => callback && callback())
             .then(() => clearState())
@@ -125,7 +127,7 @@ function SuppliersSpareParts({orders=[], setTotalFilteredOrders,
                 }
             })
             .then(_ => {
-                supplierOrders.current.removeOrder(order)
+                supplierOrders.removeOrder(order)
                 return Promise.all([refreshSparePartUsages(),
                 refreshServices()])
             })
@@ -156,7 +158,7 @@ function SuppliersSpareParts({orders=[], setTotalFilteredOrders,
                     showToastMessage(`failed to update order, response: ${JSON.stringify(json)}`)
                 }
                 else {
-                    supplierOrders.current.updateOrders(json)
+                    supplierOrders.updateOrders(json)
                 }
             })
             .then(() => clearState())
@@ -186,7 +188,7 @@ function SuppliersSpareParts({orders=[], setTotalFilteredOrders,
                     showToastMessage(`failed to update order, response: ${JSON.stringify(json)}`)
                 }
                 else {
-                    supplierOrders.current.updateOrders(json)
+                    supplierOrders.updateOrders(json)
                 }
             })
             .then(() => clearState())
@@ -215,7 +217,6 @@ function SuppliersSpareParts({orders=[], setTotalFilteredOrders,
                 <AddSparePartsDialog isShow={showDialog} 
                     setShowDialog={setShowDialog}
                     suppliers={suppliers}
-                    supplierOrders={supplierOrders.current}
                     existingOrder={existingOrder}
                     onSaveNewOrders={onSaveNewOrders}
                     sparePartUsages={sparePartUsages}
@@ -271,7 +272,7 @@ function SuppliersSpareParts({orders=[], setTotalFilteredOrders,
                     </Offcanvas>
                 </Col>
             </Row> }
-            { overview && <SupplierSparePartsYearMonthView orders={orders} suppliers={suppliers} backToOrders={() => setOverview(false)}></SupplierSparePartsYearMonthView> }
+            { overview && <SupplierSparePartsYearMonthView suppliers={suppliers} backToOrders={() => setOverview(false)}></SupplierSparePartsYearMonthView> }
             { !overview &&
             <React.Fragment>
             <Row className="mb-3">

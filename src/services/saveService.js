@@ -22,7 +22,7 @@ export default function saveService(
         return res.json()
       })
       .then(service => {
-        transactions.current.addNewTransaction(service)
+        transactions.addNewTransaction(service)
       })
       .then(() => refreshSparePartUsages())
       .then(() => clearState())

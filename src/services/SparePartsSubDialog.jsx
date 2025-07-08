@@ -2,11 +2,13 @@ import { Button, Col, Form, FormLabel, InputGroup, ListGroup, Row } from "react-
 import { Typeahead } from "react-bootstrap-typeahead";
 import { Dollar, Suppliers, Tools, Trash } from "../Icons";
 import remainingQuantity, { decimalPointUomAvailable } from "../utils/quantityUtils";
-import SupplierOrders from "../suppliers/SupplierOrders";
+import { useSupplierOrders } from "../suppliers/SupplierOrderContextProvider";
 
 export default function SparePartsSubDialog({
-    items, setItems, orders=new SupplierOrders(), suppliers, sparePartUsages, sparePartsMargin
+    items, setItems, suppliers, sparePartUsages, sparePartsMargin
 }) {
+    const orders = useSupplierOrders()
+
     const afterChooseSparePart = ([sparePart], i) => {
         setItems(prevs => {
             const newItems = [...prevs]

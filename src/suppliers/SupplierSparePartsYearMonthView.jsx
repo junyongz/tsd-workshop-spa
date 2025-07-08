@@ -3,6 +3,7 @@ import { Badge, Button, ButtonGroup, Card, Col, Container, Dropdown, DropdownBut
 import { ScrollSpy } from "bootstrap"
 import { Calendar } from "../Icons"
 import { months3EngChars } from "../utils/dateUtils"
+import { useSupplierOrders } from "./SupplierOrderContextProvider"
 
 // {[supplier]}
 const filterOrdersBySupplier = (orders=[], suppliers=[], year, month) => {
@@ -35,14 +36,16 @@ const itemsByOrder = (supplierOrders=[]) => {
     return itemsByDO
 }
 
-function SupplierSparePartsYearMonthView({orders=[], suppliers=[], backToOrders}) {
+function SupplierSparePartsYearMonthView({suppliers=[], backToOrders}) {
+    const supplierOrders = useSupplierOrders()
+
     const currentDate = new Date()
     const [year, setYear] = useState(currentDate.getFullYear())
     const [month, setMonth] = useState(currentDate.getMonth())
 
-    const trxsGroupBySuppliers = filterOrdersBySupplier(orders, suppliers, year, month)
+    const trxsGroupBySuppliers = filterOrdersBySupplier(supplierOrders.list(), suppliers, year, month)
     const sortedKeys = Object.keys(trxsGroupBySuppliers).sort((a, b) => a > b ? -1 : 1)
-    const availableYears = Array.from(new Set(orders.map(order => 
+    const availableYears = Array.from(new Set(supplierOrders.list().map(order => 
         new Date(order.invoiceDate).getFullYear()))).sort((a, b) => b - a)
 
     const amountBySuppliers = sortedKeys.map(supplier => {

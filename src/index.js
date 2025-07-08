@@ -6,12 +6,18 @@ import 'react-bootstrap-typeahead/css/Typeahead.css';
 import './index.css';
 import App from './App';
 import { BrowserRouter } from 'react-router-dom';
+import { WorkshopServicesProvider } from './services/ServiceContextProvider';
+import { SupplierOrderProvider } from './suppliers/SupplierOrderContextProvider';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <BrowserRouter>
-      <App />
+      <WorkshopServicesProvider>
+        <SupplierOrderProvider>
+          <App />
+        </SupplierOrderProvider>
+      </WorkshopServicesProvider>
     </BrowserRouter>
   </React.StrictMode>
 );

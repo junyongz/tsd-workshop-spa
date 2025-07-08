@@ -17,7 +17,7 @@ export default function removeServiceTask (
         if (deleteId !== taskId) {
           throw Error("seems nothing deleted")
         }
-        transactions.current.removeTask(serviceId, taskId)
+        transactions.removeTask(serviceId, taskId)
       })
       .then(() => clearState())
       .finally(() => setLoading(false))

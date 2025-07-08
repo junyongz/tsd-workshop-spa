@@ -5,10 +5,9 @@ import Form from "react-bootstrap/Form";
 import { Calendar, Inspection, MaintenanceServices, Repair, Truck } from "../Icons";
 import SparePartsSubDialog from "./SparePartsSubDialog";
 import TaskSubDialog from "./TaskSubDialog";
-import SupplierOrders from "../suppliers/SupplierOrders";
 
 function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[], 
-    orders=new SupplierOrders(), suppliers=[], sparePartUsages=[], taskTemplates=[],
+    suppliers=[], sparePartUsages=[], taskTemplates=[],
     onNewVehicleCreated=() => {}}) {
 
     const apiUrl = process.env.REACT_APP_API_URL
@@ -256,7 +255,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
                         {(tabView === 'spareParts' || tabView === 'all') && <div className="mb-1"><SparePartsSubDialog 
                             sparePartsMargin={selectedExistingService?.sparePartsMargin}
                             items={items} setItems={setItems}
-                            orders={orders} sparePartUsages={sparePartUsages}
+                            sparePartUsages={sparePartUsages}
                             suppliers={suppliers} /></div>}
                         {(tabView === 'workmanship' || tabView === 'all') && <TaskSubDialog tasks={tasks} setTasks={setTasks} taskTemplates={taskTemplates} />}
                         <Form.Control type="output" name="sparePartsCompleted" className="d-none" />

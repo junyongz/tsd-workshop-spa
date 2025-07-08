@@ -1,17 +1,19 @@
 import { Token, Typeahead } from "react-bootstrap-typeahead";
-import SupplierOrders from "../suppliers/SupplierOrders";
 import { Col, Form, InputGroup, Nav, Row } from "react-bootstrap";
 import { Suppliers, Tools, Trash } from "../Icons";
 import  getOptionLabel from "react-bootstrap-typeahead/types/utils/getOptionLabel";
 import { useEffect } from "react";
+import { useSupplierOrders } from "../suppliers/SupplierOrderContextProvider";
 
 export default function SparePartSupplierSubDialog({
     maxSelectedOrdersShown, setMaxSelectedOrdersShown,
     selectedSuppliers=[], setSelectedSuppliers,
     activeSupplierId, setActiveSupplierId, 
-    orders = new SupplierOrders(), suppliers=[],
+    suppliers=[],
     matchingOrders=[], setMatchingOrders,
     hasPrevOrder, setHasPrevOrder}) {
+
+    const orders = useSupplierOrders()
 
     const ShowMoreToken = () => {
         // tabIndex is important for typeahead/react to populate correct target/currentTarget, 

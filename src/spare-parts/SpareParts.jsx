@@ -1,14 +1,16 @@
 import { useEffect, useState } from "react";
 import { Button, Card, Col, Container, Modal, Row, Stack } from "react-bootstrap";
-import SupplierOrders from "../suppliers/SupplierOrders";
 import SparePartDialog from "./SparePartDialog";
 import PromptDeletionIcon from "../components/PromptDeletionIcon";
 import { Company, HandPointer, Suppliers, Truck } from "../Icons";
 import { clearState } from "../autoRefreshWorker";
 import PhotoGallery from "../components/PhotoGallery";
+import { useSupplierOrders } from "../suppliers/SupplierOrderContextProvider";
 
-export default function SpareParts({orders=new SupplierOrders(), suppliers=[], selectedSearchOptions=[], totalSpareParts=0, setTotalSpareParts}) {
+export default function SpareParts({suppliers=[], selectedSearchOptions=[], totalSpareParts=0, setTotalSpareParts}) {
     const apiUrl = process.env.REACT_APP_API_URL
+
+    const orders = useSupplierOrders()
 
     const [showSparePartDialog, setShowSparePartDialog] = useState(false)
     // not really care about the ordering actually
@@ -39,25 +41,7 @@ export default function SpareParts({orders=new SupplierOrders(), suppliers=[], s
 
     const [existingSparePart, setExistingSparePart] = useState()
 
-    const matchSearchOptions = (sp) => {
-        if (selectedSearchOptions.length === 0) {
-            return true
-        }
-
-        return selectedSearchOptions.some(opt => {
-            const lowerCase = opt.name.toLowerCase()
-            return sp.partNo.toLowerCase().includes(lowerCase) ||
-                    sp.partName.toLowerCase().includes(lowerCase) ||
-                    sp.description.toLowerCase().includes(lowerCase) ||
-                    sp.compatibleTrucks.some(t => t.make.toLowerCase().includes(lowerCase) || 
-                                                t.model.toLowerCase().includes(lowerCase) ||
-                                                (t.make + ' ' + t.model).toLowerCase().includes(lowerCase))
-        })
-    }
-
     // TODO passing the uploaded medias in individual dialog over here
-
-
     const afterSave = (sparePart) => {
         const existing = spareParts.findIndex(sp => sp.id === sparePart.id)
         const lastSparePart = existing === -1 ? spareParts[spareParts.length - 1] : undefined
@@ -192,7 +176,7 @@ export default function SpareParts({orders=new SupplierOrders(), suppliers=[], s
         <Row>
             <Col><SparePartDialog isShow={showSparePartDialog} 
                 setShowDialog={setShowSparePartDialog} 
-                orders={orders} suppliers={suppliers}
+                suppliers={suppliers}
                 afterSave={afterSave}
                 sparePart={existingSparePart}
                 setSparePart={setExistingSparePart} 

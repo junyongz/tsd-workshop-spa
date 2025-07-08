@@ -6,15 +6,18 @@ import TaskSubDialog from './TaskSubDialog';
 import generateUniqueId from '../utils/randomUtils';
 import TransactionTypes from '../components/TransactionTypes';
 import { isInternal } from '../companies/companyEvaluation';
-import SupplierOrders from '../suppliers/SupplierOrders';
+import { useService } from './ServiceContextProvider';
+import { useSupplierOrders } from '../suppliers/SupplierOrderContextProvider';
 
-function InProgressTaskFocusListing({services=[],
-    orders=new SupplierOrders(), suppliers=[], taskTemplates=[], onNewServiceCreated, removeTask, 
+function InProgressTaskFocusListing({suppliers=[], taskTemplates=[], onNewServiceCreated, removeTask, 
     vehicles=[], companies=[]}) {
+
+  const services = useService()
+  const orders = useSupplierOrders()
 
   const [validated, setValidated] = useState(false)
   const formRef = useRef()
-  const inProgressServices = services.filter(ws => !!!ws.completionDate)
+  const inProgressServices = services.services().filter(ws => !!!ws.completionDate)
                                 .filter(ws => !isInternal(companies, vehicles, ws))
 
   const [spareParts, setSpareParts] = useState([])

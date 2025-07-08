@@ -4,9 +4,11 @@ import { Typeahead } from "react-bootstrap-typeahead";
 import remainingQuantity, { decimalPointUomAvailable } from "../utils/quantityUtils";
 import { Calendar, Dollar, Suppliers, Tools } from "../Icons";
 import PromptDeletionIcon from "../components/PromptDeletionIcon";
-import SupplierOrders from "./SupplierOrders";
+import { useSupplierOrders } from "./SupplierOrderContextProvider";
 
-function AddSparePartsDialog({isShow, setShowDialog, supplierOrders=new SupplierOrders(), existingOrder=[], suppliers=[], sparePartUsages=[], onSaveNewOrders}) {
+function AddSparePartsDialog({isShow, setShowDialog, existingOrder=[], suppliers=[], sparePartUsages=[], onSaveNewOrders}) {
+    const supplierOrders = useSupplierOrders()
+
     const formRef = useRef()
     const [validated, setValidated] = useState(false)
 

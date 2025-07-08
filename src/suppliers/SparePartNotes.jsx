@@ -18,7 +18,7 @@ function SparePartNotes({order, onNoteClick, sparePartUsages=[] }) {
                     .sort((a, b) => new Date(b.usageDate) - new Date(a.usageDate))
                     .slice(0, usageLoadCount)
                     .map(spu => 
-                        <span key={spu.id} style={{display: 'block'}}>Used by {spu.vehicleNo}
+                        <span className="fw-lighter" key={spu.id} style={{display: 'block'}}>Used by {spu.vehicleNo}
                             <Badge pill>{spu.quantity}</Badge>&nbsp;
                             <Calendar /> {spu.usageDate}
                         </span>)

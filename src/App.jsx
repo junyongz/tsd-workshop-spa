@@ -12,7 +12,6 @@ import fetchSuppliers from './suppliers/fetchSuppliers';
 import fetchSparePartUsages from './spare-parts/fetchSparePartUsages';
 import fetchServices, { fetchFewPagesServices } from './fetchServices';
 import autoRefreshWorker, { clearState } from './autoRefreshWorker';
-import ServiceTransactions from './ServiceTransactions';
 import NavigationBar from './NavigationBar';
 import Vehicles from './vehicles/Vehicles';
 
@@ -25,7 +24,8 @@ import saveService from './services/saveService';
 import removeServiceTask from './services/removeServiceTask';
 import SchedulingCalendarView from './schedule/SchedulingCalendarView';
 import YearMonthView from './services/YearMonthView';
-import SupplierOrders from './suppliers/SupplierOrders';
+import { useService } from './services/ServiceContextProvider';
+import { useSupplierOrders } from './suppliers/SupplierOrderContextProvider';
 
 function App() {
   const apiUrl = process.env.REACT_APP_API_URL
@@ -34,14 +34,11 @@ function App() {
   const [loadingTime, setLoadingTime] = useState(0)
 
   // the services and orders from supplier
-  
-  const [services, setServices] = useState([])
   const [totalFilteredServices, setTotalFilteredServices] = useState(0)
-  const transactions = useRef(new ServiceTransactions([], setServices))
+  const transactions = useService()
 
-  const [orders, setOrders] = useState([])
   const [totalFilteredOrders, setTotalFilteredOrders] = useState(0)
-  const supplierOrders = useRef(new SupplierOrders([], setOrders))
+  const supplierOrders = useSupplierOrders()
 
   const [sparePartUsages, setSparePartUsages] = useState([])
 
@@ -230,8 +227,7 @@ function App() {
           ></NavigationBar>
         <Routes>
           <Route exact path="/" element={
-            <ServiceListing services={services}
-              transactions={transactions}
+            <ServiceListing
               setTotalFilteredServices={setTotalFilteredServices}
               vehicles={vehicles}
               setVehicles={setVehicles}
@@ -239,7 +235,6 @@ function App() {
               setSelectedSearchOptions={setSelectedSearchOptions}
               selectedSearchOptions={selectedSearchOptions}
               selectedSearchDate={selectedSearchDate}
-              orders={supplierOrders.current}
               suppliers={suppliers}
               sparePartUsages={sparePartUsages}
               refreshSparePartUsages={refreshSparePartUsages}
@@ -250,16 +245,14 @@ function App() {
             />
           } />
           <Route exact path="/services-overview" element={
-            <YearMonthView transactions={transactions} 
+            <YearMonthView
               suppliers={suppliers} 
-              orders={supplierOrders.current}
               taskTemplates={taskTemplates} 
             />
           } />
           <Route exact path="/workmanships" element={
-            <InProgressTaskFocusListing services={services}
+            <InProgressTaskFocusListing
               taskTemplates={taskTemplates}
-              orders={supplierOrders.current}
               suppliers={suppliers}
               onNewServiceCreated={onNewServiceCreated}
               removeTask={removeTask}
@@ -269,8 +262,6 @@ function App() {
           } />
           <Route path="/orders" element={
             <SuppliersSpareParts
-              orders={orders}
-              supplierOrders={supplierOrders} 
               setTotalFilteredOrders={setTotalFilteredOrders}
               suppliers={suppliers} 
               vehicles={vehicles}
@@ -295,7 +286,6 @@ function App() {
           } />
           <Route path="/spare-parts" element={ 
             <SpareParts vehicles={vehicles} 
-              orders={supplierOrders.current}
               suppliers={suppliers}
               selectedSearchOptions={selectedSearchOptions}
               totalSpareParts={totalSpareParts}

@@ -3,12 +3,12 @@ import { Card, Col, Container, Form, Row, Stack } from "react-bootstrap";
 import VehicleUpdateDialog from "./VehicleUpdateDialog";
 import formatThousandSeparator from "../utils/numberUtils";
 import VehicleServices from "./VehicleServices";
-import { Inspection, Insurance, Roadtax } from "../Icons";
+import { HandPointer, Inspection, Insurance, Roadtax } from "../Icons";
 import { addMonthsToDate } from "../utils/dateUtils";
+import { useService } from "../services/ServiceContextProvider";
 
 export default function Vehicles({vehicles=[], setVehicles, companies=[], selectedSearchOptions=[]}) {
-
-    const apiUrl = process.env.REACT_APP_API_URL
+    const services = useService()
 
     const [serviceByVehicle, setServiceByVehicle] = useState({})
     const [inspectionByVehicle, setInspectionByVehicle] = useState({})
@@ -18,6 +18,8 @@ export default function Vehicles({vehicles=[], setVehicles, companies=[], select
     
     const [toSortByServiceDueSoon, setToSortByServiceDueSoon] = useState(false)
     const [toSortByInspectionDueSoon, setToSortByInspectionDueSoon] = useState(false)
+
+    const [vehicleLoadCount, setVehicleLoadCount] = useState(12)
 
     const showVehicle = (vehicleId) => {
         const veh = vehicles.find(veh => veh.id === vehicleId)
@@ -66,39 +68,27 @@ export default function Vehicles({vehicles=[], setVehicles, companies=[], select
         })
     }
 
-/*
-
-*/
+    const filteredVehicles = applySorting(vehicles).filter(veh => !showInternalOnly || (showInternalOnly && companies.find(co => co.id === veh.companyId)?.internal))
+                .filter(veh => !selectedSearchOptions || selectedSearchOptions.length === 0 || selectedSearchOptions.some(sso => sso.name === veh.vehicleNo))
 
     useEffect(() => {
-        fetch(`${apiUrl}/api/workshop-services?type=SERVICE`, {
-            method: 'GET', 
-            headers: {
-              'Content-type': 'application/json'
-            }
-          })
-          .then(res => res.json())
-          .then(services => {
-            setServiceByVehicle(services.reduce((pv, cv) => {
-                pv[cv.vehicleNo] = cv
-                return pv
-            }, {}))
-          })
+        const findBy = (type) => {
+            return vehicles
+                .map(veh => services.services()
+                    .findIndex(srv => (srv.vehicleId === veh.id && srv.transactionTypes?.includes(type)))
+                )
+                .map(idx => services.services()[idx])
+                .filter(srv => !!srv)
+                .reduce((pv, cv) => {
+                    pv[cv.vehicleNo] = cv
+                    return pv
+                    }, {})
+        }
 
-          fetch(`${apiUrl}/api/workshop-services?type=INSPECTION`, {
-            method: 'GET', 
-            headers: {
-              'Content-type': 'application/json'
-            }
-          })
-          .then(res => res.json())
-          .then(inspections => {
-            setInspectionByVehicle(inspections.reduce((pv, cv) => {
-                pv[cv.vehicleNo] = cv
-                return pv
-            }, {}))
-          })
-    }, [apiUrl])
+        setServiceByVehicle(findBy('SERVICE'))
+        setInspectionByVehicle(findBy('INSPECTION'))
+
+    }, [services.services()])
 
     return (
         <Container fluid>
@@ -135,8 +125,7 @@ export default function Vehicles({vehicles=[], setVehicles, companies=[], select
         </Row>
         <Row className="mb-3">
             {toSortByServiceDueSoon && <Col xs="12"><span className="text-secondary fw-lighter">Default using {formatThousandSeparator(defaultTargetedDistanceKm)} KM and {defaultTargetedMonthOvershot} months as indicators, for those travel between JB & SG, please adjust accordingly.</span></Col> }
-            { applySorting(vehicles).filter(veh => !showInternalOnly || (showInternalOnly && companies.find(co => co.id === veh.companyId)?.internal))
-                .filter(veh => !selectedSearchOptions || selectedSearchOptions.length === 0 || selectedSearchOptions.some(sso => sso.name === veh.vehicleNo))
+            { filteredVehicles.slice(0, vehicleLoadCount)
                 .map(v => 
                     <Col xs="12" sm="6" md="4" lg="3" className="mb-3">
                     <Card role="button" key={v.id} onClick={() => showVehicle(v.id)}>
@@ -172,7 +161,14 @@ export default function Vehicles({vehicles=[], setVehicles, companies=[], select
                     </Col>
                 )
             }
-            
+            {
+                filteredVehicles.length > vehicleLoadCount && <><Col xs="12" className="text-center">
+                    <span className="text-secondary" role="button" onClick={() => setVehicleLoadCount(vehicleLoadCount+12)}><HandPointer /> Click to load more.</span>
+                </Col>
+                <Col xs="12" className="text-center">
+                    <span className="text-secondary" role="button" onClick={() => setVehicleLoadCount(Number.MAX_SAFE_INTEGER)}><HandPointer /> Load all.</span>
+                </Col></>
+            }
         </Row>
         </Container>
     )

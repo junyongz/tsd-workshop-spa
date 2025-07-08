@@ -14,17 +14,21 @@ import ResponsivePagination from './components/ResponsivePagination';
 import { applyFilterOnServices } from './search/fuzzySearch';
 import { useNavigate } from 'react-router-dom';
 import SupplierOrders from './suppliers/SupplierOrders';
-import ServiceTransactions from './ServiceTransactions';
+import { useService } from './services/ServiceContextProvider';
+import { useSupplierOrders } from './suppliers/SupplierOrderContextProvider';
 
-function ServiceListing({services, transactions = {current: new ServiceTransactions()},
+function ServiceListing({
     setTotalFilteredServices,
     refreshSparePartUsages=() => {}, 
     vehicles=[{vehicleNo:''}], setVehicles, sparePartUsages=[],
-    orders=new SupplierOrders(), suppliers=[], taskTemplates=[],
+    suppliers=[], taskTemplates=[],
     onNewVehicleCreated=() => {}, setLoading=()=>{},
     selectedSearchOptions=[{name:''}], setSelectedSearchOptions, 
     selectedSearchDate,
     onNewServiceCreated, removeTask}) {
+  
+  const transactions = useService()
+  const orders = useSupplierOrders()
 
   const apiUrl = process.env.REACT_APP_API_URL
   const [showModal, setShowModal] = useState(false)
@@ -33,7 +37,7 @@ function ServiceListing({services, transactions = {current: new ServiceTransacti
   const serviceTransaction = useRef()
 
   const [activePage, setActivePage] = useState(1)
-  const filteredServices = applyFilterOnServices(selectedSearchOptions, selectedSearchDate, vehicles, services, orders)
+  const filteredServices = applyFilterOnServices(selectedSearchOptions, selectedSearchDate, vehicles, transactions.services(), orders)
   const chunkedItems = chunkArray(filteredServices, 10)
   const totalPages = chunkedItems.length;
 
@@ -99,7 +103,7 @@ function ServiceListing({services, transactions = {current: new ServiceTransacti
         if (deleteId !== sparePartUsageId) {
           throw Error("seems nothing deleted")
         }
-        transactions.current.removeTransaction(serviceId, sparePartUsageId)
+        transactions.removeTransaction(serviceId, sparePartUsageId)
       })
       .then(() => refreshSparePartUsages())
       .then(() => clearState())
@@ -121,7 +125,7 @@ function ServiceListing({services, transactions = {current: new ServiceTransacti
       })
       .then(res => res.json())
       .then(newService => {
-        transactions.current.updateTransaction(newService)
+        transactions.updateTransaction(newService)
       })
       .then(() => clearState())
       .finally(() => setLoading(false))
@@ -140,7 +144,7 @@ function ServiceListing({services, transactions = {current: new ServiceTransacti
       })
       .then(res => res.json())
       .then(newService => {
-        transactions.current.updateForNote(newService)
+        transactions.updateForNote(newService)
       })
       .then(() => clearState())
       .finally(() => setLoading(false))
@@ -182,7 +186,7 @@ function ServiceListing({services, transactions = {current: new ServiceTransacti
         if (ws.id !== id) {
           throw Error(`seems nothing deleted, returning ${JSON.stringify(id)}`)
         }
-        transactions.current.removeService(ws)
+        transactions.removeService(ws)
       })
       .then(() => clearState())
       .then(() => refreshSparePartUsages())
@@ -194,7 +198,7 @@ function ServiceListing({services, transactions = {current: new ServiceTransacti
     fetch(`${apiUrl}/api/workshop-services/${ws.id}`)
     .then(resp => resp.json())
     .then(wsJson => {
-      transactions.current.updateTransaction(wsJson)
+      transactions.updateTransaction(wsJson)
     })
   }
 
@@ -203,7 +207,7 @@ function ServiceListing({services, transactions = {current: new ServiceTransacti
       setActivePage(1)
       setTotalFilteredServices(filteredServices.length)
     }
-  }, [services, selectedSearchOptions, selectedSearchDate])
+  }, [transactions.services(), selectedSearchOptions, selectedSearchDate])
 
   return (
       <Container fluid>
@@ -211,7 +215,6 @@ function ServiceListing({services, transactions = {current: new ServiceTransacti
         onNewServiceCreated={onNewServiceCreated} 
         vehicles={vehicles} setVehicles={setVehicles} 
         taskTemplates={taskTemplates}
-        orders={orders}
         suppliers={suppliers}
         sparePartUsages={sparePartUsages}
         onNewVehicleCreated={onNewVehicleCreated}></ServiceDialog>

@@ -7,8 +7,13 @@ import { months3EngChars } from "../utils/dateUtils"
 import useTheme from "../utils/useTheme"
 import { useNavigate } from "react-router-dom"
 import SupplierOrders from "../suppliers/SupplierOrders"
+import { useService } from "./ServiceContextProvider"
+import { useSupplierOrders } from "../suppliers/SupplierOrderContextProvider"
 
-function YearMonthView({transactions, suppliers=[], orders=new SupplierOrders(), taskTemplates}) {
+function YearMonthView({suppliers=[], taskTemplates}) {
+    const transactions = useService()
+    const orders = useSupplierOrders()
+
     const apiUrl = process.env.REACT_APP_API_URL
 
     const navigate = useNavigate()
@@ -25,8 +30,8 @@ function YearMonthView({transactions, suppliers=[], orders=new SupplierOrders(),
         return fetch(`${apiUrl}/api/workshop-services?year=${year}&month=${month}`)
         .then(resp => resp.json())
         .then(yearMonthWss => {
-            transactions.current.updateTransactions(yearMonthWss)
-            setTrxsGroupByVehicles(transactions.current.filterByYearMonthGroupByVehicle(year, month-1))
+            transactions.updateTransactions(yearMonthWss)
+            setTrxsGroupByVehicles(transactions.filterByYearMonthGroupByVehicle(year, month-1))
         })
     }
 
@@ -57,7 +62,7 @@ function YearMonthView({transactions, suppliers=[], orders=new SupplierOrders(),
     const DropDownYears = () => {
         return (
             <DropdownButton id="dropdown-year" as={ButtonGroup} title={year} variant={((theme === 'dark') ? 'light': 'dark')} >
-            { transactions.current.availableYears().map(
+            { transactions.availableYears().map(
                 v => <Dropdown.Item key={v} onClick={() => changeYear(v)} eventKey={v}>{v}</Dropdown.Item> )
             }
             </DropdownButton> 

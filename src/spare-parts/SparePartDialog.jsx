@@ -1,18 +1,19 @@
 import { useRef, useState } from "react"
 import { Container, Form, Modal, Row, Col, Button, InputGroup, FormControl, FloatingLabel, ListGroup, Tabs, Tab, Badge } from "react-bootstrap"
 import { Company, Medias, Notes, NoteTaking, Suppliers, Tools, Trash, Truck } from "../Icons"
-import SupplierOrders from "../suppliers/SupplierOrders"
 import SparePartMediaSubDialog from "./SparePartMediaSubDialog"
 import SparePartSupplierSubDialog from "./SparePartSupplierSubDialog"
 import { clearState } from "../autoRefreshWorker"
+import { useSupplierOrders } from "../suppliers/SupplierOrderContextProvider"
 
 function SparePartDialog({isShow, setShowDialog, 
         sparePart, setSparePart,
-        orders=new SupplierOrders(), 
         suppliers=[{id: 1000, supplierName: ''}],
         afterSave=() => {}, afterRemoveMedia=() => {}}) {
 
     const apiUrl = process.env.REACT_APP_API_URL
+
+    const orders = useSupplierOrders()
 
     const formRef = useRef()
     const [validated, setValidated] = useState(false)
@@ -338,7 +339,6 @@ function SparePartDialog({isShow, setShowDialog,
                                     setSelectedSuppliers={setSelectedSuppliers}
                                     matchingOrders={matchingOrders}
                                     setMatchingOrders={setMatchingOrders}
-                                    orders={orders}
                                     suppliers={suppliers}
                                     hasPrevOrder={hasPrevOrder} 
                                     setHasPrevOrder={setHasPrevOrder} />

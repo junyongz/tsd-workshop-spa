@@ -2,7 +2,7 @@ import { ButtonGroup, Button, Container, Card, Badge, Col, Row, ListGroup, Modal
 import { days3EngCharsStartWithSun, months3EngChars, sameDay } from "../utils/dateUtils";
 import { useEffect, useState } from "react";
 import './CalendarView.css'
-import { Trash } from "../Icons";
+import { HandPointer, Trash } from "../Icons";
 
 export default function CalendarView({
     events=[{date: new Date(), display: 'JTN 1288', description: 'due for service'}], 
@@ -131,7 +131,7 @@ export default function CalendarView({
                                 }
                                 </Row>
                                 {events.filter(evt => sameDay(evt.date, boxDate)).length > 0 && <Row className="d-none d-lg-flex">
-                                    <span role="button" onClick={(e) => prepareToShowEventDialog(e, boxDate)}>details...</span>
+                                    <span className="text-secondary" role="button" onClick={(e) => prepareToShowEventDialog(e, boxDate)}><HandPointer /> details...</span>
                                 </Row> }
                                 <Row className="d-flex d-lg-none">
                                     { events.filter(evt => sameDay(evt.date, boxDate)).length > 0 && <Badge pill>{ events.filter(evt => sameDay(evt.date, boxDate)).length}</Badge> }

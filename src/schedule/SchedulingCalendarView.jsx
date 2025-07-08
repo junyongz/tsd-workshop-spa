@@ -3,7 +3,7 @@ import CalendarView from "../components/CalendarView";
 import NewSchedulingDialog from "./NewSchedulingDialog";
 import { mapToCalendarEvent } from "./mappingUtils.js";
 
-export default function SchedulingCalendarView({vehicles, onNewVehicleCreated}) {
+export default function SchedulingCalendarView({vehicles=[], onNewVehicleCreated}) {
     const apiUrl = process.env.REACT_APP_API_URL
 
     const [showEventDialog, setShowEventDialog] = useState(false)

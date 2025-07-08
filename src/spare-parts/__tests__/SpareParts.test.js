@@ -4,6 +4,7 @@ import SpareParts from '../SpareParts';
 import SupplierOrders from '../../suppliers/SupplierOrders';
 import { jest, test, expect } from '@jest/globals';
 import '@testing-library/jest-dom';
+import { SupplierOrderContext } from '../../suppliers/SupplierOrderContextProvider';
 
 jest.mock('react-bootstrap-typeahead/types/utils/getOptionLabel', () => ({
     getOptionLabel: (opt, labelKey) => opt[labelKey]
@@ -91,13 +92,12 @@ test('filters spare parts based on search options, then remove search options la
     const mockSearchOptions = [{ name: 'Hino' }];
 
     const { rerender } = render(
-        <SpareParts
-        orders={mockOrders}
+        <SupplierOrderContext value={mockOrders}><SpareParts
         suppliers={mockSuppliers}
         selectedSearchOptions={mockSearchOptions}
         totalSpareParts={10}
         setTotalSpareParts={jest.fn()}
-        />
+        /></SupplierOrderContext>
     );
 
     // Wait for the spare part to be rendered
@@ -107,7 +107,7 @@ test('filters spare parts based on search options, then remove search options la
     const partName = await screen.findByText('Flame Tank');
     expect(partName).toBeInTheDocument();
 
-    expect(global.fetch).nthCalledWith(1, "http://localhost:8080/api/spare-parts?pageNumber=1&pageSize=4&keyword=Hino", {"headers": {"Content-type": "application/json"}, "mode": "cors"})
+    expect(global.fetch).nthCalledWith(1, "http://localhost:8080/api/spare-parts?pageNumber=1&pageSize=10&keyword=Hino", {"headers": {"Content-type": "application/json"}, "mode": "cors"})
     expect(global.fetch).nthCalledWith(2, "http://localhost:8080/api/spare-parts/1000/medias")
     expect(global.fetch).nthCalledWith(3, "http://localhost:8080/api/spare-parts/1001/medias")
     expect(global.fetch).nthCalledWith(4, "http://localhost:8080/api/spare-parts/1000/medias/3000/data")
@@ -118,7 +118,7 @@ test('filters spare parts based on search options, then remove search options la
     const moreButton = document.querySelector('#more-button')
     await user.click(moreButton)
 
-    expect(global.fetch).nthCalledWith(8, "http://localhost:8080/api/spare-parts?pageNumber=2&pageSize=4&keyword=Hino", {"headers": {"Content-type": "application/json"}, "mode": "cors"})
+    expect(global.fetch).nthCalledWith(8, "http://localhost:8080/api/spare-parts?pageNumber=2&pageSize=10&keyword=Hino", {"headers": {"Content-type": "application/json"}, "mode": "cors"})
     expect(global.fetch).nthCalledWith(9, "http://localhost:8080/api/spare-parts/1002/medias")
     expect(global.fetch).nthCalledWith(10, "http://localhost:8080/api/spare-parts/1002/medias/3004/data")
 
@@ -146,7 +146,7 @@ test('filters spare parts based on search options, then remove search options la
     }
     expect(screen.getAllByRole("menuitem")).toHaveLength(1)
 
-    expect(global.fetch).nthCalledWith(11, "http://localhost:8080/api/spare-parts?pageNumber=1&pageSize=4", {"headers": {"Content-type": "application/json"}, "mode": "cors"})
+    expect(global.fetch).nthCalledWith(11, "http://localhost:8080/api/spare-parts?pageNumber=1&pageSize=10", {"headers": {"Content-type": "application/json"}, "mode": "cors"})
     expect(global.fetch).nthCalledWith(12, "http://localhost:8080/api/spare-parts/1003/medias")
     expect(global.fetch).nthCalledWith(13, "http://localhost:8080/api/spare-parts/1003/medias/3005/data")
     expect(global.fetch).not.nthCalledWith(14, expect.anything())

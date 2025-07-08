@@ -4,6 +4,7 @@ import SuppliersSpareParts from '../SuppliersSpareParts';
 import SupplierOrders from '../SupplierOrders';
 
 import { test, expect } from '@jest/globals'
+import { SupplierOrderContext } from '../SupplierOrderContextProvider';
 
 // Mock dependencies
 jest.mock('../../utils/getPaginationItems', () => () => [<div key="1">Pagination</div>]);
@@ -80,13 +81,10 @@ describe('SuppliersSpareParts Component', () => {
     })
 
     defaultProps = {
-        orders: [...mockOrders],
         setFilteredOrders: jest.fn(),
         selectedSearchOptions: [],
         filterServices: jest.fn(),
-        supplierOrders: {current: new SupplierOrders([...mockOrders], jest.fn())},
         suppliers: [...mockSuppliers],
-        spareParts: [],
         vehicles: [],
         sparePartUsages: [],
         refreshSparePartUsages: jest.fn(),
@@ -99,7 +97,7 @@ describe('SuppliersSpareParts Component', () => {
   });
 
   test('renders component with no orders', () => {
-    const container = render(<SuppliersSpareParts {...defaultProps} orders={[]} />);
+    const container = render(<SupplierOrderContext value={new SupplierOrders([], jest.fn())}><SuppliersSpareParts {...defaultProps} /></SupplierOrderContext>);
     
     expect(screen.getByText('Add New')).toBeInTheDocument();
     expect(screen.getByText('Showing All')).toBeInTheDocument();
@@ -109,7 +107,7 @@ describe('SuppliersSpareParts Component', () => {
   });
 
   test('renders multiple orders correctly', () => {
-    const container = render(<SuppliersSpareParts {...defaultProps} />);
+    const container = render(<SupplierOrderContext value={new SupplierOrders([...mockOrders], jest.fn())}><SuppliersSpareParts {...defaultProps} /></SupplierOrderContext>);
     
     expect(screen.getByText('2023-01-01')).toBeInTheDocument();
     expect(screen.getByText('2023-01-02')).toBeInTheDocument();
@@ -126,7 +124,7 @@ describe('SuppliersSpareParts Component', () => {
   });
 
   test('opens Add Spare Parts dialog when clicking Add New button', async () => {
-    const container = render(<SuppliersSpareParts {...defaultProps} />);
+    const container = render(<SupplierOrderContext value={new SupplierOrders([...mockOrders], jest.fn())}><SuppliersSpareParts {...defaultProps} /></SupplierOrderContext>);
     
     fireEvent.click(screen.getByText('Add New'));
     expect(screen.getByText('AddSparePartsDialog')).toBeInTheDocument();
@@ -135,7 +133,7 @@ describe('SuppliersSpareParts Component', () => {
   });
 
   test('handles supplier filter click with multiple orders', async () => {
-    const container = render(<SuppliersSpareParts {...defaultProps} />);
+    const container = render(<SupplierOrderContext value={new SupplierOrders([...mockOrders], jest.fn())}><SuppliersSpareParts {...defaultProps} /></SupplierOrderContext>);
     
     fireEvent.click(screen.getByText('Showing All'));
     expect(screen.getByText('Suppliers')).toBeInTheDocument();
@@ -148,7 +146,7 @@ describe('SuppliersSpareParts Component', () => {
   });
 
   test('calls recordUsage for specific order', () => {
-    const container = render(<SuppliersSpareParts {...defaultProps} />);
+    const container = render(<SupplierOrderContext value={new SupplierOrders([...mockOrders], jest.fn())}><SuppliersSpareParts {...defaultProps} /></SupplierOrderContext>);
     
     const usageButtons = document.querySelectorAll('.bi-truck')
     expect(usageButtons.length).toBe(3);
@@ -162,7 +160,7 @@ describe('SuppliersSpareParts Component', () => {
   test('handles removal of specific order', async () => {
     global.fetch.mockResolvedValueOnce({ ok: true });
     
-    const container = render(<SuppliersSpareParts {...defaultProps} />);
+    const container = render(<SupplierOrderContext value={new SupplierOrders([...mockOrders], jest.fn())}><SuppliersSpareParts {...defaultProps} /></SupplierOrderContext>);
     
     const deleteButtons = document.querySelectorAll('.bi-trash3')
     expect(deleteButtons.length).toBe(3);
@@ -192,7 +190,8 @@ describe('SuppliersSpareParts Component', () => {
       json: () => Promise.resolve(newOrders)
     });
     
-    const container = render(<SuppliersSpareParts {...defaultProps} />);
+    const supplierOrders = new SupplierOrders([...mockOrders], jest.fn())
+    const container = render(<SupplierOrderContext value={supplierOrders}><SuppliersSpareParts {...defaultProps} /></SupplierOrderContext>);
     
     const span = container.getByTestId('add-spare-parts')
     const evt = createEvent.click(span, {target: {orders: newOrders}})
@@ -206,17 +205,17 @@ describe('SuppliersSpareParts Component', () => {
           body: JSON.stringify(newOrders)
         })
       );
-      expect(defaultProps.supplierOrders.current.list()).toHaveLength(6);
+      expect(supplierOrders.list()).toHaveLength(6);
     });
 
     container.unmount()
   });
 
   test('updates filtered orders when selectedSearchOptions change', async () => {
-    render(<SuppliersSpareParts 
+    render(<SupplierOrderContext value={new SupplierOrders([...mockOrders], jest.fn())}><SuppliersSpareParts 
       {...defaultProps}
       selectedSearchOptions={[{name: 'engine'}, {name: 'brake'}]}
-    />);
+    /></SupplierOrderContext>);
 
     expect(screen.getAllByRole("listitem")).toHaveLength(2)
   });
@@ -228,13 +227,11 @@ describe('SuppliersSpareParts Component', () => {
       { orderId: 3, quantity: 1 }
     ];
     
-    const container = render(<SuppliersSpareParts 
-      {...defaultProps} 
-      sparePartUsages={mockUsages}
-    />);
+    const container = render(<SupplierOrderContext value={new SupplierOrders([...mockOrders], jest.fn())}>
+      <SuppliersSpareParts {...defaultProps} sparePartUsages={mockUsages} /></SupplierOrderContext>);
     
     const quantities = container.getAllByText(/left/);
-    expect(quantities.length).toBe(3);
+    expect(quantities).toHaveLength(3)
     expect(screen.getByText('9 left')).toBeInTheDocument();  
     expect(screen.getByText('4 left')).toBeInTheDocument();  
     expect(screen.getByText('7 left')).toBeInTheDocument();  

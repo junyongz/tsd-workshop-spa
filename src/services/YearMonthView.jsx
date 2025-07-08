@@ -6,7 +6,6 @@ import { Foreman, NoteTaking, Services } from "../Icons"
 import { months3EngChars } from "../utils/dateUtils"
 import useTheme from "../utils/useTheme"
 import { useNavigate } from "react-router-dom"
-import SupplierOrders from "../suppliers/SupplierOrders"
 import { useService } from "./ServiceContextProvider"
 import { useSupplierOrders } from "../suppliers/SupplierOrderContextProvider"
 

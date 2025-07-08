@@ -2,6 +2,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import AddSparePartsDialog from '../AddSparePartsDialog';
 import SupplierOrders from '../SupplierOrders';
+import { SupplierOrderContext, SupplierOrderProvider } from '../SupplierOrderContextProvider';
 
 describe('AddSparePartsDialog Component', () => {
   const mockSuppliers = [
@@ -21,7 +22,6 @@ describe('AddSparePartsDialog Component', () => {
   const defaultProps = {
     isShow: true,
     setShowDialog: jest.fn(),
-    supplierOrders: new SupplierOrders(mockOrders, jest.fn()),
     existingOrder: undefined,
     suppliers: mockSuppliers,
     sparePartUsages: mockSparePartUsages,
@@ -33,7 +33,7 @@ describe('AddSparePartsDialog Component', () => {
   });
 
   test('renders dialog with initial state', () => {
-    render(<AddSparePartsDialog {...defaultProps} />);
+    render(<SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}><AddSparePartsDialog {...defaultProps} /></SupplierOrderContext>);
 
     fireEvent.click(screen.getByText('Add More'));
 
@@ -73,7 +73,7 @@ describe('AddSparePartsDialog Component', () => {
   });
 
   test('updates supplier and filters spare parts', async () => {
-    render(<AddSparePartsDialog {...defaultProps} />);
+    render(<SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}><AddSparePartsDialog {...defaultProps} /></SupplierOrderContext>);
 
     const supplierInput = screen.getByPlaceholderText('Choose a supplier');
     fireEvent.click(supplierInput);
@@ -96,7 +96,7 @@ describe('AddSparePartsDialog Component', () => {
   });
 
   test('selects item code and updates supplier', async () => {
-    render(<AddSparePartsDialog {...defaultProps} />);
+    render(<SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}><AddSparePartsDialog {...defaultProps} /></SupplierOrderContext>);
 
     fireEvent.click(screen.getByText('Add More'));
 
@@ -113,7 +113,7 @@ describe('AddSparePartsDialog Component', () => {
   });
 
   test('selects spare part and updates supplier', async () => {
-    render(<AddSparePartsDialog {...defaultProps} />);
+    render(<SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}><AddSparePartsDialog {...defaultProps} /></SupplierOrderContext>);
 
     fireEvent.click(screen.getByText('Add More'));
 
@@ -157,7 +157,7 @@ describe('AddSparePartsDialog Component', () => {
   });
 
   test('saves valid form data', async () => {
-    render(<AddSparePartsDialog {...defaultProps} />);
+    render(<SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}><AddSparePartsDialog {...defaultProps} /></SupplierOrderContext>);
 
     fireEvent.change(screen.getByPlaceholderText('Key in Invoice Date'), { target: { value: '2023-01-01' } });
     const supplierInput = screen.getByPlaceholderText('Choose a supplier');

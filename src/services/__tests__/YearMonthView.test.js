@@ -2,6 +2,12 @@ import { render, screen, fireEvent, within, waitFor } from '@testing-library/rea
 import YearMonthView from '../YearMonthView';
 import { ScrollSpy } from 'bootstrap';
 import { useNavigate } from 'react-router-dom';
+import { ServiceContext } from '../ServiceContextProvider';
+import { SupplierOrderContext } from '../../suppliers/SupplierOrderContextProvider';
+import ServiceTransactions from '../../ServiceTransactions';
+import SupplierOrders from '../../suppliers/SupplierOrders';
+
+import {jest, test, expect} from '@jest/globals'
 
 
 // Mock OrderTooltip
@@ -26,25 +32,10 @@ describe('YearMonthView Component', () => {
   ];
 
   const mockServices = {
-    current: {
-      filterByYearMonthGroupByVehicle(year, month) {
-        return {
-          'Truck A': [ { creationDate: '2023-01-01', sparePartUsages: allServices.slice(4, 5), migratedHandWrittenSpareParts: allServices.slice(0, 1) } ],
-          'Truck B': [ { creationDate: '2023-01-02', sparePartUsages: allServices.slice(5, 7), migratedHandWrittenSpareParts: allServices.slice(1, 3) } ],
-          'Truck C': [ { creationDate: '2023-01-03', sparePartUsages: allServices.slice(7), migratedHandWrittenSpareParts: allServices.slice(3, 4) } ]
-        };
-      },
-      updateTransactions(wss) {
-
-      },
-      availableYears() {
-        return [2022, 2023, 2024];
-      },
-      transactions: [{ creationDate: '2023-01-01', sparePartUsages: allServices.slice(4, 5), migratedHandWrittenSpareParts: allServices.slice(0, 1) },
-        { creationDate: '2023-01-02', sparePartUsages: allServices.slice(5, 7), migratedHandWrittenSpareParts: allServices.slice(1, 3) },
-        { creationDate: '2023-01-03', sparePartUsages: allServices.slice(7), migratedHandWrittenSpareParts: allServices.slice(3, 4) }
+      transactions: [{ id: 1000, vehicleNo: 'Truck A', creationDate: '2023-01-01', startDate: '2023-01-01', sparePartUsages: allServices.slice(4, 5), migratedHandWrittenSpareParts: allServices.slice(0, 1) },
+        { id: 1001, vehicleNo: 'Truck B', creationDate: '2023-01-02', startDate: '2023-01-02', sparePartUsages: allServices.slice(5, 7), migratedHandWrittenSpareParts: allServices.slice(1, 3) },
+        { id: 1002, vehicleNo: 'Truck C', creationDate: '2023-01-03', startDate: '2023-01-03', sparePartUsages: allServices.slice(7), migratedHandWrittenSpareParts: allServices.slice(3, 4) }
       ]
-    }
   };
 
   const mockSuppliers = [
@@ -81,8 +72,11 @@ describe('YearMonthView Component', () => {
 
   test('renders component with initial year and month', async () => {
     global.fetch = jest.fn(() => Promise.resolve({ok: true, 
-      json: () => Promise.resolve([])}));
-    render(<YearMonthView {...defaultProps} />);
+      json: () => Promise.resolve(mockServices.transactions)}));
+    render(<ServiceContext value={new ServiceTransactions(mockServices.transactions, jest.fn())}>
+              <SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}>
+                <YearMonthView {...defaultProps} />
+            </SupplierOrderContext></ServiceContext>);
 
     await waitFor(() => {
       const yearButton = screen.getAllByRole('button', { name: '2023' });
@@ -103,8 +97,11 @@ describe('YearMonthView Component', () => {
 
   test('changes month via button', async () => {
     global.fetch = jest.fn(() => Promise.resolve({ok: true, 
-      json: () => Promise.resolve([])}));
-    render(<YearMonthView {...defaultProps} />);
+      json: () => Promise.resolve(mockServices.transactions)}));
+    render(<ServiceContext value={new ServiceTransactions(mockServices.transactions, jest.fn())}>
+              <SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}>
+                <YearMonthView {...defaultProps} />
+            </SupplierOrderContext></ServiceContext>);
 
     await waitFor(() => {
       fireEvent.click(screen.getByRole('button', {current: 'Jun'}));
@@ -115,8 +112,11 @@ describe('YearMonthView Component', () => {
 
   test('calls backToService when Back to Service button is clicked', async () => {
     global.fetch = jest.fn(() => Promise.resolve({ok: true, 
-      json: () => Promise.resolve([])}));
-    render(<YearMonthView {...defaultProps} />);
+      json: () => Promise.resolve(mockServices.transactions)}));
+    render(<ServiceContext value={new ServiceTransactions(mockServices.transactions, jest.fn())}>
+              <SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}>
+                <YearMonthView {...defaultProps} />
+            </SupplierOrderContext></ServiceContext>);
 
     await waitFor(() => {
       fireEvent.click(screen.getByRole('button', { name: 'Back to Service' }));
@@ -126,8 +126,11 @@ describe('YearMonthView Component', () => {
 
   test('displays vehicle transactions with order and supplier info', async () => {
     global.fetch = jest.fn(() => Promise.resolve({ok: true, 
-      json: () => Promise.resolve([])}));
-    render(<YearMonthView {...defaultProps} />);
+      json: () => Promise.resolve(mockServices.transactions)}));
+    render(<ServiceContext value={new ServiceTransactions(mockServices.transactions, jest.fn())}>
+              <SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}>
+                <YearMonthView {...defaultProps} />
+            </SupplierOrderContext></ServiceContext>);
 
     await waitFor(() => {
       expect(screen.getAllByText('2023-01-01').length).toBe(2)
@@ -152,10 +155,15 @@ describe('YearMonthView Component', () => {
 
   test('displays top 3 vehicles by amount in summary', async () => {
     global.fetch = jest.fn(() => Promise.resolve({ok: true, 
-      json: () => Promise.resolve([])}));
-    render(<YearMonthView {...defaultProps} />)
+      json: () => Promise.resolve(mockServices.transactions)}));
+    render(<ServiceContext value={new ServiceTransactions(mockServices.transactions, jest.fn())}>
+              <SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}>
+                <YearMonthView {...defaultProps} />
+            </SupplierOrderContext></ServiceContext>)
 
     await waitFor(() => {
+      expect(global.fetch).toBeCalledWith('http://localhost:8080/api/workshop-services?year=2023&month=1')
+
       const summaryCard = screen.getByText('Top 3:').closest('.card-body');
       const withinSummary = within(summaryCard);
 

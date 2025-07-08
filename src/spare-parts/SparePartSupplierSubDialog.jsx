@@ -103,7 +103,7 @@ export default function SparePartSupplierSubDialog({
             <Typeahead
                 inputProps={{formNoValidate: true}}
                 labelKey={(option) => `${option.partName} (${option.invoiceDate}) - ${suppliers.find(sp => sp.id === option.supplierId)?.supplierName}`}
-                options={orders.list().filter(mo => !mo.sparePartId)}
+                options={orders.list().filter(mo => !mo.sparePartId).filter(mo => matchingOrders.findIndex(mmo => mmo.id === mo.id) === -1)}
                 onChange={(options) => afterChooseOrders(options)}
                 selected={[]}
                 placeholder="How about start with an order"

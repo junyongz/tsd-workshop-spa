@@ -109,14 +109,17 @@ function AddSparePartsDialog({isShow, setShowDialog, existingOrder=[], suppliers
         if (sparePart && suppliers.findIndex(s => s.id === sparePart.supplierId) >= 0) {
             setSelectedSupplier([suppliers.find(s => s.id === sparePart.supplierId)])
         }
+
+        const toAddSparePart = sparePart && {...sparePart}
+        sparePart && deleteExistingFields(toAddSparePart)
+
         setItems(prevs => {
             const newItem = [...prevs]
-            newItem[i] = {...prevs[i], ...sparePart, 
-                selectedSparePart: (sparePart && 
-                    supplierOrders.list().findIndex(sp => sp.itemCode === sparePart.itemCode) >= 0 
-                    && supplierOrders.list().filter(sp => sp.itemCode === sparePart.itemCode)) || [...prevs[i].selectedSparePart], 
-                selectedItemCode: (sparePart && [sparePart]) || []}
-            deleteExistingFields(newItem[i])
+            newItem[i] = {...prevs[i], ...toAddSparePart, 
+                selectedSparePart: (toAddSparePart && 
+                    supplierOrders.list().findIndex(sp => sp.itemCode === toAddSparePart.itemCode) >= 0 
+                    && supplierOrders.list().filter(sp => sp.itemCode === toAddSparePart.itemCode)) || [...prevs[i].selectedSparePart], 
+                selectedItemCode: (toAddSparePart && [toAddSparePart]) || []}
             return newItem
         })
     }
@@ -125,12 +128,15 @@ function AddSparePartsDialog({isShow, setShowDialog, existingOrder=[], suppliers
         if (sparePart && suppliers.findIndex(s => s.id === sparePart.supplierId) >= 0) {
             setSelectedSupplier([suppliers.find(s => s.id === sparePart.supplierId)])
         }
+
+        const toAddSparePart = sparePart && {...sparePart}
+        sparePart && deleteExistingFields(toAddSparePart)
+
         setItems(prevs => {
             const newItem = [...prevs]
-            newItem[i] = {...prevs[i], ...sparePart, 
-                selectedSparePart: (sparePart && [sparePart]) || [], 
-                selectedItemCode: (sparePart && sparePart.itemCode && [sparePart]) || [...prevs[i].selectedItemCode]}
-            deleteExistingFields(newItem[i])
+            newItem[i] = {...prevs[i], ...toAddSparePart, 
+                selectedSparePart: (toAddSparePart && [toAddSparePart]) || [], 
+                selectedItemCode: (toAddSparePart && toAddSparePart.itemCode && [toAddSparePart]) || [...prevs[i].selectedItemCode]}
             return newItem
         })
     }

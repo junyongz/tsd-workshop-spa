@@ -108,41 +108,45 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
 
         checkVehicleValidity(nativeForm['vehicle'])
         if (items.some(itm => !itm.selectedSpareParts || itm.selectedSpareParts.length === 0)) {
-            nativeForm['sparePartsCompleted'].setCustomValidity('Please key spare parts')
+            nativeForm.elements.namedItem('sparePartsCompleted').setCustomValidity('Please key spare parts')
             setTabView('all')
         }
         else {
-            nativeForm['sparePartsCompleted'].setCustomValidity('')
+            nativeForm.elements.namedItem('sparePartsCompleted').setCustomValidity('')
         }
         if (tasks?.some(itm => !itm.taskId)) {
-            nativeForm['tasksCompleted'].setCustomValidity('Please key tasks')
+            nativeForm.elements.namedItem('tasksCompleted').setCustomValidity('Please key tasks')
             setTabView('all')
         }
         else {
-            nativeForm['tasksCompleted'].setCustomValidity('')
+            nativeForm.elements.namedItem('tasksCompleted').setCustomValidity('')
         }
 
         if (nativeForm.checkValidity() === false) {
             setValidated(true)
             return
         }
-        nativeForm['sparePartsCompleted'].setCustomValidity('')
-        nativeForm['tasksCompleted'].setCustomValidity('')
-        nativeForm['vehicle'].setCustomValidity('')
+        nativeForm.elements.namedItem('sparePartsCompleted').setCustomValidity('')
+        nativeForm.elements.namedItem('tasksCompleted').setCustomValidity('')
+        nativeForm.elements.namedItem('vehicle').setCustomValidity('')
+
+        const startDateElem = nativeForm.elements.namedItem('startDate')
+        const mileageKmElem = nativeForm.elements.namedItem('mileageKm')
+        const transactionTypesElems = nativeForm.elements.namedItem('transactionTypes')
 
         const service = {
             id: selectedExistingService?.id,
             vehicleId: selectedVehicles[0].id,
             vehicleNo: selectedVehicles[0].vehicleNo,
-            startDate: selectedExistingService ? selectedExistingService.startDate : nativeForm['startDate'].value,
-            transactionTypes: Array.from(nativeForm['transactionTypes']).filter(tt => tt.checked).map(tt => tt.value),
-            mileageKm: nativeForm['mileageKm'].value,
+            startDate: selectedExistingService ? selectedExistingService.startDate : startDateElem.value,
+            transactionTypes: Array.from(transactionTypesElems).filter(tt => tt.checked).map(tt => tt.value),
+            mileageKm: mileageKmElem.value,
             notes: selectedExistingService?.notes,
             sparePartsMargin: selectedExistingService?.sparePartsMargin,
             sparePartUsages: items.map(v => {
                 return {
                     vehicleNo: selectedVehicles[0].vehicleNo,
-                    usageDate: nativeForm['startDate'].value,
+                    usageDate: startDateElem.value,
                     quantity: v.quantity,
                     soldPrice: parseFloat(v.unitPrice * (1+(selectedExistingService?.sparePartsMargin||0)/100)),
                     margin: selectedExistingService?.sparePartsMargin||0,
@@ -151,7 +155,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
             }),
             tasks: (tasks || []).map(v => {
                 return {
-                    recordedDate: nativeForm['startDate'].value,
+                    recordedDate: startDateElem.value,
                     taskId: v.taskId,
                     quotedPrice: v.quotedPrice,
                     remarks: v.remarks
@@ -230,9 +234,9 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
                         </Row>
                         <Row>
                             <Col className="text-center">
-                            <Form.Check ref={repairSwitchRef} inline name="transactionTypes" type="switch" defaultChecked={trx.current?.transactionTypes?.includes('REPAIR')} value="REPAIR" label={ <span onClick={() => repairSwitchRef.current.click()}><Repair /> Repair</span> }></Form.Check>
-                            <Form.Check ref={maintSwitchRef} inline name="transactionTypes" type="switch" defaultChecked={trx.current?.transactionTypes?.includes('SERVICE')}value="SERVICE" label={ <span onClick={() => maintSwitchRef.current.click()}><MaintenanceServices /> Maintenance Service</span> }></Form.Check>
-                            <Form.Check ref={inspectionSwitchRef} inline name="transactionTypes" type="switch" defaultChecked={trx.current?.transactionTypes?.includes('INSPECTION')}value="INSPECTION"  label={ <span onClick={() => inspectionSwitchRef.current.click()}><Inspection /> Inspection</span> }></Form.Check>
+                            <Form.Check ref={repairSwitchRef} inline name="transactionTypes" type="switch" defaultChecked={trx?.current?.transactionTypes?.includes('REPAIR')} value="REPAIR" label={ <span onClick={() => repairSwitchRef.current.click()}><Repair /> Repair</span> }></Form.Check>
+                            <Form.Check ref={maintSwitchRef} inline name="transactionTypes" type="switch" defaultChecked={trx?.current?.transactionTypes?.includes('SERVICE')}value="SERVICE" label={ <span onClick={() => maintSwitchRef.current.click()}><MaintenanceServices /> Maintenance Service</span> }></Form.Check>
+                            <Form.Check ref={inspectionSwitchRef} inline name="transactionTypes" type="switch" defaultChecked={trx?.current?.transactionTypes?.includes('INSPECTION')}value="INSPECTION"  label={ <span onClick={() => inspectionSwitchRef.current.click()}><Inspection /> Inspection</span> }></Form.Check>
                             </Col>
                         </Row>
                         <Row>

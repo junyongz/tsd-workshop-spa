@@ -218,7 +218,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
                                         }
                                     }}
                                     placeholder="Choose a vehicle..."
-                                    defaultSelected={selectedVehicles} />
+                                    selected={selectedVehicles} />
                                 </InputGroup>
                             </Col>
                             <Col xs="12" lg="3" className="mb-1">

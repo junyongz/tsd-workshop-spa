@@ -1,18 +1,16 @@
 import ServiceTransactions from "../ServiceTransactions"
 import SupplierOrders from "../suppliers/SupplierOrders"
 
-export const doFilterServices = (options=[], transactions = {current: new ServiceTransactions()}, setSelectedSearchOptions) => {
+export const doFilterServices = (options=[], transactions = new ServiceTransactions(), setSelectedSearchOptions) => {
     const apiUrl = process.env.REACT_APP_API_URL
 
-    if (transactions.current) {
-      const keywords = options.map(opt => `keyword=${opt.name}`).join('&')
+    const keywords = options.map(opt => `keyword=${opt.name}`).join('&')
 
-      fetch(`${apiUrl}/api/workshop-services?${keywords}`)
-        .then(resp => resp.json())
-        .then(wss => {
-          transactions.updateTransactions(wss)
-        })
-    }
+    fetch(`${apiUrl}/api/workshop-services?${keywords}`)
+      .then(resp => resp.json())
+      .then(wss => {
+        transactions.updateTransactions(wss)
+      })
 
     setSelectedSearchOptions(options)
 }

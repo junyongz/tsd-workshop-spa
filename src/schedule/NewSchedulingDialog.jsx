@@ -112,7 +112,6 @@ function NewSchedulingDialog({isShow, setShowDialog, vehicles, theDate = new Dat
                                         }
                                     }}
                                     placeholder="Choose a vehicle..."
-                                    selected={selectedVehicles}
                                     clearButton 
                                     />
                                 </InputGroup>

@@ -50,6 +50,7 @@ export default function SparePartsSubDialog({
                         <InputGroup>
                         <InputGroup.Text><Tools /></InputGroup.Text>
                         <Typeahead
+                            id="typeahead-partname"
                             inputProps={{required:true, name: 'partName'}}
                             labelKey={(option) => 
                                 `${(option.itemCode && !option.partName.includes(option.itemCode)) ? (option.itemCode + ' ') : ''}${option.partName}`
@@ -68,7 +69,6 @@ export default function SparePartsSubDialog({
                                 }
                             }
                             clearButton
-                            selected={v.selectedSpareParts}
                             />
                         </InputGroup>
                     </Col>

@@ -42,7 +42,7 @@ export default function SparePartSupplierSubDialog({
         setMatchingOrders(prev => [...prev.filter(mo => mo.supplierId !== supplier.id)])
     }
 
-    const afterChooseOrders = (options=[]) => {
+    const afterChooseOrders = (options=[], supplierId) => {
         const newSupplierIds = Array.from(new Set(
             options.map(opt => opt.supplierId)
                 .filter(spid => !selectedSuppliers.map(sp => sp.id).includes(spid))))
@@ -54,18 +54,24 @@ export default function SparePartSupplierSubDialog({
                 newItems.push(suppliers.find(sp => sp.id === newSupplierIds[0]))
                 return newItems
             })
-            setActiveSupplierId(newSupplierIds[0])
-
             setMatchingOrders(prev => [...prev].concat(options))
+            setActiveSupplierId(newSupplierIds[0])
         }
         else {
-            setMatchingOrders(prev => {
-                const newItems = [...prev]
-                const otherSuppliersMatchingOrders = newItems.filter(mo => mo.supplierId != activeSupplierId)
-
-                return otherSuppliersMatchingOrders.concat(options || [])
-            })
+            // cannot assume options length is 1 only, because same supplier can have many orders already selected!
+            if (options && options.length > 0) {
+                setMatchingOrders(prev => [...prev]
+                        .filter(mo => !!supplierId ? mo.supplierId != activeSupplierId : true)
+                        .concat(options || []))
+                setActiveSupplierId(options[0].supplierId)
+            }
+            else {
+                setMatchingOrders(prev => [...prev.filter(p => p.supplierId != activeSupplierId)])
+            }
         }
+
+        // of course assume only 1
+        
     }
 
     useEffect(() => {
@@ -91,6 +97,7 @@ export default function SparePartSupplierSubDialog({
             <InputGroup className="mb-1">
             <InputGroup.Text><Suppliers /></InputGroup.Text>
             <Typeahead
+                id="typeahead-supplier"
                 inputProps={{formNoValidate: true}}
                 labelKey={(option) => `${option.supplierName}`}
                 options={suppliers.filter(sp => selectedSuppliers.findIndex(ssp => ssp.id === sp.id) === -1)}
@@ -103,6 +110,7 @@ export default function SparePartSupplierSubDialog({
             <InputGroup>
             <InputGroup.Text><Tools /></InputGroup.Text>
             <Typeahead
+                id="typeahead-order"
                 inputProps={{formNoValidate: true}}
                 labelKey={(option) => `${option.partName} (${option.invoiceDate}) - ${suppliers.find(sp => sp.id === option.supplierId)?.supplierName}`}
                 options={orders.list().filter(mo => !mo.sparePartId).filter(mo => matchingOrders.findIndex(mmo => mmo.id === mo.id) === -1)}
@@ -123,11 +131,12 @@ export default function SparePartSupplierSubDialog({
             </Nav> }
 
             {selectedSuppliers.length > 0 && <Typeahead
+                id="typeahead-select-orders"
                 key={activeSupplierId}
                 inputProps={{name: 'orders'}}
                 labelKey={(option) => `${option.partName} (${option.invoiceDate})`}
                 options={orders.list().filter(o => o.supplierId == activeSupplierId).filter(mo => !mo.sparePartId)}
-                onChange={(opts) => afterChooseOrders(opts)}
+                onChange={(opts) => afterChooseOrders(opts, activeSupplierId)}
                 selected={matchingOrders.filter(mo => mo.supplierId == activeSupplierId)}
                 placeholder="Find a spare part from orders"
                 renderToken={(option, props, idx) => 

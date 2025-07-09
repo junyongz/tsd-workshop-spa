@@ -5,6 +5,7 @@ import remainingQuantity, { decimalPointUomAvailable } from "../utils/quantityUt
 import { Calendar, Dollar, Suppliers, Tools } from "../Icons";
 import PromptDeletionIcon from "../components/PromptDeletionIcon";
 import { useSupplierOrders } from "./SupplierOrderContextProvider";
+import generateUniqueId from "../utils/randomUtils";
 
 function AddSparePartsDialog({isShow, setShowDialog, existingOrder=[], suppliers=[], sparePartUsages=[], onSaveNewOrders}) {
     const supplierOrders = useSupplierOrders()
@@ -14,7 +15,7 @@ function AddSparePartsDialog({isShow, setShowDialog, existingOrder=[], suppliers
 
     const [isPending, startTransition] = useTransition();
 
-    const defaultItem = {itemCode: '', partName: 'Choose one ...', quantity: 0, unit: 'pc', unitPrice: 0, selectedItemCode: [], selectedSparePart: []};
+    const defaultItem = {rid: generateUniqueId(), itemCode: '', partName: 'Choose one ...', quantity: 0, unit: 'pc', unitPrice: 0, selectedItemCode: [], selectedSparePart: []};
 
     const [items, setItems] = useState(existingOrder || [defaultItem])
     const editing = items && items[0]?.deliveryOrderNo
@@ -34,7 +35,7 @@ function AddSparePartsDialog({isShow, setShowDialog, existingOrder=[], suppliers
     const clone = () => {
         setItems(prev => {
             const newItems = prev.map(v => {
-                const newItem = {...v}
+                const newItem = {...v, rid: generateUniqueId()}
                 delete newItem.id
                 delete newItem.deliveryOrderNo
                 delete newItem.invoiceDate
@@ -243,7 +244,7 @@ function AddSparePartsDialog({isShow, setShowDialog, existingOrder=[], suppliers
                         <Row>
                         <ListGroup>
                         {items?.map((v, i) =>
-                            <ListGroup.Item>
+                            <ListGroup.Item key={v.rid || v.id}>
                                 <Row>
                                 { !editing && <Col xs="1"><PromptDeletionIcon confirmDelete={() => removeItem(v, i)} flip/></Col> }
                                 <Col xs={!editing ? 11 : 12}>
@@ -252,6 +253,7 @@ function AddSparePartsDialog({isShow, setShowDialog, existingOrder=[], suppliers
                                             <InputGroup>
                                             <InputGroup.Text><i className="bi bi-123"></i></InputGroup.Text>
                                             <Typeahead
+                                                id="typeahead-item-code"
                                                 inputProps={{name: 'itemCode'}}
                                                 labelKey='itemCode'
                                                 options={supplierOrders.list()
@@ -271,6 +273,7 @@ function AddSparePartsDialog({isShow, setShowDialog, existingOrder=[], suppliers
                                             <InputGroup>
                                             <InputGroup.Text><Tools /></InputGroup.Text>
                                             <Typeahead
+                                                id="typeahead-part"
                                                 inputProps={{required: true, name: 'partName'}}
                                                 labelKey='partName'
                                                 options={supplierOrders.list().filter(mo => selectedSupplier.length > 0 ? mo.supplierId === selectedSupplier[0].id : true)}

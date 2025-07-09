@@ -30,15 +30,14 @@ export default function NavigationBar({
             <Navbar.Collapse>
                 <Nav variant="underline" defaultActiveKey={location.pathname === '/' ? 'home' : location.pathname.substring(1)}>
                     <Dropdown as={ButtonGroup}>
-                    <Nav.Item><Nav.Link eventKey="home" onClick={() => navigate("/")}><Services /> Services {(selectedSearchOptions.length > 0 || selectedSearchDate) && totalFilteredServices > 0 && <Badge pill>{totalFilteredServices}</Badge>}</Nav.Link></Nav.Item>
+                    <Nav.Item><Nav.Link eventKey="home" onClick={() => navigate("/")}><Services /> {!((selectedSearchOptions.length > 0 || selectedSearchDate) && totalFilteredServices > 0) && <span>Services</span> } {(selectedSearchOptions.length > 0 || selectedSearchDate) && totalFilteredServices > 0 && <Badge pill>{totalFilteredServices}</Badge>}</Nav.Link></Nav.Item>
                     <Dropdown.Toggle as={NavLink} ></Dropdown.Toggle>
                     <Dropdown.Menu>
                         <NavDropdown.Item eventKey={'task'} onClick={() => navigate("/workmanships")}><Foreman /> Workmanship</NavDropdown.Item>
                     </Dropdown.Menu>
                     </Dropdown>
-                    { false && <Nav.Item><Nav.Link eventKey="home" onClick={() => navigate("/")}><Services /> Services {(selectedSearchOptions.length > 0 || selectedSearchDate) && totalFilteredServices > 0 && <Badge pill>{totalFilteredServices}</Badge>}</Nav.Link></Nav.Item> }
                     <Nav.Item><Nav.Link eventKey="schedules" onClick={() => navigate("/schedules")}><Calendar /> Schedules</Nav.Link></Nav.Item>
-                    <Nav.Item><Nav.Link eventKey="orders" onClick={() => navigate("/orders")}><Suppliers /> Suppliers {(selectedSearchOptions.length > 0 || selectedSearchDate) && totalFilteredOrders > 0 && <Badge pill>{totalFilteredOrders}</Badge>}</Nav.Link></Nav.Item>
+                    <Nav.Item><Nav.Link eventKey="orders" onClick={() => navigate("/orders")}><Suppliers /> {!((selectedSearchOptions.length > 0 || selectedSearchDate) && totalFilteredOrders > 0) && <span>Suppliers</span>} {(selectedSearchOptions.length > 0 || selectedSearchDate) && totalFilteredOrders > 0 && <Badge pill>{totalFilteredOrders}</Badge>}</Nav.Link></Nav.Item>
                     <Nav.Item><Nav.Link eventKey="vehicles" onClick={() => navigate("/vehicles")}><Truck /> Trucks</Nav.Link></Nav.Item>
                     <Nav.Item><Nav.Link eventKey="spare-parts" onClick={() => navigate("/spare-parts")}><Tools /> Spare Parts {selectedSearchOptions.length > 0 && totalSpareParts > 0 && <Badge pill>{totalSpareParts}</Badge>}</Nav.Link></Nav.Item>
                 </Nav>
@@ -58,7 +57,6 @@ export default function NavigationBar({
                                 onChange={filterServices}
                                 options={searchOptions}
                                 placeholder="Choose by vehicle(s) and/or spart part(s)"
-                                selected={selectedSearchOptions}
                             />
                         <InputGroup.Text><Calendar role={location.pathname === '/vehicles'  ? '' : 'button'} onClick={location.pathname === '/vehicles' ? ()=>{} : () => setSearchByDate(true)} /></InputGroup.Text>
                     </InputGroup>

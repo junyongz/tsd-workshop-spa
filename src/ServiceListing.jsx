@@ -13,7 +13,6 @@ import HoverPriceTag from './components/HoverPriceTag';
 import ResponsivePagination from './components/ResponsivePagination';
 import { applyFilterOnServices } from './search/fuzzySearch';
 import { useNavigate } from 'react-router-dom';
-import SupplierOrders from './suppliers/SupplierOrders';
 import { useService } from './services/ServiceContextProvider';
 import { useSupplierOrders } from './suppliers/SupplierOrderContextProvider';
 
@@ -40,6 +39,20 @@ function ServiceListing({
   const filteredServices = applyFilterOnServices(selectedSearchOptions, selectedSearchDate, vehicles, transactions.services(), orders)
   const chunkedItems = chunkArray(filteredServices, 10)
   const totalPages = chunkedItems.length;
+
+  const [prevSelectedSearchOptions, setPrevSelectedSearchOptions] = useState(selectedSearchOptions)
+  const [prevSelectedSearchDate, setPrevSelectedSearchDate] = useState(selectedSearchDate)
+
+  if (prevSelectedSearchOptions !== selectedSearchOptions || prevSelectedSearchDate !== selectedSearchDate) {
+    setActivePage(1)
+
+    if (prevSelectedSearchOptions !== selectedSearchOptions) {
+      setPrevSelectedSearchOptions(selectedSearchOptions)
+    }
+    if (prevSelectedSearchDate !== selectedSearchDate) {
+      setPrevSelectedSearchDate(selectedSearchDate)
+    }
+  }
 
   const navigate = useNavigate()
 
@@ -204,7 +217,7 @@ function ServiceListing({
 
   useEffect(() => {
     if (selectedSearchOptions.length > 0 || selectedSearchDate) {
-      setActivePage(1)
+      //setActivePage(1)
       setTotalFilteredServices(filteredServices.length)
     }
   }, [transactions.services(), selectedSearchOptions, selectedSearchDate])

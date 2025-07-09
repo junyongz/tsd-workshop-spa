@@ -127,6 +127,7 @@ function VehicleUpdateDialog({isShow, setShowDialog, vehicle, setVehicles, compa
                                 <InputGroup>
                                 <InputGroup.Text><Company /></InputGroup.Text>
                                     <Typeahead
+                                        id="typeahead-company"
                                         disabled={selectedCompanies[0]?.internal && vehicle.companyId === selectedCompanies[0].id}
                                         inputProps={{required:true, name: 'companyId'}}
                                         labelKey='companyName'

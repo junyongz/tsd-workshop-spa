@@ -2,7 +2,9 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import AddSparePartsDialog from '../AddSparePartsDialog';
 import SupplierOrders from '../SupplierOrders';
-import { SupplierOrderContext, SupplierOrderProvider } from '../SupplierOrderContextProvider';
+import { SupplierOrderContext } from '../SupplierOrderContextProvider';
+
+import { describe, test, expect } from '@jest/globals'
 
 describe('AddSparePartsDialog Component', () => {
   const mockSuppliers = [
@@ -282,7 +284,8 @@ describe('AddSparePartsDialog Component', () => {
     expect(screen.getByText('Clone')).toBeInTheDocument();
   });
 
-  test('renders existing order with full quantity available', () => {
+  test('renders existing order with full quantity available', async () => {
+    const user = userEvent.setup()
     const existingOrder = [{
       id: 2,
       invoiceDate: '2023-01-02',
@@ -305,5 +308,17 @@ describe('AddSparePartsDialog Component', () => {
     expect(screen.getByPlaceholderText('Find a existing one as template')).not.toBeDisabled();
     expect(screen.getByPlaceholderText('Quantity')).not.toBeDisabled();
     expect(screen.getByPlaceholderText('Price $')).not.toBeDisabled();
+
+    // change text, id should retain, part name should get changed to new one
+    await user.click(screen.getByPlaceholderText('Find a existing one as template'))
+    await user.clear(screen.getByPlaceholderText('Find a existing one as template'))
+    await user.keyboard('Engine Oil 1880')
+
+    await user.click(screen.getByText('Save'));
+    expect(defaultProps.onSaveNewOrders).lastCalledWith(
+      [{"deliveryOrderNo": "DO456", "id": 2, "invoiceDate": "2023-01-02", "itemCode": "XYZ789", 
+        "notes": undefined, "partName": "Engine Oil 1880", "quantity": 8, 
+        "sparePartId": undefined, "supplierId": 2, "totalPrice": 600, 
+        "unit": "pcs", "unitPrice": 75}], expect.any(Function))
   });
 });

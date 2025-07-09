@@ -244,7 +244,7 @@ export default function SpareParts({suppliers=[], selectedSearchOptions=[], tota
 
                             <Suppliers />
                                 {supplierIds.map(spId => 
-                                    <div>{suppliers.find(sp => sp.id === spId)?.supplierName}</div>
+                                    <div key={spId}>{suppliers.find(sp => sp.id === spId)?.supplierName}</div>
                                 )}
                                 {!hasVariousPrices && <span className="text-secondary">${matchedOrders[0]?.unitPrice}</span>}
                                 {hasVariousPrices && <span className="text-secondary">${matchedOrders[0]?.unitPrice} - ${matchedOrders[matchedOrders.length - 1]?.unitPrice}</span>}

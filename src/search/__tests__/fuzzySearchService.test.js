@@ -1,7 +1,11 @@
-import { expect, test } from '@jest/globals'
+import { afterAll, expect, test, jest } from '@jest/globals'
 
-import { applyFilterOnServices } from '../fuzzySearch'
+import { applyFilterOnServices, doFilterServices } from '../fuzzySearch'
 import SupplierOrders from '../../suppliers/SupplierOrders'
+import ServiceTransactions from '../../ServiceTransactions'
+import { waitFor } from '@testing-library/react'
+
+afterAll(() => jest.clearAllMocks())
 
 test('1 search option, only vehicle match', () => {
     expect(applyFilterOnServices([{name: 'J 1000'}], undefined, 
@@ -110,4 +114,23 @@ test('2 search options, no vehicle matched, but spare part matched', () => {
             {startDate: '2020-02-02', vehicleNo: 'J 1000', sparePartUsages: [{orderId: 1000}]},
             {startDate: '2020-03-02', vehicleNo: 'J 2000', sparePartUsages: [{orderId: 1001}]}
         ])
+})
+
+// can only cater existing one
+test('search via api call through keywords', async () => {
+    const dispatch = jest.fn()
+    const setSelectedSearchOptions = jest.fn()
+
+    global.fetch = jest.fn(() => Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve([{id: 1000, vehicleNo: 'J 23', startDate: '24-12-2025'}, {id: 2000, vehicleNo: 'J 33', startDate: '25-12-2025'}])
+    }))
+
+    doFilterServices([{name: 'J 23'}], new ServiceTransactions([{id: 1000, vehicleNo: 'J 23', startDate: '25-12-2025'}, 
+        {id: 2000, vehicleNo: 'J 33', startDate: '24-12-2025'}], dispatch), setSelectedSearchOptions)
+
+    expect(setSelectedSearchOptions).toBeCalledWith([{"name": "J 23"}])
+    
+    await waitFor(() => expect(dispatch).toBeCalledWith([{"id": 2000, "startDate": "25-12-2025", "vehicleNo": "J 33"}, 
+        {"id": 1000, "startDate": "24-12-2025", "vehicleNo": "J 23"}]))
 })

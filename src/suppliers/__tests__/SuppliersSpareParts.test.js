@@ -3,7 +3,7 @@ import { render, screen, fireEvent, waitFor, createEvent } from '@testing-librar
 import SuppliersSpareParts from '../SuppliersSpareParts';  
 import SupplierOrders from '../SupplierOrders';
 
-import { test, expect } from '@jest/globals'
+import { test, expect, jest } from '@jest/globals'
 import { SupplierOrderContext } from '../SupplierOrderContextProvider';
 
 // Mock dependencies
@@ -11,10 +11,10 @@ jest.mock('../../utils/getPaginationItems', () => () => [<div key="1">Pagination
 jest.mock('../AddSparePartsDialog', () => 
     ({onSaveNewOrders}) => <div>AddSparePartsDialog<span data-testid="add-spare-parts" onClick={(e) => onSaveNewOrders(e.target.orders)}></span></div>
 );
+
 jest.mock('../SparePartsUsageDialog', () => () => <div>SparePartsUsageDialog</div>);
 jest.mock('../NoteTakingDialog', () => () => <div>NoteTakingDialog</div>);
 jest.mock('../SparePartNotes', () => () => <div>SparePartNotes</div>);
-jest.mock('../../autoRefreshWorker', () => ({ clearState: jest.fn() }));
 
 // Mock fetch globally
 global.fetch = jest.fn();

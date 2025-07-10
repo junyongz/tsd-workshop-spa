@@ -18,7 +18,7 @@ function NoteTakingDialog({isShow, setShowDialog, onUpdateOrder=()=>{}, noteSpar
             return
         }
 
-        onUpdateOrder({...noteSparePart, notes: nativeForm['notes'].value}, true)
+        onUpdateOrder({...noteSparePart, notes: nativeForm.elements.namedItem('notes').value}, true)
         handleClose()
     }
 

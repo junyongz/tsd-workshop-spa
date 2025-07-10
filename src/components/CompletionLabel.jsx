@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
 import { Badge, Button, ButtonGroup, Collapse, Form, InputGroup, OverlayTrigger, Popover } from "react-bootstrap";
-import InputGroupText from "react-bootstrap/esm/InputGroupText";
+import InputGroupText from "react-bootstrap/InputGroupText";
 import { Calendar, Camera, NoteTaking } from "../Icons";
 import PhotoGallery from "./PhotoGallery";
 import PromptDeletionButton from "./PromptDeletionButton";

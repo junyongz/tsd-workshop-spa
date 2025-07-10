@@ -40,16 +40,16 @@ function SparePartsUsageDialog({isShow, setShowDialog, vehicles,
             return
         }
 
-        const usageDate = nativeForm['usageDate'].value
+        const usageDate = nativeForm.elements.namedItem('usageDate').value
         const vehicleNo = selectedVehicles[0].vehicleNo
-        const quantity = nativeForm['quantity'].value
+        const quantity = nativeForm.elements.namedItem('quantity').value
 
         onSaveNewSparePartUsage({
             vehicleId: selectedVehicles[0].id,
             vehicleNo: vehicleNo,
             usageDate: usageDate,
             orderId: usageSpareParts.id,
-            serviceId: nativeForm['serviceId'] && nativeForm['serviceId'].value,
+            serviceId: nativeForm.elements.namedItem('serviceId') && nativeForm.elements.namedItem('serviceId').value,
             quantity: quantity,
             soldPrice: usageSpareParts.unitPrice
         })
@@ -111,8 +111,8 @@ function SparePartsUsageDialog({isShow, setShowDialog, vehicles,
                     <Form ref={formRef} validated={validated}>
                         {
                             Array.from({length: records}, (_, i) =>
-                                <React.Fragment>
-                                <Row key={i} className="mb-1">
+                                <React.Fragment key={i}>
+                                <Row className="mb-1">
                                     <Col xs="3">
                                         <InputGroup>
                                         <InputGroup.Text><Calendar /></InputGroup.Text>
@@ -152,7 +152,7 @@ function SparePartsUsageDialog({isShow, setShowDialog, vehicles,
                                     <Col xs="3"></Col>
                                     <Col>
                                         {
-                                            existingServices.map(v => <Form.Check type="radio" 
+                                            existingServices.map((v, i) => <Form.Check key={i} type="radio" 
                                                 onChange={() => afterChooseExistingService(v)} 
                                                 name="serviceId" value={v.id} 
                                                 checked={existingServices.length === 1}

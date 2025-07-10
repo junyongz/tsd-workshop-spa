@@ -30,7 +30,7 @@ function InProgressTaskFocusListing({suppliers=[], taskTemplates=[], onNewServic
   const [originalTasks, setOriginalTasks] = useState([])
   const showTaskSubDialog = (ws) => {
     setTargetedService(ws)
-    const theTasks = [...ws.tasks].map(v => {
+    const theTasks = [...ws.tasks || []].map(v => {
         return {...v, rid: generateUniqueId(), selectedTask: [taskTemplates.find(t => t.id === v.taskId)]}
     }).sort((t1, t2) => t1.id - t2.id)
     setTasks(theTasks)
@@ -150,8 +150,8 @@ function InProgressTaskFocusListing({suppliers=[], taskTemplates=[], onNewServic
         <Row className='a'>
         {
         !targetedService && inProgressServices.map((v, i) =>
-            <Col xs="12" md="6" lg="4">
-            <Card key={v.id} className={'mb-3'} onClick={() => showTaskSubDialog(v, i)} role="button">
+            <Col xs="12" md="6" lg="4" key={v.id}>
+            <Card className={'mb-3'} onClick={() => showTaskSubDialog(v, i)} role="button">
               <Card.Header>
                 <Row>
                   <Col xs="6"><h1>{v.vehicleNo}</h1></Col>
@@ -233,7 +233,7 @@ function InProgressTaskFocusListing({suppliers=[], taskTemplates=[], onNewServic
                           <Col xs="12" lg="6" className='text-end'>
                             {spareParts.length > 0 && <Nav className='justify-content-end' variant='pills' activeKey={targetedService.sparePartsMargin} onSelect={(v) => changeMargin(v)}>
                               {[20, 30, 40].map(v => 
-                              <Nav.Item><Nav.Link eventKey={v}>{v}%</Nav.Link></Nav.Item>)}
+                              <Nav.Item key={v}><Nav.Link eventKey={v}>{v}%</Nav.Link></Nav.Item>)}
                               <Nav.Item className='ms-2'><InputGroup><Form.Control onChange={(e) => changeMargin(parseFloat(e.target.value))} style={{width: '6rem'}} required min="0" max="300" size="lg" type="number" step={5} name="sparePartsMargin" value={targetedService.sparePartsMargin} /><InputGroup.Text>%</InputGroup.Text></InputGroup></Nav.Item>
                             </Nav> }
                           </Col>

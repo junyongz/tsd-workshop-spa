@@ -114,7 +114,9 @@ export default function TaskSubDialog({taskTemplates, tasks, setTasks, removeTas
         })
     }
 
-    const imagesContext = require.context('../images', false, /\.png$/);
+    const imagesContext = process.env.NODE_ENV === 'test' 
+    ? Object.assign( (key) => `../images/${key}`, { keys: () => ['braking.png', 'cab.png'],} )
+    : require.context('../images', false, /\.png$/)
 
     useEffect(() => {
         return () => clearTimeout(searchTimer)
@@ -126,8 +128,8 @@ export default function TaskSubDialog({taskTemplates, tasks, setTasks, removeTas
             <ListGroup.Item key={v.rid || v.id}>
                 <Row>
                         {(!v.selectedTask || v.selectedTask.length === 0) && 
-                        imagesContext.keys().map( (vi, i) => 
-                            <Col xs="4" lg="2" key={i}>
+                        imagesContext.keys().map((vi, ii) => 
+                            <Col xs="4" lg="2" key={ii}>
                                 <div role="button" onClick={() => afterChooseSubsystem(i, vi.split('/').pop())}>
                                     <Image className={(v.subsystem && vi.split('/').pop().replaceAll(' ', '-').includes(v.subsystem)) ? 'bg-primary rounded' : ''} alt={vi.split('/').pop()} width={100} src={imagesContext(vi)} />
                                 </div>
@@ -158,7 +160,7 @@ export default function TaskSubDialog({taskTemplates, tasks, setTasks, removeTas
                                 </div>
                             }
                             clearButton
-                            defaultSelected={v.selectedTask}
+                            selected={v.selectedTask}
                             />
                             {v.selectedTask && v.selectedTask[0] && <InputGroup.Text role="button" onClick={() => afterChangeUnitPrice((v.selectedTask[0].unitPrice), i)}>${v.selectedTask[0].unitPrice}</InputGroup.Text> }
                         </InputGroup>

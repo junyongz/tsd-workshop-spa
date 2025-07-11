@@ -246,7 +246,7 @@ function AddSparePartsDialog({isShow, setShowDialog, existingOrder=[], suppliers
                         {items?.map((v, i) =>
                             <ListGroup.Item key={v.rid || v.id}>
                                 <Row>
-                                { !editing && <Col xs="1"><PromptDeletionIcon confirmDelete={() => removeItem(v, i)} flip/></Col> }
+                                { !editing && <Col xs="1"><PromptDeletionIcon confirmDelete={() => removeItem(i)} flip/></Col> }
                                 <Col xs={!editing ? 11 : 12}>
                                     <Row>
                                         <Col xs="12" lg="4" className="mb-2">

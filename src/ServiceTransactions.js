@@ -27,7 +27,6 @@ class ServiceTransactions {
                 if (!b.completionDate) return 1;
                 return b.startDate.localeCompare(a.startDate);
             }))
-        
     }
 
     addNewTransaction(newService) {

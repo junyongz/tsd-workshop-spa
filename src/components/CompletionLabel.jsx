@@ -51,7 +51,7 @@ const CompletionLabel = ({ws, onCompletion, onDelete, noteForService, mediaForSe
                             <Popover.Header><Calendar /> Choose a date for completion</Popover.Header>
                             <Popover.Body>
                                 <InputGroup>
-                                <Form.Control ref={completionDateRef} required type="date" defaultValue={todayDate} min={ws.startDate} max={todayDate}></Form.Control>
+                                <Form.Control ref={completionDateRef} required name="completionDate" type="date" defaultValue={todayDate} min={ws.startDate} max={todayDate}></Form.Control>
                                 <InputGroupText><Button variant="success" className="px-1 py-0" onClick={confirmComplete}>Go</Button></InputGroupText>
                                 </InputGroup>
                                 <Form.Text>Default is today's date {todayDate}</Form.Text>
@@ -68,7 +68,7 @@ const CompletionLabel = ({ws, onCompletion, onDelete, noteForService, mediaForSe
 
     return (
         <div className="text-body-secondary">
-            <span className="fs-6 me-3">Completed on {ws.creationDate !== ws.completionDate ? ws.completionDate : 'same day'}</span> 
+            <span className="fs-6 me-3">Completed on {ws.startDate !== ws.completionDate ? ws.completionDate : 'same day'}</span> 
             {ws.notes && <span role="button" onClick={() => setOpenNote(!openNote)}><NoteTaking /> </span>}
             {ws.uploadedMediasCount > 0 && <span role="button" onClick={() => fetchMediasOrCollapse()}><Camera /> </span>}
 

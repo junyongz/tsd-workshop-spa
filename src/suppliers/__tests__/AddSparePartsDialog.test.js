@@ -13,8 +13,9 @@ describe('AddSparePartsDialog Component', () => {
   ];
 
   const mockOrders = [
-    { id: 1, supplierId: 1, invoiceDate: '2023-01-01', itemCode: 'ABC123', partName: 'Engine Oil', unitPrice: 50, unit: 'ltr'},
-    { id: 2, supplierId: 2, invoiceDate: '2023-01-02', itemCode: 'XYZ789', partName: 'Tire', unitPrice: 75, unit: 'pcs' }
+    { id: 1, supplierId: 1, invoiceDate: '2023-01-01', itemCode: 'ABC123', partName: 'Engine Oil', unitPrice: 50, unit: 'ltr', quantity: 20},
+    { id: 2, supplierId: 1, invoiceDate: '2023-01-01', itemCode: 'XYZ789', partName: 'Best Tire', unitPrice: 50, unit: 'ltr', quantity: 20},
+    { id: 3, supplierId: 2, invoiceDate: '2023-01-02', itemCode: 'XYZ789', partName: 'Tire', unitPrice: 75, unit: 'pcs', quantity: 20 }
   ];
 
   const mockSparePartUsages = [
@@ -64,14 +65,31 @@ describe('AddSparePartsDialog Component', () => {
     expect(document.querySelectorAll('.list-group-item').length).toBe(2)
   });
 
-  test('removes an item', () => {
-    render(<AddSparePartsDialog {...defaultProps} />);
-    fireEvent.click(screen.getByText('Add More')); // Add a second item
+  test('removes an item', async () => {
+    const user = userEvent.setup()
 
-    expect(document.querySelectorAll('.list-group-item').length).toBe(2)
-    fireEvent.click(screen.getAllByRole('button', { name: 'remove' })[0]); // Remove first item
-    fireEvent.click(screen.getAllByRole('button', { name: 'remove' })[0]); // to click 1 more time
-    expect(document.querySelectorAll('.list-group-item').length).toBe(1)
+    render(<SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}><AddSparePartsDialog {...defaultProps} /></SupplierOrderContext>);
+    fireEvent.click(screen.getByText('Add More'));
+    fireEvent.click(screen.getByText('Add More'));
+    fireEvent.click(screen.getByText('Add More'));
+
+    expect(document.querySelectorAll('.list-group-item').length).toBe(4)
+
+    const itemCodeInputs = screen.getAllByPlaceholderText('Key in item code');
+    expect(itemCodeInputs).toHaveLength(3)
+    await user.click(itemCodeInputs[0])
+    await user.click(screen.getByText('ABC123'))
+
+    await user.click(itemCodeInputs[1])
+    await user.click(screen.getByText('XYZ789'))
+
+    expect(screen.getAllByRole('button', { name: 'remove' })).toHaveLength(3)
+    await user.click(screen.getAllByRole('button', { name: 'remove' })[1]); 
+    await user.click(screen.getAllByRole('button', { name: 'remove' })[1]);
+    expect(document.querySelectorAll('.list-group-item').length).toBe(3)
+
+    expect(document.querySelector('[value="Best Tire"]')).not.toBeInTheDocument()
+    expect(document.querySelector('[value="Engine Oil"]')).toBeInTheDocument()
   });
 
   test('updates supplier and filters spare parts', async () => {

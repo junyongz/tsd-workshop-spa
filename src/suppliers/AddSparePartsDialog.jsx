@@ -245,8 +245,9 @@ function AddSparePartsDialog({isShow, setShowDialog, existingOrder=[], suppliers
                         <ListGroup>
                         {items?.map((v, i) =>
                             <ListGroup.Item key={v.rid || v.id}>
+                                <div className="fs-4 price-tag text-center mb-1">$ { (Number.isFinite(v.quantity) && Number.isFinite(v.unitPrice)) ? (v.quantity * v.unitPrice).toFixed(2) : 0}</div>
                                 <Row>
-                                { !editing && <Col xs="1"><PromptDeletionIcon confirmDelete={() => removeItem(i)} flip/></Col> }
+                                { !editing && <Col xs="1" className="fs-4"><PromptDeletionIcon confirmDelete={() => removeItem(i)} flip/></Col> }
                                 <Col xs={!editing ? 11 : 12}>
                                     <Row>
                                         <Col xs="12" lg="4" className="mb-2">
@@ -299,24 +300,26 @@ function AddSparePartsDialog({isShow, setShowDialog, existingOrder=[], suppliers
                                         <Col xs="3" lg="2">
                                             <Form.Control onChange={(e) => updatePriceByQuantity(e.target.value, i)} required disabled={v.disabled} type="number" min={decimalPointUomAvailable(v?.unit) ? 0.1 : 1} step={decimalPointUomAvailable(v?.unit) ? 0.1 : 1} name="quantity" placeholder="Quantity" value={v?.quantity}/>
                                         </Col>
-                                        <Col xs="3" lg="1">
+                                        <Col xs="3" lg="2">
                                             <Form.Control onChange={(e) => updateUnit(e.target.value, i)} required type="text" name="unit" placeholder="Unit" disabled={v.disabled} value={v?.unit}/>
                                         </Col>
-                                        <Col xs="6" lg="3">
+                                        <Col xs="6" lg="4">
                                             <InputGroup>
                                                 <InputGroup.Text><Dollar /></InputGroup.Text>
                                                 <Form.Control onChange={(e) => updatePriceByUnitPrice(e.target.value, i)} required disabled={v.disabled} type="number" min="0" step="0.01" name="unitPrice" placeholder="Price $" value={v?.unitPrice} />
                                             </InputGroup>
-                                        </Col>
-                                        <Col xs="12" lg="2" className="text-end">
-                                            <span className="fs-4">$ { (Number.isFinite(v.quantity) && Number.isFinite(v.unitPrice)) ? (v.quantity * v.unitPrice).toFixed(2) : 0}</span>
                                         </Col>
                                     </Row>
                                 </Col>
                                 </Row>
                             </ListGroup.Item>
                         )}
-                        <ListGroup.Item key={'total'}><Col className="text-end fs-5">$ {items?.reduce((pv, cv) => pv + ((cv.quantity && cv.unitPrice && cv.quantity * cv.unitPrice) || 0), 0).toFixed(2)}</Col></ListGroup.Item>
+                        <ListGroup.Item key={'total'} className="fs-3 fw-bold" style={{  backgroundColor: 'var(--bs-body-color)', color: 'var(--bs-body-bg)' }}>
+                            <Row>
+                            <Col xs="6">Total</Col>
+                            <Col xs="6" className="text-end">$ {items?.reduce((pv, cv) => pv + ((cv.quantity && cv.unitPrice && cv.quantity * cv.unitPrice) || 0), 0).toFixed(2)}</Col>
+                            </Row>
+                        </ListGroup.Item>
                         </ListGroup>
                         </Row>
                     </Form>

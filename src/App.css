@@ -38,7 +38,7 @@
 .list-group-item > .price-tag {
   position: relative; 
   top: 0; 
-  width: 100px;
+  max-width: 150px;
   
   margin-left: auto; 
   margin-top: calc(-1 * (var(--bs-list-group-item-padding-y))); 

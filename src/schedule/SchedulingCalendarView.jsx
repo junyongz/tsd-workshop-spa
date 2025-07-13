@@ -34,8 +34,33 @@ export default function SchedulingCalendarView({vehicles=[], onNewVehicleCreated
             }
         })
         .then(resp => resp.json())
-        .then(schedulings => setEvents(schedulings.map(sch => mapToCalendarEvent(sch))))
-    }, [])
+        .then(schedulings => {
+            setEvents(
+                schedulings
+                    .concat(vehicles
+                    .filter(veh => new Date(veh.nextInspectionDate) >= new Date())
+                    .map(veh => {
+                        return {
+                            id: `veh-insp-${veh.id}`, // to different for 'key' also dont allow to delete
+                            scheduledDate: veh.nextInspectionDate,
+                            vehicleNo: `Inspection for ${veh.vehicleNo}`,
+                            notes: `Inspection for ${veh.vehicleNo}`
+                        }
+                    }))
+                    .concat(vehicles
+                    .filter(veh => new Date(veh.roadTaxExpiryDate) >= new Date())
+                    .map(veh => {
+                        return {
+                            id: `veh-roadtax-${veh.id}`, // to different for 'key' also dont allow to delete
+                            scheduledDate: veh.roadTaxExpiryDate,
+                            vehicleNo: `Roadtax expiring ${veh.vehicleNo}`,
+                            notes: `Roadtax expiring ${veh.vehicleNo}`
+                        }
+                    }))
+                .map(sch => mapToCalendarEvent(sch))
+            )
+        })
+    }, [vehicles])
 
     return (
         <>

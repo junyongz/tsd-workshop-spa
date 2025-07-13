@@ -65,7 +65,7 @@ export default function CalendarView({
                     .map(evt => <ListGroup.Item key={evt.id}>
                         <Row>
                         <Col xs="10"><span className="fw-semibold">{ evt.display }</span></Col> 
-                        <Col xs="2"><Button variant="danger" onClick={() => onClickRemove(evt.id) }><Trash /></Button></Col>
+                        { isFinite(evt.id) && <Col xs="2"><Button variant="danger" onClick={() => onClickRemove(evt.id) }><Trash /></Button></Col> }
                         <Col xs="12">{evt.description}</Col>
                         </Row>
                         </ListGroup.Item>) 
@@ -120,18 +120,11 @@ export default function CalendarView({
                                 {
                                     events.filter(evt => sameDay(evt.date, boxDate))
                                     .slice(0, 3)
-                                    .map(evt => <Col xs="6" key={evt.id}><EventDisplay item={evt} /></Col>)
-                                }
-                                </Row>
-                                <Row className="d-none d-lg-flex d-xl-none">
-                                {
-                                    events.filter(evt => sameDay(evt.date, boxDate))
-                                    .slice(0, 2)
-                                    .map(evt => <Col xs="12" key={evt.id}><Badge>{ evt.display }</Badge></Col>)
+                                    .map(evt => <Col xs="12" key={evt.id}><EventDisplay item={evt} /></Col>)
                                 }
                                 </Row>
                                 {events.filter(evt => sameDay(evt.date, boxDate)).length > 0 && <Row className="d-none d-lg-flex">
-                                    <span className="text-secondary" role="button" onClick={(e) => prepareToShowEventDialog(e, boxDate)}><HandPointer /> details...</span>
+                                    <span className="text-secondary" role="button" onClick={(e) => prepareToShowEventDialog(e, boxDate)}><HandPointer /> more...</span>
                                 </Row> }
                                 <Row className="d-flex d-lg-none">
                                     { events.filter(evt => sameDay(evt.date, boxDate)).length > 0 && <Badge pill>{ events.filter(evt => sameDay(evt.date, boxDate)).length}</Badge> }

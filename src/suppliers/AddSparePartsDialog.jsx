@@ -295,7 +295,7 @@ function AddSparePartsDialog({isShow, setShowDialog, existingOrder=[], suppliers
                                             </InputGroup>
                                         </Col>
                                     </Row>
-                                    <Row>
+                                    <Row className="mb-3">
                                         <Col lg="4"></Col>
                                         <Col xs="3" lg="2">
                                             <Form.Control onChange={(e) => updatePriceByQuantity(e.target.value, i)} required disabled={v.disabled} type="number" min={decimalPointUomAvailable(v?.unit) ? 0.1 : 1} step={decimalPointUomAvailable(v?.unit) ? 0.1 : 1} name="quantity" placeholder="Quantity" value={v?.quantity}/>

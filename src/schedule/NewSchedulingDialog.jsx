@@ -51,18 +51,18 @@ function NewSchedulingDialog({isShow, setShowDialog, vehicles, theDate = new Dat
     const saveChange = () => {
         const nativeForm = formRef.current
 
-        checkVehicleValidity(nativeForm['vehicle'])
+        checkVehicleValidity( nativeForm.elements.namedItem('vehicle'))
         if (nativeForm.checkValidity() === false) {
             setValidated(true)
             return
         }
-        nativeForm['vehicle'].setCustomValidity('')
+        nativeForm.elements.namedItem('vehicle').setCustomValidity('')
 
         const toSave = {
             scheduledDate: theDate.toLocaleDateString('en-CA'),
             vehicleId: selectedVehicles[0]?.id,
             vehicleNo: selectedVehicles[0]?.vehicleNo,
-            notes: nativeForm['notes'].value
+            notes:  nativeForm.elements.namedItem('notes').value
         }
 
         fetch(`${apiUrl}/api/scheduling`, {

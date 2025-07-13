@@ -1,6 +1,6 @@
 import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { test, expect, jest, afterAll, afterEach } from '@jest/globals'
+import { test, expect, jest, afterEach } from '@jest/globals'
 import { WorkshopServicesProvider } from '../services/ServiceContextProvider';
 import { SupplierOrderContext } from '../suppliers/SupplierOrderContextProvider';
 import ServiceListing from '../ServiceListing';

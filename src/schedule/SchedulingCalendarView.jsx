@@ -43,8 +43,9 @@ export default function SchedulingCalendarView({vehicles=[], onNewVehicleCreated
                         return {
                             id: `veh-insp-${veh.id}`, // to different for 'key' also dont allow to delete
                             scheduledDate: veh.nextInspectionDate,
-                            vehicleNo: `Inspection for ${veh.vehicleNo}`,
-                            notes: `Inspection for ${veh.vehicleNo}`
+                            vehicleNo: `${veh.vehicleNo}`,
+                            notes: `Inspection booked ${veh.vehicleNo}`,
+                            variant: 'warning'
                         }
                     }))
                     .concat(vehicles
@@ -53,8 +54,9 @@ export default function SchedulingCalendarView({vehicles=[], onNewVehicleCreated
                         return {
                             id: `veh-roadtax-${veh.id}`, // to different for 'key' also dont allow to delete
                             scheduledDate: veh.roadTaxExpiryDate,
-                            vehicleNo: `Roadtax expiring ${veh.vehicleNo}`,
-                            notes: `Roadtax expiring ${veh.vehicleNo}`
+                            vehicleNo: `${veh.vehicleNo}`,
+                            notes: `Roadtax expiring ${veh.vehicleNo}`,
+                            variant: 'success'
                         }
                     }))
                 .map(sch => mapToCalendarEvent(sch))

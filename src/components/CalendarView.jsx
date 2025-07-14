@@ -75,10 +75,10 @@ export default function CalendarView({
         )
     }
 
-    const EventDisplay = ({item}) => {
+    const EventDisplay = ({item={display: '', description: '', variant: 'primary'}}) => {
         return (
             <OverlayTrigger overlay={<Tooltip>{item.description}</Tooltip>}>
-                <Badge>{item.display}</Badge>
+                <Badge bg={item.variant ?? 'primary'}>{item.display}</Badge>
             </OverlayTrigger>
         )
     }
@@ -120,7 +120,7 @@ export default function CalendarView({
                                 {
                                     events.filter(evt => sameDay(evt.date, boxDate))
                                     .slice(0, 3)
-                                    .map(evt => <Col xs="12" key={evt.id}><EventDisplay item={evt} /></Col>)
+                                    .map(evt => <Col xs="12" key={evt.id} style={{whiteSpace: 'none'}}><EventDisplay item={evt} /></Col>)
                                 }
                                 </Row>
                                 {events.filter(evt => sameDay(evt.date, boxDate)).length > 0 && <Row className="d-none d-lg-flex">

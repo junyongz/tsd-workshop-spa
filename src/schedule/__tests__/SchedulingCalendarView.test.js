@@ -73,7 +73,7 @@ test('scheduling info with inspection and roadtax', async () => {
             {"headers": {"Content-type": "application/json"}})
         
         expect(Array.from(document.querySelectorAll('span.badge'))
-            .filter(elem => elem.textContent.includes("J "))).toHaveLength(sameMonthEvents)
+            .filter(elem => elem.textContent.startsWith("J "))).toHaveLength(sameMonthEvents)
     })
 })
 
@@ -126,7 +126,7 @@ test('create a new event', async () => {
     await user.click(screen.getByText('Save'))
 
     await waitFor(() => expect(global.fetch).lastCalledWith("http://localhost:8080/api/scheduling", 
-        {"body": "{\"scheduledDate\":\"2025-07-13\",\"vehicleId\":70005,\"vehicleNo\":\"JJ 23\",\"notes\":\"Sent for inspection\"}", 
+        {"body": "{\"scheduledDate\":\""+ addDaysToDateStr(todayDate, 0) +"\",\"vehicleId\":70005,\"vehicleNo\":\"JJ 23\",\"notes\":\"Sent for inspection\"}", 
             "headers": {"Content-type": "application/json"}, "method": "POST"}))
 })
 

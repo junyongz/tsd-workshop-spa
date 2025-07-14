@@ -3,6 +3,7 @@ export function mapToCalendarEvent(scheduling) {
         id: scheduling.id,
         date: new Date(scheduling.scheduledDate),
         display: scheduling.vehicleNo,
-        description: scheduling.notes
+        description: scheduling.notes,
+        variant: scheduling.variant ?? 'primary'
     }
 }

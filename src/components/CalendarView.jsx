@@ -116,7 +116,7 @@ export default function CalendarView({
                         <Card>
                             <Card.Header className={sameDay(choosenDate, boxDate) ? 'text-bg-primary' : ''}>{ date }</Card.Header>
                             <Card.Body style={{height: maxHeight, maxHeight: maxHeight, '--bs-card-spacer-y': '5px'}}>
-                                <Row className="d-none d-lg-none d-xl-flex">
+                                <Row className="d-none d-lg-flex">
                                 {
                                     events.filter(evt => sameDay(evt.date, boxDate))
                                     .slice(0, 3)

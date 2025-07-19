@@ -32,8 +32,8 @@
     -->
     <script type="text/javascript">
       (() => {
-        const checkBundle = () => {
-          const mainJsRelativePath = document.querySelector('head script')?.getAttribute('src')
+        const checkBundle = async () => {
+          const mainJsRelativePath = await fetch('%PUBLIC_URL%/api/stats/webbundle/main.js').then(resp => resp.text())
           const prevMainJsRelativePath = localStorage.getItem('mainJsRelativePath')
           if (!prevMainJsRelativePath) {
             localStorage.setItem('mainJsRelativePath', mainJsRelativePath)

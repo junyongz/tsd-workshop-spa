@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button, Card, Col, Container, Modal, Row, Stack } from "react-bootstrap";
 import SparePartDialog from "./SparePartDialog";
 import PromptDeletionIcon from "../components/PromptDeletionIcon";
-import { Company, HandPointer, Suppliers, Truck } from "../Icons";
+import { Company, Suppliers, Truck } from "../Icons";
 import { clearState } from "../autoRefreshWorker";
 import PhotoGallery from "../components/PhotoGallery";
 import { useSupplierOrders } from "../suppliers/SupplierOrderContextProvider";
@@ -17,19 +17,9 @@ export default function SpareParts({suppliers=[], selectedSearchOptions=[], tota
     const [uploadedMedias, setUploadedMedias] = useState([])
     const [currentPreviewSparePart, setCurrentPreviewSparePart] = useState()
 
-    const pageSize = 10
-    const [activePage, setActivePage] = useState(1)
-    const [totalPages, setTotalPages] = useState(0)
-
-    const [prevSelectedSearchOptions, setPrevSelectedSearchOptions] = useState(selectedSearchOptions)
-    if (prevSelectedSearchOptions !== selectedSearchOptions) {
-        setActivePage(1)
-        setPrevSelectedSearchOptions(selectedSearchOptions)
-    }
-
-    // update existing dont need to append, based on sparePart state (by id)
-    // add new one, add to the beginning, and remove the last one
-    // remove, calling for active page, add the last one to the sparePart state
+    const observer = useRef();
+    const fetchMediaTimeouts = useRef(new Map());
+    const fetchedMediasSparePartIds = useRef(new Set())
 
     const sampleSparePart = {id: 1000, partNo: '44350-1610', partName: 'Power Steering Pump',
             description: "Generates hydraulic pressure to assist in turning the vehicle's wheels, making steering easier and smoother, especially at low speeds",
@@ -41,10 +31,25 @@ export default function SpareParts({suppliers=[], selectedSearchOptions=[], tota
 
     const [existingSparePart, setExistingSparePart] = useState()
 
+    const matchSearchOptions = (sp) => {
+        if (selectedSearchOptions.length === 0) {
+            return true
+        }
+
+        return selectedSearchOptions.some(opt => {
+            const lowerCase = opt.name.toLowerCase()
+            return sp.partNo.toLowerCase().includes(lowerCase) ||
+                    sp.partName.toLowerCase().includes(lowerCase) ||
+                    sp.description.toLowerCase().includes(lowerCase) ||
+                    sp.compatibleTrucks.some(t => t.make.toLowerCase().includes(lowerCase) || 
+                                                t.model.toLowerCase().includes(lowerCase) ||
+                                                (t.make + ' ' + t.model).toLowerCase().includes(lowerCase))
+        })
+    }
+
     // TODO passing the uploaded medias in individual dialog over here
     const afterSave = (sparePart) => {
         const existing = spareParts.findIndex(sp => sp.id === sparePart.id)
-        const lastSparePart = existing === -1 ? spareParts[spareParts.length - 1] : undefined
 
         setSpareParts(prev => {
             const newItems = [...prev]
@@ -54,27 +59,9 @@ export default function SpareParts({suppliers=[], selectedSearchOptions=[], tota
                 return newItems
             }
             else {
-                // only remove the last one, if there is more to load, it's ok to keep on adding
-                if (activePage !== totalPages) {
-                    newItems.splice(newItems.length - 1, 1)
-                }
                 return [sparePart, ...newItems]
             }
         })
-
-        // so not to load again for the same media
-        if (lastSparePart) {
-            setUploadedMedias(prev => [...prev.filter(um => um.sparePartId !== lastSparePart.id)])
-        }
-
-        // to add parameter to this function
-        fetchSparePartMediaPromise(sparePart.id)
-            .then(medias => {
-                setUploadedMedias(um => {
-                    const newItems = [...um].filter(um => um.sparePartId !== sparePart.id)
-                    return [...newItems, ...medias.flatMap(res => res.value)]
-                })
-            })
 
         orders.updateOrdersSparePartId(sparePart.id, sparePart.orderIds)
     }
@@ -130,46 +117,62 @@ export default function SpareParts({suppliers=[], selectedSearchOptions=[], tota
     }
 
     useEffect(() => {
-        const keywords = selectedSearchOptions.map(opt => `keyword=${opt.name}`).join('&')
-
-        fetch(`${apiUrl}/api/spare-parts?pageNumber=${activePage}&pageSize=${pageSize}${keywords.trim().length > 0 ? ('&' + keywords) : ''}`, {
+        fetch(`${apiUrl}/api/spare-parts`, {
             mode: 'cors',
             headers: {
                 'Content-type': 'application/json'
             }
         })
-        .then(resp => {
-            setTotalSpareParts(parseInt(resp.headers.get('X-Total-Elements')))
-            setTotalPages(parseInt(resp.headers.get('X-Total-Pages')))
+        .then(resp => resp.json())
+        .then(setSpareParts)
+    }, [])
 
-            return resp.json()
-        })
-        .then(spJson => {
-            const promises = spJson.map(sp => fetchSparePartMediaPromise(sp.id))
+    useEffect(() => {
+        observer.current = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    const sparePartId = entry.target.dataset.sparePartId;
+                    if (fetchedMediasSparePartIds.current.has(sparePartId)) return
 
-            Promise.allSettled(promises)
-                .then(datas => {
-                    setUploadedMedias(prev => activePage === 1 
-                        ? datas.filter(p => p.value.length > 0).flatMap(res => res.value).map(res => res.value)
-                        : [...prev, ...datas.filter(p => p.value.length > 0).flatMap(res => res.value).map(res => res.value)])
-                })
-                .finally(() => setSpareParts(prev => {
-                        // console.table(prev)
-                        // console.table(spJson)
-                        return activePage === 1 ? spJson : [...prev, ...spJson]
+                    if (entry.isIntersecting) {
+                        const timeoutId = setTimeout(() => {
+                            if (entry.isIntersecting) {
+                                fetchSparePartMediaPromise(sparePartId)
+                                    .then(datas => {
+                                        setUploadedMedias(prev => [...prev, ...datas.flatMap(res => res.value)])
+                                    })
+                                    .finally(() => {
+                                        // ensure the "intersecting" wont happen anymore, very important!
+                                        observer.current.unobserve(entry.target)
+                                        fetchedMediasSparePartIds.current.add(sparePartId)
+                                    })
+                            }
+                            fetchMediaTimeouts.current.delete(sparePartId);
+                        }, 800);
+                        fetchMediaTimeouts.current.set(sparePartId, timeoutId);
+                    } 
+                    else {
+                        const timeoutId = fetchMediaTimeouts.current.get(sparePartId);
+                        if (timeoutId) {
+                            clearTimeout(timeoutId);
+                            fetchMediaTimeouts.current.delete(sparePartId);
+                        }
                     }
-                ))
-        })
+                });
+            },
+            { threshold: 0.1 }
+        );
+
+        // better to brute force use vanilla javascript instead of react useRef
+        // since IntersectionObserver are Web API, it's okay to do such way too
+        document.querySelectorAll('.spare-part-card').forEach(elem => observer.current.observe(elem))
 
         return () => {
-            // but the clean up would looking at previous render value instead latest value
-            if (activePage > 1 && selectedSearchOptions.length > 0) {
-                // always reset to page 1 for search options changed
-                setActivePage(1)
-            }
-        }
-
-    }, [activePage, selectedSearchOptions])
+            fetchMediaTimeouts.current.forEach(timeoutId => clearTimeout(timeoutId))
+            fetchMediaTimeouts.current.clear()
+            observer.current.disconnect()
+        };
+    }, [spareParts, selectedSearchOptions]);
 
     return (
         <Container fluid>
@@ -205,7 +208,7 @@ export default function SpareParts({suppliers=[], selectedSearchOptions=[], tota
         <Row>
             <Col>
                 <Row>
-                    { spareParts.map(v => {
+                    { spareParts.filter(matchSearchOptions).map(v => {
                     const matchedOrders = orders.list().filter(o => o.sparePartId === v.id)
                     const supplierIds = Array.from(new Set(matchedOrders.map(mo => mo.supplierId)))
 
@@ -213,7 +216,7 @@ export default function SpareParts({suppliers=[], selectedSearchOptions=[], tota
                     const hasVariousPrices = Array.from(new Set(matchedOrders.map(mo => mo.unitPrice))).length > 1
 
                     return <Col xs="12" sm="6" md="4" lg="3" role="menuitem" className="mb-3" key={v.id}>
-                            <Card>
+                            <Card className="spare-part-card" data-spare-part-id={v.id}>
                             <Card.Header role="button" onClick={() => showDialogFor(v)}>
                                 <div className="fs-5">
                                     <Stack direction="horizontal">
@@ -248,7 +251,6 @@ export default function SpareParts({suppliers=[], selectedSearchOptions=[], tota
                                 )}
                                 {!hasVariousPrices && <span className="text-secondary">${matchedOrders[0]?.unitPrice}</span>}
                                 {hasVariousPrices && <span className="text-secondary">${matchedOrders[0]?.unitPrice} - ${matchedOrders[matchedOrders.length - 1]?.unitPrice}</span>}
-                            
                             </Row>
                             {uploadedMedias.filter(um => um.sparePartId === v.id).map(md => 
                             <img key={md.id} role="button" onClick={() => setCurrentPreviewSparePart(v)} 
@@ -260,11 +262,6 @@ export default function SpareParts({suppliers=[], selectedSearchOptions=[], tota
                 </Row>
             </Col>
         </Row>
-        { activePage < totalPages  && <Row className="mb-3">
-            <Col className="text-center">
-                <span role="button" id="more-button" onClick={() => setActivePage(prev => prev+1)}>Total {totalSpareParts} items. <HandPointer /> Click to load more.</span>
-            </Col>
-        </Row> }
         </Container>
     )
 }

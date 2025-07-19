@@ -39,7 +39,7 @@ export default function NavigationBar({
                     <Nav.Item><Nav.Link eventKey="schedules" onClick={() => navigate("/schedules")}><Calendar /> Schedules</Nav.Link></Nav.Item>
                     <Nav.Item><Nav.Link eventKey="orders" onClick={() => navigate("/orders")}><Suppliers /> {!((selectedSearchOptions.length > 0 || selectedSearchDate) && totalFilteredOrders > 0) && <span>Suppliers</span>} {(selectedSearchOptions.length > 0 || selectedSearchDate) && totalFilteredOrders > 0 && <Badge pill>{totalFilteredOrders}</Badge>}</Nav.Link></Nav.Item>
                     <Nav.Item><Nav.Link eventKey="vehicles" onClick={() => navigate("/vehicles")}><Truck /> Trucks</Nav.Link></Nav.Item>
-                    <Nav.Item><Nav.Link eventKey="spare-parts" onClick={() => navigate("/spare-parts")}><Tools /> Spare Parts {selectedSearchOptions.length > 0 && totalSpareParts > 0 && <Badge pill>{totalSpareParts}</Badge>}</Nav.Link></Nav.Item>
+                    <Nav.Item><Nav.Link eventKey="spare-parts" onClick={() => navigate("/spare-parts")}><Tools /> Parts {selectedSearchOptions.length > 0 && totalSpareParts > 0 && <Badge pill>{totalSpareParts}</Badge>}</Nav.Link></Nav.Item>
                 </Nav>
                 <Form className="d-flex ms-auto responsive-width-50">
                 {!searchByDate &&

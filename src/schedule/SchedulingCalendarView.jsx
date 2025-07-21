@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import CalendarView from "../components/CalendarView";
 import NewSchedulingDialog from "./NewSchedulingDialog";
 import { mapToCalendarEvent } from "./mappingUtils.js";
+import { addDaysToDate } from "../utils/dateUtils.js";
 
 export default function SchedulingCalendarView({vehicles=[], onNewVehicleCreated}) {
     const apiUrl = process.env.REACT_APP_API_URL
@@ -38,7 +39,7 @@ export default function SchedulingCalendarView({vehicles=[], onNewVehicleCreated
             setEvents(
                 schedulings
                     .concat(vehicles
-                    .filter(veh => new Date(veh.nextInspectionDate) >= new Date())
+                    .filter(veh => new Date(veh.nextInspectionDate) > addDaysToDate(new Date(), -1))
                     .map(veh => {
                         return {
                             id: `veh-insp-${veh.id}`, // to different for 'key' also dont allow to delete
@@ -49,7 +50,7 @@ export default function SchedulingCalendarView({vehicles=[], onNewVehicleCreated
                         }
                     }))
                     .concat(vehicles
-                    .filter(veh => new Date(veh.roadTaxExpiryDate) >= new Date())
+                    .filter(veh => new Date(veh.roadTaxExpiryDate) > addDaysToDate(new Date(), -1))
                     .map(veh => {
                         return {
                             id: `veh-roadtax-${veh.id}`, // to different for 'key' also dont allow to delete

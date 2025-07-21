@@ -49,7 +49,8 @@ test('scheduling info with inspection and roadtax', async () => {
         {id: 7001, vehicleNo: "J 99", roadTaxExpiryDate: addDaysToDateStr(todayDate, 3), nextInspectionDate: addDaysToDateStr(todayDate, 6)},
         {id: 7002, vehicleNo: "J 100", roadTaxExpiryDate: addDaysToDateStr(todayDate, 5), nextInspectionDate: addDaysToDateStr(todayDate, 10)},
         {id: 7003, vehicleNo: "J 88", roadTaxExpiryDate: addDaysToDateStr(todayDate, 10), nextInspectionDate: addDaysToDateStr(todayDate, 20)},
-        {id: 7004, vehicleNo: "J 56", roadTaxExpiryDate: addDaysToDateStr(todayDate, 15), nextInspectionDate: addDaysToDateStr(todayDate, 22)}
+        {id: 7004, vehicleNo: "J 56", roadTaxExpiryDate: addDaysToDateStr(todayDate, 15), nextInspectionDate: addDaysToDateStr(todayDate, 22)},
+        {id: 7005, vehicleNo: "J 59", roadTaxExpiryDate: addDaysToDateStr(todayDate, 0), nextInspectionDate: addDaysToDateStr(todayDate, 0)}
     ]
 
     global.fetch = jest.fn(() => Promise.resolve( {
@@ -58,14 +59,11 @@ test('scheduling info with inspection and roadtax', async () => {
     }))
 
     const sameMonthEvents = events.map(evt => new Date(evt.scheduledDate))
-        .filter(evtDate => sameMonth(todayDate,evtDate))
-        .length 
+            .filter(evtDate => sameMonth(todayDate,evtDate)).length 
         + vehicles.map(evt => new Date(evt.roadTaxExpiryDate))
-        .filter(evtDate => sameMonth(todayDate,evtDate))
-        .length
+            .filter(evtDate => sameMonth(todayDate,evtDate)).length
         + vehicles.map(evt => new Date(evt.nextInspectionDate))
-        .filter(evtDate => sameMonth(todayDate,evtDate))
-        .length
+            .filter(evtDate => sameMonth(todayDate,evtDate)).length
 
     render(<SchedulingCalendarView vehicles={vehicles} ></SchedulingCalendarView>)
     await waitFor(() => {

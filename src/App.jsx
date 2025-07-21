@@ -109,6 +109,8 @@ function App() {
     setSelectedSearchDate()
   }
 
+  const refreshVehicles = useCallback(() => fetchVehicles(apiUrl, setVehicles, setSearchOptions), [apiUrl])
+
   const onNewVehicleCreated = async (vehicleNo) => {
     if (!/([A-Z]{1,3})\s([\d]{1,4})(\s([A-Z]{1,2}))?/.test(vehicleNo)) {
       alert('Wrong vehicle no format: ' + vehicleNo)
@@ -127,9 +129,10 @@ function App() {
     })
     .then(res => res.json())
     .then(veh => {
-      fetchVehicles(apiUrl, setVehicles, setSearchOptions)
+      refreshVehicles()
       return veh
     })
+    .finally(() => clearState())
   }
 
   const refreshCompanies = useCallback(() => fetchCompanies(apiUrl, setCompanies), [apiUrl])
@@ -161,7 +164,7 @@ function App() {
                   refreshSparePartUsages(),
               
                   refreshCompanies(),
-                  fetchVehicles(apiUrl, setVehicles, setSearchOptions),
+                  refreshVehicles()
                 ]))
         .then( () => setLoading(false) ))
         .then(() => {
@@ -182,6 +185,7 @@ function App() {
             'workshop_service': refreshServices,
             'mig_supplier_spare_parts': refreshSupplierSpareParts,
             'spare_part_usages': refreshSparePartUsages,
+            'vehicle': refreshVehicles
           }
         )
       }, 30000)

@@ -44,7 +44,9 @@ function SparePartDialog({isShow, setShowDialog,
     };
 
     const onShowingDialog = () => {
-        const matchedOrders = orders.list().filter(o => o.sparePartId === sparePart.id)
+        // not adding !!o.sparePartId would allow undefined one to match for new spare part
+        const matchedOrders = orders.list().filter(o => !!o.sparePartId)
+            .filter(o => o.sparePartId === sparePart.id)
         // setSelectedSuppliers(sparePart.supplierIds.map(spid => suppliers.find(s => s.id === spid)))
         setSelectedSuppliers(Array.from(new Set(matchedOrders.map(mo => mo.supplierId)))
                     .map(spid => suppliers.find(s => s.id === spid)))
@@ -284,10 +286,10 @@ function SparePartDialog({isShow, setShowDialog,
                                         <ListGroup.Item>
                                         <Row>
                                         <Col xs="12" xl="4" className="mb-1 mb-xl-none">
-                                            <Form.Control onChange={(e) => afterKeyInName(e.target.value, i)} required value={v.name} />
+                                            <Form.Control onChange={(e) => afterKeyInName(e.target.value, i)} required aria-label={'name for oem ' + i} value={v.name} />
                                         </Col>
                                         <Col xs="12" xl="7">
-                                            <Form.Control onChange={(e) => afterKeyInUrl(e.target.value, i)} required type="url" value={v.url} />
+                                            <Form.Control onChange={(e) => afterKeyInUrl(e.target.value, i)} required aria-label={'url for oem ' + i} type="url" value={v.url} />
                                         </Col>
                                         <Col xs="12" xl="1" className="fs-5 text-danger text-end">
                                         <span role="button" onClick={() => removeOem(i)}><Trash /></span>
@@ -301,7 +303,7 @@ function SparePartDialog({isShow, setShowDialog,
                             </Row>
                             <Row>
                                 <Col xs="12" className="mb-3 text-end">
-                                    <Button aria-label="button to add OEM" onClick={() => addNewTruck()}><Truck /> Add Compatible Trucks</Button>
+                                    <Button aria-label="button to add compatible truck" onClick={() => addNewTruck()}><Truck /> Add Compatible Trucks</Button>
                                 </Col>
                                 <Col xs="12">
                                     <ListGroup>
@@ -315,10 +317,10 @@ function SparePartDialog({isShow, setShowDialog,
                                         <ListGroup.Item key={i}>
                                         <Row>
                                         <Col xs="12" xl="4" className="mb-1 mb-xl-none">
-                                            <Form.Control onChange={(e) => afterKeyInMake(e.target.value, i)} required value={v.make} />
+                                            <Form.Control onChange={(e) => afterKeyInMake(e.target.value, i)} aria-label={'truck make ' + i} required value={v.make} />
                                         </Col>
                                         <Col xs="12" xl="7">
-                                            <Form.Control onChange={(e) => afterKeyInModel(e.target.value, i)} required value={v.model} />
+                                            <Form.Control onChange={(e) => afterKeyInModel(e.target.value, i)} aria-label={'truck model ' + i}required value={v.model} />
                                         </Col>
                                         <Col xs="12" xl="1" className="fs-5 text-danger text-end">
                                         <span role="button" onClick={() => removeTruck(i)}><Trash /></span>

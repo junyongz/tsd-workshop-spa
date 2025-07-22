@@ -8,9 +8,8 @@ import { SupplierOrderContext } from '../suppliers/SupplierOrderContextProvider'
 import ServiceTransactions from '../ServiceTransactions';
 import SupplierOrders from '../suppliers/SupplierOrders';
 
-jest.mock('react-bootstrap-typeahead/types/utils/getOptionLabel', () => ({
-    getOptionLabel: (opt, labelKey) => opt[labelKey]
-}));
+jest.mock('react-bootstrap-typeahead/types/utils/getOptionLabel', () => ((opt, labelKey) => opt[labelKey]));
+
 jest.mock('../schedule/SchedulingCalendarView', () => 
     ({onNewVehicleCreated}) => <div><span data-testid="onNewVehicleCreated"  onClick={() => onNewVehicleCreated("JJ 3")}></span></div>
 )

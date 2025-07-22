@@ -127,8 +127,8 @@ export default function Vehicles({vehicles=[], setVehicles, companies=[], select
             {toSortByServiceDueSoon && <Col xs="12"><span className="text-secondary fw-lighter">Default using {formatThousandSeparator(defaultTargetedDistanceKm)} KM and {defaultTargetedMonthOvershot} months as indicators, for those travel between JB & SG, please adjust accordingly.</span></Col> }
             { filteredVehicles.slice(0, vehicleLoadCount)
                 .map(v => 
-                    <Col xs="12" sm="6" md="4" lg="3" className="mb-3">
-                    <Card role="button" key={v.id} onClick={() => showVehicle(v.id)}>
+                    <Col key={v.id} xs="12" sm="6" md="4" lg="3" className="mb-3">
+                    <Card role="button" onClick={() => showVehicle(v.id)}>
                         <Card.Header>
                             <Row>
                                 <Col xs="12" lg="6"><h3>{v.vehicleNo}</h3></Col>

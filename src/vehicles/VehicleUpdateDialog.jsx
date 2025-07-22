@@ -49,24 +49,24 @@ function VehicleUpdateDialog({isShow, setShowDialog, vehicle, setVehicles, compa
     const saveChange = () => {
         const nativeForm = formRef.current
 
-        checkCompanyValidity(nativeForm['companyId'])
+        checkCompanyValidity(nativeForm.elements.namedItem('companyId'))
         if (nativeForm.checkValidity() === false) {
             setValidated(true)
             return
         }
-        nativeForm['companyId'].setCustomValidity('')
+        nativeForm.elements.namedItem('companyId').setCustomValidity('')
 
         const toSave = {
             id: vehicle.id,
             vehicleNo: vehicle.vehicleNo,
-            trailerNo: nativeForm['trailerNo'].value,
+            trailerNo: nativeForm.elements.namedItem('trailerNo').value,
             companyId: selectedCompanies[0].id,
-            insuranceExpiryDate: nativeForm['insuranceExpiryDate'].value,
-            roadTaxExpiryDate: nativeForm['roadTaxExpiryDate'].value,
-            inspectionDueDate: nativeForm['inspectionDueDate'].value,
-            trailerInspectionDueDate: nativeForm['trailerInspectionDueDate'] ? nativeForm['trailerInspectionDueDate'].value : nativeForm['inspectionDueDate'].value,
-            nextInspectionDate: nativeForm['nextInspectionDate'].value,
-            nextTrailerInspectionDate: nativeForm['nextTrailerInspectionDate'] ? nativeForm['nextTrailerInspectionDate'].value : nativeForm['nextInspectionDate'].value
+            insuranceExpiryDate: nativeForm.elements.namedItem('insuranceExpiryDate').value,
+            roadTaxExpiryDate: nativeForm.elements.namedItem('roadTaxExpiryDate').value,
+            inspectionDueDate: nativeForm.elements.namedItem('inspectionDueDate').value,
+            trailerInspectionDueDate: nativeForm.elements.namedItem('trailerInspectionDueDate') ? nativeForm.elements.namedItem('trailerInspectionDueDate').value : nativeForm.elements.namedItem('inspectionDueDate').value,
+            nextInspectionDate: nativeForm.elements.namedItem('nextInspectionDate').value,
+            nextTrailerInspectionDate: nativeForm.elements.namedItem('nextTrailerInspectionDate') ? nativeForm.elements.namedItem('nextTrailerInspectionDate').value : nativeForm.elements.namedItem('nextInspectionDate').value
         }
 
         fetch(`${apiUrl}/api/vehicles`, {

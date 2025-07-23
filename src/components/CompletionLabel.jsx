@@ -60,8 +60,8 @@ const CompletionLabel = ({ws, onCompletion, onDelete, noteForService, mediaForSe
                         <Button variant="outline-success" size="sm"><i className="bi bi-hand-thumbs-up"></i> Complete Service</Button>
                 </OverlayTrigger>
                 <PromptDeletionButton confirmDelete={onDelete} />
-                <Button variant='outline-success' onClick={noteForService}><NoteTaking /></Button>
-                <Button variant='outline-success' onClick={mediaForService}><Camera /> {ws.uploadedMediasCount > 0 && <Badge className="position-absolute top-0 start-100 translate-middle" pill>{ws.uploadedMediasCount}</Badge>}</Button>
+                <Button variant='outline-success' onClick={noteForService} aria-label="note-taking"><NoteTaking /></Button>
+                <Button variant='outline-success' onClick={mediaForService} aria-label="photo-taking"><Camera /> {ws.uploadedMediasCount > 0 && <Badge className="position-absolute top-0 start-100 translate-middle" pill>{ws.uploadedMediasCount}</Badge>}</Button>
             </ButtonGroup>
         )
     }

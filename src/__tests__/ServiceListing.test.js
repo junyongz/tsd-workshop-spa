@@ -1,10 +1,27 @@
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { test, expect, jest, afterEach } from '@jest/globals'
 import { WorkshopServicesProvider } from '../services/ServiceContextProvider';
 import { SupplierOrderContext } from '../suppliers/SupplierOrderContextProvider';
 import ServiceListing from '../ServiceListing';
 import SupplierOrders from '../suppliers/SupplierOrders';
+
+jest.mock('../services/ServiceNoteTakingDialog', () => ({isShow, onSaveNote}) => 
+    <div>
+        <span data-is-show={isShow} data-testid="onSaveNote" onClick={() => onSaveNote({id: 10001, vehicleNo: "J 23", notes: 'Hello World'})}></span>
+    </div>
+)
+
+jest.mock('../services/ServiceMediaDialog', () => ({isShow, onSaveMedia}) => 
+    <div>
+        <span data-is-show={isShow} data-testid="onSaveMedia" onClick={() => onSaveMedia(
+                {id: 10001, vehicleNo: "J 23"}, 
+                new File([new Blob(['content'], { type: 'text/plain'})], 'test.txt', { type: 'text/plain' }), 
+                () => {})}></span>
+    </div>
+)
+
+global.fetch = jest.fn()
 
 const suppliers = [{id: 60001, supplierName: "Tok Kong"}, {id: 60002, supplierName: "KHD"}]
 
@@ -31,11 +48,11 @@ const orders = [{id: 1000, supplierId: 60001, itemCode: '1000', partName: 'Engin
 
 afterEach(() => {
     jest.clearAllMocks()
+    jest.resetModules()
     cleanup()
 })
 
 test('listing no search options, delete one item, delete service', async () => {
-    global.fetch = jest.fn()
     global.fetch.mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve(990001)
@@ -102,7 +119,6 @@ test('listing no search options, delete one item, delete service', async () => {
 })
 
 test('to complete service', async () => {
-    global.fetch = jest.fn()
     global.fetch.mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve({...transactions[0], completionDate: new Date().toISOString().split('T')[0]})
@@ -148,6 +164,68 @@ test('to complete service', async () => {
     await waitFor(() => expect(global.fetch).toBeCalledWith("http://localhost:8080/api/workshop-services?op=COMPLETE", {"body": "{\"id\":10001,\"creationDate\":\"2022-02-02\",\"startDate\":\"2022-02-02\",\"vehicleId\":20001,\"vehicleNo\":\"J 23\",\"mileageKm\":230000,\"sparePartUsages\":[{\"id\":990001,\"orderId\":1000,\"quantity\":20,\"usageDate\":\"2022-02-03\",\"soldPrice\":10}],\"completionDate\":\""+keyInCompletionDate+"\"}", 
         "headers": {"Content-type": "application/json"}, "method": "POST"}))
     expect(screen.getAllByText(`Completed on ${keyInCompletionDate}`)).toHaveLength(1)
+
+    unmount()
+})
+
+test('on save note and save media', async () => {
+    const user = userEvent.setup()
+
+    global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({...transactions[0], notes: 'Hello World'})
+    }).mockResolvedValueOnce({
+        ok: true,
+        text: () => Promise.resolve("222000009")
+    })
+
+    window.matchMedia = jest.fn(() => {return {
+        refCount: 0,
+        addListener: jest.fn(),
+        removeListener: jest.fn(),
+        matches: false,           // Added for completeness, can be adjusted
+        media: '(min-width: 768px)', // Default media query, can be adjusted
+        onchange: null            // Added for completeness
+    }})
+
+    const setTotalFilteredServices = jest.fn()
+    const setLoading = jest.fn()
+    const initialServices = newTransactions()
+    const { container, unmount } = render(<WorkshopServicesProvider initialServices={initialServices}>
+        <SupplierOrderContext value={new SupplierOrders([...orders], jest.fn())}>
+            <ServiceListing selectedSearchOptions={[]} 
+                setTotalFilteredServices={setTotalFilteredServices}
+                suppliers={[...suppliers]}
+                setLoading={setLoading} />
+        </SupplierOrderContext>
+    </WorkshopServicesProvider>)
+
+    expect(screen.getAllByText('Complete Service')).toHaveLength(3)
+    expect(container.querySelectorAll('.list-group-item')).toHaveLength(3)
+
+    expect(screen.queryAllByRole('button', {name: 'note-taking'})).toHaveLength(3)
+    await user.click(screen.queryAllByRole('button', {name: 'note-taking'})[0])
+    fireEvent.click(screen.getByTestId('onSaveNote'))
+
+    await waitFor(() => expect(global.fetch).lastCalledWith("http://localhost:8080/api/workshop-services?op=NOTE", 
+        {"body": "{\"id\":10001,\"vehicleNo\":\"J 23\",\"notes\":\"Hello World\"}", 
+            "headers": {"Content-type": "application/json"}, "method": "POST"}))
+
+    expect(setLoading).nthCalledWith(1, true)
+    expect(setLoading).nthCalledWith(2, false)
+
+    expect(screen.queryAllByRole('button', {name: 'photo-taking'})).toHaveLength(3)
+    await user.click(screen.queryAllByRole('button', {name: 'photo-taking'})[0])
+    fireEvent.click(screen.getByTestId('onSaveMedia'))
+
+    await waitFor(() => expect(global.fetch).lastCalledWith("http://localhost:8080/api/workshop-services/10001/medias", 
+        {"body": expect.any(FormData), "method": "POST"}))
+
+    const formData = global.fetch.mock.calls[1][1].body
+    expect(formData.get("file").name).toEqual('test.txt')
+
+    expect(setLoading).nthCalledWith(3, true)
+    expect(setLoading).nthCalledWith(4, false)
 
     unmount()
 })

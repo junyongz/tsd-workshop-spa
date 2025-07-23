@@ -168,6 +168,7 @@ function ServiceMediaDialog({isShow, setShowDialog, ws, onSaveMedia}) {
                                 <InputGroup>
                                     <InputGroup.Text><Camera /></InputGroup.Text>
                                     <Form.Control required type="file" name="file" accept="image/*,video/*"
+                                        role="button" aria-label="upload image or video"
                                         onChange={afterUploadMedia}></Form.Control>
                                 </InputGroup>
                             </Col>

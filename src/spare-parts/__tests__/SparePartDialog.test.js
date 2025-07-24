@@ -90,7 +90,7 @@ test('add new parts with supplier and photo', async () => {
 })
 
 test('update existing parts with supplier and photo', async () => {
-    URL.createObjectURL = jest.fn()
+    URL.createObjectURL = jest.fn(() => 'http://hello.world')
     URL.revokeObjectURL = jest.fn()
     const user = userEvent.setup()
 
@@ -147,5 +147,5 @@ test('update existing parts with supplier and photo', async () => {
     expect(afterSave).lastCalledWith({"id": 50001, "orderIds": [5000]})
 
     expect(URL.createObjectURL).toBeCalledTimes(1)
-    expect(URL.revokeObjectURL).toBeCalledTimes(1)
+    expect(URL.revokeObjectURL).toBeCalledWith('http://hello.world')
 })

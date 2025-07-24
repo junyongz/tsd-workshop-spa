@@ -35,6 +35,7 @@ export default function SparePartMediaSubDialog({sparePart, uploadedMedias, setU
     const afterUploadMedia = (event) => {
         const selectedFiles = event.target.files;
 
+        // this will always make sure files uploaded would replace whatever already uploaded
         setUploadedFiles([])
         clearPreviewDataUrls()
 
@@ -75,7 +76,7 @@ export default function SparePartMediaSubDialog({sparePart, uploadedMedias, setU
                         <Image src={v.dataUrl} className="d-block w-100"/>
                         <Carousel.Caption>
                             <ButtonGroup>
-                            <Button variant="success" onClick={() => {
+                            <Button aria-label={`download ${v.fileName}`} variant="success" onClick={() => {
                                 const link = document.createElement('a');
                                 link.href = v.dataUrl;
                                 link.download = v.fileName;
@@ -83,7 +84,7 @@ export default function SparePartMediaSubDialog({sparePart, uploadedMedias, setU
                                 link.click();
                                 document.body.removeChild(link);
                             }}><Download /> {v.fileName}</Button>
-                            <Button variant="danger" onClick={() => removeMedia(v, i)}><Trash /></Button>
+                            <Button variant="danger" aria-label={`remove ${v.fileName}`} onClick={() => removeMedia(v, i)}><Trash /></Button>
                             </ButtonGroup>
                         </Carousel.Caption>
                     </Carousel.Item>
@@ -96,7 +97,7 @@ export default function SparePartMediaSubDialog({sparePart, uploadedMedias, setU
                     To upload:
                     <InputGroup>
                         <InputGroup.Text><Camera /></InputGroup.Text>
-                        <Form.Control type="file" multiple name="file" accept="image/*,movie/*"
+                        <Form.Control type="file" multiple name="file" role="button" aria-label="upload file(s)" accept="image/*,movie/*"
                             onChange={afterUploadMedia}></Form.Control>
                     </InputGroup>
                 </Col>

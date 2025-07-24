@@ -292,7 +292,7 @@ function SparePartDialog({isShow, setShowDialog,
                                             <Form.Control onChange={(e) => afterKeyInUrl(e.target.value, i)} required aria-label={'url for oem ' + i} type="url" value={v.url} />
                                         </Col>
                                         <Col xs="12" xl="1" className="fs-5 text-danger text-end">
-                                        <span role="button" onClick={() => removeOem(i)}><Trash /></span>
+                                        <span role="button" aria-label="remove oem" onClick={() => removeOem(i)}><Trash /></span>
                                         </Col>
                                         </Row>
                                         </ListGroup.Item>
@@ -323,7 +323,7 @@ function SparePartDialog({isShow, setShowDialog,
                                             <Form.Control onChange={(e) => afterKeyInModel(e.target.value, i)} aria-label={'truck model ' + i}required value={v.model} />
                                         </Col>
                                         <Col xs="12" xl="1" className="fs-5 text-danger text-end">
-                                        <span role="button" onClick={() => removeTruck(i)}><Trash /></span>
+                                        <span role="button" aria-label="remove compatible truck" onClick={() => removeTruck(i)}><Trash /></span>
                                         </Col>
                                         </Row>
                                         </ListGroup.Item>

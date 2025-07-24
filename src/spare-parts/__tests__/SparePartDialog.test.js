@@ -17,7 +17,6 @@ const mockOrders = new SupplierOrders([
 const mockSuppliers = [{ id: 2000, supplierName: 'Han Seng' }, { id: 2001, supplierName: 'Kok Song' }];
 
 global.fetch = jest.fn()
-
 afterAll(() => jest.clearAllMocks())
 
 test('add new parts with supplier and photo', async () => {
@@ -88,4 +87,65 @@ test('add new parts with supplier and photo', async () => {
 
     expect(setShowDialog).lastCalledWith(false)
     expect(afterSave).lastCalledWith({"id": 50001, "orderIds": [5000]})
+})
+
+test('update existing parts with supplier and photo', async () => {
+    URL.createObjectURL = jest.fn()
+    URL.revokeObjectURL = jest.fn()
+    const user = userEvent.setup()
+
+    global.fetch.mockResolvedValueOnce({
+        ok: true, // /api/spare-parts/:sparePartId/medias
+        json: () => Promise.resolve([{ id: 60001 }])
+    }).mockResolvedValueOnce({
+        ok: true, // /api/spare-parts/:sparePartId/medias/:mediaId/data
+        blob: () => Promise.resolve([Buffer.from("/9j/4AAQSkZJRgABAQEAAAAAAA==", 'base64')])
+    })
+    .mockResolvedValueOnce({
+        ok: true, // POST /api/spare-parts
+        json: () => Promise.resolve({ id: 50001 })
+    })
+
+    const afterSave = jest.fn()
+    const afterRemoveMedia = jest.fn()
+    const setShowDialog = jest.fn()
+
+    const SparePartWrapper = () => {
+        const [sparePart, setSparePart] = useState({id: 200001, 
+            oems:[{name:"TSO",url:"http://tso.com/1122000/air-tank"}],
+            compatibleTrucks: [{make:"Hino",model:"700"}],
+            partNo:"11220000", partName:"Air Tank", description:"Air Tank for storing air from compressor"})
+
+        return (
+            <SparePartDialog afterSave={afterSave} 
+                afterRemoveMedia={afterRemoveMedia} 
+                suppliers={mockSuppliers}
+                isShow
+                setShowDialog={setShowDialog}
+                sparePart={sparePart}
+                setSparePart={setSparePart}></SparePartDialog>
+        )
+    }
+
+    const theOrders = [...mockOrders.list()]
+    theOrders[0].sparePartId = 200001
+
+    render(<SupplierOrderContext value={new SupplierOrders(theOrders, jest.fn())}><SparePartWrapper /></SupplierOrderContext>)
+
+    await waitFor(() => expect(screen.queryAllByRole('img')).toHaveLength(1))
+
+    await user.click(screen.getByRole('button', {name: 'remove oem'}))
+    await user.click(screen.getByRole('button', {name: 'remove compatible truck'}))
+
+    await user.click(screen.getByRole('button', {name: 'Save'}))
+
+    await waitFor(() => expect(global.fetch).lastCalledWith("http://localhost:8080/api/spare-parts", 
+        {"body": "{\"id\":200001,\"oems\":[],\"compatibleTrucks\":[],\"partNo\":\"11220000\",\"partName\":\"Air Tank\",\"description\":\"Air Tank for storing air from compressor\",\"supplierIds\":[2000],\"orderIds\":[5000]}", 
+            "headers": {"Content-type": "application/json"}, "method": "POST", "mode": "cors"}))
+
+    expect(setShowDialog).lastCalledWith(false)
+    expect(afterSave).lastCalledWith({"id": 50001, "orderIds": [5000]})
+
+    expect(URL.createObjectURL).toBeCalledTimes(1)
+    expect(URL.revokeObjectURL).toBeCalledTimes(1)
 })

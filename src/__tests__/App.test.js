@@ -1,4 +1,4 @@
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { test, expect, jest, afterAll } from '@jest/globals'
 import App from '../App';
@@ -28,10 +28,17 @@ jest.mock('../services/YearMonthView', () =>
 jest.mock('../suppliers/SuppliersSpareParts', () => 
     ({}) => <div data-testid="supplier-orders-page"></div>
 )
-jest.mock('../ServiceListing', () => 
-    ({}) => <div data-testid="service-listing-page"></div>
+jest.mock('../ServiceListing', () => ({}) => 
+    <div data-testid="service-listing-page"></div>
 )
-jest.mock('../NavigationBar', () => ({}) => <div data-testid="navigation-bar"></div>)
+// lesson learnt: if the mock JSX is drawing an object/array, the jest test would just hang (selectedSearchOptions vs selectedSearchOptions.length)
+jest.mock('../NavigationBar', () => ({filterServices, selectedSearchOptions}) => 
+    <div data-testid="navigation-bar">
+        <span data-testid="filter-services-some-options" onClick={() => filterServices([{name: "J 23"}, {name: "oil"}])}></span>
+        <span data-testid="filter-services-no-options" onClick={() => filterServices([])}></span>
+        <span data-testid="selected-search-options">{selectedSearchOptions.length}</span>
+    </div>
+)
 jest.useFakeTimers()
 global.fetch = jest.fn()
 
@@ -126,8 +133,16 @@ test('draw with mocked components and click the new vehicle created', async () =
             { id: 82003, vehicleNo: "JJ 3"}
         ]) 
     })
+    .mockResolvedValueOnce({
+        ok: true, // /api/workshop-services?keyword=X
+        json: () => Promise.resolve([
+            { id: 3000, startDate: "2005-01-01", vehicleNo: "JJ 1", notes: 'Hello world'},
+            { id: 3001, startDate: "2005-02-01", vehicleNo: "JJ 2", notes: 'Hello drainage '}
+        ])
+    })
 
-    render(<ServiceContext value={new ServiceTransactions([], jest.fn())}>
+    const trxsDispatch = jest.fn()
+    render(<ServiceContext value={new ServiceTransactions([], trxsDispatch)}>
         <SupplierOrderContext value={new SupplierOrders([], jest.fn())}>
             <BrowserRouter>
                 <App />
@@ -161,5 +176,20 @@ test('draw with mocked components and click the new vehicle created', async () =
             {"body": "{\"vehicleNo\":\"JJ 3\"}", 
                 "headers": {"Content-type": "application/json"}, "method": "POST", "mode": "cors"})
     expect(global.fetch).nthCalledWith(12, "http://localhost:8080/api/vehicles", {"mode": "cors"})
+
+    // test filter service
+    fireEvent.click(screen.getByTestId('filter-services-some-options'))
+    jest.advanceTimersByTime(600)
+    await waitFor(() => expect(global.fetch).toBeCalledTimes(13))
+    expect(global.fetch).nthCalledWith(13, "http://localhost:8080/api/workshop-services?keyword=J 23&keyword=oil")
+    await waitFor(() => expect(trxsDispatch).toBeCalledTimes(3))
+    expect(trxsDispatch).lastCalledWith([
+        {"id": 3001, "notes": "Hello drainage ", "startDate": "2005-02-01", "vehicleNo": "JJ 2"}, 
+        {"id": 3000, "notes": "Hello world", "startDate": "2005-01-01", "vehicleNo": "JJ 1"}
+    ])
+    await waitFor(() => expect(screen.getByTestId('selected-search-options')).toHaveTextContent(2))
+
+    fireEvent.click(screen.getByTestId('filter-services-no-options'))
+    await waitFor(() => expect(screen.getByTestId('selected-search-options')).toHaveTextContent(0))
 
 })

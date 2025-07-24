@@ -30,16 +30,16 @@ export default function NavigationBar({
             <Navbar.Collapse>
                 <Nav variant="underline" defaultActiveKey={location.pathname === '/' ? 'home' : location.pathname.substring(1)}>
                     <Dropdown as={ButtonGroup}>
-                    <Nav.Item><Nav.Link eventKey="home" onClick={() => navigate("/")}><Services /> {!((selectedSearchOptions.length > 0 || selectedSearchDate) && totalFilteredServices > 0) && <span>Services</span> } {(selectedSearchOptions.length > 0 || selectedSearchDate) && totalFilteredServices > 0 && <Badge pill>{totalFilteredServices}</Badge>}</Nav.Link></Nav.Item>
-                    <Dropdown.Toggle as={NavLink} ></Dropdown.Toggle>
+                    <Nav.Item><Nav.Link eventKey="home" aria-label="Home" onClick={() => navigate("/")}><Services /> {!((selectedSearchOptions?.length > 0 || selectedSearchDate) && totalFilteredServices > 0) && <span>Services</span> } {(selectedSearchOptions?.length > 0 || selectedSearchDate) && totalFilteredServices > 0 && <Badge pill>{totalFilteredServices}</Badge>}</Nav.Link></Nav.Item>
+                    <Dropdown.Toggle aria-label="more for services" as={NavLink} ></Dropdown.Toggle>
                     <Dropdown.Menu>
-                        <NavDropdown.Item eventKey={'task'} onClick={() => navigate("/workmanships")}><Foreman /> Workmanship</NavDropdown.Item>
+                        <NavDropdown.Item eventKey={'task'} aria-label="Tasks" onClick={() => navigate("/workmanships")}><Foreman /> Workmanship</NavDropdown.Item>
                     </Dropdown.Menu>
                     </Dropdown>
-                    <Nav.Item><Nav.Link eventKey="schedules" onClick={() => navigate("/schedules")}><Calendar /> Schedules</Nav.Link></Nav.Item>
-                    <Nav.Item><Nav.Link eventKey="orders" onClick={() => navigate("/orders")}><Suppliers /> {!((selectedSearchOptions.length > 0 || selectedSearchDate) && totalFilteredOrders > 0) && <span>Suppliers</span>} {(selectedSearchOptions.length > 0 || selectedSearchDate) && totalFilteredOrders > 0 && <Badge pill>{totalFilteredOrders}</Badge>}</Nav.Link></Nav.Item>
-                    <Nav.Item><Nav.Link eventKey="vehicles" onClick={() => navigate("/vehicles")}><Truck /> Trucks</Nav.Link></Nav.Item>
-                    <Nav.Item><Nav.Link eventKey="spare-parts" onClick={() => navigate("/spare-parts")}><Tools /> Parts {selectedSearchOptions.length > 0 && totalSpareParts > 0 && <Badge pill>{totalSpareParts}</Badge>}</Nav.Link></Nav.Item>
+                    <Nav.Item><Nav.Link eventKey="schedules" aria-label="Schedules" onClick={() => navigate("/schedules")}><Calendar /> Schedules</Nav.Link></Nav.Item>
+                    <Nav.Item><Nav.Link eventKey="orders" aria-label="Suppliers" onClick={() => navigate("/orders")}><Suppliers /> {!((selectedSearchOptions?.length > 0 || selectedSearchDate) && totalFilteredOrders > 0) && <span>Suppliers</span>} {(selectedSearchOptions?.length > 0 || selectedSearchDate) && totalFilteredOrders > 0 && <Badge pill>{totalFilteredOrders}</Badge>}</Nav.Link></Nav.Item>
+                    <Nav.Item><Nav.Link eventKey="vehicles" aria-label="Vehicles" onClick={() => navigate("/vehicles")}><Truck /> Trucks</Nav.Link></Nav.Item>
+                    <Nav.Item><Nav.Link eventKey="spare-parts" aria-label="Parts" onClick={() => navigate("/spare-parts")}><Tools /> Parts {selectedSearchOptions?.length > 0 && totalSpareParts > 0 && <Badge pill>{totalSpareParts}</Badge>}</Nav.Link></Nav.Item>
                 </Nav>
                 <Form className="d-flex ms-auto responsive-width-50">
                 {!searchByDate &&
@@ -58,13 +58,13 @@ export default function NavigationBar({
                                 options={searchOptions}
                                 placeholder="Choose by vehicle(s) and/or spart part(s)"
                             />
-                        <InputGroup.Text><Calendar role={location.pathname === '/vehicles'  ? '' : 'button'} onClick={location.pathname === '/vehicles' ? ()=>{} : () => setSearchByDate(true)} /></InputGroup.Text>
+                        <InputGroup.Text><Calendar role={location.pathname === '/vehicles'  ? '' : 'button'} aria-label="search by date" onClick={location.pathname === '/vehicles' ? ()=>{} : () => setSearchByDate(true)} /></InputGroup.Text>
                     </InputGroup>
                 }
                 {searchByDate && 
                 <InputGroup>
                     <InputGroup.Text>Choose a date</InputGroup.Text>
-                    <InputGroup.Text><i className="bi bi-x-circle" role="button" onClick={clearFilterDate}></i></InputGroup.Text>
+                    <InputGroup.Text><i className="bi bi-x-circle" role="button" aria-label="clear date" onClick={clearFilterDate}></i></InputGroup.Text>
                     <Form.Control disabled={location.pathname === '/vehicles'} type='date' placeholder='Choose a date' onChange={(e) => setSelectedSearchDate(e.target.value)}></Form.Control>
                 </InputGroup>
                 }

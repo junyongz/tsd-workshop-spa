@@ -51,8 +51,8 @@ class ServiceTransactions {
             newService.sparePartsCount = newService.sparePartUsages?.length
             newService.workmanshipTasksCount = newService.tasks?.length
             this.#transactions[existingIdx] = newService
+            this.#refreshServices()
         }
-        this.#refreshServices()
     }
 
     updateTransaction(updatedService) {
@@ -78,22 +78,30 @@ class ServiceTransactions {
     }
 
     removeService(deletingService) {
-        const idx = this.#transactionIndexes[deletingService.id]
-        this.#transactions.splice(idx, 1)
-        delete this.#transactionIndexes[idx]
-        this.#refreshServices()
+        const idx = this.#transactionIndexes[deletingService?.id]
+        if (idx >= 0) {
+            this.#transactions.splice(idx, 1)
+            delete this.#transactionIndexes[idx]
+            this.#refreshServices()
+        }
     }
 
     removeTransaction(serviceId, sparePartUsageId) {
         const service = this.#transactions[this.#transactionIndexes[serviceId]]
-        service.sparePartUsages.splice(service.sparePartUsages.findIndex(v => v.id === sparePartUsageId), 1)
-        this.#refreshServices()
+        const sparePartIdx = service.sparePartUsages.findIndex(v => v.id === sparePartUsageId)
+        if (sparePartIdx >= 0) {
+            service.sparePartUsages.splice(sparePartIdx, 1)
+            this.#refreshServices()
+        }
     }
 
     removeTask(serviceId, taskId) {
         const service = this.#transactions[this.#transactionIndexes[serviceId]]
-        service.tasks.splice(service.tasks.findIndex(v => v.id === taskId), 1)
-        this.#refreshServices()
+        const taskIdx = service.tasks.findIndex(v => v.id === taskId)
+        if (taskIdx >= 0) {
+            service.tasks.splice(taskIdx, 1)
+            this.#refreshServices()
+        }
     }
 
     services() {
@@ -102,21 +110,18 @@ class ServiceTransactions {
 
     // {vehicle: []}
     filterByYearMonthGroupByVehicle(year=2025, month=0) {
-        const matchedYearMonthTrxs = this.#transactions.filter(trx => {
-            const creationDate = new Date(trx.creationDate)
+        return this.#transactions.filter(trx => {
+            const creationDate = new Date(trx.startDate)
             if (creationDate.getFullYear() === year && creationDate.getMonth() === month) {
                 return true
             }
             return false
-        })
-
-        const formattedTrxs = {}
-        matchedYearMonthTrxs.forEach(trx => {
-            const vehTrxs = formattedTrxs[trx.vehicleNo] || []
-            vehTrxs.push(trx)
-            formattedTrxs[trx.vehicleNo] = vehTrxs
-        })
-        return formattedTrxs
+        }).reduce((pv, cv) => {
+            const trsx = pv[cv.vehicleNo] || []
+            trsx.push(cv)
+            pv[cv.vehicleNo] = trsx
+            return pv
+        }, {})
     }
 
     availableYears() {

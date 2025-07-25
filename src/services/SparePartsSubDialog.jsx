@@ -88,7 +88,7 @@ export default function SparePartsSubDialog({
                         <FormLabel className="fs-5 text-end"><span>$&nbsp;{(v?.quantity * v?.unitPrice * (1 + (sparePartsMargin || 0)/100)).toFixed(2) || 0}</span></FormLabel>
                     </Col>
                     <Col xs="6" xl="1" className="text-end">
-                    <Button variant="danger" className="fs-5" onClick={() => removeItem(i)}><Trash /></Button>
+                    <Button variant="danger" className="fs-5" aria-label={`delete spare part ${i}`} onClick={() => removeItem(i)}><Trash /></Button>
                     </Col>
                 </Row>
             </ListGroup.Item>

@@ -19,7 +19,7 @@ function ServiceNoteTakingDialog({isShow, setShowDialog, ws, onSaveNote}) {
             return
         }
 
-        onSaveNote({...ws, notes: nativeForm['notes'].value})
+        onSaveNote({...ws, notes: nativeForm.elements.namedItem('notes').value})
         handleClose()
     }
 
@@ -37,7 +37,7 @@ function ServiceNoteTakingDialog({isShow, setShowDialog, ws, onSaveNote}) {
                             <Col>
                                 <InputGroup>
                                     <InputGroup.Text><NoteTaking /></InputGroup.Text>
-                                    <Form.Control as="textarea" name="notes" rows={5} defaultValue={ws.notes}></Form.Control>
+                                    <Form.Control as="textarea" name="notes" aria-label="notes for this service" rows={5} defaultValue={ws.notes}></Form.Control>
                                 </InputGroup>
                             </Col>
                         </Row>    

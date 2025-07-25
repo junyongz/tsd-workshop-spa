@@ -3,7 +3,7 @@ import { Dollar, Foreman, NoteTaking, Trash } from "../Icons";
 import { Button, Col, Dropdown, Form, Image, InputGroup, ListGroup, Row } from "react-bootstrap";
 import { Typeahead } from "react-bootstrap-typeahead";
 
-let searchTimer;
+let searchTimer
 export default function TaskSubDialog({taskTemplates, tasks, setTasks, removeTask}) {
     const afterChooseTask = ([task], i) => {
         setTasks(prevs => {
@@ -168,13 +168,13 @@ export default function TaskSubDialog({taskTemplates, tasks, setTasks, removeTas
                     <Col xs={{span: 12, order: 2}} lg={{span: 3, order: 0}}  className="mb-3 order-xs-5">
                         <InputGroup>
                             <InputGroup.Text><Dollar /></InputGroup.Text>
-                            <Form.Control size="lg" onChange={(e) => afterChangeUnitPrice(e.target.value, i) } required type="number" step="10" name="quotedPrice" placeholder="Price $" value={v?.quotedPrice} />
+                            <Form.Control size="lg" onChange={(e) => afterChangeUnitPrice(e.target.value, i) } required type="number" step="10" name="quotedPrice" aria-label={`price for labour ${i}`} placeholder="Price $" value={v?.quotedPrice} />
                         </InputGroup>
                     </Col>
                     <Col xs="12" lg="11" className="mb-3">
                         <InputGroup>
                             <InputGroup.Text><NoteTaking /></InputGroup.Text>
-                            <Form.Control size="lg" onFocus={(e) => afterKeyRemarks(e.target.value, i)} 
+                            <Form.Control size="lg" aria-label={`remarks for task ${i}`} onFocus={(e) => afterKeyRemarks(e.target.value, i)} 
                             onChange={(e) => afterKeyRemarks(e.target.value, i)} 
                             as="textarea" name="remarks" rows={2} value={v.remarks}></Form.Control>
                             {v.remarkPrice && <InputGroup.Text role="button" onClick={() => afterChangeUnitPrice(v.remarkPrice, i)}>${v.remarkPrice}</InputGroup.Text> }
@@ -198,7 +198,7 @@ export default function TaskSubDialog({taskTemplates, tasks, setTasks, removeTas
                         </Dropdown>
                     </Col>
                     <Col xs={{span: "12", order: 'last'}} lg="1" className="text-end order-xs-last">
-                        <Button size="lg" variant="danger" onClick={() => removeItem(v, i)}><Trash /></Button>
+                        <Button size="lg" variant="danger" aria-label={`remove task ${i}`} onClick={() => removeItem(v, i)}><Trash /></Button>
                     </Col>
                     </Row>
                     </Col>

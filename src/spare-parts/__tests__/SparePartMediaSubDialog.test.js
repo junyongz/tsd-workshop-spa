@@ -7,7 +7,10 @@ import { useState } from 'react';
 global.fetch = jest.fn()
 jest.mock('browser-image-compression', () => (file) => Promise.resolve(file))
 
-afterAll(() => jest.clearAllMocks())
+afterEach(() => {
+    jest.clearAllMocks()
+    jest.restoreAllMocks()
+})
 
 test('click to download file and remove it', async() => {
     const user = userEvent.setup()

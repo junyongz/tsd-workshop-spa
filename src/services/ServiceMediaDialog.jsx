@@ -3,6 +3,7 @@ import { Button, ButtonGroup, Card, Carousel, Col, Container, Form, Image, Input
 import { Camera, Download, Trash } from "../Icons";
 import TransactionTypes from "../components/TransactionTypes";
 import imageCompression from 'browser-image-compression';
+import download from "../utils/downloadUtils";
 
 function ServiceMediaDialog({isShow, setShowDialog, ws, onSaveMedia}) {
     const apiUrl = process.env.REACT_APP_API_URL
@@ -119,7 +120,7 @@ function ServiceMediaDialog({isShow, setShowDialog, ws, onSaveMedia}) {
                 setUploadedFile()
                 setPreviewDataUrl()
                 setCurrentIndex(uploadedMedias.length)
-                nativeForm['file'].value = ''
+                nativeForm.elements.namedItem('file').value = ''
             })
     }
 
@@ -142,19 +143,12 @@ function ServiceMediaDialog({isShow, setShowDialog, ws, onSaveMedia}) {
                             onSelect={(eventKey) => setCurrentIndex(eventKey)}>
                             { uploadedMedias.map((v, i) => 
                                 <Carousel.Item key={v.id}>
-                                    {v.mediaType.startsWith('image') && <Image src={v.dataUrl} className="d-block w-100" width={640} height={480}/> }
-                                    {v.mediaType.startsWith('video') && <video autoPlay controls  src={v.dataUrl} className="d-block w-100" width={640} height={480}/> }
+                                    {v.mediaType.startsWith('image') && <Image src={v.dataUrl} aria-label={`image of ${v.fileName}`} className="d-block w-100" width={640} height={480}/> }
+                                    {v.mediaType.startsWith('video') && <video autoPlay controls src={v.dataUrl} aria-label={`video of ${v.fileName}`} className="d-block w-100" width={640} height={480}/> }
                                     <Carousel.Caption>
                                         <ButtonGroup>
-                                        <Button variant="success" onClick={() => {
-                                            const link = document.createElement('a');
-                                            link.href = v.dataUrl;
-                                            link.download = v.fileName;
-                                            document.body.appendChild(link);
-                                            link.click();
-                                            document.body.removeChild(link);
-                                        }}><Download /> {v.fileName}</Button>
-                                        <Button variant="danger" onClick={() => removeMedia(v, i)}><Trash /></Button>
+                                        <Button variant="success" aria-label={`download media ${v.fileName}`} onClick={() => download(v.dataUrl, v.fileName)}><Download /> {v.fileName}</Button>
+                                        <Button variant="danger" aria-label={`remove media ${v.fileName}`} onClick={() => removeMedia(v, i)}><Trash /></Button>
                                         </ButtonGroup>
                                     </Carousel.Caption>
                                 </Carousel.Item>
@@ -162,7 +156,7 @@ function ServiceMediaDialog({isShow, setShowDialog, ws, onSaveMedia}) {
                         </Carousel>
                     </Col>
                     </Row>}
-                    <Form ref={formRef} validated={validated}>
+                    <Form ref={formRef} validated={validated} aria-label="upload form">
                         <Row className="mb-3">
                             <Col>
                                 <InputGroup>

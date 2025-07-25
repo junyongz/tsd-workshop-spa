@@ -2,7 +2,10 @@ import { jest, test, expect, afterAll } from '@jest/globals';
 import fetchCompanies from '../fetchCompanies';
 import { waitFor } from '@testing-library/react';
 
-afterAll(() => jest.clearAllMocks())
+afterEach(() => {
+    jest.clearAllMocks()
+    jest.restoreAllMocks()
+})
 
 test('error happening when fetch', async () => {
     global.fetch = jest.fn()

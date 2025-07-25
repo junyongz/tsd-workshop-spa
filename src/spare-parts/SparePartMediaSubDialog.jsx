@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Button, ButtonGroup, Card, Carousel, Col, Form, Image, InputGroup, Row } from "react-bootstrap";
 import { Camera, Download, Trash } from "../Icons";
 import imageCompression from 'browser-image-compression';
+import download from "../utils/downloadUtils";
 
 export default function SparePartMediaSubDialog({sparePart, uploadedMedias, setUploadedMedias,
     uploadedFiles, setUploadedFiles, subscribe, afterRemoveMedia}) {
@@ -76,14 +77,7 @@ export default function SparePartMediaSubDialog({sparePart, uploadedMedias, setU
                         <Image src={v.dataUrl} className="d-block w-100"/>
                         <Carousel.Caption>
                             <ButtonGroup>
-                            <Button aria-label={`download ${v.fileName}`} variant="success" onClick={() => {
-                                const link = document.createElement('a');
-                                link.href = v.dataUrl;
-                                link.download = v.fileName;
-                                document.body.appendChild(link);
-                                link.click();
-                                document.body.removeChild(link);
-                            }}><Download /> {v.fileName}</Button>
+                            <Button aria-label={`download ${v.fileName}`} variant="success" onClick={() => download(v.dataUrl, v.fileName)}><Download /> {v.fileName}</Button>
                             <Button variant="danger" aria-label={`remove ${v.fileName}`} onClick={() => removeMedia(v, i)}><Trash /></Button>
                             </ButtonGroup>
                         </Carousel.Caption>

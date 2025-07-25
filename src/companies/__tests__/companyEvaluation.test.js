@@ -1,4 +1,4 @@
-import { jest, test, expect, afterAll } from '@jest/globals';
+import { test, expect } from '@jest/globals';
 import { isInternal } from '../companyEvaluation';
 
 test('once and for all', () => {

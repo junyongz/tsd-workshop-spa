@@ -19,7 +19,7 @@ export default function SparePartSupplierSubDialog({
         // tabIndex is important for typeahead/react to populate correct target/currentTarget, 
         // so focus/click event can happen on correct element
         return (
-        <div className="rbt-token rbt-token-removeable rbt-token-active" onClick={() => setMaxSelectedOrdersShown(prev => prev + 5)} tabIndex="0">
+        <div role="listitem" aria-label="more to show selected order" className="rbt-token rbt-token-removeable rbt-token-active" onClick={() => setMaxSelectedOrdersShown(prev => prev + 5)} tabIndex="0">
             <span className="rbt-token-label">{matchingOrders.filter(mo => mo.supplierId == activeSupplierId).length - maxSelectedOrdersShown} more...</span>
         </div>)
     }
@@ -125,7 +125,7 @@ export default function SparePartSupplierSubDialog({
                 onSelect={setActiveSupplierId} activeKey={(selectedSuppliers.length === 1 && selectedSuppliers[0].id) || activeSupplierId}>
             {
                 selectedSuppliers.map((v, i) => <Nav.Item key={v?.id}>
-                                <Nav.Link eventKey={v?.id}>{v?.supplierName} {activeSupplierId == v.id && <span role="button" className="text-danger" onClick={(e) => removeFromSelectedSupplier(v)}><Trash /></span>}</Nav.Link>
+                                <Nav.Link eventKey={v?.id}>{v?.supplierName} {activeSupplierId == v.id && <span role="button" aria-label={`remove supplier ${v.supplierName}`} className="text-danger" onClick={(e) => removeFromSelectedSupplier(v)}><Trash /></span>}</Nav.Link>
                                 </Nav.Item>)
             }
             </Nav> }
@@ -133,7 +133,7 @@ export default function SparePartSupplierSubDialog({
             {selectedSuppliers.length > 0 && <Typeahead
                 id="typeahead-select-orders"
                 key={activeSupplierId}
-                inputProps={{name: 'orders'}}
+                inputProps={{name: 'orders', "aria-label": 'find the order from the supplier'}}
                 labelKey={(option) => `${option.partName} (${option.invoiceDate})`}
                 options={orders.list().filter(o => o.supplierId == activeSupplierId).filter(mo => !mo.sparePartId)}
                 onChange={(opts) => afterChooseOrders(opts, activeSupplierId)}
@@ -144,6 +144,7 @@ export default function SparePartSupplierSubDialog({
                             ? <ShowMoreToken {...props} />
                             : ((idx > maxSelectedOrdersShown) ? <></>
                             : <Token
+                                role="listitem"
                                 disabled={props.disabled}
                                 key={idx}
                                 onRemove={props.onRemove}

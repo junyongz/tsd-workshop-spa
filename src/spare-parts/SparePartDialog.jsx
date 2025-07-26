@@ -283,7 +283,7 @@ function SparePartDialog({isShow, setShowDialog,
                                         </Row>
                                         </ListGroup.Item>
                                     {sparePart.oems?.map((v, i) => 
-                                        <ListGroup.Item>
+                                        <ListGroup.Item key={i}>
                                         <Row>
                                         <Col xs="12" xl="4" className="mb-1 mb-xl-none">
                                             <Form.Control onChange={(e) => afterKeyInName(e.target.value, i)} required aria-label={'name for oem ' + i} value={v.name} />

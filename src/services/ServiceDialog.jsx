@@ -5,6 +5,7 @@ import Form from "react-bootstrap/Form";
 import { Calendar, Inspection, MaintenanceServices, Repair, Truck } from "../Icons";
 import SparePartsSubDialog from "./SparePartsSubDialog";
 import TaskSubDialog from "./TaskSubDialog";
+import { addDaysToDateStr } from "../utils/dateUtils";
 
 function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[], 
     suppliers=[], sparePartUsages=[], taskTemplates=[],
@@ -13,7 +14,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
     const apiUrl = process.env.REACT_APP_API_URL
 
     const [items, setItems] = useState([{partName: 'Choose one ...', quantity: 1, unit: 'pc', unitPrice: 0, selectedSpareParts: []}])
-    const [tasks, setTasks] = useState()
+    const [tasks, setTasks] = useState([])
 
     const [validated, setValidated] = useState(false)
     const formRef = useRef()
@@ -106,7 +107,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
     const saveChange = () => {
         const nativeForm = formRef.current
 
-        checkVehicleValidity(nativeForm['vehicle'])
+        checkVehicleValidity(nativeForm.elements.namedItem('vehicle'))
         if (items.some(itm => !itm.selectedSpareParts || itm.selectedSpareParts.length === 0)) {
             nativeForm.elements.namedItem('sparePartsCompleted').setCustomValidity('Please key spare parts')
             setTabView('all')
@@ -132,7 +133,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
 
         const startDateElem = nativeForm.elements.namedItem('startDate')
         const mileageKmElem = nativeForm.elements.namedItem('mileageKm')
-        const transactionTypesElems = nativeForm.elements.namedItem('transactionTypes')
+        const transactionTypesElems = document.querySelectorAll('input[name="transactionTypes"]')
 
         const service = {
             id: selectedExistingService?.id,
@@ -199,7 +200,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
                                 <InputGroup.Text><Calendar /></InputGroup.Text>
                                     <Form.Control onChange={(e) => afterChooseDate(e.target.value)} name="startDate" 
                                         min={selectedExistingService ? selectedExistingService.startDate : undefined} 
-                                        max={new Date().toISOString().split('T')[0]} 
+                                        max={addDaysToDateStr(new Date(), 0)} 
                                         required type="date"></Form.Control>
                                 </InputGroup>
                             </Col>
@@ -234,14 +235,16 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
                         </Row>
                         <Row>
                             <Col className="text-center">
-                            <Form.Check ref={repairSwitchRef} inline name="transactionTypes" type="switch" defaultChecked={trx?.current?.transactionTypes?.includes('REPAIR')} value="REPAIR" label={ <span onClick={() => repairSwitchRef.current.click()}><Repair /> Repair</span> }></Form.Check>
-                            <Form.Check ref={maintSwitchRef} inline name="transactionTypes" type="switch" defaultChecked={trx?.current?.transactionTypes?.includes('SERVICE')}value="SERVICE" label={ <span onClick={() => maintSwitchRef.current.click()}><MaintenanceServices /> Maintenance Service</span> }></Form.Check>
-                            <Form.Check ref={inspectionSwitchRef} inline name="transactionTypes" type="switch" defaultChecked={trx?.current?.transactionTypes?.includes('INSPECTION')}value="INSPECTION"  label={ <span onClick={() => inspectionSwitchRef.current.click()}><Inspection /> Inspection</span> }></Form.Check>
+                            <Form.Check ref={repairSwitchRef} inline name="transactionTypes" type="switch" defaultChecked={trx?.current?.transactionTypes?.includes('REPAIR')} value="REPAIR" label={ <span aria-label="service type: repair" onClick={() => repairSwitchRef.current.click()}><Repair /> Repair</span> }></Form.Check>
+                            <Form.Check ref={maintSwitchRef} inline name="transactionTypes" type="switch" defaultChecked={trx?.current?.transactionTypes?.includes('SERVICE')} value="SERVICE" label={ <span aria-label="service type: service" onClick={() => maintSwitchRef.current.click()}><MaintenanceServices /> Maintenance Service</span> }></Form.Check>
+                            <Form.Check ref={inspectionSwitchRef} inline name="transactionTypes" type="switch" defaultChecked={trx?.current?.transactionTypes?.includes('INSPECTION')} value="INSPECTION" label={ <span aria-label="service type: inspection" onClick={() => inspectionSwitchRef.current.click()}><Inspection /> Inspection</span> }></Form.Check>
                             </Col>
                         </Row>
                         <Row>
                             <Col className="text-end">
-                                <Button disabled={tabView === 'all'} size="sm" onClick={addNewItem}><i className="bi bi-plus-circle-fill me-2"></i>{items.length === 0 ? 'Add New' : 'Add More' }</Button>
+                                <Button disabled={tabView === 'all'} size="sm" onClick={addNewItem}>
+                                    <i className="bi bi-plus-circle-fill me-2"></i>{((tabView === 'spareParts' && items.length === 0) || (tabView === 'workmanship' && tasks.length === 0)) ? 'Add New' : 'Add More' }
+                                </Button>
                             </Col>
                         </Row>
                         

@@ -4,6 +4,7 @@ import InputGroupText from "react-bootstrap/InputGroupText";
 import { Calendar, Camera, NoteTaking } from "../Icons";
 import PhotoGallery from "./PhotoGallery";
 import PromptDeletionButton from "./PromptDeletionButton";
+import { addDaysToDateStr } from "../utils/dateUtils";
 
 const CompletionLabel = ({ws, onCompletion, onDelete, noteForService, mediaForService}) => {
     const apiUrl = process.env.REACT_APP_API_URL
@@ -20,7 +21,7 @@ const CompletionLabel = ({ws, onCompletion, onDelete, noteForService, mediaForSe
         onCompletion(completionDateRef.current.value)
     }
 
-    const todayDate = new Date().toISOString().split('T')[0]
+    const todayDate = addDaysToDateStr(new Date(), 0)
 
     const fetchMediasOrCollapse = () => {
         if (openMedia) {

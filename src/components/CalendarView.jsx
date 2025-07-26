@@ -1,5 +1,5 @@
 import { ButtonGroup, Button, Container, Card, Badge, Col, Row, ListGroup, Modal, OverlayTrigger, Tooltip } from "react-bootstrap";
-import { days3EngCharsStartWithSun, months3EngChars, sameDay } from "../utils/dateUtils";
+import { addDaysToDateStr, days3EngCharsStartWithSun, months3EngChars, sameDay } from "../utils/dateUtils";
 import { useEffect, useState } from "react";
 import './CalendarView.css'
 import { HandPointer, Trash } from "../Icons";
@@ -88,7 +88,7 @@ export default function CalendarView({
             <Row>
                 <Modal show={showEventsDialog} onHide={() => setShowEventDialog(false)}>
                     <Modal.Header closeButton>
-                        Schedules for {choosenDate?.toISOString().split('T')[0]}
+                        Schedules for {choosenDate ? addDaysToDateStr(choosenDate, 0) : ''}
                     </Modal.Header>
                     <Modal.Body>
                         <AllEvents events={events} onDoClickNew={() => { onClickNew(choosenDate); setShowEventDialog(false)}} />

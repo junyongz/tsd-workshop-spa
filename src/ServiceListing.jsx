@@ -15,6 +15,7 @@ import { applyFilterOnServices } from './search/fuzzySearch';
 import { useNavigate } from 'react-router-dom';
 import { useService } from './services/ServiceContextProvider';
 import { useSupplierOrders } from './suppliers/SupplierOrderContextProvider';
+import { addDaysToDateStr } from './utils/dateUtils';
 
 function ServiceListing({
     setTotalFilteredServices,
@@ -243,7 +244,7 @@ function ServiceListing({
         <Col className='text-end'>
           <ButtonGroup className='responsive-width-50'>
             <Button variant='secondary' onClick={() => { setSelectedSearchOptions([]); navigate('/services-overview')}}><Calendar />&nbsp;Calendar View</Button>
-            <Button variant='success' onClick={() => addNewServiceTransaction(new Date().toISOString().split('T')[0])}><i className="bi bi-plus-circle-fill me-2"></i>Add New</Button>
+            <Button variant='success' onClick={() => addNewServiceTransaction(addDaysToDateStr(new Date(), 0))}><i className="bi bi-plus-circle-fill me-2"></i>Add New</Button>
           </ButtonGroup>
         </Col>
       </Row>

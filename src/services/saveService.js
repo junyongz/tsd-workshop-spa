@@ -16,8 +16,7 @@ export default function saveService(
       })
       .then(res => {
         if (!res.ok) {
-          console.trace("Issue with POST workshop-services: " + JSON.stringify(res.body))
-          throw Error("not good")
+          throw Error("failed to save service: " + JSON.stringify(service))
         }
         return res.json()
       })
@@ -26,6 +25,7 @@ export default function saveService(
       })
       .then(() => refreshSparePartUsages())
       .then(() => clearState())
+      .catch(err => console.error(err))
       .finally(() => setLoading(false))
     })
     

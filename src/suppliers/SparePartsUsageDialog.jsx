@@ -3,6 +3,7 @@ import { Container, Form, Modal, Row, Col, Button, InputGroup } from "react-boot
 import { Typeahead } from "react-bootstrap-typeahead"
 import { decimalPointUomAvailable } from "../utils/quantityUtils"
 import { Calendar, Tools, Truck } from "../Icons"
+import { addDaysToDateStr } from "../utils/dateUtils"
 
 function SparePartsUsageDialog({isShow, setShowDialog, vehicles, 
     usageSpareParts, setUsageSpareParts, onSaveNewSparePartUsage,
@@ -118,7 +119,7 @@ function SparePartsUsageDialog({isShow, setShowDialog, vehicles,
                                         <InputGroup.Text><Calendar /></InputGroup.Text>
                                         <Form.Control required type="date" 
                                             min={selectedExistingService ? selectedExistingService.startDate : usageSpareParts.invoiceDate}
-                                            max={new Date().toISOString().split('T')[0]}
+                                            max={addDaysToDateStr(new Date(), 0)}
                                             name="usageDate" disabled={!usageSpareParts.quantity || usageSpareParts.quantity === 0}></Form.Control>
                                         </InputGroup>
                                     </Col>

@@ -144,7 +144,7 @@ function SupplierSparePartsYearMonthView({suppliers=[], backToOrders}) {
                                     </Card.Header>    
                                     <Card.Body>
                                         {Object.keys(groupByDO).map(v => {
-                                            return <Card className="mb-3">
+                                            return <Card className="mb-3" key={v} role="document">
                                                 <Card.Header>
                                                     <Row>
                                                         <Col><Calendar /> {groupByDO[v][0].invoiceDate}</Col>

@@ -1,13 +1,23 @@
-import { jest, test, expect } from '@jest/globals'
-import { render, screen } from '@testing-library/react'
+import { jest, test, expect, afterAll } from '@jest/globals'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import ServiceDialog from '../ServiceDialog'
 import { SupplierOrderContext } from '../../suppliers/SupplierOrderContextProvider'
 import SupplierOrders from '../../suppliers/SupplierOrders'
+import { addDaysToDateStr } from '../../utils/dateUtils'
+
+global.fetch = jest.fn()
+
+afterAll(() => jest.clearAllMocks())
 
 test('add 2 spare parts', async () => {
     const user = userEvent.setup()
+
+    global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([])
+    })
 
     const orders = new SupplierOrders([
         {id: 1000, supplierId: 60001, itemCode: '1000', partName: 'Engine Oil 20w-50', quantity: 100, unit: 'litres', unitPrice: 9.7, status: 'ACTIVE'},
@@ -90,6 +100,11 @@ test('add 2 spare parts', async () => {
 test('add 3 spare parts, then delete 2nd one', async () => {
     const user = userEvent.setup()
 
+    global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([])
+    })
+
     const orders = new SupplierOrders([
         {id: 1000, supplierId: 60001, itemCode: '1000', partName: 'Engine Oil 20w-50', quantity: 100, unit: 'litres', unitPrice: 9.7, status: 'ACTIVE'},
         {id: 1001, supplierId: 60002, itemCode: '2000', partName: 'Oil Filter', quantity: 5, unit: 'pc', unitPrice: 29.5, status: 'ACTIVE'},
@@ -106,6 +121,7 @@ test('add 3 spare parts, then delete 2nd one', async () => {
             suppliers={[{id: 60001, supplierName: "Kotong"}, {id: 60002, supplierName: "Facaw"}]}
             sparePartUsages={[]}
             onNewServiceCreated={saveService}
+            trx={{current: {}}}
         />
         </SupplierOrderContext>)
 
@@ -174,4 +190,171 @@ test('add 3 spare parts, then delete 2nd one', async () => {
         "tasks": [], "transactionTypes": [], 
         "vehicleId": 50002, "vehicleNo": "J 33"})
     expect(setShow).toBeCalledWith(false)
+})
+
+test('vehicles validity check', async () => {
+    const user = userEvent.setup()
+
+    const orders = new SupplierOrders([
+        {id: 1000, supplierId: 60001, itemCode: '1000', partName: 'Engine Oil 20w-50', quantity: 100, unit: 'litres', unitPrice: 9.7, status: 'ACTIVE'},
+        {id: 2000, supplierId: 60002, itemCode: '2000', partName: 'Oil Filter', quantity: 5, unit: 'pc', unitPrice: 29.5, status: 'ACTIVE'}
+    ], jest.fn())
+
+    const saveService = jest.fn()
+    const setShow = jest.fn()
+    const onNewVehicleCreated = jest.fn((vehNo) => Promise.resolve({id: 50003, vehicleNo: vehNo}))
+    render(<SupplierOrderContext value={orders}>
+        <ServiceDialog 
+            isShow={true}
+            setShow={setShow}
+            vehicles={[{id: 50001, vehicleNo: "J 23"}, {id: 50002, vehicleNo: "J 33"}]} 
+            suppliers={[{id: 60001, supplierName: "Kotong"}, {id: 60002, supplierName: "Facaw"}]}
+            sparePartUsages={[]}
+            onNewVehicleCreated={onNewVehicleCreated}
+            onNewServiceCreated={saveService}
+            trx={{current: {}}}
+        />
+        </SupplierOrderContext>)
+
+    const vehicle = screen.getByPlaceholderText("Choose a vehicle...")
+    expect(vehicle).toBeInTheDocument()
+    await user.click(vehicle)
+    await user.type(vehicle, "J 34")
+    await user.click(screen.getByText("Create & add a new vehicle:"))
+
+    // should have J 34
+    await waitFor(() => expect(screen.getByPlaceholderText("Choose a vehicle...")).toHaveValue("J 34"))
+
+    // key in another, but dont choose to create a new one
+    await user.click(vehicle)
+    await user.type(vehicle, "J 35")
+    await user.click(screen.getByText("Save"))
+
+    expect(vehicle.validationMessage).toBe('not a valid vehicle, either choose one and create one first')
+})
+
+test('add for existing service, to update mileage only', async () => {
+    const user = userEvent.setup()
+
+    const todayDate = new Date()
+    const keyInStartDate = `${todayDate.getFullYear()}-${(todayDate.getMonth() + 1).toString().padStart(2, 0)}-${(todayDate.getDate()-1).toString().padStart(2, 0)}`
+    const prevStartDate = addDaysToDateStr(todayDate, -2)
+
+    global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([
+            {id: 10001, vehicleNo: "J 33", startDate: prevStartDate, mileageKm: 135392}
+        ])
+    })
+
+    const orders = new SupplierOrders([
+        {id: 1000, supplierId: 60001, itemCode: '1000', partName: 'Engine Oil 20w-50', quantity: 100, unit: 'litres', unitPrice: 9.7, status: 'ACTIVE'},
+        {id: 2000, supplierId: 60002, itemCode: '2000', partName: 'Oil Filter', quantity: 5, unit: 'pc', unitPrice: 29.5, status: 'ACTIVE'}
+    ], jest.fn())
+
+    const saveService = jest.fn()
+    const setShow = jest.fn()
+    render(<SupplierOrderContext value={orders}>
+        <ServiceDialog 
+            isShow={true}
+            setShow={setShow}
+            vehicles={[{id: 50001, vehicleNo: "J 23"}, {id: 50002, vehicleNo: "J 33"}]} 
+            suppliers={[{id: 60001, supplierName: "Kotong"}, {id: 60002, supplierName: "Facaw"}]}
+            sparePartUsages={[]}
+            onNewServiceCreated={saveService}
+            trx={{current: {}}}
+        />
+        </SupplierOrderContext>)
+
+    const startDate = document.querySelector('input[name="startDate"]')
+    await user.click(startDate)
+    await user.type(startDate, keyInStartDate)
+
+    // before choose a vehicle with exiting service
+    expect(screen.queryAllByText('Service started at ' + keyInStartDate)).toHaveLength(1)
+
+    const vehicle = screen.getByPlaceholderText("Choose a vehicle...")
+    expect(vehicle).toBeInTheDocument()
+    await user.click(vehicle)
+    await user.type(vehicle, "J 33")
+    await user.click(screen.getByText('J 33'))
+
+    // after choose, start date reflect at the dialog header
+    expect(screen.queryAllByText('Service started at ' + prevStartDate)).toHaveLength(1)
+
+    const mileageKm = document.querySelector('input[name="mileageKm"]')
+    expect(mileageKm).toBeInTheDocument()
+    await user.click(mileageKm)
+    await user.keyboard('{Control>}A{/Control}[Backspace]137392')
+
+    // delete the part
+    await user.click(screen.getByRole('button', {name: 'delete spare part 0'}))  
+
+    // save it
+    await user.click(screen.getByText("Save"))
+    expect(saveService).toBeCalledWith({"id": 10001, "mileageKm": "137392", "notes": undefined, 
+        "sparePartUsages": [], "sparePartsMargin": undefined, "startDate": prevStartDate, "tasks": [], 
+        "transactionTypes": [], "vehicleId": 50002, "vehicleNo": "J 33"})
+    expect(setShow).toBeCalledWith(false)
+})
+
+test('add for existing service, navigate around', async () => {
+    const user = userEvent.setup()
+
+    const todayDate = new Date()
+    const keyInStartDate = `${todayDate.getFullYear()}-${(todayDate.getMonth() + 1).toString().padStart(2, 0)}-${(todayDate.getDate()-1).toString().padStart(2, 0)}`
+    const prevStartDate = addDaysToDateStr(todayDate, -2)
+
+    const orders = new SupplierOrders([
+        {id: 1000, supplierId: 60001, itemCode: '1000', partName: 'Engine Oil 20w-50', quantity: 100, unit: 'litres', unitPrice: 9.7, status: 'ACTIVE'},
+        {id: 2000, supplierId: 60002, itemCode: '2000', partName: 'Oil Filter', quantity: 5, unit: 'pc', unitPrice: 29.5, status: 'ACTIVE'}
+    ], jest.fn())
+
+    const saveService = jest.fn()
+    const setShow = jest.fn()
+    render(<SupplierOrderContext value={orders}>
+        <ServiceDialog 
+            isShow={true}
+            setShow={setShow}
+            vehicles={[{id: 50001, vehicleNo: "J 23"}, {id: 50002, vehicleNo: "J 33"}]} 
+            suppliers={[{id: 60001, supplierName: "Kotong"}, {id: 60002, supplierName: "Facaw"}]}
+            sparePartUsages={[]}
+            onNewServiceCreated={saveService}
+            trx={{current: {id: 100001, vehicleNo: "J 23", startDate: prevStartDate}}}
+        />
+        </SupplierOrderContext>)
+
+    const startDate = document.querySelector('input[name="startDate"]')
+    await user.click(startDate)
+    await user.type(startDate, keyInStartDate)
+
+    const vehicle = screen.getByPlaceholderText("Choose a vehicle...")
+    expect(vehicle).toBeInTheDocument()
+    expect(vehicle).toHaveValue("J 23")
+
+    // navigate to workmanship tab
+    await user.click(screen.getByText('Workmanship'))
+
+    // add new item for task
+    await user.click(screen.getByText('Add New'))
+    expect(screen.queryAllByPlaceholderText('Find a suitable task')).toHaveLength(1)
+    await user.click(screen.getByLabelText('remove task 0'))
+    expect(screen.queryAllByPlaceholderText('Find a suitable task')).toHaveLength(0)
+
+    // navigate back to spare parts
+    await user.click(screen.getByText('Spare Parts'))
+    expect(screen.queryAllByPlaceholderText('Find a spare part...')).toHaveLength(1)
+    await user.click(screen.getByLabelText('delete spare part 0'))
+    expect(screen.queryAllByPlaceholderText('Find a spare part...')).toHaveLength(0)
+
+    // click all repair, service and inspection
+    await user.click(screen.getByLabelText('service type: repair'))
+    await user.click(screen.getByLabelText('service type: service'))
+    await user.click(screen.getByLabelText('service type: inspection'))
+
+    // save it
+    await user.click(screen.getByText("Save"))
+    expect(saveService).toBeCalledWith({"id": 100001, "mileageKm": "", 
+        "notes": undefined, "sparePartUsages": [], "sparePartsMargin": undefined, "startDate": prevStartDate, 
+        "tasks": [], "transactionTypes": ['REPAIR', 'SERVICE', 'INSPECTION'], "vehicleId": 50001, "vehicleNo": "J 23"})
 })

@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { test, expect, jest, afterAll } from '@jest/globals'
 import { ServiceContext } from '../ServiceContextProvider';
@@ -128,4 +128,79 @@ test('change margin to 30%', async () => {
         "tasks": [{"id": 8800001, "quotedPrice": 50, "recordedDate": "2022-02-02", "remarks": "to adjust brake", "rid": expect.anything(), 
             "selectedTask": [{"complexity": "LOW", "component": {"subsystem": "brake"}, "description": "adjust brake", "id": 540001, "unitPrice": 150}], "taskId": 540001}], 
         "vehicleId": 20001, "vehicleNo": "J 23"})
+})
+
+test('change margin individually', async () => {
+    const user = userEvent.setup()
+
+    const onNewServiceCreated = jest.fn()
+    render(<ServiceContext value={new ServiceTransactions(newTransactions(), jest.fn())}>
+        <SupplierOrderContext value={new SupplierOrders(orders, jest.fn())}>
+            <InProgressTaskFocusListing 
+                suppliers={suppliers} vehicles={vehicles} 
+                companies={companies} taskTemplates={taskTemplates}
+                onNewServiceCreated={onNewServiceCreated} />
+        </SupplierOrderContext>
+    </ServiceContext>)
+
+    expect(document.querySelectorAll('.card')).toHaveLength(2)
+
+    // click on the first one.
+    await user.click(document.querySelectorAll('.card')[0])
+
+    expect(screen.queryByText('Engine Oil 20w-50')).toBeInTheDocument()
+    expect(screen.queryByText('Oil Filter')).toBeInTheDocument()
+
+    await user.click(screen.queryByText('Engine Oil 20w-50'))
+    await user.click(screen.getByLabelText('individual margin 40%'))
+    await user.click(screen.getByText('OK'))
+
+    // OKAY and save
+    await user.click(screen.getByText('OKAY'))
+
+    expect(onNewServiceCreated).toBeCalledWith({"id": 10001, "mileageKm": 230000, 
+        "sparePartUsages": [
+            {"id": 990001, "margin": "40", 
+                "order": {"id": 1000, "itemCode": "1000", "partName": "Engine Oil 20w-50", "quantity": 100, "status": "ACTIVE", "supplierId": 60001, "unit": "litres", "unitPrice": 9.7}, 
+                "orderId": 1000, "quantity": 20, "soldPrice": 13.579999999999998, "usageDate": "2022-02-03"}, 
+            {"id": 990004, "margin": 0, 
+                "order": {"id": 2000, "itemCode": "2000", "partName": "Oil Filter", "quantity": 5, "status": "ACTIVE", "supplierId": 60002, "unit": "pc", "unitPrice": 29.5}, 
+                "orderId": 2000, "quantity": 1, "usageDate": "2022-02-03"}], 
+        "startDate": "2022-02-02", 
+        "tasks": [{"id": 8800001, "quotedPrice": 50, "recordedDate": "2022-02-02", "remarks": "to adjust brake", "rid": expect.anything(), 
+            "selectedTask": [{"complexity": "LOW", "component": {"subsystem": "brake"}, "description": "adjust brake", "id": 540001, "unitPrice": 150}], "taskId": 540001}], 
+        "vehicleId": 20001, "vehicleNo": "J 23"})
+})
+
+test('just view and go back', async () => {
+    const user = userEvent.setup()
+
+    const onNewServiceCreated = jest.fn()
+    render(<ServiceContext value={new ServiceTransactions(newTransactions(), jest.fn())}>
+        <SupplierOrderContext value={new SupplierOrders(orders, jest.fn())}>
+            <InProgressTaskFocusListing 
+                suppliers={suppliers} vehicles={vehicles} 
+                companies={companies} taskTemplates={taskTemplates}
+                onNewServiceCreated={onNewServiceCreated} />
+        </SupplierOrderContext>
+    </ServiceContext>)
+
+    expect(document.querySelectorAll('.card')).toHaveLength(2)
+
+    // click on the first one.
+    await user.click(document.querySelectorAll('.card')[0])
+
+    expect(screen.queryByText('Engine Oil 20w-50')).toBeInTheDocument()
+    expect(screen.queryByText('Oil Filter')).toBeInTheDocument()
+
+    await user.click(screen.queryByText('Engine Oil 20w-50'))
+    await user.click(screen.getByText('OK'))
+
+    await user.click(screen.queryByText('Oil Filter'))
+    await user.click(screen.getByText('OK'))
+
+    // OKAY and save
+    await user.click(screen.getByText('OKAY'))
+
+    expect(onNewServiceCreated).not.toBeCalled()
 })

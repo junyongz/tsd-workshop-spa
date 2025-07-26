@@ -5,6 +5,7 @@ import { WorkshopServicesProvider } from '../services/ServiceContextProvider';
 import { SupplierOrderContext } from '../suppliers/SupplierOrderContextProvider';
 import ServiceListing from '../ServiceListing';
 import SupplierOrders from '../suppliers/SupplierOrders';
+import { addDaysToDate, addDaysToDateStr } from '../utils/dateUtils';
 
 jest.mock('../services/ServiceNoteTakingDialog', () => ({isShow, onSaveNote}) => 
     <div>
@@ -113,7 +114,7 @@ test('listing no search options, delete one item, delete service', async () => {
 
     // finally click on Add New button
     await user.click(screen.getByText('Add New'))
-    expect(screen.queryByText('Service started at ' + new Date().toISOString().split('T')[0])).toBeInTheDocument()
+    expect(screen.queryByText('Service started at ' + addDaysToDateStr(new Date(), 0))).toBeInTheDocument()
 
     unmount()
 })
@@ -121,7 +122,7 @@ test('listing no search options, delete one item, delete service', async () => {
 test('to complete service', async () => {
     global.fetch.mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({...transactions[0], completionDate: new Date().toISOString().split('T')[0]})
+        json: () => Promise.resolve({...transactions[0], completionDate: addDaysToDateStr(new Date(), 0)})
     })
 
     window.matchMedia = jest.fn(() => {return {
@@ -156,14 +157,14 @@ test('to complete service', async () => {
     
     // choose a date
     const todayDate = new Date()
-    const keyInCompletionDate = `${todayDate.getFullYear()}-${(todayDate.getMonth() + 1).toString().padStart(2, 0)}-${(todayDate.getDate()).toString().padStart(2, 0)}`
+    const keyInCompletionDate = addDaysToDateStr(todayDate, 0)
 
     // click on green color go
     await user.click(screen.getByText('Go'))
 
     await waitFor(() => expect(global.fetch).toBeCalledWith("http://localhost:8080/api/workshop-services?op=COMPLETE", {"body": "{\"id\":10001,\"creationDate\":\"2022-02-02\",\"startDate\":\"2022-02-02\",\"vehicleId\":20001,\"vehicleNo\":\"J 23\",\"mileageKm\":230000,\"sparePartUsages\":[{\"id\":990001,\"orderId\":1000,\"quantity\":20,\"usageDate\":\"2022-02-03\",\"soldPrice\":10}],\"completionDate\":\""+keyInCompletionDate+"\"}", 
         "headers": {"Content-type": "application/json"}, "method": "POST"}))
-    expect(screen.getAllByText(`Completed on ${keyInCompletionDate}`)).toHaveLength(1)
+    await waitFor(() => expect(screen.getAllByText(`Completed on ${keyInCompletionDate}`)).toHaveLength(1))
 
     unmount()
 })

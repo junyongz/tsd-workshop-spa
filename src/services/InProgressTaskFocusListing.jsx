@@ -133,7 +133,7 @@ function InProgressTaskFocusListing({suppliers=[], taskTemplates=[], onNewServic
               <div className="text-secondary">original: ${selectedSparePart.order.unitPrice?.toFixed(2)} </div>
               <Nav className='justify-content-center' variant='pills' activeKey={selectedSparePart.margin} onSelect={(v) => changeMargin(v)}>
                 {[20, 30, 40].map(v => 
-                <Nav.Item><Nav.Link eventKey={v}>{v}%</Nav.Link></Nav.Item>)}
+                <Nav.Item key={v}><Nav.Link aria-label={`individual margin ${v}%`} eventKey={v}>{v}%</Nav.Link></Nav.Item>)}
                 <Nav.Item className='ms-3'><InputGroup>
                   <Form.Control onChange={(e) => changeMargin(parseFloat(e.target.value))} 
                   style={{width: '6rem'}} required min="0" max="300" size="lg" 

@@ -55,6 +55,7 @@ function SparePartDialog({isShow, setShowDialog,
         setTabKey('detail')
 
         if (sparePart && sparePart.id) {
+            // TODO: make this routine generic
             fetch(`${apiUrl}/api/spare-parts/${sparePart.id}/medias`)
                 .then(resp => resp.json())
                 .then(medias => {

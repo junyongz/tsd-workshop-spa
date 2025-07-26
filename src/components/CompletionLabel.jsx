@@ -70,8 +70,8 @@ const CompletionLabel = ({ws, onCompletion, onDelete, noteForService, mediaForSe
     return (
         <div className="text-body-secondary">
             <span className="fs-6 me-3">Completed on {ws.startDate !== ws.completionDate ? ws.completionDate : 'same day'}</span> 
-            {ws.notes && <span role="button" onClick={() => setOpenNote(!openNote)}><NoteTaking /> </span>}
-            {ws.uploadedMediasCount > 0 && <span role="button" onClick={() => fetchMediasOrCollapse()}><Camera /> </span>}
+            {ws.notes && <span role="button" aria-label="show note" onClick={() => setOpenNote(!openNote)}><NoteTaking /> </span>}
+            {ws.uploadedMediasCount > 0 && <span role="button" aria-label="show medias" onClick={() => fetchMediasOrCollapse()}><Camera /> </span>}
 
             {ws.notes && <Collapse in={openNote}><div>{ws.notes.split(/\r\n|\n|\r/).map((line, index) => (
                 <React.Fragment key={index}>{line}<br /></React.Fragment>

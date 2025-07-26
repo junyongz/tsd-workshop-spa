@@ -1,4 +1,4 @@
-import { jest, test, expect } from '@jest/globals'
+import { test, expect } from '@jest/globals'
 
 import formatThousandSeparator from "../numberUtils";
 

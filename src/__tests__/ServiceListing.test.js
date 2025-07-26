@@ -151,7 +151,7 @@ test('to complete service', async () => {
     expect(screen.getAllByText('Complete Service')).toHaveLength(3)
     expect(container.querySelectorAll('.list-group-item')).toHaveLength(3)
 
-    // let's try delete one whole workshop service
+    // let's try complete a workshop service
     const completeButton = screen.getAllByText('Complete Service')[0]
     await user.click(completeButton)
     
@@ -227,6 +227,67 @@ test('on save note and save media', async () => {
 
     expect(setLoading).nthCalledWith(3, true)
     expect(setLoading).nthCalledWith(4, false)
+
+    unmount()
+})
+
+test('view the completed service, notes and medias', async () => {
+    const user = userEvent.setup()
+
+    URL.createObjectURL = jest.fn(() => 'http://image.data.url')
+
+    global.fetch.mockResolvedValueOnce({
+        ok: true,  // GET /api/workshop-services/:serviceId/medias
+        json: () => Promise.resolve([{id: 3000, fileName: 'img_001.png'}, {id: 3001, fileName: 'img_002.jpg'}])
+    }).mockResolvedValueOnce({
+        ok: true, // GET /api/workshop-services/:serviceId/medias/3000/data
+        blob: () => Promise.resolve("")
+    }).mockResolvedValueOnce({
+        ok: true, // GET /api/workshop-services/:serviceId/medias/3001/data
+        blob: () => Promise.resolve("")
+    })
+
+    window.matchMedia = jest.fn(() => {return {
+        refCount: 0,
+        addListener: jest.fn(),
+        removeListener: jest.fn(),
+        matches: false,           // Added for completeness, can be adjusted
+        media: '(min-width: 768px)', // Default media query, can be adjusted
+        onchange: null            // Added for completeness
+    }})
+
+    const setTotalFilteredServices = jest.fn()
+    const setLoading = jest.fn()
+    const initialServices = newTransactions()
+    initialServices[0] = {...initialServices[0], notes: 'hello 2022-02-15', completionDate: '2022-02-15', uploadedMediasCount: 1}
+    initialServices[1] = {...initialServices[1], notes: 'hello 2022-01-15', completionDate: '2022-01-15', uploadedMediasCount: 2}
+    initialServices[2] = {...initialServices[2], notes: 'hello 2022-01-14', completionDate: '2022-01-14', uploadedMediasCount: 1}
+
+    const { container, unmount } = render(<WorkshopServicesProvider initialServices={initialServices}>
+        <SupplierOrderContext value={new SupplierOrders([...orders], jest.fn())}>
+            <ServiceListing selectedSearchOptions={[]} 
+                setTotalFilteredServices={setTotalFilteredServices}
+                suppliers={[...suppliers]}
+                setLoading={setLoading} />
+        </SupplierOrderContext>
+    </WorkshopServicesProvider>)
+
+    expect(container.querySelectorAll('.list-group-item')).toHaveLength(3)
+    expect(screen.getAllByLabelText('show note')).toHaveLength(3)
+    expect(screen.getAllByLabelText('show medias')).toHaveLength(3)
+
+    await user.click(screen.getAllByLabelText('show note')[0])
+    expect(screen.queryAllByText('hello 2022-02-15')).toHaveLength(1)
+
+    await user.click(screen.getAllByLabelText('show medias')[1])
+    await waitFor(() => expect(global.fetch).nthCalledWith(1, "http://localhost:8080/api/workshop-services/10002/medias"))
+    await waitFor(() => expect(global.fetch).nthCalledWith(2, "http://localhost:8080/api/workshop-services/10002/medias/3000/data"))
+    await waitFor(() => expect(global.fetch).nthCalledWith(3, "http://localhost:8080/api/workshop-services/10002/medias/3001/data"))
+
+    const removeChild = jest.spyOn(document.body, 'removeChild')
+    await user.click(screen.getByLabelText('download media img_001.png'))
+    expect(removeChild.mock.calls[0][0].href).toEqual('http://image.data.url/')
+    expect(removeChild.mock.calls[0][0].download).toEqual('img_001.png')
 
     unmount()
 })

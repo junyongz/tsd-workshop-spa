@@ -3,12 +3,12 @@ import SupplierOrders from "./SupplierOrders";
 
 export const SupplierOrderContext = createContext(new SupplierOrders())
 
-export function SupplierOrderProvider({children}) {
+export function SupplierOrderProvider({initialOrders=[], children}) {
     const reducer = (prev = new SupplierOrders(), newOrders=[]) => {
         return new SupplierOrders(newOrders, prev.dispatch)
     }
 
-    const [supplierOrders, dispatch] = useReducer(reducer, new SupplierOrders([]))
+    const [supplierOrders, dispatch] = useReducer(reducer, new SupplierOrders(initialOrders))
     supplierOrders.acceptDispatch(dispatch)
     
     return (

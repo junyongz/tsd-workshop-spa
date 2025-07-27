@@ -312,7 +312,7 @@ function SuppliersSpareParts({setTotalFilteredOrders,
                                     <Col xs="6" md="3"><SparePartNotes order={v} onNoteClick={() => recordNote(v)} sparePartUsages={sparePartUsages}></SparePartNotes></Col>
                                     <Col xs="6" md="1" className="text-end fs-5">
                                         {!v.sheetName && !v.disabled && quantityLeft === v.quantity && <PromptDeletionIcon confirmDelete={() => removeOrder(v)} /> }
-                                        {quantityLeft === v.quantity && v.status === 'ACTIVE' && <span role="button" className="me-2" onClick={() => depleteOrder(v)}><EmptyBox /></span>} 
+                                        {quantityLeft === v.quantity && v.status === 'ACTIVE' && <span aria-label={`deplete order ${v.partName}`} role="button" className="me-2" onClick={() => depleteOrder(v)}><EmptyBox /></span>} 
                                         {quantityLeft > 0 && v.status === 'ACTIVE' && <span role="button" className="me-2" onClick={() => recordUsage(v)}><Truck /></span>}
                                     </Col>
                                 </Row>

@@ -94,10 +94,6 @@ function SparePartsUsageDialog({isShow, setShowDialog, vehicles,
         setSelectedExistingService(v)
     }
 
-    const addNewItem = () => {
-        setRecords(r => r + 1)
-    }
-
     return (
         <Modal show={isShow} onHide={handleClose} onShow={() => setRemaining(usageSpareParts.remaining)} size="lg">
             <Modal.Header closeButton>
@@ -108,7 +104,6 @@ function SparePartsUsageDialog({isShow, setShowDialog, vehicles,
             </Modal.Header>
             <Modal.Body>
                 <Container>
-                    { false && <Button onClick={addNewItem}>Add New</Button> }
                     <Form ref={formRef} validated={validated}>
                         {
                             Array.from({length: records}, (_, i) =>

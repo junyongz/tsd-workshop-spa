@@ -25,13 +25,15 @@ const companies = [
 ]
 
 const vehicles = [
-    {id: 82001, vehicleNo: "JJ 1", companyId: 8000, latestMileageKm: 20000},
-    {id: 82002, vehicleNo: "JJ 2", companyId: 8000, latestMileageKm: 18000},
-    {id: 82003, vehicleNo: "JJ 3", companyId: 8001, latestMileageKm: 12000},
-    {id: 82004, vehicleNo: "JJ 4", companyId: 8001, latestMileageKm: 15000},
+    {id: 82001, vehicleNo: "JJ 1", companyId: 8000, latestMileageKm: 20000, insuranceExpiryDate: '2005-06-30', roadTaxExpiryDate: '2005-06-30', inspectionDueDate: '2005-07-30'},
+    {id: 82002, vehicleNo: "JJ 2", companyId: 8000, latestMileageKm: 18000, insuranceExpiryDate: '2005-08-31', roadTaxExpiryDate: '2005-08-31', inspectionDueDate: '2005-09-30'},
+    {id: 82003, vehicleNo: "JJ 3", companyId: 8001, latestMileageKm: 12000, insuranceExpiryDate: '2005-08-31', roadTaxExpiryDate: '2005-08-31', inspectionDueDate: '2005-09-30'},
+    {id: 82004, vehicleNo: "JJ 4", companyId: 8001, latestMileageKm: 15000 },
 ]
 
-test('render many vehicles', () => {
+test('render many vehicles', async () => {
+    const user = userEvent.setup()
+
     render(<ServiceContext value={new ServiceTransactions(services, jest.fn())}>
             <Vehicles vehicles={vehicles} companies={companies}></Vehicles>
         </ServiceContext>)
@@ -43,6 +45,14 @@ test('render many vehicles', () => {
 
     expect(screen.getAllByText('10,000 KM @ 2005-04-01')).toHaveLength(1)
     expect(screen.getAllByText('3,000 KM @ 2005-02-11')).toHaveLength(1)
+    expect(screen.queryAllByText('TSD')).toHaveLength(0)
+
+    // to show all vehicles
+    await user.click(screen.getByText('Only showing for Harsoon'))
+    expect(screen.getAllByRole("button")
+        .map(elem => elem.className)
+        .filter(clz => clz === 'card')).toHaveLength(4)
+    expect(screen.getAllByText('TSD')).toHaveLength(2)
 })
 
 test('filter service due soon', async () => {

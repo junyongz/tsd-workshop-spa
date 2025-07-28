@@ -6,6 +6,7 @@ import { Calendar, Inspection, MaintenanceServices, Repair, Truck } from "../Ico
 import SparePartsSubDialog from "./SparePartsSubDialog";
 import TaskSubDialog from "./TaskSubDialog";
 import { addDaysToDateStr } from "../utils/dateUtils";
+import createNewVehicle from "../vehicles/createNewVehicle";
 
 function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[], 
     suppliers=[], sparePartUsages=[], taskTemplates=[],
@@ -59,13 +60,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
 
     const addOrUpdateVehicles = ([veh]) => {
         if (veh) {
-            if (vehicles.findIndex(v => v.vehicleNo === veh?.vehicleNo) === -1) {
-                onNewVehicleCreated(veh.vehicleNo)
-                .then(stored => setSelectedVehicles([stored]))
-            }
-            else {
-                setSelectedVehicles([veh])
-            }
+            createNewVehicle(veh, vehicles, setSelectedVehicles, onNewVehicleCreated)
             
             if (isFinite(veh.id)) {
                 // not allow to add more than 1 service for same vehicle

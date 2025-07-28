@@ -6,7 +6,11 @@ import SupplierOrders from '../../suppliers/SupplierOrders';
 import { SupplierOrderContext } from '../../suppliers/SupplierOrderContextProvider';
 import { useState } from 'react';
 
+jest.mock('browser-image-compression', () => (file) => Promise.resolve(file))
 jest.mock('react-bootstrap-typeahead/types/utils/getOptionLabel', () => ((opt, labelKey) => opt[labelKey]));
+
+URL.createObjectURL =  jest.fn((file) => 'http://' + file.fileName)
+URL.revokeObjectURL = jest.fn()
 
 const mockOrders = new SupplierOrders([
     {id: 5000, supplierId: 2000, partName: 'Air Tank', invoiceDate: '2005-01-01', status: 'ACTIVE'},
@@ -26,6 +30,7 @@ const mockOrders = new SupplierOrders([
 const mockSuppliers = [{ id: 2000, supplierName: 'Han Seng' }, { id: 2001, supplierName: 'Kok Song' }];
 
 global.fetch = jest.fn()
+global.alert = jest.fn()
 afterAll(() => jest.clearAllMocks())
 
 test('add new parts with supplier and photo', async () => {
@@ -34,6 +39,10 @@ test('add new parts with supplier and photo', async () => {
     global.fetch.mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve({ id: 50001 })
+    })
+    .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([650001])
     })
 
     const afterSave = jest.fn()
@@ -86,16 +95,113 @@ test('add new parts with supplier and photo', async () => {
     await user.keyboard('Air Tank')
     await user.click(screen.getByRole('option', {name: 'Air Tank (2005-01-01) - Han Seng'}))
 
+    // go to gallery
+    await user.click(screen.getByRole('tabpanel', {name: 'Gallery'}))
+    const upload = screen.getByLabelText('upload file(s)')
+    user.upload(upload, new File([Uint8Array.from(atob("/9j/4AAQSkZJRgABAQEAAAAAAA=="), c => c.charCodeAt(0)).buffer], 'test.jpg', { type: 'image/jpeg' })) 
+
+    // go to detail
+    await user.click(screen.getByRole('tabpanel', {name: 'Detail'}))
+
+    // and back to gallery changed to 1
+    await user.click(screen.getByRole('tabpanel', {name: 'Gallery 1'}))
+
     // go to detail and save
     await user.click(screen.getByRole('tabpanel', {name: 'Detail'}))
     await user.click(screen.getByRole('button', {name: 'Save'}))
 
-    await waitFor(() => expect(global.fetch).lastCalledWith("http://localhost:8080/api/spare-parts", 
-        {"body": "{\"oems\":[{\"name\":\"TSO\",\"url\":\"http://tso.com/1122000/air-tank\"}],\"compatibleTrucks\":[{\"make\":\"Hino\",\"model\":\"700\"}],\"partNo\":\"11220000\",\"partName\":\"Air Tank\",\"description\":\"Air Tank for storing air from compressor\",\"supplierIds\":[2000],\"orderIds\":[5000]}", 
-            "headers": {"Content-type": "application/json"}, "method": "POST", "mode": "cors"}))
+    await waitFor(() => {
+        expect(global.fetch).nthCalledWith(1, "http://localhost:8080/api/spare-parts", 
+            {"body": "{\"oems\":[{\"name\":\"TSO\",\"url\":\"http://tso.com/1122000/air-tank\"}],\"compatibleTrucks\":[{\"make\":\"Hino\",\"model\":\"700\"}],\"partNo\":\"11220000\",\"partName\":\"Air Tank\",\"description\":\"Air Tank for storing air from compressor\",\"supplierIds\":[2000],\"orderIds\":[5000]}", 
+                "headers": {"Content-type": "application/json"}, "method": "POST", "mode": "cors"}) 
+
+        expect(global.fetch).nthCalledWith(2, "http://localhost:8080/api/spare-parts/50001/medias", {"body": expect.any(FormData), "method": "POST"})
+    })
 
     expect(setShowDialog).lastCalledWith(false)
     expect(afterSave).lastCalledWith({"id": 50001, "orderIds": [5000]})
+})
+
+test('add new parts without any supplier', async () => {
+    const user = userEvent.setup()
+
+    global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ id: 50001 })
+    })
+
+    const afterSave = jest.fn()
+    const afterRemoveMedia = jest.fn()
+    const setShowDialog = jest.fn()
+
+    const SparePartWrapper = () => {
+        const [sparePart, setSparePart] = useState({oems:[],compatibleTrucks:[]})
+
+        return (
+            <SparePartDialog afterSave={afterSave} 
+                afterRemoveMedia={afterRemoveMedia} 
+                suppliers={mockSuppliers}
+                isShow
+                setShowDialog={setShowDialog}
+                sparePart={sparePart}
+                setSparePart={setSparePart}></SparePartDialog>
+        )
+    }
+
+    render(<SupplierOrderContext value={mockOrders}><SparePartWrapper /></SupplierOrderContext>)
+
+    await user.click(screen.getByPlaceholderText('OE No'))
+    await user.keyboard('11220000')
+
+    await user.click(screen.getByPlaceholderText('Part Name'))
+    await user.keyboard('Air Tank')
+
+    await user.click(screen.getByPlaceholderText('Description'))
+    await user.keyboard('Air Tank for storing air from compressor')
+
+    await user.click(screen.getByRole('button', {name: 'Save'}))
+    expect(global.alert).toBeCalledWith('Sorry, no suppliers added')
+
+    // supplier tab
+    await user.click(screen.getByRole('tabpanel', {name: 'Suppliers'}))
+    // find from supplier
+    await user.click(screen.getByPlaceholderText('Find a supplier then choose an order'))
+    await user.click(screen.getByText('Han Seng'))
+
+    // back to detail
+    await user.click(screen.getByRole('tabpanel', {name: 'Detail'}))
+    await user.click(screen.getByRole('button', {name: 'Save'}))
+    expect(global.alert).lastCalledWith('Sorry, no orders added')
+
+    // back to supplier tab, add a new order for another supplier
+    // supplier tab
+    await user.click(screen.getByRole('tabpanel', {name: 'Suppliers 1'}))
+    await user.click(screen.getByPlaceholderText('How about start with an order'))
+    await user.keyboard('Air Tank')
+    await user.click(screen.getByRole('option', {name: 'Air Tank (2005-02-09) - Kok Song'}))
+    expect(screen.queryAllByRole('listitem')).toHaveLength(1)
+
+    // back to detail
+    await user.click(screen.getByRole('tabpanel', {name: 'Detail'}))
+    await user.click(screen.getByRole('button', {name: 'Save'}))
+    expect(global.alert).lastCalledWith('Sorry, following suppliers has no orders: Han Seng')
+
+    // untick that never order before
+    await user.click(screen.getByRole('tabpanel', {name: 'Suppliers 2'}))
+    await user.click(screen.getByLabelText('remove supplier Kok Song'))
+    await user.click(screen.getByLabelText('remove supplier Han Seng'))
+    await user.click(screen.getByLabelText('Did we order this spare part before?'))
+
+    // back to detail
+    await user.click(screen.getByRole('tabpanel', {name: 'Detail'}))
+    await user.click(screen.getByRole('button', {name: 'Save'}))
+
+    await waitFor(() => expect(global.fetch).lastCalledWith("http://localhost:8080/api/spare-parts", 
+        {"body": "{\"oems\":[],\"compatibleTrucks\":[],\"partNo\":\"11220000\",\"partName\":\"Air Tank\",\"description\":\"Air Tank for storing air from compressor\",\"supplierIds\":[],\"orderIds\":[]}", 
+            "headers": {"Content-type": "application/json"}, "method": "POST", "mode": "cors"}))
+
+    expect(setShowDialog).lastCalledWith(false)
+    expect(afterSave).lastCalledWith({"id": 50001, "orderIds": []})
 })
 
 test('add spare part with many orders, remove supplier and add photo', async () => {
@@ -204,7 +310,111 @@ test('add spare part with many orders, remove supplier and add photo', async () 
 
     expect(setShowDialog).lastCalledWith(false)
     expect(afterSave).lastCalledWith({"id": 50001, "orderIds": [5000, 5004, 5005, 5006, 5007, 5008, 5009]})
-}, 10000)
+})
+
+test('add spare part with many orders through suppliers order box', async () => {
+    const user = userEvent.setup()
+
+    global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ id: 50001 })
+    })
+
+    const afterSave = jest.fn()
+    const afterRemoveMedia = jest.fn()
+    const setShowDialog = jest.fn()
+
+    const SparePartWrapper = () => {
+        const [sparePart, setSparePart] = useState({oems:[],compatibleTrucks:[]})
+
+        return (
+            <SparePartDialog afterSave={afterSave} 
+                afterRemoveMedia={afterRemoveMedia} 
+                suppliers={mockSuppliers}
+                isShow
+                setShowDialog={setShowDialog}
+                sparePart={sparePart}
+                setSparePart={setSparePart}></SparePartDialog>
+        )
+    }
+
+    render(<SupplierOrderContext value={mockOrders}><SparePartWrapper /></SupplierOrderContext>)
+
+    await user.click(screen.getByPlaceholderText('OE No'))
+    await user.keyboard('11220000')
+
+    await user.click(screen.getByPlaceholderText('Part Name'))
+    await user.keyboard('Air Tank')
+
+    await user.click(screen.getByPlaceholderText('Description'))
+    await user.keyboard('Air Tank for storing air from compressor')
+
+    // supplier tab
+    await user.click(screen.getByRole('tabpanel', {name: 'Suppliers'}))
+    // find from supplier
+    await user.click(screen.getByPlaceholderText('Find a supplier then choose an order'))
+    await user.click(screen.getByText('Han Seng'))
+
+    await user.click(screen.getByPlaceholderText('Find a spare part from orders'))
+    await user.keyboard('Air Tank')
+    await user.click(screen.getByRole('option', {name: 'Air Tank (2005-01-01)'}))
+    expect(screen.queryAllByRole('listitem')).toHaveLength(1)
+
+    // one selected and need to choose from other way
+    expect(screen.queryByPlaceholderText('Find a spare part from orders')).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('combobox', {name: 'find the order from the supplier'}))
+    await user.keyboard('Air Tank')
+    await user.click(screen.getByRole('option', {name: 'Air Tank (2005-01-02)'}))
+    expect(screen.queryAllByRole('listitem')).toHaveLength(2)
+
+    await user.click(screen.getByRole('combobox', {name: 'find the order from the supplier'}))
+    await user.keyboard('Air Tank')
+    await user.click(screen.getByRole('option', {name: 'Air Tank (2005-02-03)'}))
+    expect(screen.queryAllByRole('listitem')).toHaveLength(3)
+
+    await user.click(screen.getByRole('combobox', {name: 'find the order from the supplier'}))
+    await user.keyboard('Air Tank')
+    await user.click(screen.getByRole('option', {name: 'Air Tank (2005-02-04)'}))
+    expect(screen.queryAllByRole('listitem')).toHaveLength(4)
+
+    await user.click(screen.getByRole('combobox', {name: 'find the order from the supplier'}))
+    await user.keyboard('Air Tank')
+    await user.click(screen.getByRole('option', {name: 'Air Tank (2005-01-03)'}))
+    expect(screen.queryAllByRole('listitem')).toHaveLength(5)
+
+    await user.click(screen.getByRole('combobox', {name: 'find the order from the supplier'}))
+    await user.keyboard('Air Tank')
+    await user.click(screen.getByRole('option', {name: 'Air Tank (2005-01-05)'}))
+    expect(screen.queryAllByRole('listitem')).toHaveLength(6)
+
+    await user.click(screen.getByRole('combobox', {name: 'find the order from the supplier'}))
+    await user.keyboard('Air Tank')
+    await user.click(screen.getByRole('option', {name: 'Air Tank (2005-01-06)'}))
+    expect(screen.queryAllByRole('listitem')).toHaveLength(6)
+
+    expect(screen.queryAllByRole('listitem')[5]).toHaveTextContent('2 more...')
+    await user.click(screen.getByText("2 more..."))
+    expect(screen.queryAllByRole('listitem')).toHaveLength(7)
+
+    // go to detail and back to supplier now which is 2
+    await user.click(screen.getByRole('tabpanel', {name: 'Detail'}))
+    // supplier tab
+    await user.click(screen.getByRole('tabpanel', {name: 'Suppliers 1'}))
+    // remove Kok Song
+    await waitFor(() => {
+        expect(screen.queryByRole('button', {name: 'Han Seng'})).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByRole('button', {name: 'Save'}))
+
+    await waitFor(() => expect(global.fetch).lastCalledWith("http://localhost:8080/api/spare-parts", 
+        {"body": "{\"oems\":[],\"compatibleTrucks\":[],\"partNo\":\"11220000\",\"partName\":\"Air Tank\",\"description\":\"Air Tank for storing air from compressor\",\"supplierIds\":[2000],\"orderIds\":[5000,5004,5005,5006,5007,5008,5009]}", 
+            "headers": {"Content-type": "application/json"}, "method": "POST", "mode": "cors"}))
+
+    expect(setShowDialog).lastCalledWith(false)
+    expect(afterSave).lastCalledWith({"id": 50001, "orderIds": [5000, 5004, 5005, 5006, 5007, 5008, 5009]})
+})
 
 test('update existing parts with supplier and photo', async () => {
     URL.createObjectURL = jest.fn(() => 'http://hello.world')

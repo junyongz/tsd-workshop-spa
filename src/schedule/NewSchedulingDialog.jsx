@@ -4,6 +4,7 @@ import { Typeahead } from "react-bootstrap-typeahead"
 import { NoteTaking, Truck } from "../Icons"
 import { months3EngChars } from "../utils/dateUtils"
 import { mapToCalendarEvent } from "./mappingUtils.js"
+import createNewVehicle from "../vehicles/createNewVehicle.js"
 
 function NewSchedulingDialog({isShow, setShowDialog, vehicles, theDate = new Date(), onNewVehicleCreated, setEvents}) {
 
@@ -35,13 +36,7 @@ function NewSchedulingDialog({isShow, setShowDialog, vehicles, theDate = new Dat
 
     const addOrUpdateVehicles = ([veh]) => {
         if (veh) {
-            if (vehicles.findIndex(v => v.vehicleNo === veh?.vehicleNo) === -1) {
-                onNewVehicleCreated(veh.vehicleNo)
-                .then(stored => setSelectedVehicles([stored]))
-            }
-            else {
-                setSelectedVehicles([veh])
-            }
+            createNewVehicle(veh, vehicles, setSelectedVehicles, onNewVehicleCreated)
         }
         else {
             setSelectedVehicles([])

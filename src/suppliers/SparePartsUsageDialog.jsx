@@ -4,6 +4,7 @@ import { Typeahead } from "react-bootstrap-typeahead"
 import { decimalPointUomAvailable } from "../utils/quantityUtils"
 import { Calendar, Tools, Truck } from "../Icons"
 import { addDaysToDateStr } from "../utils/dateUtils"
+import createNewVehicle from "../vehicles/createNewVehicle"
 
 function SparePartsUsageDialog({isShow, setShowDialog, vehicles, 
     usageSpareParts, setUsageSpareParts, onSaveNewSparePartUsage,
@@ -60,13 +61,7 @@ function SparePartsUsageDialog({isShow, setShowDialog, vehicles,
 
     const addOrUpdateVehicles = ([veh]) => {
         if (veh) {
-            if (vehicles.findIndex(v => v.vehicleNo === veh?.vehicleNo) === -1) {
-                onNewVehicleCreated(veh.vehicleNo)
-                    .then(stored => setSelectedVehicles([stored]))
-            }
-            else {
-                setSelectedVehicles([veh])
-            }
+            createNewVehicle(veh, vehicles, setSelectedVehicles, onNewVehicleCreated)
 
             fetch(`${apiUrl}/api/workshop-services?vehicleId=${veh.id}`, {
                 mode: 'cors',

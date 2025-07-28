@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Badge, Button, ButtonGroup, Card, Col, Container, ListGroup, ListGroupItem, Row } from 'react-bootstrap';
+import { Button, ButtonGroup, Card, Col, Container, ListGroup, ListGroupItem, Row } from 'react-bootstrap';
 import ServiceDialog from './services/ServiceDialog';
 import CompletionLabel from './components/CompletionLabel';
 import { chunkArray } from './utils/arrayUtils';
@@ -268,7 +268,6 @@ function ServiceListing({
                     noteForService={() => noteForService(v)}
                     mediaForService={() => mediaForService(v)}></CompletionLabel>
                   </Col>
-                  { false && <Col className={'text-end col-4'}><Badge pill><i className="bi bi-person-fill-gear me-1"></i>{'Tan Chwee Seng'}</Badge></Col> }
                   <Col xs="12" lg="4" className='text-lg-end fw-semibold'>
                     <h4>
                       $ {((v.migratedHandWrittenSpareParts?.reduce((acc, curr) => acc += curr.totalPrice, 0) || 0) + 
@@ -337,7 +336,7 @@ function ServiceListing({
                     {((!v.migratedHandWrittenSpareParts)
                     && (!v.sparePartUsages)
                     && v.completionDate) && 
-                    <Button onClick={() => loadWorkshopService(v)} variant='outline-secondary'><i className="bi bi-three-dots"></i></Button>}
+                    <Button aria-label="load individual service" onClick={() => loadWorkshopService(v)} variant='outline-secondary'><i className="bi bi-three-dots"></i></Button>}
                     {v.sparePartsCount === 0 && v.workmanshipTasksCount === 0 && !v.migratedHandWrittenSpareParts && <ListGroup.Item>Refer to the notes (if there is something)</ListGroup.Item>}
                     </ListGroup>
                   </Col>

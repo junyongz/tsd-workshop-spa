@@ -5,7 +5,7 @@ import { WorkshopServicesProvider } from '../services/ServiceContextProvider';
 import { SupplierOrderContext } from '../suppliers/SupplierOrderContextProvider';
 import ServiceListing from '../ServiceListing';
 import SupplierOrders from '../suppliers/SupplierOrders';
-import { addDaysToDate, addDaysToDateStr } from '../utils/dateUtils';
+import { addDaysToDateStr } from '../utils/dateUtils';
 
 jest.mock('../services/ServiceNoteTakingDialog', () => ({isShow, onSaveNote}) => 
     <div>
@@ -290,4 +290,65 @@ test('view the completed service, notes and medias', async () => {
     expect(removeChild.mock.calls[0][0].download).toEqual('img_001.png')
 
     unmount()
+})
+
+test('view the completed service, and load individual', async () => {
+    const user = userEvent.setup()
+
+    global.fetch.mockResolvedValueOnce({
+        ok: true, // GET /api/workshop-services/10002
+        json: () => Promise.resolve({
+            id: 10002, creationDate: '2022-01-11', startDate: '2022-01-10', 
+            vehicleId: 20002, vehicleNo: "J 33", mileageKm: 20000, completionDate: '2022-01-15',
+            sparePartUsages: [
+                {id: 990002, orderId: 1000, quantity: 30, usageDate: '2022-01-11', soldPrice: 11, margin: 20}
+            ],
+            migratedHandWrittenSpareParts: [
+                {index: 9800001, totalPrice: 289.50, creationDate: '2022-01-09', itemDescription: 'Brake adjuster from L', quantity: 1, unitPrice: 289.50, unit: 'pc'}
+            ],
+            tasks: [
+                {id: 9700001, recordedDate: '2022-01-09', quotedPrice: 250, taskId: 8700001, remarks: 'To adjust brake'}
+            ]
+        })
+    })
+
+    window.matchMedia = jest.fn(() => {return {
+        refCount: 0,
+        addListener: jest.fn(),
+        removeListener: jest.fn(),
+        matches: false,           // Added for completeness, can be adjusted
+        media: '(min-width: 768px)', // Default media query, can be adjusted
+        onchange: null            // Added for completeness
+    }})
+
+    const setTotalFilteredServices = jest.fn()
+    const setLoading = jest.fn()
+    const initialServices = newTransactions()
+    initialServices[0] = {...initialServices[0], sparePartsCount: 0, workmanshipTasksCount: 0, }
+    initialServices[1] = {...initialServices[1], sparePartUsages: undefined, completionDate: '2022-01-15'}
+    initialServices[2] = {...initialServices[2], sparePartUsages: undefined, completionDate: '2022-01-14'}
+
+    render(<WorkshopServicesProvider initialServices={initialServices}>
+        <SupplierOrderContext value={new SupplierOrders([...orders], jest.fn())}>
+            <ServiceListing selectedSearchOptions={[]} 
+                setTotalFilteredServices={setTotalFilteredServices}
+                suppliers={[...suppliers]}
+                taskTemplates={[
+                    {id: 8700001, workmanshipTask: 'adjust brake', component: {subsystem: 'Braking', component: 'Parking Brake'}}
+                ]}
+                setLoading={setLoading} />
+        </SupplierOrderContext>
+    </WorkshopServicesProvider>)
+
+    expect(screen.queryAllByLabelText('load individual service')).toHaveLength(2)
+    expect(screen.queryByText('Refer to the notes (if there is something)')).toBeInTheDocument()
+
+    await user.click(screen.queryAllByLabelText('load individual service')[0])
+    await waitFor(() => expect(global.fetch).toBeCalledWith('http://localhost:8080/api/workshop-services/10002'))
+
+    expect(screen.queryByText('To adjust brake')).toBeInTheDocument()
+
+    // just add an item for non completed one
+    await user.click(screen.getByText('Add Item'))
+    expect(screen.queryByText('Service started at 2022-02-02')).toBeInTheDocument()
 })

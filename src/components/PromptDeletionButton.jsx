@@ -12,8 +12,8 @@ export default function PromptDeletionButton({confirmDelete}) {
 
     return (
         <>
-        { promptDelete && <Button variant="outline-warning" onClick={() => setPromptDelete(false)}>X</Button> }
-        <Button variant={promptDelete ? 'outline-danger' : 'outline-warning'}
+        { promptDelete && <Button aria-label="cancel remove" variant="outline-warning" onClick={() => setPromptDelete(false)}>X</Button> }
+        <Button aria-label="remove" variant={promptDelete ? 'outline-danger' : 'outline-warning'}
             onClick={() => promptDelete ? afterConfirmDelete() : setPromptDelete(true)}>
             <Trash />
         </Button>

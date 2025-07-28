@@ -107,7 +107,7 @@ test('create a new event', async () => {
         expect(document.querySelectorAll('span.badge')).toHaveLength(0)
     })
 
-    await user.click(screen.getByRole('button', {name: todayDate.getDate()}))
+    await user.click(screen.getByRole('button', {name: `day of ${todayDate.getMonth()}-${todayDate.getDate()}`}))
     // key in vehicle new number
     await user.click(screen.getByPlaceholderText('Choose a vehicle...'))
     await user.keyboard("JJ 23")

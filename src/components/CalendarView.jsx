@@ -60,7 +60,7 @@ export default function CalendarView({
     const AllEvents = ({events=[], onDoClickNew}) => {
         return (
             <ListGroup>
-                <ListGroup.Item key={'add-new'} className="text-end"><Button className="responsive-width-25" onClick={() => onDoClickNew()}>Add New</Button></ListGroup.Item>
+                <ListGroup.Item key={'add-new'} className="text-end"><Button aria-label="create new event" className="responsive-width-25" onClick={() => onDoClickNew()}>Add New</Button></ListGroup.Item>
                 { choosenDate && events.filter(evt => sameDay(evt.date, choosenDate))
                     .map(evt => <ListGroup.Item key={evt.id}>
                         <Row>
@@ -98,9 +98,9 @@ export default function CalendarView({
             <Row>
             <Col xs='6'><h1><span className="fw-bold">{months3EngChars[requiredDate.getMonth()]}</span> <span className="fw-lighter">{requiredDate.getFullYear()}</span></h1></Col>
             <Col xs='6' className="text-end"><ButtonGroup>
-                <Button onClick={() => { setMonth(m => m-1); setChoosenDate() }}>&lt;</Button>
+                <Button aria-label="previous month" onClick={() => { setMonth(m => m-1); setChoosenDate() }}>&lt;</Button>
                 <Button onClick={() => { setMonth(todayDate.getMonth()); setChoosenDate(todayDate) }}>Today</Button>
-                <Button onClick={() => { setMonth(m => m+1); setChoosenDate() }}>&gt;</Button></ButtonGroup></Col>
+                <Button aria-label="next month" onClick={() => { setMonth(m => m+1); setChoosenDate() }}>&gt;</Button></ButtonGroup></Col>
             </Row>
             <div className="calendar-grid" style={{'--weeks': rowsRequired}}>
                 {days3EngCharsStartWithSun.map((day) => (
@@ -112,7 +112,7 @@ export default function CalendarView({
                 {Array.from({length: lastDay}, (_, i) => i + 1).map((date) => {
                     const boxDate = new Date(requiredDate.getFullYear(), requiredDate.getMonth(), date)
                     return ( <div className="calendar-day" key={`${month}-${date}`} 
-                                role="button" onClick={() => onDateClicked(boxDate)}>
+                                role="button" aria-label={`day of ${month}-${date}`} onClick={() => onDateClicked(boxDate)}>
                         <Card>
                             <Card.Header className={sameDay(choosenDate, boxDate) ? 'text-bg-primary' : ''}>{ date }</Card.Header>
                             <Card.Body style={{height: maxHeight, maxHeight: maxHeight, '--bs-card-spacer-y': '5px'}}>

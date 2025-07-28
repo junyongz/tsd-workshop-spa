@@ -9,7 +9,6 @@ const HoverPriceTag = ({onRemove, children }) => {
   
     return (
       <div
-        pill
         bg="dark"
         className={ "price-tag hover-badge text-center" + (promptDelete ? ' clicked' : '') }
         onMouseEnter={() => setIsHovered(true)}

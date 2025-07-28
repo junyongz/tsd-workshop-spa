@@ -111,10 +111,23 @@ test('create a new event', async () => {
     // key in vehicle new number
     await user.click(screen.getByPlaceholderText('Choose a vehicle...'))
     await user.keyboard("JJ 23")
+
+    // save and hit validation error
+    await user.click(screen.getByText('Save'))
+    expect(screen.getByPlaceholderText('Choose a vehicle...').validationMessage)
+        .toEqual('not a valid vehicle, either choose one and create one first')
+
+    // click to add new vehicle
+    await user.click(screen.getByPlaceholderText('Choose a vehicle...'))
     await user.click(screen.getByText("Create & add a new vehicle:"))
 
     // add to vehicles state for validation check later
     vehicles.push({id: 70005, vehicleNo: 'JJ 23'})
+
+    // clear the button and choose again
+    await user.click(screen.getByLabelText('Clear'))
+    await user.click(screen.getByPlaceholderText('Choose a vehicle...'))
+    await user.click(screen.getByText('JJ 23'))
 
     // notes
     await user.click(screen.getByPlaceholderText('What to take note?'))

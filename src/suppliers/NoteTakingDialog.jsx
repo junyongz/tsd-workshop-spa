@@ -13,11 +13,6 @@ function NoteTakingDialog({isShow, setShowDialog, onUpdateOrder=()=>{}, noteSpar
 
     const saveChange = () => {
         const nativeForm = formRef.current
-        if (nativeForm.checkValidity() === false) {
-            setValidated(true)
-            return
-        }
-
         onUpdateOrder({...noteSparePart, notes: nativeForm.elements.namedItem('notes').value}, true)
         handleClose()
     }

@@ -9,7 +9,11 @@ import { SupplierOrderContext, SupplierOrderProvider } from '../SupplierOrderCon
 // Mock dependencies
 jest.mock('../../utils/getPaginationItems', () => () => [<div key="1">Pagination</div>]);
 jest.mock('../AddSparePartsDialog', () => 
-    ({onSaveNewOrders}) => <div>AddSparePartsDialog<span data-testid="add-spare-parts" onClick={(e) => onSaveNewOrders(e.target.orders)}></span></div>
+    ({onSaveNewOrders, existingOrder}) => <div role="dialog">
+        <span>AddSparePartsDialog</span>
+        <span data-testid="add-spare-parts" onClick={(e) => onSaveNewOrders(e.target.orders)}></span>
+        { existingOrder?.map(v => <span key={v.id}>{v.partName}</span>) }
+      </div>
 );
 
 jest.mock('../SparePartsUsageDialog', () => () => <div>SparePartsUsageDialog</div>);
@@ -20,15 +24,19 @@ global.fetch = jest.fn();
 global.matchMedia = jest.fn();
 
 const mockOrders = [
-  {"id":1001,"invoiceDate":"2023-01-01","supplierId":2000,
-    "itemCode":"ABC123","partName":"Engine Oil","quantity":10,"unit":"ltr","unitPrice":5,
-    "deliveryOrderNo":"DO001","status":"ACTIVE"},
-  {"id":1002,"invoiceDate":"2023-01-02","supplierId":2001,
-    "itemCode":"XYZ789","partName":"Air Filter","quantity":5,"unit":"pcs","unitPrice":15,
-    "deliveryOrderNo":"DO002","status":"ACTIVE"},
-  {"id":1003,"invoiceDate":"2023-01-03","supplierId":2000,
-    "itemCode":"DEF456","partName":"Brake Pads","quantity":8,"unit":"set","unitPrice":25,
-    "deliveryOrderNo":"DO003","status":"ACTIVE"}];
+  {id:1001, invoiceDate:"2023-01-01", supplierId:2000,
+    itemCode:"ABC123", partName:"Engine Oil", quantity:10, unit:"ltr", unitPrice:5,
+    deliveryOrderNo:"DO001", status:"ACTIVE"},
+  {id:1002, invoiceDate:"2023-01-02", supplierId:2001,
+    itemCode:"XYZ789", partName:"Air Filter", quantity:5, unit:"pcs", unitPrice:15,
+    deliveryOrderNo:"DO002", status:"ACTIVE"},
+  {id:1003, invoiceDate:"2023-01-03", supplierId:2000, sheetName: 'JUL 23',
+    itemCode:"DEF456", partName:"Brake Pads", quantity:8, unit:"set", unitPrice:25,
+    deliveryOrderNo:"DO003", status:"ACTIVE"},
+  {id:1004, invoiceDate:"2023-01-03", supplierId:2000, sheetName: 'JUL 23',
+    itemCode:"777888A", partName:"Brake Adjuster", quantity:4, unit: "pc", unitPrice:215,
+    deliveryOrderNo:"DO003", status:"ACTIVE"}
+];
 
 const mockSuppliers = [
     { id: 2000, supplierName: 'Han Seng' },
@@ -75,20 +83,25 @@ test('renders component with no orders', () => {
   container.unmount()
 });
 
-test('renders multiple orders correctly', () => {
+test('renders multiple orders correctly', async () => {
+  const user = userEvent.setup()
+
   const container = render(<SupplierOrderProvider initialOrders={mockOrders}>
         <SuppliersSpareParts {...defaultProps} /></SupplierOrderProvider>);
   
   expect(screen.queryByText('2023-01-01')).toBeInTheDocument();
   expect(screen.queryByText('2023-01-02')).toBeInTheDocument();
-  expect(screen.queryByText('2023-01-03')).toBeInTheDocument();
+  expect(screen.queryAllByText('2023-01-03')).toHaveLength(2)
   
   expect(screen.queryByText('Engine Oil')).toBeInTheDocument();
   expect(screen.queryByText('Air Filter')).toBeInTheDocument();
   expect(screen.queryByText('Brake Pads')).toBeInTheDocument();
   
-  expect(screen.queryAllByText('Han Seng')).toHaveLength(2)
+  expect(screen.queryAllByText('Han Seng')).toHaveLength(3)
   expect(screen.queryByText('PNB Precision')).toBeInTheDocument();
+
+  await user.click(screen.getByLabelText('view order DO001'))
+  expect(screen.getByRole('dialog').querySelectorAll('span')[2]).toHaveTextContent('Engine Oil')
 
   container.unmount()
 });
@@ -110,7 +123,7 @@ test('handles supplier filter click with multiple orders', async () => {
   
   fireEvent.click(Array.from(document.querySelectorAll('.nav-link'))
     .filter(el => el.textContent === 'Han Seng')[0]);
-  await waitFor(() => expect(screen.getAllByRole("listitem")).toHaveLength(2))
+  await waitFor(() => expect(screen.getAllByRole("listitem")).toHaveLength(3))
   
   container.unmount()
 });
@@ -119,7 +132,7 @@ test('calls recordUsage for specific order', () => {
   const container = render(<SupplierOrderContext value={new SupplierOrders([...mockOrders], jest.fn())}><SuppliersSpareParts {...defaultProps} /></SupplierOrderContext>);
   
   const usageButtons = document.querySelectorAll('.bi-truck')
-  expect(usageButtons.length).toBe(3);
+  expect(usageButtons.length).toBe(4);
   
   fireEvent.click(usageButtons[1]);
   expect(screen.getByText('SparePartsUsageDialog')).toBeInTheDocument();
@@ -133,7 +146,7 @@ test('handles removal of specific order', async () => {
   const container = render(<SupplierOrderContext value={new SupplierOrders([...mockOrders], jest.fn())}><SuppliersSpareParts {...defaultProps} /></SupplierOrderContext>);
   
   const deleteButtons = document.querySelectorAll('.bi-trash3')
-  expect(deleteButtons.length).toBe(3);
+  expect(deleteButtons.length).toBe(2);
   
   fireEvent.click(deleteButtons[0]);
   fireEvent.click(screen.getAllByRole('button', { name: 'remove' })[0]);
@@ -189,7 +202,7 @@ test('updates filtered orders when selectedSearchOptions change', async () => {
     selectedSearchOptions={[{name: 'engine'}, {name: 'brake'}]}
   /></SupplierOrderContext>);
 
-  expect(screen.getAllByRole("listitem")).toHaveLength(2)
+  expect(screen.getAllByRole("listitem")).toHaveLength(3)
 });
 
 test('displays correct quantities and supplier info for all orders', async () => {
@@ -269,7 +282,7 @@ test('deplete order and remain 2', async () => {
     {"body": "[{\"id\":1001,\"invoiceDate\":\"2023-01-01\",\"supplierId\":2000,\"itemCode\":\"ABC123\",\"partName\":\"Engine Oil\",\"quantity\":10,\"unit\":\"ltr\",\"unitPrice\":5,\"deliveryOrderNo\":\"DO001\",\"status\":\"ACTIVE\"}]", 
       "headers": {"Content-type": "application/json"}, "method": "POST", "mode": "cors"}))
 
-  expect(screen.getAllByRole("listitem")).toHaveLength(3)
+  expect(screen.getAllByRole("listitem")).toHaveLength(4)
   await waitFor(() => expect(screen.queryByLabelText('deplete order Engine Oil')).not.toBeInTheDocument())
 });
 
@@ -301,5 +314,5 @@ test('show supplier in recent order and name ordering', async () => {
   await user.click(screen.getByText('Showing for Aik Leong'))
   await user.click(screen.getByRole('button', {name: 'Aik Leong'}))
   await user.click(screen.getByRole('button', {name: 'Close'}))
-  expect(screen.queryAllByRole("listitem")).toHaveLength(3)
+  expect(screen.queryAllByRole("listitem")).toHaveLength(4)
 })

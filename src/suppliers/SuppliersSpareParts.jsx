@@ -295,8 +295,9 @@ function SuppliersSpareParts({setTotalFilteredOrders,
                             return <ListGroupItem key={v.id} role="listitem">
                                 <Row>
                                     <Col xs="6" md="2" className="fw-lighter">{v.invoiceDate}</Col>
-                                    <Col xs="6" md="2">{findSupplier(v.supplierId).supplierName} <div className="p-0 m-0">{ !v.sheetName && <Button className="p-0 text-decoration-none" variant="link"
-                                        onClick={(e) => viewOrder(v.deliveryOrderNo, e)}>{v.deliveryOrderNo}</Button>}{v.sheetName && <span>{v.deliveryOrderNo}</span>}</div></Col>
+                                    <Col xs="6" md="2">{findSupplier(v.supplierId).supplierName} <div className="p-0 m-0">{ !v.sheetName && 
+                                        <Button className="p-0 text-decoration-none" variant="link" aria-label={`view order ${v.deliveryOrderNo}`}
+                                            onClick={(e) => viewOrder(v.deliveryOrderNo, e)}>{v.deliveryOrderNo}</Button>} {v.sheetName && <span>{v.deliveryOrderNo}</span>}</div></Col>
                                     <Col xs="12" md="4">
                                         <Row>
                                             <Col><Badge bg="info" pill>{v.itemCode}</Badge></Col>

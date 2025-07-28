@@ -93,6 +93,11 @@ test('show update dialog for vehicle and update', async () => {
 
     expect(screen.getAllByRole("button")).toHaveLength(2)
     await user.click(screen.getAllByRole("button")[0])
+
+    await user.click(screen.getByLabelText('show map'))
+    expect(screen.getByRole('img').getAttribute('src')).toEqual('http://localhost:8080/api/vehicles/82004/gps')
+    await user.click(screen.getByLabelText('show map')) // close the map
+
     expect(screen.getAllByPlaceholderText('Key in trailer no')).toHaveLength(1)
     await user.click(screen.getByRole('button', {name: 'Save'}))
 
@@ -126,7 +131,7 @@ test('show update dialog for vehicle and update', async () => {
     expect(newVehicles).toEqual([{id: 820004, vehicleNo: "JJ 4"}, {id: 820001, vehicleNo: "JJ 3"}])
 })
 
-test('trailier different inspection date', async () => {
+test('trailer different inspection date', async () => {
     const user = userEvent.setup()
 
     global.fetch.mockResolvedValueOnce({

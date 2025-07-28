@@ -130,7 +130,7 @@ export default function TaskSubDialog({taskTemplates, tasks, setTasks, removeTas
                         {(!v.selectedTask || v.selectedTask.length === 0) && 
                         imagesContext.keys().map((vi, ii) => 
                             <Col xs="4" lg="2" key={ii}>
-                                <div role="button" onClick={() => afterChooseSubsystem(i, vi.split('/').pop())}>
+                                <div role="button" aria-label={`choose subsystem ${vi.split('/').pop()}`} onClick={() => afterChooseSubsystem(i, vi.split('/').pop())}>
                                     <Image className={(v.subsystem && vi.split('/').pop().replaceAll(' ', '-').includes(v.subsystem)) ? 'bg-primary rounded' : ''} alt={vi.split('/').pop()} width={100} src={imagesContext(vi)} />
                                 </div>
                             </Col>)

@@ -14,14 +14,37 @@ afterEach(() => {
     jest.restoreAllMocks()
 })
 
+test('didnt upload any file', async () => {
+    const user = userEvent.setup()
+
+    global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([])
+    })
+
+    const ws = {id: 10001, vehicleNo: "J 23", transactionTypes: ['REPAIR']}
+    const setShowDialog = jest.fn()
+    const onSaveMedia = jest.fn()
+    render(<ServiceMediaDialog isShow={true} setShowDialog={setShowDialog} onSaveMedia={onSaveMedia} ws={ws}>
+        </ServiceMediaDialog>)
+
+    expect(global.fetch).nthCalledWith(1, 'http://localhost:8080/api/workshop-services/10001/medias')
+
+    await user.click(screen.getByText('Save'))
+
+    // and close
+    expect(setShowDialog).not.toBeCalled()
+})
+
 test('upload single photo', async () => {
     const user = userEvent.setup()
 
     global.fetch.mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve(
-            [{id: 6200001, fileName: 'hello.png', mediaType: 'image/png'}, {id: 6200002, fileName: 'world.mp4', mediaType: 'video/mp4'}]
-        )
+        json: () => Promise.resolve([
+            {id: 6200001, fileName: 'hello.png', mediaType: 'image/png'}, 
+            {id: 6200002, fileName: 'world.mp4', mediaType: 'video/mp4'}
+        ])
     })
     .mockResolvedValueOnce({
         blob: () => Promise.resolve([Buffer.from("/9j/4AAQSkZJRgABAQEAAAAAAA==", 'base64')])
@@ -29,6 +52,8 @@ test('upload single photo', async () => {
     .mockResolvedValueOnce({
         blob: () => Promise.resolve([Buffer.from("/9j/4AAQSkZJRgABAQEAAAAAAA==", 'base64')])
     })
+
+    URL.createObjectURL.mockReturnValueOnce('http://preview.test.jpg')
 
     const ws = {id: 10001, vehicleNo: "J 23", transactionTypes: ['REPAIR']}
     const setShowDialog = jest.fn()
@@ -54,8 +79,17 @@ test('upload single photo', async () => {
     const link = removeChild.mock.calls[0][0]
     expect(link.download).toEqual('hello.png')
 
-    // and close
-    await user.click(screen.getByLabelText('Close'))
+    // i seem can't get the HTMLInputElementImpl#validity() to work for `this.files.length`
+    // could be due to /testing-library/user-event/blob/main/src/utils/edit/setFiles.ts to playing with original files
+    // raised issue https://github.com/testing-library/user-event/issues/1293
+    const checkValidity = jest.spyOn(screen.getByLabelText('upload form'), 'checkValidity')
+    checkValidity.mockReturnValueOnce(true)
+    await user.click(screen.getByText('Save'))
+
+    // onClose
+    expect(URL.revokeObjectURL).toBeCalledTimes(2)
+    expect(URL.revokeObjectURL).nthCalledWith(1, "http://preview.test.jpg")
+    expect(setShowDialog).toBeCalledWith(false)
 })
 
 test('remove existing media', async () => {
@@ -98,7 +132,10 @@ test('upload multiple photos', async () => {
     URL.createObjectURL.mockReturnValueOnce('http://test.jpg')
     global.fetch.mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve([])
+        json: () => Promise.resolve([{id: 6200001, fileName: 'hello.png', mediaType: 'image/png'}, ])
+    })
+    .mockResolvedValueOnce({
+        blob: () => Promise.resolve([Buffer.from("/9j/4AAQSkZJRgABAQEAAAAAAA==", 'base64')])
     })
 
     const ws = {id: 10001, vehicleNo: "J 23", transactionTypes: ['REPAIR']}
@@ -126,4 +163,5 @@ test('upload multiple photos', async () => {
     expect(onSaveMedia).lastCalledWith({"id": 10001, "transactionTypes": ["REPAIR"], "vehicleNo": "J 23"}, expect.any(File), expect.any(Function))
     const afterSaveMedia = onSaveMedia.mock.calls[0][2]
     afterSaveMedia(620001)
+    await waitFor(() => expect(screen.getAllByRole('img')).toHaveLength(2))
 })

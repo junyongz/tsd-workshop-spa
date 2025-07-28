@@ -261,7 +261,7 @@ function VehicleUpdateDialog({isShow, setShowDialog, vehicle, setVehicles, compa
                         </Col>
                         </Row>
                         { selectedCompanies[0]?.internal && <Row>
-                            <Col><Button variant="link" onClick={() => setShowMap(prev => !prev)}>{showMap ? 'Hide the map' : 'Where are they now?' }</Button></Col>
+                            <Col><Button aria-label="show map" variant="link" onClick={() => setShowMap(prev => !prev)}>{showMap ? 'Hide the map' : 'Where are they now?' }</Button></Col>
                         </Row> }
                         { showMap && <Row>
                             <Col>

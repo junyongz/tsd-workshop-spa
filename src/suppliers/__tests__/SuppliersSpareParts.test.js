@@ -219,7 +219,7 @@ test('displays correct quantities and supplier info for all orders', async () =>
   expect(screen.queryAllByText(/Used by/)).toHaveLength(7)
   expect(Array.from(screen.queryAllByText(/Used by/))
     .map(elem => elem.textContent)
-    .map(text => text.replaceAll(/[^\x20-\x7E]/g, '')))
+    .map(text => text.replaceAll(/[^\x20-\x7E]/g, ''))) // keep only ascii 32-126
   .toEqual(["Used by JJ 31 2024-03-02", 
     "Used by JJ 72 2024-03-02", 
     "Used by JJ 62 2024-02-13", 
@@ -234,7 +234,7 @@ test('displays correct quantities and supplier info for all orders', async () =>
   expect(screen.queryAllByText(/Used by/)).toHaveLength(9)
   expect(Array.from(screen.queryAllByText(/Used by/))
     .map(elem => elem.textContent)
-    .map(text => text.replaceAll(/[^\x20-\x7E]/g, '')))
+    .map(text => text.replaceAll(/[^\x20-\x7E]/g, ''))) // keep only ascii 32-126
     .toEqual(["Used by JJ 31 2024-03-02", 
       "Used by JJ 72 2024-03-02", 
       "Used by JJ 62 2024-02-13", 

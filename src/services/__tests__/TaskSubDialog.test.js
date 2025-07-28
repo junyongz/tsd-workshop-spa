@@ -5,7 +5,7 @@ import TaskSubDialog from '../TaskSubDialog'
 import { useState } from 'react'
 
 const taskTemplates = [
-    {id: 540001, workmanshipTask: 'Adjust brake', component: {componentName: 'Braking', subsystem: 'Parking Brake'}, 
+    {id: 540001, workmanshipTask: 'Adjust brake', component: {componentName: 'Parking Brake', subsystem: 'Braking'}, 
         description: 'adjust brake for smoother braking', complexity: 'LOW', unitPrice: 150}, 
     {id: 540002, workmanshipTask: 'Touch up seat', component: {componentName: "Driver's Seat", subsystem: 'Cab'}, 
         description: 'touch up cabin seat with thread and needle', complexity: 'HIGH', unitPrice: 250 },
@@ -104,5 +104,48 @@ test('with brand new tasks', async () => {
     // let's remove the first one
     await user.click(screen.getByLabelText('remove task 0'))
     expect(screen.getByLabelText('price for labour 0')).toHaveValue(250)
+})
 
+test('with brand new tasks, chosen from picture', async () => {
+    const user = userEvent.setup({advanceTimers: jest.advanceTimersByTime})
+
+    global.fetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve([{description: 'to adjust brake and apply grease', unitPrice: 200}])
+    })
+    .mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve([{description: 'to sew the cushion seat for passenger', unitPrice: 50}])
+    })
+
+    const removeTask = jest.fn()
+    const TaskSubDialogWrapper = () => {
+        const [tasks, setTasks] = useState([])
+
+        return (<div><span onClick={() => setTasks(prev => [...prev, {}])}>Add New</span>
+            <TaskSubDialog taskTemplates={taskTemplates} tasks={tasks} 
+                setTasks={setTasks} removeTask={removeTask}>
+            </TaskSubDialog></div>)
+    }
+
+    render(<TaskSubDialogWrapper></TaskSubDialogWrapper>)
+
+    await user.click(screen.getByText('Add New'))
+
+    await user.click(screen.getByLabelText('choose subsystem braking.png'))
+    await user.click(screen.getByPlaceholderText('Find a suitable task'))
+    await user.click(screen.getByLabelText('Adjust brake (Braking - Parking Brake)'))
+    jest.advanceTimersByTime(600)
+    await waitFor(() => expect(global.fetch).toBeCalledWith("http://localhost:8080/api/mig-tasks?workshopTasks=Adjust brake&subsystem=Braking"))
+
+    expect(screen.getByLabelText('price for labour 0')).toHaveValue(150)
+
+    // add one more
+    await user.click(screen.getByText('Add New'))
+
+    await user.click(screen.getByLabelText('choose subsystem cab.png'))
+    await user.click(screen.getAllByPlaceholderText('Find a suitable task')[1])
+    await user.click(screen.getByLabelText('Touch up seat (Cab - Driver\'s Seat)'))
+    jest.advanceTimersByTime(600)
+    await waitFor(() => expect(global.fetch).lastCalledWith("http://localhost:8080/api/mig-tasks?workshopTasks=Touch up seat&subsystem=Cab"))
 })

@@ -21,12 +21,12 @@ export default function SpareParts({suppliers=[], selectedSearchOptions=[], tota
     const fetchMediaTimeouts = useRef(new Map());
     const fetchedMediasSparePartIds = useRef(new Set())
 
-    const sampleSparePart = {id: 1000, partNo: '44350-1610', partName: 'Power Steering Pump',
+    /* const sampleSparePart = {id: 1000, partNo: '44350-1610', partName: 'Power Steering Pump',
             description: "Generates hydraulic pressure to assist in turning the vehicle's wheels, making steering easier and smoother, especially at low speeds",
             oems: [{name: 'XSMY Co.', url: 'http://xsmy.co'}], 
             compatibleTrucks: [{make: 'Hino', model: '500'}, {make: 'Hino', model: '700'}], 
             supplierIds: [19936, 9799],
-            orderIds: [19929, 9767]}
+            orderIds: [19929, 9767]} */
     const [spareParts, setSpareParts] = useState([])
 
     const [existingSparePart, setExistingSparePart] = useState()
@@ -38,10 +38,10 @@ export default function SpareParts({suppliers=[], selectedSearchOptions=[], tota
 
         return selectedSearchOptions.some(opt => {
             const lowerCase = opt.name.toLowerCase()
-            return sp.partNo.toLowerCase().includes(lowerCase) ||
-                    sp.partName.toLowerCase().includes(lowerCase) ||
-                    sp.description.toLowerCase().includes(lowerCase) ||
-                    sp.compatibleTrucks.some(t => t.make.toLowerCase().includes(lowerCase) || 
+            return sp.partNo?.toLowerCase().includes(lowerCase) ||
+                    sp.partName?.toLowerCase().includes(lowerCase) ||
+                    sp.description?.toLowerCase().includes(lowerCase) ||
+                    sp.compatibleTrucks?.some(t => t.make.toLowerCase().includes(lowerCase) || 
                                                 t.model.toLowerCase().includes(lowerCase) ||
                                                 (t.make + ' ' + t.model).toLowerCase().includes(lowerCase))
         })

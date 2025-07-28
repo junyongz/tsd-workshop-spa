@@ -14,11 +14,6 @@ function ServiceNoteTakingDialog({isShow, setShowDialog, ws, onSaveNote}) {
 
     const saveChange = () => {
         const nativeForm = formRef.current
-        if (nativeForm.checkValidity() === false) {
-            setValidated(true)
-            return
-        }
-
         onSaveNote({...ws, notes: nativeForm.elements.namedItem('notes').value})
         handleClose()
     }

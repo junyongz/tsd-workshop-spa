@@ -49,6 +49,7 @@ const orders = [{id: 1000, supplierId: 60001, itemCode: '1000', partName: 'Engin
 
 afterEach(() => {
     jest.clearAllMocks()
+    jest.restoreAllMocks()
     jest.resetModules()
     cleanup()
 })
@@ -328,7 +329,7 @@ test('view the completed service, and load individual', async () => {
     initialServices[1] = {...initialServices[1], sparePartUsages: undefined, completionDate: '2022-01-15'}
     initialServices[2] = {...initialServices[2], sparePartUsages: undefined, completionDate: '2022-01-14'}
 
-    render(<WorkshopServicesProvider initialServices={initialServices}>
+    const { unmount } = render(<WorkshopServicesProvider initialServices={initialServices}>
         <SupplierOrderContext value={new SupplierOrders([...orders], jest.fn())}>
             <ServiceListing selectedSearchOptions={[]} 
                 setTotalFilteredServices={setTotalFilteredServices}
@@ -351,4 +352,123 @@ test('view the completed service, and load individual', async () => {
     // just add an item for non completed one
     await user.click(screen.getByText('Add Item'))
     expect(screen.queryByText('Service started at 2022-02-02')).toBeInTheDocument()
+    await user.click(screen.getByLabelText('Close'))
+
+    unmount()
+})
+
+test('view the completed service, migrate item to spare part usage', async () => {
+    const user = userEvent.setup()
+
+    global.fetch.mockResolvedValueOnce({
+        ok: true, // GET /api/workshop-services/10002
+        json: () => Promise.resolve({
+            id: 10002, creationDate: '2022-01-11', startDate: '2022-01-10', 
+            vehicleId: 20002, vehicleNo: "J 33", mileageKm: 20000, completionDate: '2022-01-15',
+            migratedHandWrittenSpareParts: [
+                {index: 9800001, totalPrice: 289.50, creationDate: '2022-01-09', itemDescription: 'Brake adjuster from L', quantity: 1, unitPrice: 289.50, unit: 'pc'},
+                {index: 9800002, totalPrice: 93.00, creationDate: '2022-01-10', itemDescription: 'Brake oil', quantity: 10, unitPrice: 9.3, unit: 'litre'},
+                {index: 9800003, totalPrice: 40.00, creationDate: '2022-01-10', itemDescription: 'Water pipe', quantity: 10, unitPrice: 4, unit: 'pc'}
+            ],
+        })
+    })
+    .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(
+            {id: 990009, "vehicleId":20002, "vehicleNo":"J 33", "usageDate":"2022-01-09",
+                "orderId":1002, "serviceId":10002, "quantity":1, "soldPrice":289.8, "migDataIndex":9800001}
+        )
+    })
+
+    window.matchMedia = jest.fn(() => {return {
+        refCount: 0,
+        addListener: jest.fn(),
+        removeListener: jest.fn(),
+        matches: false,           // Added for completeness, can be adjusted
+        media: '(min-width: 768px)', // Default media query, can be adjusted
+        onchange: null            // Added for completeness
+    }})
+
+    const setTotalFilteredServices = jest.fn()
+    const setLoading = jest.fn()
+    const initialServices = newTransactions()
+    initialServices[0] = {...initialServices[0], sparePartsCount: 0, workmanshipTasksCount: 0, }
+    initialServices[1] = {...initialServices[1], sparePartUsages: undefined, completionDate: '2022-01-15'}
+    initialServices[2] = {...initialServices[2], sparePartUsages: undefined, completionDate: '2022-01-14'}
+
+    render(<WorkshopServicesProvider initialServices={initialServices}>
+        <SupplierOrderContext value={
+            new SupplierOrders([{id: 1002, supplierId: 60001, itemCode: '1000', 
+                partName: 'Brake adjuster 40001', quantity: 5, unit: 'pc', unitPrice: 289.8, status: 'ACTIVE'}], jest.fn())}>
+            <ServiceListing selectedSearchOptions={[]} 
+                setTotalFilteredServices={setTotalFilteredServices}
+                suppliers={[...suppliers]}
+                setLoading={setLoading} />
+        </SupplierOrderContext>
+    </WorkshopServicesProvider>)
+
+    expect(screen.queryByPlaceholderText('Find a spare part...')).not.toBeInTheDocument()
+
+    expect(screen.queryAllByLabelText('load individual service')).toHaveLength(2)
+    expect(screen.queryByText('Refer to the notes (if there is something)')).toBeInTheDocument()
+    expect(screen.queryByPlaceholderText('Find a spare part...')).not.toBeInTheDocument()
+
+    await user.click(screen.queryAllByLabelText('load individual service')[0])
+    await waitFor(() => expect(global.fetch).toBeCalledWith('http://localhost:8080/api/workshop-services/10002'))
+
+    expect(screen.queryByPlaceholderText('Find a spare part...')).not.toBeInTheDocument()
+
+    await user.click(screen.queryByLabelText('migrate item Brake adjuster from L'))
+    expect(screen.queryByText(/Migrate to a proper order/)).toBeInTheDocument()
+    await user.click(screen.queryByPlaceholderText('Find a spare part...'))
+    await user.click(screen.queryByRole('option', {name: 'Brake adjuster 40001'}))
+
+    // let's go
+    await user.click(screen.getByText('Go'))
+    await waitFor(() => expect(global.fetch).lastCalledWith("http://localhost:8080/api/spare-part-utilizations", 
+        {"body": "{\"vehicleId\":20002,\"vehicleNo\":\"J 33\",\"usageDate\":\"2022-01-09\",\"orderId\":1002,\"serviceId\":10002,\"quantity\":1,\"soldPrice\":289.8,\"migDataIndex\":9800001}", 
+            "headers": {"Content-type": "application/json"}, "method": "POST"}))
+
+    // no longer have migrated item
+    expect(screen.queryByLabelText('migrate item Brake adjuster from L')).not.toBeInTheDocument()
+    expect(screen.getByText(/Brake adjuster 40001/)).toBeInTheDocument()
+})
+
+// fixed the bug whereby 'add new' -> close -> 'add new' -> click 'Workmanship' -> blank screen
+test('Add New, then close, then navigate to workmanship, should allow to see Add New', async() => {
+    const user = userEvent.setup()
+
+    window.matchMedia = jest.fn(() => {return {
+        refCount: 0,
+        addListener: jest.fn(),
+        removeListener: jest.fn(),
+        matches: false,           // Added for completeness, can be adjusted
+        media: '(min-width: 768px)', // Default media query, can be adjusted
+        onchange: null            // Added for completeness
+    }})
+
+    const setTotalFilteredServices = jest.fn()
+    const setLoading = jest.fn()  
+    const initialServices = newTransactions()
+    render(<WorkshopServicesProvider initialServices={initialServices}>
+        <SupplierOrderContext value={new SupplierOrders([...orders], jest.fn())}>
+            <ServiceListing selectedSearchOptions={[]} 
+                setTotalFilteredServices={setTotalFilteredServices}
+                suppliers={[...suppliers]} setLoading={setLoading} />
+        </SupplierOrderContext>
+    </WorkshopServicesProvider>)
+
+    // add new 
+    await user.click(screen.getByLabelText('Add new service'))
+    expect(screen.queryByText(/Service started at/)).toBeInTheDocument()
+
+    // close the service dialog 
+    await user.click(screen.getByLabelText('Close'))
+    await waitFor(() => expect(screen.queryByText(/Service started at/)).not.toBeInTheDocument())
+
+    // add new again
+    await user.click(screen.getByLabelText('Add new service'))
+    // click on workmanship
+    await user.click(screen.getByRole('button', {name: 'Workmanship'}))
+    expect(screen.queryByLabelText('Add item for service')).toBeInTheDocument()
 })

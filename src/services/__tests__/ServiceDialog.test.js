@@ -358,3 +358,66 @@ test('add for existing service, navigate around', async () => {
         "notes": undefined, "sparePartUsages": [], "sparePartsMargin": undefined, "startDate": prevStartDate, 
         "tasks": [], "transactionTypes": ['REPAIR', 'SERVICE', 'INSPECTION'], "vehicleId": 50001, "vehicleNo": "J 23"})
 })
+
+test('choose a part, navigate to workmanship, back to part, part name retained', async () => {
+    const user = userEvent.setup()
+
+    const todayDate = new Date()
+    const keyInStartDate = `${todayDate.getFullYear()}-${(todayDate.getMonth() + 1).toString().padStart(2, 0)}-${(todayDate.getDate()-1).toString().padStart(2, 0)}`
+    const prevStartDate = addDaysToDateStr(todayDate, -2)
+
+    const orders = new SupplierOrders([
+        {id: 1000, supplierId: 60001, itemCode: '1000', partName: 'Engine Oil 20w-50', quantity: 100, unit: 'litres', unitPrice: 9.7, status: 'ACTIVE'},
+        {id: 2000, supplierId: 60002, itemCode: '2000', partName: 'Oil Filter', quantity: 5, unit: 'pc', unitPrice: 29.5, status: 'ACTIVE'}
+    ], jest.fn())
+
+    const saveService = jest.fn()
+    const setShow = jest.fn()
+    render(<SupplierOrderContext value={orders}>
+        <ServiceDialog 
+            isShow={true}
+            setShow={setShow}
+            vehicles={[{id: 50001, vehicleNo: "J 23"}, {id: 50002, vehicleNo: "J 33"}]} 
+            suppliers={[{id: 60001, supplierName: "Kotong"}, {id: 60002, supplierName: "Facaw"}]}
+            sparePartUsages={[]}
+            onNewServiceCreated={saveService}
+            trx={{current: {id: 100001, vehicleNo: "J 23", startDate: prevStartDate}}}
+        />
+        </SupplierOrderContext>)
+
+    const startDate = document.querySelector('input[name="startDate"]')
+    await user.click(startDate)
+    await user.type(startDate, keyInStartDate)
+
+    const vehicle = screen.getByPlaceholderText("Choose a vehicle...")
+    expect(vehicle).toBeInTheDocument()
+    expect(vehicle).toHaveValue("J 23")
+
+    // add engine oil
+    let sparePart = screen.getByPlaceholderText("Find a spare part...")
+    await user.click(sparePart)
+    await user.click(screen.getByText('Engine Oil 20w-50'))
+
+    await user.click(screen.getByPlaceholderText('Quantity'))
+    // delete the key in 20
+    await user.keyboard("[Backspace]20")
+    expect(screen.getByText("$ 194.00")).toBeInTheDocument()
+
+    // to confirm is ok
+    expect(screen.getByPlaceholderText("Find a spare part...")).toHaveValue('Engine Oil 20w-50')
+
+    // navigate to 'Workmanship'
+    await user.click(screen.getByRole('button', {name: 'Workmanship'}))
+    // back to 'Spare Parts'
+    await user.click(screen.getByRole('button', {name: 'Spare Parts'}))
+    expect(screen.getByPlaceholderText("Find a spare part...")).toHaveValue('Engine Oil 20w-50')
+
+    // save it
+    await user.click(screen.getByText("Save"))
+    expect(saveService).toBeCalledWith({"id": 100001, "mileageKm": "", "notes": undefined, 
+        "sparePartUsages": [{"margin": 0, "orderId": 1000, "quantity": "20", "soldPrice": 9.7, 
+            "usageDate": "2025-07-28", "vehicleNo": "J 23"}], 
+            "sparePartsMargin": undefined, "startDate": "2025-07-27", 
+            "tasks": [], "transactionTypes": [], "vehicleId": 50001, "vehicleNo": "J 23"})
+    expect(setShow).toBeCalledWith(false)
+})

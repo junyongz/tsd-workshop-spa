@@ -66,6 +66,10 @@ class ServiceTransactions {
         this.#refreshServices()
     }
 
+    getTransaction(id) {
+        return this.#transactions[this.#transactionIndexes[id]]
+    }
+
     updateTransactions(updatedServices) {
         updatedServices.forEach(ws => this.#transactions[this.#transactionIndexes[ws.id]] = ws)
         this.#refreshServices()

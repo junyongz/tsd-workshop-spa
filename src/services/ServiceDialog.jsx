@@ -31,7 +31,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
 
     const handleClose = () => {
         setItems([{partName: 'Choose one ...', quantity: 1, unit: 'pc', unitPrice: 0, selectedSpareParts:[]}])
-        setTasks()
+        setTasks([])
         setValidated(false)
         setShow(false)
         setSelectedExistingService()
@@ -237,7 +237,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
                         </Row>
                         <Row>
                             <Col className="text-end">
-                                <Button disabled={tabView === 'all'} size="sm" onClick={addNewItem}>
+                                <Button aria-label="Add item for service" disabled={tabView === 'all'} size="sm" onClick={addNewItem}>
                                     <i className="bi bi-plus-circle-fill me-2"></i>{((tabView === 'spareParts' && items.length === 0) || (tabView === 'workmanship' && tasks.length === 0)) ? 'Add New' : 'Add More' }
                                 </Button>
                             </Col>

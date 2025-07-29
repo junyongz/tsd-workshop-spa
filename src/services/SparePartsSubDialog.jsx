@@ -5,7 +5,7 @@ import remainingQuantity, { decimalPointUomAvailable } from "../utils/quantityUt
 import { useSupplierOrders } from "../suppliers/SupplierOrderContextProvider";
 
 export default function SparePartsSubDialog({
-    items, setItems, suppliers, sparePartUsages, sparePartsMargin
+    migration, items, setItems, suppliers, sparePartUsages, sparePartsMargin
 }) {
     const orders = useSupplierOrders()
 
@@ -52,11 +52,11 @@ export default function SparePartsSubDialog({
                         <Typeahead
                             id="typeahead-partname"
                             inputProps={{required:true, name: 'partName'}}
-                            labelKey={(option) => 
-                                `${(option.itemCode && !option.partName.includes(option.itemCode)) ? (option.itemCode + ' ') : ''}${option.partName}`
-                            }
+                            filterBy={migration ? ['itemCode', 'partName', 'notes'] : ['itemCode', 'partName']}
+                            labelKey="partName"
                             options={orders.list().filter(mo => remainingQuantity(mo, sparePartUsages) > 0).filter(mo => mo.status === 'ACTIVE')}
                             onChange={(opts) => afterChooseSparePart(opts, i)}
+                            selected={v.selectedSpareParts || []}
                             placeholder="Find a spare part..."
                             renderMenuItemChildren={(order) => {
                                 const supplier = suppliers.find(s => s.id === order.supplierId)
@@ -65,6 +65,7 @@ export default function SparePartsSubDialog({
                                 return <div>
                                     <div>{ order.itemCode && !order.partName.includes(order.itemCode) && <span className='text-secondary'>{order.itemCode}&nbsp;</span> } {order.partName}</div>
                                     <small className="text-secondary">${order.unitPrice} / {quantityLeft} left / <Suppliers /> {supplier.supplierName} / {order.invoiceDate}</small>
+                                    {migration && order.notes && <div><small className="text-secondary">{order.notes}</small></div> }
                                 </div>
                                 }
                             }
@@ -87,9 +88,9 @@ export default function SparePartsSubDialog({
                     <Col xs="6" xl="1" className="mb-3 mb-xl-0">
                         <FormLabel className="fs-5 text-end"><span>$&nbsp;{(v?.quantity * v?.unitPrice * (1 + (sparePartsMargin || 0)/100)).toFixed(2) || 0}</span></FormLabel>
                     </Col>
-                    <Col xs="6" xl="1" className="text-end">
+                    {!migration && <Col xs="6" xl="1" className="text-end">
                     <Button variant="danger" className="fs-5" aria-label={`delete spare part ${i}`} onClick={() => removeItem(i)}><Trash /></Button>
-                    </Col>
+                    </Col>}
                 </Row>
             </ListGroup.Item>
             )}

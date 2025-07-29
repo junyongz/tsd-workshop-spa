@@ -1,5 +1,7 @@
+import ServiceTransactions from "../ServiceTransactions"
+
 export default function saveService( 
-    setLoading, transactions, 
+    setLoading, transactions=new ServiceTransactions(), 
     refreshSparePartUsages,
     clearState, service
 ) {

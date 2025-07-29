@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { jest, test, expect, afterAll } from '@jest/globals';
+import { jest, test, expect } from '@jest/globals';
 import SparePartMediaSubDialog from '../SparePartMediaSubDialog';
 import { useState } from 'react';
 

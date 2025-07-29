@@ -16,6 +16,7 @@ import { useNavigate } from 'react-router-dom';
 import { useService } from './services/ServiceContextProvider';
 import { useSupplierOrders } from './suppliers/SupplierOrderContextProvider';
 import { addDaysToDateStr } from './utils/dateUtils';
+import MigratedItemToSupplierOrderDialog from './services/MigratedItemToSupplierOrderDialog';
 
 function ServiceListing({
     setTotalFilteredServices,
@@ -34,6 +35,7 @@ function ServiceListing({
   const [showModal, setShowModal] = useState(false)
   const [showNote, setShowNote] = useState(false)
   const [showMedia, setShowMedia] = useState(false)
+  const [migratedItem, setMigratedItem] = useState()
   const serviceTransaction = useRef()
 
   const [activePage, setActivePage] = useState(1)
@@ -216,6 +218,35 @@ function ServiceListing({
     })
   }
 
+  const migrateToSparePart = (spu) => {
+    setLoading(true)
+    requestAnimationFrame(() => {
+      fetch(`${apiUrl}/api/spare-part-utilizations`, {
+        method: 'POST',
+        body: JSON.stringify(spu),
+        headers: {
+          'Content-type': 'application/json'
+        }
+      })
+      .then(res => res.json())
+      .then(spuJson => {
+        const trx = transactions.getTransaction(spuJson.serviceId)
+        // update spare part usage
+        trx.sparePartUsages = (trx.sparePartUsages && [...trx.sparePartUsages, spuJson]) || [spuJson]
+        // remove hand written migrated data
+        const newMigratedHandWrittenSpareParts = [...trx.migratedHandWrittenSpareParts]
+        newMigratedHandWrittenSpareParts.splice(newMigratedHandWrittenSpareParts.findIndex(md => md.index === spuJson.migDataIndex), 1)
+        trx.migratedHandWrittenSpareParts = newMigratedHandWrittenSpareParts
+        // go
+        transactions.updateTransaction(trx)
+        
+      })
+      .then(() => clearState())
+      .then(() => refreshSparePartUsages())
+      .finally(() => setLoading(false))
+    })
+  }
+
   useEffect(() => {
     if (selectedSearchOptions.length > 0 || selectedSearchDate) {
       //setActivePage(1)
@@ -232,10 +263,16 @@ function ServiceListing({
         suppliers={suppliers}
         sparePartUsages={sparePartUsages}
         onNewVehicleCreated={onNewVehicleCreated}></ServiceDialog>
-      {serviceTransaction.current && <ServiceNoteTakingDialog isShow={showNote} setShowDialog={setShowNote} 
-        ws={serviceTransaction.current} onSaveNote={onSaveNote}/> }
-      {serviceTransaction.current && <ServiceMediaDialog isShow={showMedia} setShowDialog={setShowMedia} 
-        ws={serviceTransaction.current} onSaveMedia={onSaveMedia}/> }
+      {serviceTransaction.current && 
+        <ServiceNoteTakingDialog isShow={showNote} setShowDialog={setShowNote} 
+          ws={serviceTransaction.current} onSaveNote={onSaveNote}/> }
+      {serviceTransaction.current && 
+        <ServiceMediaDialog isShow={showMedia} setShowDialog={setShowMedia} 
+          ws={serviceTransaction.current} onSaveMedia={onSaveMedia}/> }
+      {migratedItem && 
+        <MigratedItemToSupplierOrderDialog item={migratedItem} suppliers={suppliers} 
+          sparePartUsages={sparePartUsages} onHideDialog={() => setMigratedItem()} onMigrate={(spu) => migrateToSparePart(spu)}>
+        </MigratedItemToSupplierOrderDialog> }
       <Row className='mb-3'>
         <Col>
           <ResponsivePagination activePage={activePage} setActivePage={setActivePage} 
@@ -244,7 +281,7 @@ function ServiceListing({
         <Col className='text-end'>
           <ButtonGroup className='responsive-width-50'>
             <Button variant='secondary' onClick={() => { setSelectedSearchOptions([]); navigate('/services-overview')}}><Calendar />&nbsp;Calendar View</Button>
-            <Button variant='success' onClick={() => addNewServiceTransaction(addDaysToDateStr(new Date(), 0))}><i className="bi bi-plus-circle-fill me-2"></i>Add New</Button>
+            <Button aria-label="Add new service" variant='success' onClick={() => addNewServiceTransaction(addDaysToDateStr(new Date(), 0))}><i className="bi bi-plus-circle-fill me-2"></i>Add New</Button>
           </ButtonGroup>
         </Col>
       </Row>
@@ -296,7 +333,7 @@ function ServiceListing({
                         {vvv.totalPrice && <div className='price-tag text-center'>$ {vvv.totalPrice?.toFixed(2)}</div>}
                         <Row>
                           <Col xs="4" lg="2" className='fw-lighter'>{vvv.creationDate}</Col>
-                          <Col xs="8" lg="6">{vvv.itemDescription}</Col>
+                          <Col xs="8" lg="6"><span role="button" aria-label={`migrate item ${vvv.itemDescription}`} className="migration-item" onClick={() => setMigratedItem({migratedItem: vvv, ws: v})}>{vvv.itemDescription}</span></Col>
                           <Col xs="12" lg="4" className='fw-lighter text-end'>{vvv.quantity > 0 && vvv.unitPrice && `${vvv.quantity} ${vvv.unit} @ $${vvv.unitPrice?.toFixed(2)}`}</Col>
                         </Row>
                       </ListGroupItem>

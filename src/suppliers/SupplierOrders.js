@@ -1,3 +1,22 @@
+/**
+ * @typedef {Object} SupplierOrder
+ * @property {number} id primary key
+ * @property {string} invoiceDate invoice date in format of '2005-05-05'
+ * @property {string} deliveryOrderNo
+ * @property {string} itemCode
+ * @property {string} partName
+ * @property {number} quantity quantity for the order
+ * @property {string} unit unit of measurement, eg, pc, litre, set,
+ * @property {number} unitPrice unit price for the order
+ * @property {string} notes any handwritten notes
+ * @property {string} sheetName excel sheet name, for migrated data only
+ * @property {number} sparePartId link to part id
+ * @property {number} supplierId link to supplier id
+ * @property {number} supplierName on-the-fly calculated against the suppliers
+ * @property {string} status either ACTIVE or DEPLETED
+ * @property {number} remaining on-the-fly calculated against spare part usages
+ */
+
 class SupplierOrders {
     #ordersList
     #ordersMapping
@@ -5,8 +24,8 @@ class SupplierOrders {
 
     /**
      * 
-     * @param {Object[]} orders 
-     * @param {React.ActionDispatch<Object[]} dispatch 
+     * @param {SupplierOrder[]} orders 
+     * @param {React.ActionDispatch<SupplierOrder[]>} dispatch 
      */
     constructor(orders, dispatch) {
         this.#ordersList = orders
@@ -17,8 +36,7 @@ class SupplierOrders {
 
     /**
      * 
-     * @param {React.ActionDispatch<Object[]>} dispatch 
-     * @returns 
+     * @param {React.ActionDispatch<SupplierOrder[]>} dispatch 
      */
     acceptDispatch(dispatch) {
         this.dispatch = dispatch
@@ -64,7 +82,7 @@ class SupplierOrders {
 
     /**
      * 
-     * @param {Object} order 
+     * @param {SupplierOrder} order 
      * @param {number} order.id
      */
     removeOrder(order) {
@@ -77,7 +95,7 @@ class SupplierOrders {
 
     /**
      * 
-     * @param {Object[]} orders
+     * @param {SupplierOrder[]} orders
      */
     replaceAll(orders) {
         this.#ordersList = orders
@@ -88,7 +106,7 @@ class SupplierOrders {
 
     /**
      * 
-     * @param {Object[]} orders 
+     * @param {SupplierOrder[]} orders 
      * @param {number} orders[].id
      */
     updateOrders(orders) {

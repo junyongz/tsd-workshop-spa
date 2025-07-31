@@ -22,7 +22,7 @@ async function fetchSupplierSparePartsWithFetchMode(apiUrl, supplierOrders, fetc
 
 /**
  * 
- * @param {*} apiUrl 
+ * @param {string} apiUrl 
  * @param {SupplierOrders} supplierOrders 
  * @returns 
  */
@@ -32,7 +32,7 @@ export async function fetchWithUsageSupplierSpareParts(apiUrl, supplierOrders) {
 
 /**
  * 
- * @param {*} apiUrl 
+ * @param {string} apiUrl 
  * @param {SupplierOrders} supplierOrders 
  * @returns 
  */

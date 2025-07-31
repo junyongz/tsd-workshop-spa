@@ -28,15 +28,16 @@ const getPaginationItems = (activePage, setActivePage, totalPages, maxVisiblePag
     }
 
     // Add First and Prev
-    items.push(<Pagination.First key="first" onClick={() => setActivePage(1)} disabled={activePage === 1} />);
-    items.push(<Pagination.Prev key="prev" onClick={() => setActivePage(activePage - 1)} disabled={activePage === 1} />);
+    items.push(<Pagination.First aria-label="first page button" key="first" onClick={() => setActivePage(1)} disabled={activePage === 1} />);
+    items.push(<Pagination.Prev aria-label="prev page button" key="prev" onClick={() => setActivePage(activePage - 1)} disabled={activePage === 1} />);
 
     // Add ellipsis if startPage > 2
     if (startPage > 2) {
-      items.push(<Pagination.Item key={1} onClick={() => setActivePage(1)}>{1}</Pagination.Item>);
-      items.push(<Pagination.Ellipsis key="start-ellipsis" />);
-    } else if (startPage === 2) {
-      items.push(<Pagination.Item key={1} onClick={() => setActivePage(1)}>{1}</Pagination.Item>);
+      items.push(<Pagination.Item aria-label="page 1 button" key={1} onClick={() => setActivePage(1)}>{1}</Pagination.Item>);
+      items.push(<Pagination.Ellipsis aria-label="ellipsis button" key="start-ellipsis" />);
+    } 
+    else if (startPage === 2) {
+      items.push(<Pagination.Item key={1} aria-label="page 1 button" onClick={() => setActivePage(1)}>{1}</Pagination.Item>);
     }
 
     // Add page numbers
@@ -44,6 +45,7 @@ const getPaginationItems = (activePage, setActivePage, totalPages, maxVisiblePag
       items.push(
         <Pagination.Item
           key={i}
+          aria-label={`page ${i} button`}
           active={i === activePage}
           onClick={() => setActivePage(i)}
         >
@@ -54,15 +56,16 @@ const getPaginationItems = (activePage, setActivePage, totalPages, maxVisiblePag
 
     // Add ellipsis if endPage < totalPages - 1
     if (endPage < totalPages - 1) {
-      items.push(<Pagination.Ellipsis key="end-ellipsis" />);
-      items.push(<Pagination.Item key={totalPages} onClick={() => setActivePage(totalPages)}>{totalPages}</Pagination.Item>);
-    } else if (endPage === totalPages - 1) {
-      items.push(<Pagination.Item key={totalPages} onClick={() => setActivePage(totalPages)}>{totalPages}</Pagination.Item>);
+      items.push(<Pagination.Ellipsis aria-label="ellipsis button" key="end-ellipsis" />);
+      items.push(<Pagination.Item key={totalPages} aria-label={`page ${totalPages} button`} onClick={() => setActivePage(totalPages)}>{totalPages}</Pagination.Item>);
+    } 
+    else if (endPage === totalPages - 1) {
+      items.push(<Pagination.Item key={totalPages} aria-label={`page ${totalPages} button`} onClick={() => setActivePage(totalPages)}>{totalPages}</Pagination.Item>);
     }
 
     // Add Next and Last
-    items.push(<Pagination.Next key="next" onClick={() => setActivePage(activePage + 1)} disabled={activePage === totalPages} />);
-    items.push(<Pagination.Last key="last" onClick={() => setActivePage(totalPages)} disabled={activePage === totalPages} />);
+    items.push(<Pagination.Next aria-label="next page button" key="next" onClick={() => setActivePage(activePage + 1)} disabled={activePage === totalPages} />);
+    items.push(<Pagination.Last aria-label="last page button" key="last" onClick={() => setActivePage(totalPages)} disabled={activePage === totalPages} />);
 
     return items;
   };

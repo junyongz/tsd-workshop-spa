@@ -14,6 +14,17 @@ import PromptDeletionIcon from "../components/PromptDeletionIcon"
 import { applyFilterOnOrders } from "../search/fuzzySearch"
 import { useSupplierOrders } from "./SupplierOrderContextProvider"
 
+/**
+ * @callback UpdateOrderFunction
+ * @param {import("./SupplierOrders").SupplierOrder} order an order to update
+ * @param {boolean} note whether to just update notes only
+ */
+
+/**
+ * 
+ * @param {*} param0 
+ * @returns 
+ */
 function SuppliersSpareParts({setTotalFilteredOrders, 
     selectedSearchOptions=[], selectedSearchDate, suppliers=[], vehicles=[], sparePartUsages=[],
     refreshSparePartUsages=() =>{}, refreshServices=()=>{},
@@ -166,6 +177,10 @@ function SuppliersSpareParts({setTotalFilteredOrders,
         })
     }
 
+    /**
+     * @type {UpdateOrderFunction}
+     * @private
+     */
     const onUpdateOrder = (order, note) => {
         setLoading(true)
         requestAnimationFrame(() => {

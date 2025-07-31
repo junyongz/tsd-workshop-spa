@@ -7,8 +7,8 @@ import { Notes } from "../Icons";
  * @param {Object} props
  * @param {boolean} props.isShow
  * @param {React.SetStateAction<boolean>} props.setShowDialog
- * @param {Function} onUpdateOrder
- * @param {Object} noteSparePart
+ * @param {import("./SuppliersSpareParts").UpdateOrderFunction} props.onUpdateOrder
+ * @param {import("./SupplierOrders").SupplierOrder} props.noteSparePart
  * @returns 
  */
 function NoteTakingDialog({isShow, setShowDialog, onUpdateOrder, noteSparePart}) {

@@ -164,7 +164,7 @@ test('listing no search options, delete one item, delete service', async () => {
     expect(screen.queryAllByText('Complete Service')).toHaveLength(10)
     expect(container.querySelectorAll('.list-group-item')).toHaveLength(0)
     // click page 2
-    await user.click(screen.getAllByRole('button', {name: '2'})[0])
+    await user.click(screen.getAllByRole('button', {name: 'page 2 button'})[0])
     expect(screen.queryAllByText('Complete Service')).toHaveLength(5)
 
     rerender(<WorkshopServicesProvider initialServices={[...lotTransactions]}>
@@ -177,7 +177,7 @@ test('listing no search options, delete one item, delete service', async () => {
 
     // should be 5 items
     expect(screen.queryAllByText('Complete Service')).toHaveLength(5)
-    expect(screen.queryAllByRole('button', {name: '2'})).toHaveLength(0)
+    expect(screen.queryAllByRole('button', {name: 'page 2 button'})).toHaveLength(0)
 
     unmount()
 })

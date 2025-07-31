@@ -2,7 +2,15 @@ import React, { useState } from "react"
 import { Badge } from "react-bootstrap"
 import { Calendar, HandPointer, NoteTaking } from "../Icons"
 
-function SparePartNotes({order, onNoteClick, sparePartUsages=[] }) {
+/**
+ * 
+ * @param {Object} props
+ * @param {import("./SupplierOrders").SupplierOrder} props.order
+ * @param {Function} props.onNoteClick
+ * @param {Object[]} sparePartUsages
+ * @returns 
+ */
+function SparePartNotes({order, onNoteClick, sparePartUsages}) {
 
     const filteredSparePartUsages = sparePartUsages.filter(spu => spu.orderId === order.id)
     const [usageLoadCount, setUsageLoadCount] = useState(5)

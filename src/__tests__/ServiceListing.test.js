@@ -99,6 +99,7 @@ test('listing no search options, delete one item, delete service', async () => {
         <SupplierOrderContext value={new SupplierOrders([...orders], jest.fn())}>
             <ServiceListing selectedSearchOptions={[]} 
                 setTotalFilteredServices={setTotalFilteredServices}
+                refreshSparePartUsages={() => Promise.resolve([])}
                 suppliers={[...suppliers]} setLoading={setLoading} />
         </SupplierOrderContext>
     </WorkshopServicesProvider>)
@@ -463,6 +464,7 @@ test('view the completed service, migrate item to spare part usage', async () =>
                 partName: 'Brake adjuster 40001', quantity: 5, unit: 'pc', unitPrice: 289.8, status: 'ACTIVE'}], jest.fn())}>
             <ServiceListing selectedSearchOptions={[]} 
                 setTotalFilteredServices={setTotalFilteredServices}
+                refreshSparePartUsages={() => Promise.resolve([])}
                 suppliers={[...suppliers]}
                 setLoading={setLoading} />
         </SupplierOrderContext>

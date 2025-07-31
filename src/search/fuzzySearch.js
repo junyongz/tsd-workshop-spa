@@ -59,7 +59,7 @@ export function applyFilterOnServices(selectedSearchOptions, selectedSearchDate,
     return services
   }
 
-  const vehicleNosMatching = selectedSearchOptions.map(so => vehicles.findIndex(veh => veh.vehicleNo === so.name) >= 0)
+  const vehicleNosMatching = selectedSearchOptions.map(so => vehicles && vehicles.findIndex(veh => veh.vehicleNo === so.name) >= 0)
   const allSearchOptionsAreVehicles = vehicleNosMatching.every(p => p)
   const atLeastOneSearchOptionIsVehicle = vehicleNosMatching.some(p => p)
 

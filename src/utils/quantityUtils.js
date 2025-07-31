@@ -9,7 +9,8 @@
  * @returns how much retain after the spare part usages
  */
 export default function remainingQuantity(order, sparePartUsages) {
-    return order?.quantity - sparePartUsages.filter(spu => spu.orderId === order.id)
+    return !sparePartUsages ? order?.quantity
+        : order?.quantity - sparePartUsages.filter(spu => spu.orderId === order.id)
                                     .reduce((oldSum, cv) => oldSum += cv.quantity, 0);
 }
 

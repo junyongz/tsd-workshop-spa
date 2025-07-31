@@ -18,13 +18,33 @@ import { useSupplierOrders } from './suppliers/SupplierOrderContextProvider';
 import { addDaysToDateStr } from './utils/dateUtils';
 import MigratedItemToSupplierOrderDialog from './services/MigratedItemToSupplierOrderDialog';
 
+/**
+ * 
+ * @param {Object} props 
+ * @param {React.SetStateAction<number>} props.setTotalFilteredServices
+ * @param {Function} props.refreshSparePartUsages
+ * @param {Object[]} props.vehicles
+ * @param {React.SetStateAction<Object[]>} props.setVehicles
+ * @param {Object[]} props.sparePartUsages
+ * @param {Object[]} props.suppliers
+ * @param {Object[]} props.taskTemplates
+ * @param {Function} props.onNewVehicleCreated
+ * @param {React.SetStateAction<boolean>} props.setLoading
+ * @param {Object[]} props.selectedSearchOptions
+ * @param {string} props.selectedSearchOptions[].name
+ * @param {React.SetStateAction<Object[]>} props.setSelectedSearchOptions
+ * @param {string} props.selectedSearchDate
+ * @param {Function} props.onNewServiceCreated
+ * @param {Function} props.removeTask
+ * @returns 
+ */
 function ServiceListing({
     setTotalFilteredServices,
-    refreshSparePartUsages=() => {}, 
-    vehicles=[{vehicleNo:''}], setVehicles, sparePartUsages=[],
-    suppliers=[], taskTemplates=[],
-    onNewVehicleCreated=() => {}, setLoading=()=>{},
-    selectedSearchOptions=[{name:''}], setSelectedSearchOptions, 
+    refreshSparePartUsages, 
+    vehicles, setVehicles, sparePartUsages,
+    suppliers, taskTemplates,
+    onNewVehicleCreated, setLoading,
+    selectedSearchOptions, setSelectedSearchOptions, 
     selectedSearchDate,
     onNewServiceCreated, removeTask}) {
   

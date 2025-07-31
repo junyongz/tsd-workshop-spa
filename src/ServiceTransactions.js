@@ -1,11 +1,27 @@
+/**
+ * @typedef {Object} WorkshopService a entity represents a workshop service
+ * @property {number} id primary key
+ * @property {string} startDate start date of a service, in format of '2005-05-05'
+ * @property {string} creationDate creation date of a service, in format of '2005-05-05'
+ * @property {string} completionDate completion date of a service, in format of '2005-05-05'
+ * @property {number} vehicleId vehicle id
+ * @property {string} vehicleNo vehicle no
+ */
+
 class ServiceTransactions {
+    /**
+     * @type {WorkshopService[]}
+     */
     #transactions
+    /**
+     * @type {Object<number, number>}
+     */
     #transactionIndexes
 
     /**
      * 
-     * @param {Object[]} transactions 
-     * @param {React.ActionDispatch<Object[]>} dispatch 
+     * @param {WorkshopService[]} transactions 
+     * @param {React.ActionDispatch<WorkshopService[]>} dispatch 
      */
     constructor(transactions = [], dispatch) {
         this.#transactions = transactions
@@ -39,6 +55,10 @@ class ServiceTransactions {
             }))
     }
 
+    /**
+     * 
+     * @param {WorkshopService} newService 
+     */
     addNewTransaction(newService) {
         const doMergeById = (prev=[], current=[]) =>
             [...prev.map(ot => ({
@@ -65,11 +85,19 @@ class ServiceTransactions {
         }
     }
 
+    /**
+     * 
+     * @param {WorkshopService} updatedService 
+     */
     updateTransaction(updatedService) {
         this.#transactions[this.#transactionIndexes[updatedService.id]] = updatedService
         this.#refreshServices()
     }
 
+    /**
+     * 
+     * @param {WorkshopService[]} updatedServices 
+     */
     replaceTransactions(updatedServices) {
         this.#transactions = updatedServices
         this.#refreshIndexes()
@@ -80,17 +108,29 @@ class ServiceTransactions {
         return this.#transactions[this.#transactionIndexes[id]]
     }
 
+    /**
+     * 
+     * @param {WorkshopService[]} updatedServices 
+     */
     updateTransactions(updatedServices) {
         updatedServices.forEach(ws => this.#transactions[this.#transactionIndexes[ws.id]] = ws)
         this.#refreshServices()
     }
 
+    /**
+     * 
+     * @param {WorkshopService} updatedService 
+     */
     updateForNote(updatedService) {
         const oldPrevService = this.#transactions[this.#transactionIndexes[updatedService.id]]
         this.#transactions[this.#transactionIndexes[updatedService.id]] = {...oldPrevService, notes: updatedService.notes}
         this.#refreshServices()
     }
 
+    /**
+     * 
+     * @param {WorkshopService} deletingService 
+     */
     removeService(deletingService) {
         const idx = this.#transactionIndexes[deletingService?.id]
         if (idx >= 0) {

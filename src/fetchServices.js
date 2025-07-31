@@ -1,6 +1,13 @@
 import ServiceTransactions from "./ServiceTransactions";
 
-export async function fetchFewPagesServices(apiUrl, transactions = new ServiceTransactions(), searchedOptions) {
+/**
+ * 
+ * @param {string} apiUrl 
+ * @param {ServiceTransactions} transactions 
+ * @param {React.RefObject<Set<string>>} searchedOptions 
+ * @returns {Promise}
+ */
+export async function fetchFewPagesServices(apiUrl, transactions, searchedOptions) {
 
   return fetch(`${apiUrl}/api/workshop-services?pageNumber=0&pageSize=30`, {mode: 'cors'})
         .then(res => res.json())
@@ -14,7 +21,14 @@ export async function fetchFewPagesServices(apiUrl, transactions = new ServiceTr
         });
 }
 
-export default async function fetchServices(apiUrl, transactions = new ServiceTransactions(), searchedOptions) {
+/**
+ * 
+ * @param {string} apiUrl 
+ * @param {ServiceTransactions} transactions 
+ * @param {React.RefObject<Set<string>>} searchedOptions 
+ * @returns {Promise}
+ */
+export default async function fetchServices(apiUrl, transactions, searchedOptions) {
 
     return fetch(`${apiUrl}/api/workshop-services`, {mode: 'cors'})
           .then(res => res.json())

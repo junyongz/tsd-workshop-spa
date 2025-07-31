@@ -7,7 +7,17 @@ import { HandPointer, Inspection, Insurance, Roadtax } from "../Icons";
 import { addMonthsToDate } from "../utils/dateUtils";
 import { useService } from "../services/ServiceContextProvider";
 
-export default function Vehicles({vehicles=[], setVehicles, companies=[], selectedSearchOptions=[]}) {
+/**
+ * 
+ * @param {Object} props
+ * @param {Object[]} props.vehicles
+ * @param {React.SetStateAction<Object[]>} props.setVehicles
+ * @param {Object[]} props.companies
+ * @param {Object[]} props.selectedSearchOptions
+ * @param {string} props.selectedSearchOptions[].name
+ * @returns 
+ */
+export default function Vehicles({vehicles, setVehicles, companies, selectedSearchOptions}) {
     const services = useService()
 
     const [serviceByVehicle, setServiceByVehicle] = useState({})

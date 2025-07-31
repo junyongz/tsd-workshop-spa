@@ -26,17 +26,21 @@ jest.mock('../services/YearMonthView', () =>
     ({}) => <div data-testid="service-year-month-page"></div>
 )
 jest.mock('../suppliers/SuppliersSpareParts', () => 
-    ({}) => <div data-testid="supplier-orders-page"></div>
+    ({showToastMessage}) => <div data-testid="supplier-orders-page" onClick={() => showToastMessage('failed the job')}></div>
 )
 jest.mock('../ServiceListing', () => ({}) => 
     <div data-testid="service-listing-page"></div>
 )
 // lesson learnt: if the mock JSX is drawing an object/array, the jest test would just hang (selectedSearchOptions vs selectedSearchOptions.length)
-jest.mock('../NavigationBar', () => ({filterServices, selectedSearchOptions}) => 
+jest.mock('../NavigationBar', () => ({filterServices, selectedSearchOptions, 
+        clearFilterDate, searchByDate, selectedSearchDate, setSelectedSearchDate}) => 
     <div data-testid="navigation-bar">
         <span data-testid="filter-services-some-options" onClick={() => filterServices([{name: "J 23"}, {name: "oil"}])}></span>
         <span data-testid="filter-services-no-options" onClick={() => filterServices([])}></span>
         <span data-testid="selected-search-options">{selectedSearchOptions.length}</span>
+        <span data-testid="search-by-date-label">{searchByDate} {selectedSearchDate}</span>
+        <span data-testid="search-by-date-action" onClick={(e) => setSelectedSearchDate('1995-05-09')}></span>
+        <span data-testid="clear-filter-date-action" onClick={() => clearFilterDate()}></span>
     </div>
 )
 jest.useFakeTimers()
@@ -192,4 +196,22 @@ test('draw with mocked components and click the new vehicle created', async () =
     fireEvent.click(screen.getByTestId('filter-services-no-options'))
     await waitFor(() => expect(screen.getByTestId('selected-search-options')).toHaveTextContent(0))
 
+    // fire again.
+    fireEvent.click(screen.getByTestId('filter-services-some-options'))
+    jest.advanceTimersByTime(600)
+    // still stay 13
+    await waitFor(() => expect(global.fetch).toBeCalledTimes(13))
+
+    // playing with filter by date
+    fireEvent.click(screen.getByTestId('clear-filter-date-action'))
+    fireEvent.click(screen.getByTestId('search-by-date-action'))
+    expect(screen.getByTestId('search-by-date-label')).toHaveTextContent('1995-05-09')
+    fireEvent.click(screen.getByTestId('clear-filter-date-action'))
+    // should be empty now
+    expect(screen.getByTestId('search-by-date-label')).toHaveTextContent('')
+
+    // showToastMessage
+    const consoleTrace = jest.spyOn(console, 'trace')
+    fireEvent.click(screen.getByTestId('supplier-orders-page'))
+    expect(consoleTrace.mock.calls[0][0]).toEqual('who is showing toast that causing error')
 })

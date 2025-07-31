@@ -38,6 +38,24 @@ const transactions = [
     }
 ]
 
+const lotTransactions = [
+    {id: 10001, creationDate: '2022-02-02', startDate: '2022-02-02', vehicleId: 20001, vehicleNo: "J 23"},
+    {id: 10002, creationDate: '2022-01-11', startDate: '2022-01-10', vehicleId: 20002, vehicleNo: "J 33"},
+    {id: 10003, creationDate: '2022-01-01', startDate: '2022-01-01', vehicleId: 20003, vehicleNo: "J 34"},
+    {id: 10004, creationDate: '2022-02-01', startDate: '2022-03-01', vehicleId: 20001, vehicleNo: "J 23"},
+    {id: 10005, creationDate: '2022-03-01', startDate: '2022-04-01', vehicleId: 20002, vehicleNo: "J 33"},
+    {id: 10006, creationDate: '2022-04-01', startDate: '2022-04-02', vehicleId: 20003, vehicleNo: "J 34"},
+    {id: 10007, creationDate: '2022-04-01', startDate: '2022-03-03', vehicleId: 20001, vehicleNo: "J 23"},
+    {id: 10008, creationDate: '2022-03-01', startDate: '2022-04-07', vehicleId: 20002, vehicleNo: "J 33"},
+    {id: 10009, creationDate: '2022-02-01', startDate: '2022-05-06', vehicleId: 20003, vehicleNo: "J 34"},
+    {id: 10010, creationDate: '2022-03-01', startDate: '2022-04-03', vehicleId: 20001, vehicleNo: "J 23"},
+    {id: 10011, creationDate: '2022-04-01', startDate: '2022-08-05', vehicleId: 20002, vehicleNo: "J 33"},
+    {id: 10012, creationDate: '2022-05-01', startDate: '2022-05-04', vehicleId: 20003, vehicleNo: "J 34"},
+    {id: 10013, creationDate: '2022-03-01', startDate: '2022-03-03', vehicleId: 20001, vehicleNo: "J 23"},
+    {id: 10014, creationDate: '2022-02-01', startDate: '2022-07-03', vehicleId: 20002, vehicleNo: "J 33"},
+    {id: 10015, creationDate: '2022-07-01', startDate: '2022-03-07', vehicleId: 20003, vehicleNo: "J 34"}
+]
+
 const newTransactions = () => {
     return [...transactions].map((t, i) => {
         return {...t, sparePartUsages: [...transactions[i].sparePartUsages]}
@@ -116,6 +134,49 @@ test('listing no search options, delete one item, delete service', async () => {
     // finally click on Add New button
     await user.click(screen.getByText('Add New'))
     expect(screen.queryByText('Service started at ' + addDaysToDateStr(new Date(), 0))).toBeInTheDocument()
+
+    unmount()
+})
+
+test('listing no search options, delete one item, delete service', async () => {
+    window.matchMedia = jest.fn(() => {return {
+        refCount: 0,
+        addListener: jest.fn(),
+        removeListener: jest.fn(),
+        matches: false,           // Added for completeness, can be adjusted
+        media: '(min-width: 768px)', // Default media query, can be adjusted
+        onchange: null            // Added for completeness
+    }})
+
+    const user = userEvent.setup()
+
+    const setTotalFilteredServices = jest.fn()
+    const setLoading = jest.fn()  
+    const { container, unmount, rerender } = render(<WorkshopServicesProvider initialServices={[...lotTransactions]}>
+        <SupplierOrderContext value={new SupplierOrders([...orders], jest.fn())}>
+            <ServiceListing selectedSearchOptions={[]} 
+                setTotalFilteredServices={setTotalFilteredServices}
+                suppliers={[...suppliers]} setLoading={setLoading} />
+        </SupplierOrderContext>
+    </WorkshopServicesProvider>)
+
+    expect(screen.queryAllByText('Complete Service')).toHaveLength(10)
+    expect(container.querySelectorAll('.list-group-item')).toHaveLength(0)
+    // click page 2
+    await user.click(screen.getAllByRole('button', {name: '2'})[0])
+    expect(screen.queryAllByText('Complete Service')).toHaveLength(5)
+
+    rerender(<WorkshopServicesProvider initialServices={[...lotTransactions]}>
+        <SupplierOrderContext value={new SupplierOrders([...orders], jest.fn())}>
+            <ServiceListing selectedSearchOptions={[{name: 'J 23'}]} 
+                setTotalFilteredServices={setTotalFilteredServices}
+                suppliers={[...suppliers]} setLoading={setLoading} />
+        </SupplierOrderContext>
+    </WorkshopServicesProvider>)
+
+    // should be 5 items
+    expect(screen.queryAllByText('Complete Service')).toHaveLength(5)
+    expect(screen.queryAllByRole('button', {name: '2'})).toHaveLength(0)
 
     unmount()
 })
@@ -420,8 +481,14 @@ test('view the completed service, migrate item to spare part usage', async () =>
 
     await user.click(screen.queryByLabelText('migrate item Brake adjuster from L'))
     expect(screen.queryByText(/Migrate to a proper order/)).toBeInTheDocument()
+
+    // should hit validation error
+    await user.click(screen.getByText('Go'))
+    expect(screen.queryByPlaceholderText('Find a spare part...')).not.toBeValid()
+
     await user.click(screen.queryByPlaceholderText('Find a spare part...'))
     await user.click(screen.queryByRole('option', {name: 'Brake adjuster 40001'}))
+    expect(screen.queryByPlaceholderText('Find a spare part...')).toBeValid()
 
     // let's go
     await user.click(screen.getByText('Go'))

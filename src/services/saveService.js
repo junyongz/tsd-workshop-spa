@@ -1,7 +1,14 @@
 import ServiceTransactions from "../ServiceTransactions"
 
+/**
+ * @param {React.SetStateAction<boolean>} setLoading 
+ * @param {ServiceTransactions} transactions
+ * @param {Function} refreshSparePartUsages 
+ * @param {Function} clearState to remove state checking from session storage, so wont refresh again
+ * @param {Object} service 
+ */
 export default function saveService( 
-    setLoading, transactions=new ServiceTransactions(), 
+    setLoading, transactions,
     refreshSparePartUsages,
     clearState, service
 ) {

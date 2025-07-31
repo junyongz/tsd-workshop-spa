@@ -7,7 +7,18 @@ import PromptDeletionIcon from "../components/PromptDeletionIcon";
 import { useSupplierOrders } from "./SupplierOrderContextProvider";
 import generateUniqueId from "../utils/randomUtils";
 
-function AddSparePartsDialog({isShow, setShowDialog, existingOrder=[], suppliers=[], sparePartUsages=[], onSaveNewOrders}) {
+/**
+ * 
+ * @param {*} props
+ * @param {boolean} props.isShow
+ * @param {React.SetStateAction<boolean>} props.setShowDialog
+ * @param {Object[]} props.existingOrder existing orders based on the same delivery order no
+ * @param {Object[]} props.suppliers
+ * @param {Object[]} props.sparePartUsages
+ * @param {Function} props.onSaveNewOrders
+ * @returns 
+ */
+function AddSparePartsDialog({isShow, setShowDialog, existingOrder, suppliers, sparePartUsages, onSaveNewOrders}) {
     const supplierOrders = useSupplierOrders()
 
     const formRef = useRef()

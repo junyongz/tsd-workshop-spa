@@ -114,7 +114,7 @@ export default function CalendarView({
                     return ( <div className="calendar-day" key={`${month}-${date}`} 
                                 role="button" aria-label={`day of ${month}-${date}`} onClick={() => onDateClicked(boxDate)}>
                         <Card>
-                            <Card.Header className={sameDay(choosenDate, boxDate) ? 'text-bg-primary' : ''}>{ date }</Card.Header>
+                            <Card.Header className={sameDay(choosenDate || todayDate, boxDate) ? 'text-bg-primary' : ''}>{ date }</Card.Header>
                             <Card.Body style={{height: maxHeight, maxHeight: maxHeight, '--bs-card-spacer-y': '5px'}}>
                                 <Row className="d-none d-lg-flex">
                                 {

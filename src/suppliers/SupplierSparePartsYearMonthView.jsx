@@ -5,8 +5,15 @@ import { Calendar } from "../Icons"
 import { months3EngChars } from "../utils/dateUtils"
 import { useSupplierOrders } from "./SupplierOrderContextProvider"
 
-// {[supplier]}
-const filterOrdersBySupplier = (orders=[], suppliers=[], year, month) => {
+/**
+ * 
+ * @param {Object[]} orders 
+ * @param {Object[]} suppliers 
+ * @param {number} year 
+ * @param {number} month 
+ * @returns 
+ */
+const filterOrdersBySupplier = (orders, suppliers, year, month) => {
     const matchedYearMonthOrders = orders.filter(order => {
         const invoiceDate = new Date(order.invoiceDate)
         if (invoiceDate.getFullYear() === year && invoiceDate.getMonth() === month) {
@@ -26,6 +33,11 @@ const filterOrdersBySupplier = (orders=[], suppliers=[], year, month) => {
     return formattedOrders
 }
 
+/**
+ * 
+ * @param {Object[]} supplierOrders 
+ * @returns 
+ */
 const itemsByOrder = (supplierOrders=[]) => {
     const itemsByDO = {}
     supplierOrders.forEach(order => {
@@ -36,7 +48,14 @@ const itemsByOrder = (supplierOrders=[]) => {
     return itemsByDO
 }
 
-function SupplierSparePartsYearMonthView({suppliers=[], backToOrders}) {
+/**
+ * 
+ * @param {*} props
+ * @param {Object[]} props.suppliers
+ * @param {Function} props.backToOrders
+ * @returns 
+ */
+function SupplierSparePartsYearMonthView({suppliers, backToOrders}) {
     const supplierOrders = useSupplierOrders()
 
     const currentDate = new Date()

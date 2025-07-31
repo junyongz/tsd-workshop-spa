@@ -7,7 +7,16 @@ import { clearState } from "../autoRefreshWorker";
 import PhotoGallery from "../components/PhotoGallery";
 import { useSupplierOrders } from "../suppliers/SupplierOrderContextProvider";
 
-export default function SpareParts({suppliers=[], selectedSearchOptions=[], totalSpareParts=0, setTotalSpareParts}) {
+/**
+ * 
+ * @param {Object} props 
+ * @param {Object[]} props.suppliers
+ * @param {Object[]} props.selectedSearchOptions
+ * @param {number} props.totalSpareParts
+ * @param {React.SetStateAction<number>} props.setTotalSpareParts
+ * @returns 
+ */
+export default function SpareParts({suppliers, selectedSearchOptions, totalSpareParts, setTotalSpareParts}) {
     const apiUrl = process.env.REACT_APP_API_URL
 
     const orders = useSupplierOrders()
@@ -217,7 +226,7 @@ export default function SpareParts({suppliers=[], selectedSearchOptions=[], tota
 
                     return <Col xs="12" sm="6" md="4" lg="3" role="menuitem" className="mb-3" key={v.id}>
                             <Card className="spare-part-card" data-spare-part-id={v.id}>
-                            <Card.Header role="button" onClick={() => showDialogFor(v)}>
+                            <Card.Header role="button" aria-label={`header for ${v.partName}`} onClick={() => showDialogFor(v)}>
                                 <div className="fs-5">
                                     <Stack direction="horizontal">
                                     <div className="w-75"><span>{v.partNo}</span></div>
@@ -253,7 +262,7 @@ export default function SpareParts({suppliers=[], selectedSearchOptions=[], tota
                                 {hasVariousPrices && <span className="text-secondary">${matchedOrders[0]?.unitPrice} - ${matchedOrders[matchedOrders.length - 1]?.unitPrice}</span>}
                             </Row>
                             {uploadedMedias.filter(um => um.sparePartId === v.id).map(md => 
-                            <img key={md.id} role="button" onClick={() => setCurrentPreviewSparePart(v)} 
+                            <img key={md.id} role="button" aria-label={`view photos for part ${md.sparePartId}`} onClick={() => setCurrentPreviewSparePart(v)} 
                                 className="rounded-pill"
                                 src={md.dataUrl} style={{width:'30%', marginRight: '5px'}}/> )}
                             </Card.Body>

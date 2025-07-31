@@ -32,7 +32,25 @@ export function applyFilterOnOrders(selectedSearchOptions=[], selectedSearchDate
         ) && (!selectedSupplier || o.supplierId === selectedSupplier.id))
 }
 
-export function applyFilterOnServices(selectedSearchOptions=[], selectedSearchDate, vehicles=[{vehicleNo:''}], services=[], supplierOrders=new SupplierOrders()) {
+/**
+ * 
+ * @param {Object[]} selectedSearchOptions 
+ * @param {string} selectedSearchOptions[].name 
+ * @param {string} selectedSearchDate a date in 'yyyy-MM-dd' format, eg '2005-05-05'
+ * @param {Object[]} vehicles 
+ * @param {string} vehicles[].vehicleNo
+ * @param {Object[]} services 
+ * @param {string} services[].startDate a date in 'yyyy-MM-dd' format, eg '2005-05-05'
+ * @param {string} services[].vehicleNo
+ * @param {Object[]} services[].migratedHandWrittenSpareParts
+ * @param {string} services[].migratedHandWrittenSpareParts[].partName
+ * @param {string} services[].migratedHandWrittenSpareParts[].itemDescription
+ * @param {Object[]} services[].sparePartUsages
+ * @param {number} services[].sparePartUsages[].orderId
+ * @param {SupplierOrders} supplierOrders 
+ * @returns 
+ */
+export function applyFilterOnServices(selectedSearchOptions, selectedSearchDate, vehicles, services=[], supplierOrders) {
   if (selectedSearchDate) {
     return services.filter(ws => ws.startDate === selectedSearchDate)
   }

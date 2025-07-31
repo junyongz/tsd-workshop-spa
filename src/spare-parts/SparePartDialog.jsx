@@ -6,10 +6,24 @@ import SparePartSupplierSubDialog from "./SparePartSupplierSubDialog"
 import { clearState } from "../autoRefreshWorker"
 import { useSupplierOrders } from "../suppliers/SupplierOrderContextProvider"
 
+/**
+ * 
+ * @param {*} props
+ * @param {boolean} props.isShow
+ * @param {React.SetStateAction<boolean>} props.setShowDialog
+ * @param {Object} props.sparePart
+ * @param {React.SetStateAction<Object>} props.setSparePart
+ * @param {Object[]} props.suppliers
+ * @param {number} props.suppliers[].id
+ * @param {string} props.suppliers[].supplierName
+ * @param {Function} props.afterSave
+ * @param {Function} props.afterRemoveMedia
+ * @returns 
+ */
 function SparePartDialog({isShow, setShowDialog, 
         sparePart, setSparePart,
-        suppliers=[{id: 1000, supplierName: ''}],
-        afterSave=() => {}, afterRemoveMedia=() => {}}) {
+        suppliers,
+        afterSave, afterRemoveMedia}) {
 
     const apiUrl = process.env.REACT_APP_API_URL
 

@@ -5,12 +5,28 @@ import  getOptionLabel from "react-bootstrap-typeahead/types/utils/getOptionLabe
 import { useEffect } from "react";
 import { useSupplierOrders } from "../suppliers/SupplierOrderContextProvider";
 
+/**
+ * 
+ * @param {*} props
+ * @param {number} props.maxSelectedOrdersShown
+ * @param {React.SetStateAction<number>} props.setMaxSelectedOrdersShown
+ * @param {Object[]} props.selectedSuppliers
+ * @param {React.SetStateAction<Object[]>} props.setSelectedSuppliers
+ * @param {number} props.activeSupplierId
+ * @param {React.SetStateAction<number>} props.setActiveSupplierId
+ * @param {Object[]} props.suppliers
+ * @param {Object[]} props.matchingOrders
+ * @param {React.SetStateAction<Object[]>} props.matchingOrders
+ * @param {boolean} props.hasPrevOrder
+ * @param {React.SetStateAction<boolean>} props.setHasPrevOrder
+ * @returns 
+ */
 export default function SparePartSupplierSubDialog({
     maxSelectedOrdersShown, setMaxSelectedOrdersShown,
-    selectedSuppliers=[], setSelectedSuppliers,
+    selectedSuppliers, setSelectedSuppliers,
     activeSupplierId, setActiveSupplierId, 
-    suppliers=[],
-    matchingOrders=[], setMatchingOrders,
+    suppliers,
+    matchingOrders, setMatchingOrders,
     hasPrevOrder, setHasPrevOrder}) {
 
     const orders = useSupplierOrders()

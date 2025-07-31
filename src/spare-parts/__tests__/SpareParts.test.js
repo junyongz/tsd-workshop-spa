@@ -6,8 +6,9 @@ import SpareParts from '../SpareParts';
 import SupplierOrders from '../../suppliers/SupplierOrders';
 import { SupplierOrderContext } from '../../suppliers/SupplierOrderContextProvider';
 
-jest.mock('../SparePartDialog', () => ({afterSave, afterRemoveMedia}) => 
+jest.mock('../SparePartDialog', () => ({afterSave, afterRemoveMedia, sparePart}) => 
     <div>
+        <span aria-label="existing part detail">{sparePart?.id} {sparePart?.partNo} {sparePart?.partName}</span>
         <span data-testid="afterSave" onClick={(e) => afterSave(e.target.sparePart)}></span>
         <span data-testid="afterRemoveMedia" onClick={() => afterRemoveMedia({id: 3001})}></span>
     </div>
@@ -23,16 +24,17 @@ afterAll(() => {
 })
 
 const theOrders = [
-    {id: 5000, supplierId: 2000, sparePartId: 1000},
-    {id: 5001, supplierId: 2001, sparePartId: 1001},
-    {id: 5002, supplierId: 2001, sparePartId: 1002},
-    {id: 5003, supplierId: 2000, sparePartId: 1003}
+    {id: 5000, supplierId: 2000, sparePartId: 1000, unitPrice: 5},
+    {id: 5001, supplierId: 2001, sparePartId: 1001, unitPrice: 15},
+    {id: 5002, supplierId: 2001, sparePartId: 1002, unitPrice: 25},
+    {id: 5003, supplierId: 2000, sparePartId: 1003, unitPrice: 15},
+    {id: 5004, supplierId: 2001, sparePartId: 1000, unitPrice: 8},
 ]
 const mockSuppliers = [{ id: 2000, supplierName: 'Han Seng' }, { id: 2001, supplierName: 'Kok Song' }];
 
 
 test('filters spare parts based on search options, then remove search options later on', async () => {
-    const user = userEvent.setup()
+    const user = userEvent.setup({advanceTimers: jest.advanceTimersByTime})
 
     let intersectionFunc;
     const disconnectFn = jest.fn()
@@ -128,10 +130,17 @@ test('filters spare parts based on search options, then remove search options la
     expect(observeFn).toBeCalledTimes(3)
     expect(unobserveFn).toBeCalledTimes(2)
 
+    // photo gallery popup
+    expect(screen.getAllByRole('button', {name: 'view photos for part 1000'})).toHaveLength(2)
+    await user.click(screen.getAllByRole('button', {name: 'view photos for part 1000'})[0])
+    await waitFor(() => expect(screen.queryByText('11110000 - Air Tank')).toBeInTheDocument())
+    expect(screen.queryByText('11110000 - Air Tank')).toBeInTheDocument()
+    await user.click(screen.getByLabelText('Close'))
+
     // test afterSave and afterRemoveMedia
     const mockAfterSave = screen.getByTestId('afterSave')
     const evt = createEvent.click(mockAfterSave, {target: {sparePart: {
-        id: 1003, partNo: '33220001', partName: 'Brake Adjuster', description: 'Brake adjuster', oems:[], compatibleTrucks:[] 
+        id: 1003, partNo: '33220001', partName: 'Brake Adjuster', description: 'Brake adjuster', oems:[], compatibleTrucks:[], orderIds: [] 
     }}})
     fireEvent.click(mockAfterSave, evt)
     // increase to 4 (from 3)
@@ -151,7 +160,7 @@ test('filters spare parts based on search options, then remove search options la
 });
 
 test('update existing parts', async() => {
-    const user = userEvent.setup()
+    const user = userEvent.setup({advanceTimers: jest.advanceTimersByTime})
 
     jest.doMock('../SparePartDialog', () => ({afterSave, afterRemoveMedia}) => 
         <div>
@@ -183,6 +192,7 @@ test('update existing parts', async() => {
         json: () => Promise.resolve([])
     })
 
+    // search parts with 'tank' keyword
     const mockOrders = new SupplierOrders([...theOrders], jest.fn());
     render(
         <SupplierOrderContext value={mockOrders}><SpareParts
@@ -202,12 +212,26 @@ test('update existing parts', async() => {
     expect(screen.queryAllByText('Flame Tank')).toHaveLength(1)
     expect(screen.queryAllByText('Brake Adjuster')).toHaveLength(0)
 
+    // also price range
+    expect(screen.queryByText('$5 - $8')).toBeInTheDocument()
+
     // after save for to work on existing spare part
     const mockAfterSave = screen.getByTestId('afterSave')
     const evt = createEvent.click(mockAfterSave, {target: {sparePart: {
-        id: 1002, partNo: '33220000', partName: 'Brake Adjuster XB', description: 'Brake adjuster for Heavy Tank', oems:[], compatibleTrucks:[] 
+        id: 1002, partNo: '33220000', partName: 'Brake Adjuster XB', description: 'Brake adjuster for Heavy Tank', 
+            oems:[{name: 'OSK', url: 'http://osk.com'}], 
+            compatibleTrucks:[{make: 'Hino', model: '700'}], 
+            orderIds: [] 
     }}})
     fireEvent.click(mockAfterSave, evt)
 
     expect(screen.getAllByRole("menuitem")).toHaveLength(3)
+
+    // existing
+    await user.click(screen.getByRole('button', {name: 'header for Brake Adjuster XB'}))
+    expect(screen.getByLabelText('existing part detail')).toHaveTextContent('1002 33220000 Brake Adjuster XB')
+
+    // create new
+    await user.click(screen.getByRole('button', {name: 'button to show dialog for add/edit spare part'}))
+    expect(screen.getByLabelText('existing part detail')).toHaveTextContent('')
 })

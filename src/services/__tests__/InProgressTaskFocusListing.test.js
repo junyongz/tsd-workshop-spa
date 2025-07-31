@@ -128,13 +128,36 @@ test('change margin to 30%', async () => {
         "tasks": [{"id": 8800001, "quotedPrice": 50, "recordedDate": "2022-02-02", "remarks": "to adjust brake", "rid": expect.anything(), 
             "selectedTask": [{"complexity": "LOW", "component": {"subsystem": "brake"}, "description": "adjust brake", "id": 540001, "unitPrice": 150}], "taskId": 540001}], 
         "vehicleId": 20001, "vehicleNo": "J 23"})
+    
+    // direct change in input text
+    await user.click(document.querySelectorAll('.card')[0])
+    await user.click(screen.getByRole('spinbutton', {name: 'manual input margin for all parts'}))
+    await user.keyboard("[Backspace][Backspace]40")
+    await user.click(screen.getByText('OKAY'))
+
+    expect(onNewServiceCreated).lastCalledWith({"id": 10001, "mileageKm": 230000, 
+        "sparePartUsages": [
+            {"id": 990001, "margin": 40, 
+                "order": {"id": 1000, "itemCode": "1000", "partName": "Engine Oil 20w-50", "quantity": 100, "status": "ACTIVE", "supplierId": 60001, "unit": "litres", "unitPrice": 9.7}, 
+                "orderId": 1000, "quantity": 20, "soldPrice": 13.579999999999998, "usageDate": "2022-02-03"}, 
+            {"id": 990004, "margin": 40, 
+                "order": {"id": 2000, "itemCode": "2000", "partName": "Oil Filter", "quantity": 5, "status": "ACTIVE", "supplierId": 60002, "unit": "pc", "unitPrice": 29.5}, 
+                "orderId": 2000, "quantity": 1, "soldPrice": 41.3, "usageDate": "2022-02-03"}], 
+        "sparePartsMargin": 40, "startDate": "2022-02-02", 
+        "tasks": [{"id": 8800001, "quotedPrice": 50, "recordedDate": "2022-02-02", "remarks": "to adjust brake", "rid": expect.anything(), 
+            "selectedTask": [{"complexity": "LOW", "component": {"subsystem": "brake"}, "description": "adjust brake", "id": 540001, "unitPrice": 150}], "taskId": 540001}], 
+        "vehicleId": 20001, "vehicleNo": "J 23"})
 })
 
 test('change margin individually', async () => {
     const user = userEvent.setup()
 
+    const trxs = newTransactions()
+    trxs[0].tasks = [{
+        id: 8800002, recordedDate: '2022-02-02', taskId: 540002, remarks: 'to sew the broken seat', quotedPrice: 150
+    }, ...trxs[0].tasks]
     const onNewServiceCreated = jest.fn()
-    render(<ServiceContext value={new ServiceTransactions(newTransactions(), jest.fn())}>
+    render(<ServiceContext value={new ServiceTransactions(trxs, jest.fn())}>
         <SupplierOrderContext value={new SupplierOrders(orders, jest.fn())}>
             <InProgressTaskFocusListing 
                 suppliers={suppliers} vehicles={vehicles} 
@@ -151,7 +174,7 @@ test('change margin individually', async () => {
     expect(screen.queryByText('Engine Oil 20w-50')).toBeInTheDocument()
     expect(screen.queryByText('Oil Filter')).toBeInTheDocument()
 
-    await user.click(screen.queryByText('Engine Oil 20w-50'))
+    await user.click(screen.getByText('Engine Oil 20w-50'))
     await user.click(screen.getByLabelText('individual margin 40%'))
     await user.click(screen.getByText('OK'))
 
@@ -167,8 +190,35 @@ test('change margin individually', async () => {
                 "order": {"id": 2000, "itemCode": "2000", "partName": "Oil Filter", "quantity": 5, "status": "ACTIVE", "supplierId": 60002, "unit": "pc", "unitPrice": 29.5}, 
                 "orderId": 2000, "quantity": 1, "usageDate": "2022-02-03"}], 
         "startDate": "2022-02-02", 
-        "tasks": [{"id": 8800001, "quotedPrice": 50, "recordedDate": "2022-02-02", "remarks": "to adjust brake", "rid": expect.anything(), 
-            "selectedTask": [{"complexity": "LOW", "component": {"subsystem": "brake"}, "description": "adjust brake", "id": 540001, "unitPrice": 150}], "taskId": 540001}], 
+        "tasks": [
+            {"id": 8800001, "quotedPrice": 50, "recordedDate": "2022-02-02", "remarks": "to adjust brake", "rid": expect.anything(), 
+                "selectedTask": [{"complexity": "LOW", "component": {"subsystem": "brake"}, "description": "adjust brake", "id": 540001, "unitPrice": 150}], "taskId": 540001},
+            {"id": 8800002, "quotedPrice": 150, "recordedDate": "2022-02-02", "remarks": "to sew the broken seat", "rid": expect.anything(), 
+                "selectedTask": [{"complexity": "HIGH", "component": {"subsystem": "cab"}, "description": "touch up cabin seat", "id": 540002, "unitPrice": 250}], "taskId": 540002}], 
+        "vehicleId": 20001, "vehicleNo": "J 23"})
+
+    // direct change in input text
+    await user.click(document.querySelectorAll('.card')[0])
+    await user.click(screen.getByText('Engine Oil 20w-50'))
+    await user.click(screen.getByRole('spinbutton', {name: 'manual input margin for 1 part'}))
+    await user.keyboard("[Backspace][Backspace]55")
+    await user.click(screen.getByText('OKAY'))
+
+    expect(onNewServiceCreated).lastCalledWith({"id": 10001, "mileageKm": 230000, 
+        "sparePartUsages": [
+            {"id": 990001, "margin": 55, 
+                "order": {"id": 1000, "itemCode": "1000", "partName": "Engine Oil 20w-50", "quantity": 100, "status": "ACTIVE", "supplierId": 60001, "unit": "litres", "unitPrice": 9.7}, 
+                "orderId": 1000, "quantity": 20, "soldPrice": 15.035, "usageDate": "2022-02-03"}, 
+            {"id": 990004, "margin": 0, 
+                "order": {"id": 2000, "itemCode": "2000", "partName": "Oil Filter", "quantity": 5, "status": "ACTIVE", "supplierId": 60002, "unit": "pc", "unitPrice": 29.5}, 
+                "orderId": 2000, "quantity": 1, "usageDate": "2022-02-03"}], 
+        "startDate": "2022-02-02", 
+        "tasks": [
+            {"id": 8800001, "quotedPrice": 50, "recordedDate": "2022-02-02", "remarks": "to adjust brake", "rid": expect.anything(), 
+                "selectedTask": [{"complexity": "LOW", "component": {"subsystem": "brake"}, "description": "adjust brake", "id": 540001, "unitPrice": 150}], "taskId": 540001},
+            {"id": 8800002, "quotedPrice": 150, "recordedDate": "2022-02-02", "remarks": "to sew the broken seat", "rid": expect.anything(), 
+                "selectedTask": [{"complexity": "HIGH", "component": {"subsystem": "cab"}, "description": "touch up cabin seat", "id": 540002, "unitPrice": 250}], "taskId": 540002}
+        ], 
         "vehicleId": 20001, "vehicleNo": "J 23"})
 })
 
@@ -203,4 +253,55 @@ test('just view and go back', async () => {
     await user.click(screen.getByText('OKAY'))
 
     expect(onNewServiceCreated).not.toBeCalled()
+})
+
+test('add then save, hit validation then delete', async () => {
+    const user = userEvent.setup()
+
+    const onNewServiceCreated = jest.fn()
+    render(<ServiceContext value={new ServiceTransactions(newTransactions(), jest.fn())}>
+        <SupplierOrderContext value={new SupplierOrders(orders, jest.fn())}>
+            <InProgressTaskFocusListing 
+                suppliers={suppliers} vehicles={vehicles} 
+                companies={companies} taskTemplates={taskTemplates}
+                onNewServiceCreated={onNewServiceCreated} />
+        </SupplierOrderContext>
+    </ServiceContext>)
+
+    expect(document.querySelectorAll('.card')).toHaveLength(2)
+
+    // click on the first one.
+    await user.click(document.querySelectorAll('.card')[0])
+    expect(screen.queryByText('Engine Oil 20w-50')).toBeInTheDocument()
+    expect(screen.queryByText('Oil Filter')).toBeInTheDocument()
+
+    // OKAY and save
+    await user.click(screen.getByText('OKAY'))
+
+    expect(onNewServiceCreated).not.toBeCalled()
+
+    // now click the 2nd one
+    await user.click(document.querySelectorAll('.card')[1])
+    expect(screen.queryByText('Oil Filter')).toBeInTheDocument()
+    expect(screen.queryByText('Engine Oil 20w-50')).not.toBeInTheDocument()
+
+    // add without filling, hit error it should
+    await user.click(screen.getByText('Add New'))
+    await user.click(screen.getByText('OKAY'))
+    expect(screen.getByPlaceholderText('Find a suitable task')).not.toBeValid()
+
+    // now remove and hit OK
+    await user.click(screen.getByLabelText('remove task 0'))
+    await user.click(screen.getByText('OKAY'))
+
+    expect(onNewServiceCreated).toBeCalledWith(
+        {"id": 10003, "mileageKm": 3100, 
+            "sparePartUsages": [
+                {"id": 990003, "margin": 0, 
+                    "order": {"id": 2000, "itemCode": "2000", "partName": "Oil Filter", 
+                        "quantity": 5, "status": "ACTIVE", "supplierId": 60002, "unit": "pc", 
+                        "unitPrice": 29.5}, 
+                "orderId": 2000, "quantity": 2, "usageDate": "2022-01-03"}
+            ], "startDate": "2022-01-01", 
+            "tasks": [], "vehicleId": 20003, "vehicleNo": "J 34"})
 })

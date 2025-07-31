@@ -1,6 +1,13 @@
 import Pagination from "react-bootstrap/Pagination";
-
-const getPaginationItems = (activePage = -1, setActivePage, totalPages = -1, maxVisiblePages = -1) => {
+/**
+ * 
+ * @param {number} activePage 
+ * @param {React.SetStateAction<number>} setActivePage 
+ * @param {number} totalPages 
+ * @param {number} maxVisiblePages 
+ * @returns the sub components for &lt;Pagination&gt;&lt;/Pagination&gt; component
+ */
+const getPaginationItems = (activePage, setActivePage, totalPages, maxVisiblePages) => {
     const items = [];
     let startPage, endPage;
 

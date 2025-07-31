@@ -1,7 +1,11 @@
 import { createContext, useContext, useReducer } from "react";
 import SupplierOrders from "./SupplierOrders";
 
-export const SupplierOrderContext = createContext(new SupplierOrders())
+/**
+ * @constant 
+ * @type {React.Context<SupplierOrders>}
+ */
+export const SupplierOrderContext = createContext()
 
 export function SupplierOrderProvider({initialOrders=[], children}) {
     const reducer = (prev = new SupplierOrders(), newOrders=[]) => {

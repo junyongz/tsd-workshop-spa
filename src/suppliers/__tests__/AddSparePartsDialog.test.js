@@ -38,8 +38,6 @@ describe('AddSparePartsDialog Component', () => {
   test('renders dialog with initial state', () => {
     render(<SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}><AddSparePartsDialog {...defaultProps} /></SupplierOrderContext>);
 
-    fireEvent.click(screen.getByText('Add More'));
-
     expect(screen.getByText('Adding New Spare Parts')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('Choose a supplier')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('Key in DO. #')).toBeInTheDocument();
@@ -51,25 +49,24 @@ describe('AddSparePartsDialog Component', () => {
 
   test('closes dialog and resets state', () => {
     const setShowDialog = jest.fn();
-    render(<AddSparePartsDialog {...defaultProps} setShowDialog={setShowDialog} />);
+    render(<SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}><AddSparePartsDialog {...defaultProps} setShowDialog={setShowDialog} /></SupplierOrderContext>);
 
     fireEvent.click(screen.getByRole('button', { name: /close/i }));
     expect(setShowDialog).toHaveBeenCalledWith(false);
   });
 
   test('adds new item', () => {
-    render(<AddSparePartsDialog {...defaultProps} />);
+    render(<SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}><AddSparePartsDialog {...defaultProps} /></SupplierOrderContext>);
 
-    expect(document.querySelectorAll('.list-group-item').length).toBe(1) // Subtract total row
-    fireEvent.click(screen.getByText('Add More'));
     expect(document.querySelectorAll('.list-group-item').length).toBe(2)
+    fireEvent.click(screen.getByText('Add More'));
+    expect(document.querySelectorAll('.list-group-item').length).toBe(3)
   });
 
   test('removes an item', async () => {
     const user = userEvent.setup()
 
     render(<SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}><AddSparePartsDialog {...defaultProps} /></SupplierOrderContext>);
-    fireEvent.click(screen.getByText('Add More'));
     fireEvent.click(screen.getByText('Add More'));
     fireEvent.click(screen.getByText('Add More'));
 
@@ -104,7 +101,6 @@ describe('AddSparePartsDialog Component', () => {
     });
 
     expect(supplierInput).toHaveValue('Supplier A');
-    fireEvent.click(screen.getByText('Add More'));
 
     // Check spare part options are filtered
     const sparePartInput = screen.getByPlaceholderText('Find a existing one as template');
@@ -117,8 +113,6 @@ describe('AddSparePartsDialog Component', () => {
 
   test('selects item code and updates supplier', async () => {
     render(<SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}><AddSparePartsDialog {...defaultProps} /></SupplierOrderContext>);
-
-    fireEvent.click(screen.getByText('Add More'));
 
     const itemCodeInput = screen.getByPlaceholderText('Key in item code');
     fireEvent.click(itemCodeInput);
@@ -135,8 +129,6 @@ describe('AddSparePartsDialog Component', () => {
   test('selects spare part and updates supplier', async () => {
     render(<SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}><AddSparePartsDialog {...defaultProps} /></SupplierOrderContext>);
 
-    fireEvent.click(screen.getByText('Add More'));
-
     const sparePartInput = screen.getByPlaceholderText('Find a existing one as template');
     fireEvent.click(sparePartInput);
     fireEvent.change(sparePartInput, { target: { value: 'Tire' } });
@@ -150,9 +142,7 @@ describe('AddSparePartsDialog Component', () => {
   });
 
   test('updates quantity and unit price', () => {
-    render(<AddSparePartsDialog {...defaultProps} />);
-
-    fireEvent.click(screen.getByText('Add More'));
+    render(<SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}><AddSparePartsDialog {...defaultProps} /></SupplierOrderContext>);
 
     const quantityInput = screen.getByPlaceholderText('Quantity');
     fireEvent.change(quantityInput, { target: { value: '5' } });
@@ -166,10 +156,7 @@ describe('AddSparePartsDialog Component', () => {
   });
 
   test('validates form and prevents save on invalid input', async () => {
-    render(<AddSparePartsDialog {...defaultProps} />);
-
-    const addMoreButton = screen.getByText('Add More')
-    fireEvent.click(addMoreButton)
+    render(<SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}><AddSparePartsDialog {...defaultProps} /></SupplierOrderContext>);
 
     fireEvent.click(screen.getByText('Save'));
     expect(screen.getByPlaceholderText('Find a existing one as template').closest('form')).toHaveClass('was-validated');
@@ -187,9 +174,6 @@ describe('AddSparePartsDialog Component', () => {
       fireEvent.click(screen.getByText('Supplier A'));
     });
     fireEvent.change(screen.getByPlaceholderText('Key in DO. #'), { target: { value: 'DO123' } });
-
-    const addMoreButton = screen.getByText('Add More')
-    fireEvent.click(addMoreButton)
 
     const sparePartInput = screen.getByPlaceholderText('Find a existing one as template');
     fireEvent.click(sparePartInput);
@@ -225,7 +209,7 @@ describe('AddSparePartsDialog Component', () => {
   test('saves valid form data, using "onblur"', async () => {
     const user = userEvent.setup()
 
-    render(<AddSparePartsDialog {...defaultProps} />);
+    render(<SupplierOrderContext value={new SupplierOrders([], jest.fn())}><AddSparePartsDialog {...defaultProps} /></SupplierOrderContext>);
 
     await user.click(screen.getByPlaceholderText('Key in Invoice Date'))
     await user.keyboard('2023-01-01')
@@ -236,7 +220,6 @@ describe('AddSparePartsDialog Component', () => {
     await user.click(screen.getByPlaceholderText('Key in DO. #'))
     await user.keyboard('DO123')
 
-    await user.click(screen.getByText('Add More'))
     await user.click(screen.getByPlaceholderText('Find a existing one as template'))
     await user.keyboard('Engine Oil')
 
@@ -271,7 +254,9 @@ describe('AddSparePartsDialog Component', () => {
     });
   });
 
-  test('renders existing order in edit mode with disabled fields', () => {
+  test('renders existing order in edit mode with disabled fields', async () => {
+    const user = userEvent.setup()
+
     const existingOrder = [{
       id: 1,
       invoiceDate: '2023-01-01',
@@ -283,23 +268,26 @@ describe('AddSparePartsDialog Component', () => {
       unit: 'ltr',
       unitPrice: 50
     }];
-    render(<AddSparePartsDialog {...defaultProps} existingOrder={existingOrder} />);
+    render(<SupplierOrderContext value={new SupplierOrders([], jest.fn())}><AddSparePartsDialog {...defaultProps} existingOrder={existingOrder} /></SupplierOrderContext>);
 
-    expect(screen.getByText('Update Spare Parts')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Key in Invoice Date')).toHaveValue('2023-01-01');
-    expect(screen.getByPlaceholderText('Choose a supplier')).toHaveValue('Supplier A');
-    expect(screen.getByPlaceholderText('Key in DO. #')).toHaveValue('DO123');
-    expect(screen.getByPlaceholderText('Key in item code')).toHaveValue('ABC123');
-    expect(screen.getByPlaceholderText('Find a existing one as template')).toHaveValue('Engine Oil');
-    expect(screen.getByPlaceholderText('Quantity')).toHaveValue(10);
-    expect(screen.getByPlaceholderText('Price $')).toHaveValue(50);
+    expect(screen.queryByText('Update Spare Parts')).toBeInTheDocument();
+    expect(screen.queryByPlaceholderText('Key in Invoice Date')).toHaveValue('2023-01-01');
+    expect(screen.queryByPlaceholderText('Choose a supplier')).toHaveValue('Supplier A');
+    expect(screen.queryByPlaceholderText('Key in DO. #')).toHaveValue('DO123');
+    expect(screen.queryByPlaceholderText('Key in item code')).toHaveValue('ABC123');
+    expect(screen.queryByPlaceholderText('Find a existing one as template')).toHaveValue('Engine Oil');
+    expect(screen.queryByPlaceholderText('Quantity')).toHaveValue(10);
+    expect(screen.queryByPlaceholderText('Price $')).toHaveValue(50);
 
-    expect(screen.getByPlaceholderText('Key in item code')).toBeDisabled();
-    expect(screen.getByPlaceholderText('Find a existing one as template')).toBeDisabled();
-    expect(screen.getByPlaceholderText('Quantity')).toBeDisabled();
-    expect(screen.getByPlaceholderText('Price $')).toBeDisabled();
-    expect(screen.getByText('Add More')).toBeDisabled();
-    expect(screen.getByText('Clone')).toBeInTheDocument();
+    expect(screen.queryByPlaceholderText('Key in item code')).toBeDisabled();
+    expect(screen.queryByPlaceholderText('Find a existing one as template')).toBeDisabled();
+    expect(screen.queryByPlaceholderText('Quantity')).toBeDisabled();
+    expect(screen.queryByPlaceholderText('Price $')).toBeDisabled();
+    expect(screen.queryByText('Add More')).toBeDisabled();
+    expect(screen.queryByText('Clone')).toBeInTheDocument();
+
+    await user.click(screen.getByText('Clone'))
+    expect(screen.queryByText('Clone')).not.toBeInTheDocument();
   });
 
   test('renders existing order with full quantity available', async () => {
@@ -315,7 +303,7 @@ describe('AddSparePartsDialog Component', () => {
       unit: 'pcs',
       unitPrice: 75
     }];
-    render(<AddSparePartsDialog {...defaultProps} existingOrder={existingOrder} />);
+    render(<SupplierOrderContext value={new SupplierOrders([], jest.fn())}><AddSparePartsDialog {...defaultProps} existingOrder={existingOrder} /></SupplierOrderContext>);
 
     expect(screen.getByPlaceholderText('Key in item code')).toHaveValue('XYZ789');
     expect(screen.getByPlaceholderText('Find a existing one as template')).toHaveValue('Tire');

@@ -7,7 +7,10 @@ import { ServiceContext } from '../../services/ServiceContextProvider';
 import ServiceTransactions from '../../ServiceTransactions';
 import { addDaysToDateStr, addMonthsToDateStr } from '../../utils/dateUtils';
 
-afterAll(() => jest.clearAllMocks())
+afterEach(() => { 
+    jest.clearAllMocks()
+    jest.restoreAllMocks()
+})
 
 global.fetch = jest.fn()
 
@@ -91,7 +94,7 @@ test('show update dialog for vehicle and update', async () => {
     global.fetch.mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve({
-            id: 820004, vehicleNo: "JJ 4"
+            id: 82004, vehicleNo: "JJ 4"
         })
     })
 
@@ -137,8 +140,52 @@ test('show update dialog for vehicle and update', async () => {
     })
 
     const updateFunc = setVehicles.mock.calls[0][0]
-    const newVehicles = updateFunc([{id: 820004, vehicleNo: "JJ 4"}, {id: 820001, vehicleNo: "JJ 3"}])
-    expect(newVehicles).toEqual([{id: 820004, vehicleNo: "JJ 4"}, {id: 820001, vehicleNo: "JJ 3"}])
+    const newVehicles = updateFunc([{id: 82004, vehicleNo: "JJ 4"}, {id: 820001, vehicleNo: "JJ 3"}])
+    expect(newVehicles).toEqual([{id: 82004, vehicleNo: "JJ 4"}, {id: 820001, vehicleNo: "JJ 3"}])
+})
+
+test('show update dialog for vehicle and failed to update', async () => {
+    const user = userEvent.setup()
+
+    global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({errorCode: 500, description: "failed badly"})
+    })
+
+    const setVehicles = jest.fn()
+
+    render(<ServiceContext value={new ServiceTransactions(services, jest.fn())}>
+            <Vehicles vehicles={vehicles} companies={companies} setVehicles={setVehicles}></Vehicles>
+        </ServiceContext>)
+
+    expect(screen.getAllByRole("button")).toHaveLength(2)
+    await user.click(screen.getAllByRole("button")[0])
+
+    await user.click(document.querySelector('input[name="insuranceExpiryDate"]'))
+    await user.keyboard(addMonthsToDateStr(new Date(), 6))
+
+    await user.click(document.querySelector('input[name="roadTaxExpiryDate"]'))
+    await user.keyboard(addMonthsToDateStr(new Date(), 6))
+
+    await user.click(document.querySelector('input[name="inspectionDueDate"]'))
+    await user.keyboard(addMonthsToDateStr(new Date(), 3))
+
+    const consoleError = jest.spyOn(console, 'error')
+    await user.click(screen.getByRole('button', {name: 'Save'}))
+
+    await waitFor(() => {
+        expect(global.fetch).lastCalledWith("http://localhost:8080/api/vehicles", 
+            {"body": "{\"id\":82004,\"vehicleNo\":\"JJ 4\",\"trailerNo\":\"\",\"companyId\":8001,\"insuranceExpiryDate\":\""+
+                addMonthsToDateStr(new Date(), 6)+"\",\"roadTaxExpiryDate\":\""+
+                addMonthsToDateStr(new Date(), 6)+"\",\"inspectionDueDate\":\""+
+                addMonthsToDateStr(new Date(), 3)+"\",\"trailerInspectionDueDate\":\""+
+                addMonthsToDateStr(new Date(), 3)+"\",\"nextInspectionDate\":\"\",\"nextTrailerInspectionDate\":\"\"}", 
+            "headers": {"Content-type": "application/json"}, 
+            "method": "POST"})
+    })
+
+    expect(consoleError.mock.calls[0][0])
+        .toEqual("failed to save vehicles: {\"errorCode\":500,\"description\":\"failed badly\"}")
 })
 
 test('trailer different inspection date', async () => {
@@ -147,7 +194,7 @@ test('trailer different inspection date', async () => {
     global.fetch.mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve({
-            id: 820004, vehicleNo: "JJ 4", trailerNo: "T/J 1"
+            id: 82004, vehicleNo: "JJ 4", trailerNo: "T/J 1"
         })
     })
 
@@ -189,6 +236,41 @@ test('trailer different inspection date', async () => {
     })
 
     const updateFunc = setVehicles.mock.calls[0][0]
-    const newVehicles = updateFunc([{id: 820004, vehicleNo: "JJ 4"}, {id: 820001, vehicleNo: "JJ 3"}])
-    expect(newVehicles).toEqual([{id: 820004, trailerNo: "T/J 1", vehicleNo: "JJ 4"}, {id: 820001, vehicleNo: "JJ 3"}])
+    const newVehicles = updateFunc([{id: 82004, vehicleNo: "JJ 4"}, {id: 82001, vehicleNo: "JJ 3"}])
+    expect(newVehicles).toEqual([{id: 82004, trailerNo: "T/J 1", vehicleNo: "JJ 4"}, {id: 82001, vehicleNo: "JJ 3"}])
+})
+
+test('to load trailer different inspection date', async () => {
+    const user = userEvent.setup()
+
+    global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+            id: 820004, vehicleNo: "JJ 4", trailerNo: "T/J 1"
+        })
+    })
+
+    const setVehicles = jest.fn()
+    const usingVehicles = [...vehicles]
+    usingVehicles[0].trailerInspectionDueDate = '2005-08-15'
+    usingVehicles[1].trailerInspectionDueDate = '2005-10-15'
+
+    render(<ServiceContext value={new ServiceTransactions(services, jest.fn())}>
+            <Vehicles vehicles={usingVehicles} companies={companies} setVehicles={setVehicles}></Vehicles>
+        </ServiceContext>)
+    
+    await user.click(screen.getByText('Only showing for Harsoon'))
+    await user.click(screen.getByText('JJ 2'))
+    expect(document.querySelector('[name="trailerInspectionDueDate"]')).toHaveValue('2005-10-15')
+    // cancel it to be same inspection due date
+    await user.click(screen.getByText('Cancel, they are same'))
+    expect(document.querySelector('[name="trailerInspectionDueDate"]')).not.toBeInTheDocument()
+
+    // save with any company name
+    await user.click(screen.getByPlaceholderText('Choose a company...'))
+    await user.keyboard('{Control>}A{/Control}[Backspace]Facebook')
+
+    await user.click(screen.getByRole('button', {name: 'Save'}))
+    expect(screen.getByPlaceholderText('Choose a company...').validationMessage)
+        .toEqual('not a valid company, either choose one and create one first')
 })

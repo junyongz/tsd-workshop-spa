@@ -2,13 +2,24 @@ class SupplierOrders {
     #ordersList
     #ordersMapping
     #ordersIndexes
-    constructor(orders=[], dispatch) {
+
+    /**
+     * 
+     * @param {Object[]} orders 
+     * @param {React.ActionDispatch<Object[]} dispatch 
+     */
+    constructor(orders, dispatch) {
         this.#ordersList = orders
         this.#refreshIndexes()
         this.#refreshMapping()
         this.dispatch = dispatch
     }
 
+    /**
+     * 
+     * @param {React.ActionDispatch<Object[]>} dispatch 
+     * @returns 
+     */
     acceptDispatch(dispatch) {
         this.dispatch = dispatch
     }
@@ -33,14 +44,29 @@ class SupplierOrders {
         )
     }
 
-    byId(id=0) {
+    /**
+     * 
+     * @param {number} id 
+     * @returns 
+     */
+    byId(id) {
         return this.#ordersMapping[id]
     }
 
-    forIndex(id=0) {
+    /**
+     * 
+     * @param {number} id 
+     * @returns 
+     */
+    forIndex(id) {
         return this.#ordersIndexes[id]
     }
 
+    /**
+     * 
+     * @param {Object} order 
+     * @param {number} order.id
+     */
     removeOrder(order) {
         const idx = this.forIndex(order.id)
         this.#ordersList.splice(idx, 1)
@@ -49,14 +75,23 @@ class SupplierOrders {
         this.#doSetOrders()
     }
 
-    replaceAll(orders=[]) {
+    /**
+     * 
+     * @param {Object[]} orders
+     */
+    replaceAll(orders) {
         this.#ordersList = orders
         this.#refreshIndexes()
         this.#refreshMapping()
         this.#doSetOrders()
     }
 
-    updateOrders(orders=[]) {
+    /**
+     * 
+     * @param {Object[]} orders 
+     * @param {number} orders[].id
+     */
+    updateOrders(orders) {
         orders.forEach(o => {
             const idx = this.forIndex(o.id)
             if (idx >= 0) {
@@ -71,7 +106,11 @@ class SupplierOrders {
         this.#doSetOrders()
     }
 
-    #doRemoveSparePart(sparePartId=1000) {
+    /**
+     * 
+     * @param {number} sparePartId 
+     */
+    #doRemoveSparePart(sparePartId) {
         this.#ordersList.filter(o => o.sparePartId === sparePartId)
             .map(o => {
                 // null and undefined can be very different
@@ -84,10 +123,15 @@ class SupplierOrders {
             })
     }
 
-    updateOrdersSparePartId(sparePartId=1000, orderIds=[]) {
+    /**
+     * 
+     * @param {number} sparePartId 
+     * @param {number[]} orderIds 
+     */
+    updateOrdersSparePartId(sparePartId, orderIds) {
         this.#doRemoveSparePart(sparePartId)
 
-        orderIds.forEach(oid => {
+        orderIds?.forEach(oid => {
             const idx = this.forIndex(oid)
             this.#ordersList[idx].sparePartId = sparePartId
         })
@@ -95,7 +139,11 @@ class SupplierOrders {
         this.#doSetOrders()
     }
 
-    removeSparePart(sparePartId=1000) {
+    /**
+     * 
+     * @param {number} sparePartId 
+     */
+    removeSparePart(sparePartId) {
         this.#doRemoveSparePart(sparePartId)
         this.#doSetOrders()
     }

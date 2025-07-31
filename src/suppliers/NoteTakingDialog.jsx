@@ -2,7 +2,16 @@ import { useRef, useState } from "react";
 import { Button, Col, Container, Form, InputGroup, Modal, Row } from "react-bootstrap";
 import { Notes } from "../Icons";
 
-function NoteTakingDialog({isShow, setShowDialog, onUpdateOrder=()=>{}, noteSparePart}) {
+/**
+ * 
+ * @param {Object} props
+ * @param {boolean} props.isShow
+ * @param {React.SetStateAction<boolean>} props.setShowDialog
+ * @param {Function} onUpdateOrder
+ * @param {Object} noteSparePart
+ * @returns 
+ */
+function NoteTakingDialog({isShow, setShowDialog, onUpdateOrder, noteSparePart}) {
     const formRef = useRef()
     const [validated, setValidated] = useState(false)
 

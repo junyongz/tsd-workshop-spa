@@ -135,7 +135,7 @@ function InProgressTaskFocusListing({suppliers=[], taskTemplates=[], onNewServic
                 {[20, 30, 40].map(v => 
                 <Nav.Item key={v}><Nav.Link aria-label={`individual margin ${v}%`} eventKey={v}>{v}%</Nav.Link></Nav.Item>)}
                 <Nav.Item className='ms-3'><InputGroup>
-                  <Form.Control onChange={(e) => changeMargin(parseFloat(e.target.value))} 
+                  <Form.Control aria-label="manual input margin for 1 part" onChange={(e) => changeMargin(parseFloat(e.target.value))} 
                   style={{width: '6rem'}} required min="0" max="300" size="lg" 
                   type="number" step={5} name="sparePartsMargin" value={selectedSparePart.margin}/><InputGroup.Text>%</InputGroup.Text>
                   </InputGroup></Nav.Item>
@@ -168,8 +168,7 @@ function InProgressTaskFocusListing({suppliers=[], taskTemplates=[], onNewServic
                 <Col xs="12"><h4><span className="text-body-secondary">started since {v.startDate}</span></h4></Col>
                 <Col xs="6">
                 <h4>
-                    $ {((v.migratedHandWrittenSpareParts?.reduce((acc, curr) => acc += curr.totalPrice, 0) || 0) + 
-                        (v.sparePartUsages?.reduce((acc, curr) =>  acc + (curr.quantity * curr.soldPrice), 0) || 0) +
+                    $ {((v.sparePartUsages?.reduce((acc, curr) =>  acc + (curr.quantity * curr.soldPrice), 0) || 0) +
                         (v.tasks?.reduce((acc, curr) => acc + (curr.quotedPrice || 0), 0) || 0)).toFixed(2)}
                 </h4>
                 </Col>
@@ -186,10 +185,6 @@ function InProgressTaskFocusListing({suppliers=[], taskTemplates=[], onNewServic
             <Container>
                 <div className='position-sticky top-0' style={{zIndex: 6}}>
                 <Row className='mb-1'>
-                    { false && <Col xs="6">
-                    <Button className='w-100' variant='outline-warning' size='lg' 
-                        onClick={() => showAllInProgressTasks()}><i className="bi bi-arrow-left-circle-fill"></i> Go Back</Button>
-                    </Col> }
                     <Col xs="12">
                     <Button className='w-100' variant='success' size='lg' 
                         onClick={() => saveChange()}><i className="bi bi-arrow-left-circle-fill"></i> OKAY</Button>
@@ -200,8 +195,7 @@ function InProgressTaskFocusListing({suppliers=[], taskTemplates=[], onNewServic
                   <Col xs="12" lg="4" className='text-lg-start text-center'><h4><span className="text-body-secondary">Started since {targetedService.startDate}</span></h4></Col>
                   <Col xs="12" lg="4" className='text-center'>
                     <h4>
-                      $ {((targetedService.migratedHandWrittenSpareParts?.reduce((acc, curr) => acc += curr.totalPrice, 0) || 0) + 
-                          (spareParts?.reduce((acc, curr) =>  acc + (curr.quantity * curr.soldPrice), 0) || 0) +
+                      $ {((spareParts?.reduce((acc, curr) =>  acc + (curr.quantity * curr.soldPrice), 0) || 0) +
                           (tasks?.reduce((acc, curr) => acc + curr.quotedPrice, 0) || 0)).toFixed(2)}
                     </h4>
                   </Col>
@@ -234,7 +228,11 @@ function InProgressTaskFocusListing({suppliers=[], taskTemplates=[], onNewServic
                             {spareParts.length > 0 && <Nav className='justify-content-end' variant='pills' activeKey={targetedService.sparePartsMargin} onSelect={(v) => changeMargin(v)}>
                               {[20, 30, 40].map(v => 
                               <Nav.Item key={v}><Nav.Link eventKey={v}>{v}%</Nav.Link></Nav.Item>)}
-                              <Nav.Item className='ms-2'><InputGroup><Form.Control onChange={(e) => changeMargin(parseFloat(e.target.value))} style={{width: '6rem'}} required min="0" max="300" size="lg" type="number" step={5} name="sparePartsMargin" value={targetedService.sparePartsMargin} /><InputGroup.Text>%</InputGroup.Text></InputGroup></Nav.Item>
+                              <Nav.Item className='ms-2'><InputGroup>
+                                <Form.Control aria-label="manual input margin for all parts" onChange={(e) => changeMargin(parseFloat(e.target.value))} style={{width: '6rem'}} 
+                                  required min="0" max="300" size="lg" type="number" step={5} name="sparePartsMargin" 
+                                  value={targetedService.sparePartsMargin} /><InputGroup.Text>%</InputGroup.Text>
+                              </InputGroup></Nav.Item>
                             </Nav> }
                           </Col>
                           </Row>

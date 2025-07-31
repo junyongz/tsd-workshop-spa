@@ -77,20 +77,21 @@ function VehicleUpdateDialog({isShow, setShowDialog, vehicle, setVehicles, compa
             }
         })
         .then(res => {
-            if (!res.ok) {
-                console.trace("Issue with POST vehicle: " + JSON.stringify(res.body))
-                throw Error("not good")
-            }
             return res.json()
         })
         .then(saved => {
-            setVehicles(prevVehicles => {
-                const idx = prevVehicles.findIndex(veh => veh.id === saved.id)
-                const newVehicles = [...prevVehicles]
-                newVehicles[idx] = saved
-                return newVehicles
-            })
-            handleClose()
+            if (saved.id !== vehicle.id) {
+                console.error("failed to save vehicles: " + JSON.stringify(saved))
+            }
+            else {
+                setVehicles(prevVehicles => {
+                    const idx = prevVehicles.findIndex(veh => veh.id === saved.id)
+                    const newVehicles = [...prevVehicles]
+                    newVehicles[idx] = saved
+                    return newVehicles
+                })
+                handleClose()
+            }
         })
         .finally(() => handleClose())
     }

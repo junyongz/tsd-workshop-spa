@@ -1,12 +1,22 @@
 class ServiceTransactions {
     #transactions
     #transactionIndexes
+
+    /**
+     * 
+     * @param {Object[]} transactions 
+     * @param {React.ActionDispatch<Object[]>} dispatch 
+     */
     constructor(transactions = [], dispatch) {
         this.#transactions = transactions
         this.#refreshIndexes()
         this.dispatch = dispatch
     }
 
+    /**
+     * 
+     * @param {React.ActionDispatch<Object[]>} dispatch 
+     */
     acceptDispatch(dispatch) {
         this.dispatch = dispatch
     }

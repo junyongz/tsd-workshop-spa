@@ -416,8 +416,8 @@ test('choose a part, navigate to workmanship, back to part, part name retained',
     await user.click(screen.getByText("Save"))
     expect(saveService).toBeCalledWith({"id": 100001, "mileageKm": "", "notes": undefined, 
         "sparePartUsages": [{"margin": 0, "orderId": 1000, "quantity": "20", "soldPrice": 9.7, 
-            "usageDate": "2025-07-28", "vehicleNo": "J 23"}], 
-            "sparePartsMargin": undefined, "startDate": "2025-07-27", 
+            "usageDate": keyInStartDate, "vehicleNo": "J 23"}], 
+            "sparePartsMargin": undefined, "startDate": prevStartDate, 
             "tasks": [], "transactionTypes": [], "vehicleId": 50001, "vehicleNo": "J 23"})
     expect(setShow).toBeCalledWith(false)
 })

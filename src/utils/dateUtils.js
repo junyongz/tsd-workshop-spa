@@ -20,13 +20,25 @@ export function addMonthsToDateStr(dateVal, monthNum) {
     return `${aDate.getFullYear()}-${(aDate.getMonth()+1).toString().padStart(2,0)}-${aDate.getDate().toString().padStart(2,0)}`
 }
 
-export function sameDay(aDate=new Date(), anotherDate=new Date()) {
+/**
+ * 
+ * @param {Date} aDate 
+ * @param {Date} anotherDate 
+ * @returns whether provided dates are same day
+ */
+export function sameDay(aDate, anotherDate) {
     return aDate.getFullYear() === anotherDate.getFullYear() &&
             aDate.getMonth() === anotherDate.getMonth() &&
             aDate.getDate() === anotherDate.getDate()
 }
 
-export function sameMonth(aDate=new Date(), anotherDate=new Date()) {
+/**
+ * 
+ * @param {Date} aDate 
+ * @param {Date} anotherDate 
+ * @returns whether provided dates are same in same year and mont
+ */
+export function sameMonth(aDate, anotherDate) {
     return aDate.getFullYear() === anotherDate.getFullYear() &&
             aDate.getMonth() === anotherDate.getMonth()
 }

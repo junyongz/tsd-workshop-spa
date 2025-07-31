@@ -1,10 +1,21 @@
 import { createContext, useContext, useReducer } from "react";
 import ServiceTransactions from "../ServiceTransactions";
 
-export const ServiceContext = createContext(new ServiceTransactions())
+/**
+ * @constant 
+ * @type {React.Context<ServiceTransactions>}
+ */
+export const ServiceContext = createContext()
 
 export function WorkshopServicesProvider({initialServices=[], children}) {
-    const reducer = (prev = new ServiceTransactions(), newTransactions=[]) => {
+
+    /**
+     * 
+     * @param {ServiceTransactions} prev 
+     * @param {Object[]} newTransactions 
+     * @returns 
+     */
+    const reducer = (prev, newTransactions) => {
         return new ServiceTransactions(newTransactions, prev.dispatch)
     }
 

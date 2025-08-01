@@ -1,178 +1,216 @@
-import { render, screen, fireEvent, within, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import {jest, test, expect, afterEach} from '@jest/globals'
 import YearMonthView from '../YearMonthView';
-import { ScrollSpy } from 'bootstrap';
 import { useNavigate } from 'react-router-dom';
-import { ServiceContext } from '../ServiceContextProvider';
+import { WorkshopServicesProvider } from '../ServiceContextProvider';
 import { SupplierOrderContext } from '../../suppliers/SupplierOrderContextProvider';
-import ServiceTransactions from '../../ServiceTransactions';
 import SupplierOrders from '../../suppliers/SupplierOrders';
+import { months3EngChars } from '../../utils/dateUtils';
+import userEvent from '@testing-library/user-event';
 
-import {jest, test, expect} from '@jest/globals'
-
-
-// Mock OrderTooltip
 jest.mock('../OrderTooltip', () => ({ order, supplier }) => (
   <div>OrderTooltip for {order.id} from {supplier.supplierName}</div>
 ));
 
-// Mock ScrollSpy
 jest.mock('bootstrap')
 jest.mock('react-router-dom')
 
-describe('YearMonthView Component', () => {
-  const allServices = [
-    { index: 1, itemDescription: 'Oil Change', totalPrice: 100, quantity: 2, unit: 'ltr', unitPrice: 50 },
-    { index: 2, itemDescription: 'Tire Replacement', totalPrice: 200, quantity: 4, unit: 'pcs', unitPrice: 50 },
-    { index: 3, itemDescription: 'Brake Pads', totalPrice: 300, quantity: 2, unit: 'set', unitPrice: 150 },
-    { index: 4, itemDescription: 'Filter Change', totalPrice: 160, quantity: 2, unit: 'pcs', unitPrice: 80 },
-    { id: 10, orderId: 1, supplierId: 1, creationDate: '2023-01-05', itemDescription: 'Diesel Change',  quantity: 2, soldPrice: 35 },
-    { id: 20, orderId: 2, supplierId: 2, creationDate: '2023-01-06', itemDescription: 'Tire Rotation',  quantity: 4, soldPrice: 60 },
-    { id: 30, orderId: 3, supplierId: 1, creationDate: '2023-01-07', itemDescription: 'Brake Lining',  quantity: 2, soldPrice: 150 },
-    { id: 40, orderId: 4, supplierId: 2, creationDate: '2023-01-08', itemDescription: 'Air Balloon Change',  quantity: 2, soldPrice: 80 }
-  ];
+global.fetch = jest.fn()
 
-  const mockServices = {
-      transactions: [{ id: 1000, vehicleNo: 'Truck A', creationDate: '2023-01-01', startDate: '2023-01-01', sparePartUsages: allServices.slice(4, 5), migratedHandWrittenSpareParts: allServices.slice(0, 1) },
-        { id: 1001, vehicleNo: 'Truck B', creationDate: '2023-01-02', startDate: '2023-01-02', sparePartUsages: allServices.slice(5, 7), migratedHandWrittenSpareParts: allServices.slice(1, 3) },
-        { id: 1002, vehicleNo: 'Truck C', creationDate: '2023-01-03', startDate: '2023-01-03', sparePartUsages: allServices.slice(7), migratedHandWrittenSpareParts: allServices.slice(3, 4) }
-      ]
-  };
+const todayDate = new Date()
 
-  const mockSuppliers = [
-    { id: 1, supplierName: 'Supplier A' },
-    { id: 2, supplierName: 'Supplier B' }
-  ];
+/**
+ * @type {import('../../ServiceTransactions').WorkshopService[]}
+ */
+const transactions = [
+    {id: 10000, creationDate: '2020-01-02', startDate: '2020-01-02', vehicleId: 20001, vehicleNo: "J 23"},
+    {id: 10001, creationDate: '2020-01-12', startDate: '2020-01-12', vehicleId: 20001, vehicleNo: "J 23"},
+    {id: 10002, creationDate: '2020-02-02', startDate: '2020-02-02', vehicleId: 20002, vehicleNo: "J 33"},
+    {id: 10003, creationDate: '2020-03-02', startDate: '2020-03-02', vehicleId: 20003, vehicleNo: "J 34"},
+    {id: 10004, creationDate: '2021-01-02', startDate: '2021-01-02', vehicleId: 20001, vehicleNo: "J 23"},
+    {id: 10005, creationDate: '2021-03-02', startDate: '2021-03-02', vehicleId: 20002, vehicleNo: "J 33"},
+    {id: 10006, creationDate: '2021-03-19', startDate: '2021-03-19', vehicleId: 20003, vehicleNo: "J 34"},
+    {id: 10007, creationDate: '2022-04-07', startDate: '2022-04-07', vehicleId: 20001, vehicleNo: "J 23"},
+    {id: 10008, creationDate: '2022-08-07', startDate: '2022-08-07', vehicleId: 20002, vehicleNo: "J 33"},
+    {id: 10009, creationDate: '2022-08-09', startDate: '2022-08-09', vehicleId: 20003, vehicleNo: "J 34"},
+    {id: 10010, creationDate: '2022-10-17', startDate: '2022-10-17', vehicleId: 20001, vehicleNo: "J 23"},
+    {id: 10011, creationDate: '2022-11-09', startDate: '2022-11-09', vehicleId: 20002, vehicleNo: "J 33"},
+    {id: 10012, creationDate: '2023-04-07', startDate: '2023-04-07', vehicleId: 20003, vehicleNo: "J 34"},
+    {id: 10013, creationDate: '2023-04-27', startDate: '2023-04-27', vehicleId: 20001, vehicleNo: "J 23"},
+    {id: 10014, creationDate: '2023-10-07', startDate: '2023-10-07', vehicleId: 20002, vehicleNo: "J 33"},
+    {id: 10015, creationDate: '2023-10-10', startDate: '2023-10-10', vehicleId: 20003, vehicleNo: "J 34"}
+]
 
-  const mockOrders = [
-    { id: 1, details: 'Order 1', supplierId: 1, unit: 'ltr', unitPrice: 35 },
-    { id: 2, details: 'Order 2', supplierId: 2, unit: 'pcs', unitPrice: 60 },
-    { id: 3, details: 'Order 3', supplierId: 1, unit: 'set',  unitPrice: 150 },
-    { id: 4, details: 'Order 4', supplierId: 2, unit: 'pcs', unitPrice: 80 }
-  ];
+const orders = [
+  {id:1001, invoiceDate:"2019-01-19", supplierId:2000,
+    itemCode:"E-100", partName:"Engine Oil", quantity:10, unit:"ltr", unitPrice:9,
+    deliveryOrderNo:"DO001", status:"ACTIVE"},
+  {id:1002, invoiceDate:"2019-03-22", supplierId:2001,
+    itemCode:"A-100", partName:"Air Filter", quantity:5, unit:"pcs", unitPrice:80,
+    deliveryOrderNo:"DO002", status:"ACTIVE"},
+  {id:1003, invoiceDate:"2019-04-05", supplierId:2000, sheetName: 'JUL 23',
+    itemCode:"BP-001", partName:"Brake Pads", quantity:8, unit:"set", unitPrice:14,
+    deliveryOrderNo:"DO003", status:"ACTIVE"},
+  {id:1004, invoiceDate:"2019-12-13", supplierId:2001, sheetName: 'JUL 23',
+    itemCode:"BA-002", partName:"Brake Adjuster", quantity:4, unit: "pc", unitPrice:250,
+    deliveryOrderNo:"DO003", status:"ACTIVE"}
+];
 
-  const defaultProps = {
-    transactions: mockServices,
-    suppliers: mockSuppliers,
-    orders: {byId: (id) => mockOrders.find(o => o.id === id)}
-  };
+afterEach(() => jest.clearAllMocks())
 
-  beforeAll(() => {
-    jest.useFakeTimers('modern');
-    jest.setSystemTime(new Date('2023-01-01')); // June 15, 2023
-  });
+test('render the overview page with large screen', async() => {
+    const user = userEvent.setup()
 
-  afterAll(() => {
-    jest.useRealTimers();
-  });
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    ScrollSpy.mockClear(); // Clear ScrollSpy mock calls between tests
-  });
-
-  test('renders component with initial year and month', async () => {
-    global.fetch = jest.fn(() => Promise.resolve({ok: true, 
-      json: () => Promise.resolve(mockServices.transactions)}));
-    render(<ServiceContext value={new ServiceTransactions(mockServices.transactions, jest.fn())}>
-              <SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}>
-                <YearMonthView {...defaultProps} />
-            </SupplierOrderContext></ServiceContext>);
-
-    await waitFor(() => {
-      const yearButton = screen.getAllByRole('button', { name: '2023' });
-      expect(yearButton[1]).toBeInTheDocument();
-
-      expect(screen.getAllByRole('button', { name: 'Jan' })[1]).toHaveClass('btn-outline-dark');
-
-      expect(screen.getAllByText('Truck A').length).toBe(3);
-      expect(screen.getAllByText('Truck B').length).toBe(3);
-      expect(screen.getAllByText('Truck C').length).toBe(3);
-
-      expect(screen.getByText('Trucks')).toBeInTheDocument();
-      expect(screen.getByText('3')).toBeInTheDocument(); // 3 trucks
-      expect(screen.getByText('$ 1530.00')).toBeInTheDocument(); // Total amount
-      expect(screen.getByText('8')).toBeInTheDocument(); // 4 items
+    global.fetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(transactions) // just return all
     })
-  });
 
-  test('changes month via button', async () => {
-    global.fetch = jest.fn(() => Promise.resolve({ok: true, 
-      json: () => Promise.resolve(mockServices.transactions)}));
-    render(<ServiceContext value={new ServiceTransactions(mockServices.transactions, jest.fn())}>
-              <SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}>
-                <YearMonthView {...defaultProps} />
-            </SupplierOrderContext></ServiceContext>);
-
-    await waitFor(() => {
-      fireEvent.click(screen.getByRole('button', {current: 'Jun'}));
-
-      expect(screen.getByRole('button', { current: 'Jun' })).toHaveClass('btn-outline-dark');
+    window.matchMedia = jest.fn(() => {
+        return { matches: true }
     })
-  });
 
-  test('calls backToService when Back to Service button is clicked', async () => {
-    global.fetch = jest.fn(() => Promise.resolve({ok: true, 
-      json: () => Promise.resolve(mockServices.transactions)}));
-    render(<ServiceContext value={new ServiceTransactions(mockServices.transactions, jest.fn())}>
-              <SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}>
-                <YearMonthView {...defaultProps} />
-            </SupplierOrderContext></ServiceContext>);
+    render(<WorkshopServicesProvider initialServices={transactions}>
+            <SupplierOrderContext value={new SupplierOrders(orders, jest.fn())}>
+            <YearMonthView suppliers={[
+                {id: 2000, supplierName: 'Kah Seng'}, 
+                {id: 2001, supplierName: 'Seribu Bintang'} 
+            ]} 
+            taskTemplates={[]}></YearMonthView>
+            </SupplierOrderContext></WorkshopServicesProvider>)
 
-    await waitFor(() => {
-      fireEvent.click(screen.getByRole('button', { name: 'Back to Service' }));
-      expect(useNavigate()).toHaveBeenCalledWith('/')
+    document.documentElement.setAttribute('data-bs-theme', 'dark')
+
+    await waitFor(() => expect(global.fetch).toBeCalledWith(`http://localhost:8080/api/workshop-services?year=${todayDate.getFullYear()}&month=${todayDate.getMonth()+1}`))
+    await waitFor(() => expect(screen.queryAllByRole('document')).toHaveLength(0))
+    await waitFor(() => expect(screen.queryAllByRole('listitem')).toHaveLength(0))
+    
+    await user.click(screen.getByRole('button', {name: todayDate.getFullYear()}))
+    expect(screen.queryAllByLabelText(/change to year/)).toHaveLength(4)
+
+    // change year
+    let changeYear = screen.getByLabelText('change to year 2023')
+    await user.click(changeYear)
+    await waitFor(() => expect(global.fetch).lastCalledWith(`http://localhost:8080/api/workshop-services?year=${changeYear.textContent}&month=${todayDate.getMonth()}`))
+
+    // change month
+    await user.click(screen.getByLabelText('change to month Apr'))
+    await waitFor(() => expect(screen.queryAllByRole('document')).toHaveLength(2))
+    await user.click(screen.getByLabelText('change to month Oct'))
+    await waitFor(() => expect(screen.queryAllByRole('document')).toHaveLength(2))
+
+    // change another year
+    await user.click(screen.getByRole('button', {name: '2023'}))
+    changeYear = screen.getByLabelText('change to year 2020')
+    await user.click(changeYear)
+    await waitFor(() => expect(global.fetch).lastCalledWith(`http://localhost:8080/api/workshop-services?year=${changeYear.textContent}&month=9`))
+
+    // change to another month
+    await user.click(screen.getByLabelText(`change to month Jan`))
+    await waitFor(() => expect(global.fetch).lastCalledWith(`http://localhost:8080/api/workshop-services?year=${changeYear.textContent}&month=1`))
+    expect(screen.queryAllByRole('document')).toHaveLength(1)
+    expect(screen.getAllByRole('document')[0]).toHaveTextContent('J 23$0.00')
+})
+
+test('render the overview page with small screen', async() => {
+    const user = userEvent.setup()
+
+    global.fetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(transactions) // just return all
     })
-  });
 
-  test('displays vehicle transactions with order and supplier info', async () => {
-    global.fetch = jest.fn(() => Promise.resolve({ok: true, 
-      json: () => Promise.resolve(mockServices.transactions)}));
-    render(<ServiceContext value={new ServiceTransactions(mockServices.transactions, jest.fn())}>
-              <SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}>
-                <YearMonthView {...defaultProps} />
-            </SupplierOrderContext></ServiceContext>);
-
-    await waitFor(() => {
-      expect(screen.getAllByText('2023-01-01').length).toBe(2)
-      expect(screen.getByText('Oil Change')).toBeInTheDocument();
-      expect(screen.getByText('OrderTooltip for 1 from Supplier A')).toBeInTheDocument();
-      expect(screen.getByText('2 ltr @ $50.00')).toBeInTheDocument();
-      expect(screen.getByText('$ 100.00')).toBeInTheDocument();
-
-      expect(screen.getAllByText('2023-01-02').length).toBe(4)
-      expect(screen.getByText('Tire Replacement')).toBeInTheDocument();
-      expect(screen.getByText('OrderTooltip for 2 from Supplier B')).toBeInTheDocument();
-      expect(screen.getByText('4 pcs @ $50.00')).toBeInTheDocument();
-      expect(screen.getByText('$ 200.00')).toBeInTheDocument();
-
-      expect(screen.getAllByText('2023-01-03').length).toBe(2)
-      expect(screen.getByText('Filter Change')).toBeInTheDocument();
-      expect(screen.getByText('OrderTooltip for 4 from Supplier B')).toBeInTheDocument();
-      expect(screen.getByText('2 ltr @ $35.00')).toBeInTheDocument();
-      expect(screen.getByText('$ 70.00')).toBeInTheDocument();
+    window.matchMedia = jest.fn(() => {
+        return { matches: false }
     })
-  });
 
-  test('displays top 3 vehicles by amount in summary', async () => {
-    global.fetch = jest.fn(() => Promise.resolve({ok: true, 
-      json: () => Promise.resolve(mockServices.transactions)}));
-    render(<ServiceContext value={new ServiceTransactions(mockServices.transactions, jest.fn())}>
-              <SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}>
-                <YearMonthView {...defaultProps} />
-            </SupplierOrderContext></ServiceContext>)
+    render(<WorkshopServicesProvider initialServices={transactions}>
+            <SupplierOrderContext value={new SupplierOrders(orders, jest.fn())}>
+            <YearMonthView suppliers={[
+                {id: 2000, supplierName: 'Kah Seng'}, 
+                {id: 2001, supplierName: 'Seribu Bintang'} 
+            ]} 
+            taskTemplates={[]}></YearMonthView>
+            </SupplierOrderContext></WorkshopServicesProvider>)
 
-    await waitFor(() => {
-      expect(global.fetch).toBeCalledWith('http://localhost:8080/api/workshop-services?year=2023&month=1')
+    document.documentElement.setAttribute('data-bs-theme', 'light')
 
-      const summaryCard = screen.getByText('Top 3:').closest('.card-body');
-      const withinSummary = within(summaryCard);
+    await waitFor(() => expect(global.fetch).toBeCalledWith(`http://localhost:8080/api/workshop-services?year=${todayDate.getFullYear()}&month=${todayDate.getMonth()+1}`))
+    await waitFor(() => expect(screen.queryAllByRole('document')).toHaveLength(0))
+    await waitFor(() => expect(screen.queryAllByRole('listitem')).toHaveLength(0))
+    
+    await user.click(screen.getByRole('button', {name: todayDate.getFullYear()}))
+    expect(screen.queryAllByLabelText(/change to year/)).toHaveLength(4)
 
-      expect(withinSummary.getByText('Truck B')).toBeInTheDocument();
-      expect(withinSummary.getByText('$1040.00')).toBeInTheDocument();
-      expect(withinSummary.getByText('Truck C')).toBeInTheDocument();
-      expect(withinSummary.getByText('$320.00')).toBeInTheDocument();
-      expect(withinSummary.getByText('Truck A')).toBeInTheDocument();
-      expect(withinSummary.getByText('$170.00')).toBeInTheDocument();
+    // change year
+    let changeYear = screen.getByLabelText('change to year 2023')
+    await user.click(changeYear)
+    await waitFor(() => expect(global.fetch).lastCalledWith(`http://localhost:8080/api/workshop-services?year=${changeYear.textContent}&month=${todayDate.getMonth()}`))
+
+    // change month
+    await user.click(screen.getByRole('button', {name: months3EngChars[todayDate.getMonth()]}))
+    await user.click(screen.getByLabelText('change to month Apr'))
+    await waitFor(() => expect(screen.queryAllByRole('document')).toHaveLength(2))
+})
+
+test('render the overview page with small screen, with parts and tasks', async() => {
+    const user = userEvent.setup()
+
+    const newTransactions = [...transactions]
+    newTransactions[8].migratedHandWrittenSpareParts = [
+        {index: 1000, itemDescription: 'Brake Adjuster', quantity: 1, unit: 'pc', unitPrice: 250, totalPrice: 250},
+        {index: 1001, itemDescription: 'Brake Lining', quantity: 4, unit: 'pc', unitPrice: 12, totalPrice: 48}
+    ]
+    newTransactions[9].sparePartUsages = [
+        {id: 90001, orderId: 1001, quantity: 2, soldPrice: 5},
+        {id: 90002, orderId: 1002, quantity: 1, soldPrice: 15, margin: 20}
+    ]
+    newTransactions[9].tasks = [
+        {id: 880001, taskId: 750001, recordedDate: '2022-08-10', remarks: 'to adjust brake', quotedPrice: 150},
+    ]
+
+    global.fetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(newTransactions) // just return all
     })
-  });
-});
+
+    window.matchMedia = jest.fn(() => {
+        return { matches: false }
+    })
+
+    render(<WorkshopServicesProvider initialServices={newTransactions}>
+            <SupplierOrderContext value={new SupplierOrders(orders, jest.fn())}>
+            <YearMonthView suppliers={[
+                {id: 2000, supplierName: 'Kah Seng'}, 
+                {id: 2001, supplierName: 'Seribu Bintang'} 
+            ]} 
+            taskTemplates={[{id: 750001, workmanship: 'adjust brake', component: {subsystem: 'Brake', componentName: 'Parking Brake'}}]}></YearMonthView>
+            </SupplierOrderContext></WorkshopServicesProvider>)
+
+    document.documentElement.setAttribute('data-bs-theme', 'light')
+
+    await waitFor(() => expect(global.fetch).toBeCalledWith(`http://localhost:8080/api/workshop-services?year=${todayDate.getFullYear()}&month=${todayDate.getMonth()+1}`))
+    await waitFor(() => expect(screen.queryAllByRole('document')).toHaveLength(0))
+    await waitFor(() => expect(screen.queryAllByRole('listitem')).toHaveLength(0))
+    
+    await user.click(screen.getByRole('button', {name: todayDate.getFullYear()}))
+    expect(screen.queryAllByLabelText(/change to year/)).toHaveLength(4)
+
+    // change year
+    let changeYear = screen.getByLabelText('change to year 2022')
+    await user.click(changeYear)
+    await waitFor(() => expect(global.fetch).lastCalledWith(`http://localhost:8080/api/workshop-services?year=${changeYear.textContent}&month=${todayDate.getMonth()}`))
+
+    // change month
+    await user.click(screen.getByRole('button', {name: months3EngChars[todayDate.getMonth()]}))
+    await user.click(screen.getByLabelText('change to month Aug'))
+    await waitFor(() => expect(screen.queryAllByRole('document')).toHaveLength(2))
+
+    // check value
+    expect(screen.getAllByRole('document')[0]).toHaveTextContent('J 34$248.002022-08-09Engine Oil OrderTooltip for 1001 from Kah Seng2 ltr @ $5.00$ 18.002022-08-09Air Filter OrderTooltip for 1002 from Seribu Bintang1 pcs @ $15.00original: $80.00 20%$ 80.002022-08-10 (Brake - Parking Brake) to adjust brake$ 150.00')
+    expect(screen.getAllByRole('document')[1]).toHaveTextContent('J 33$298.002022-08-07Brake Adjuster1 pc @ $250.00$ 250.002022-08-07Brake Lining4 pc @ $12.00$ 48.00')
+
+    // back
+    await user.click(screen.getByText('Back to Service'))
+    expect(useNavigate()).lastCalledWith('/')
+})

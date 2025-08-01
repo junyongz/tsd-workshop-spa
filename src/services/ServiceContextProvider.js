@@ -7,12 +7,18 @@ import ServiceTransactions from "../ServiceTransactions";
  */
 export const ServiceContext = createContext()
 
+/**
+ * 
+ * @param {Object} props 
+ * @param {import("../ServiceTransactions").WorkshopService[]} props.initialServices
+ * @returns 
+ */
 export function WorkshopServicesProvider({initialServices=[], children}) {
 
     /**
      * 
      * @param {ServiceTransactions} prev 
-     * @param {Object[]} newTransactions 
+     * @param {import("../ServiceTransactions").WorkshopService[]} newTransactions 
      * @returns 
      */
     const reducer = (prev, newTransactions) => {

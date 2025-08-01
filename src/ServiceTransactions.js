@@ -1,4 +1,19 @@
 /**
+ * @typedef {Object} TaskTemplate
+ * @property {number} id
+ * @property {number} componentId
+ * @property {string} category
+ * @property {number} unitPrice
+ * @property {number} labourHours
+ * @property {string} complexity
+ * @property {string} description
+ * @property {Object} component
+ * @property {number} component.id
+ * @property {string} component.componentName
+ * @property {string} component.subsystem
+ */
+
+/**
  * @typedef {Object} SparePartUsage
  * @property {number} id
  * @property {number} vehicleId
@@ -80,7 +95,7 @@ class ServiceTransactions {
 
     /**
      * 
-     * @param {React.ActionDispatch<Object[]>} dispatch 
+     * @param {React.ActionDispatch<WorkshopService[]>} dispatch 
      */
     acceptDispatch(dispatch) {
         this.dispatch = dispatch

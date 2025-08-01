@@ -9,24 +9,26 @@ import { useNavigate } from "react-router-dom"
 import { useService } from "./ServiceContextProvider"
 import { useSupplierOrders } from "../suppliers/SupplierOrderContextProvider"
 
+const apiUrl = process.env.REACT_APP_API_URL
+
 /**
  * 
  * @param {Object} props 
- * @param {Object[]} props.suppliers 
- * @param {Object[]} props.taskTemplates 
+ * @param {import("../suppliers/SupplierOrders").Supplier[]} props.suppliers 
+ * @param {import("../ServiceTransactions").TaskTemplate[]} props.taskTemplates 
  * @returns 
  */
 function YearMonthView({suppliers, taskTemplates}) {
     const transactions = useService()
     const orders = useSupplierOrders()
 
-    const apiUrl = process.env.REACT_APP_API_URL
-
     const navigate = useNavigate()
 
     const currentDate = new Date()
     const [year, setYear] = useState(currentDate.getFullYear())
     const [month, setMonth] = useState(currentDate.getMonth())
+
+    const [monthView, setMonthView] = useState('terrace') // terrace or dropdown
 
     const theme = useTheme()
 
@@ -60,7 +62,7 @@ function YearMonthView({suppliers, taskTemplates}) {
 
         return {vehicle: veh, amount: 
             (services.flatMap(s => s.migratedHandWrittenSpareParts || []).reduce((pv, cv) => pv + (cv.totalPrice || 0), 0) +
-            services.flatMap(s => s.sparePartUsages).reduce((acc, curr) => {
+            services.flatMap(s => s.sparePartUsages || []).reduce((acc, curr) => {
                 const order = orders.byId(curr.orderId)
                 return acc + (curr.quantity * order.unitPrice)}, 0) + 
             services.flatMap(s => s.tasks || []).reduce((acc, curr) => {
@@ -71,9 +73,9 @@ function YearMonthView({suppliers, taskTemplates}) {
 
     const DropDownYears = () => {
         return (
-            <DropdownButton id="dropdown-year" as={ButtonGroup} title={year} variant={((theme === 'dark') ? 'light': 'dark')} >
+            <DropdownButton aria-label="change year" id="dropdown-year" as={ButtonGroup} title={year} variant={((theme === 'dark') ? 'light': 'dark')} >
             { transactions.availableYears().map(
-                v => <Dropdown.Item key={v} onClick={() => changeYear(v)} eventKey={v}>{v}</Dropdown.Item> )
+                v => <Dropdown.Item aria-label={`change to year ${v}`} key={v} onClick={() => changeYear(v)} eventKey={v}>{v}</Dropdown.Item> )
             }
             </DropdownButton> 
         )
@@ -93,9 +95,22 @@ function YearMonthView({suppliers, taskTemplates}) {
         });
 
         fetchByYearAndMonth(year, month+1)
+
+        const settingResponsiveMonthView = () => {
+            if (window.matchMedia('(min-width: 992px)').matches) {
+                setMonthView('terrace')
+            }
+            else {
+                setMonthView('dropdown')
+            }
+        }
+        settingResponsiveMonthView()
+
+        window.addEventListener('resize', settingResponsiveMonthView)
     
         return () => {
           scrollSpy.dispose();
+          window.removeEventListener('resize', settingResponsiveMonthView)
         };
         
     }, []);    
@@ -104,25 +119,25 @@ function YearMonthView({suppliers, taskTemplates}) {
         <Container>
             <Row className="mb-3 justify-content-between">
                 <Col xs="6" lg="10">
-                    <ButtonGroup className="d-flex d-lg-none">
                     <DropDownYears />
+                    { monthView === 'dropdown' && <ButtonGroup>
+                    
                     <DropdownButton id="dropdown-month" as={ButtonGroup} title={months3EngChars[month]} variant={((theme === 'dark') ? 'light': 'dark')} >
                         {
                             months3EngChars.map((v, i) => 
-                                    <Dropdown.Item key={v} variant={calcVariant(i)} onClick={() => changeMonth(i)}>{v}</Dropdown.Item>
+                                    <Dropdown.Item aria-label={`change to month ${v}`} key={v} variant={calcVariant(i)} onClick={() => changeMonth(i)}>{v}</Dropdown.Item>
                                 )
                         }
                     </DropdownButton>
-                    </ButtonGroup>
+                    </ButtonGroup> }
 
-                    <ButtonGroup className="d-none d-lg-flex">
-                    <DropDownYears />
+                    { monthView === 'terrace' && <ButtonGroup>
                         {
                             months3EngChars.map((v, i) => 
-                                <Button aria-current={v} key={v} variant={calcVariant(i)} onClick={() => changeMonth(i)}>{v}</Button>
+                                <Button aria-label={`change to month ${v}`} key={v} variant={calcVariant(i)} onClick={() => changeMonth(i)}>{v}</Button>
                             )
                         }
-                    </ButtonGroup>
+                    </ButtonGroup> }
                 </Col>
                 <Col xs="6" lg="2" className="text-end">
                     <Button variant="outline-secondary" onClick={() => navigate("/")}><Services /> Back to Service</Button>
@@ -157,7 +172,7 @@ function YearMonthView({suppliers, taskTemplates}) {
                         
                             return (
                             <ListGroup key={veh} id={'vehicle-' + veh.replace(' ', '')}>
-                                <Card className={'mb-2'}>
+                                <Card className={'mb-2'} role="document">
                                     <Card.Header>
                                         <Stack direction="horizontal">
                                             <Col className="fs-5 fw-bold">{veh}</Col><Col className='text-end fw-semibold fs-5'>${amountByVehicles.find(a => a.vehicle === veh).amount}</Col>
@@ -174,7 +189,7 @@ function YearMonthView({suppliers, taskTemplates}) {
                                                 </Row>
                                             </ListGroupItem>)
 
-                                            const usages = trx.sparePartUsages.map(v => {
+                                            const usages = trx.sparePartUsages?.map(v => {
                                                 const order = orders.byId(v.orderId)
                                                 const supplier = suppliers.find(s => s.id === order.supplierId)
                                                 const totalPrice = (v.quantity * order.unitPrice).toFixed(2) || 0

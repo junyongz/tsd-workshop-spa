@@ -38,7 +38,7 @@ test('add 2 spare parts', async () => {
         </SupplierOrderContext>)
 
     const todayDate = new Date()
-    const keyInStartDate = `${todayDate.getFullYear()}-${(todayDate.getMonth() + 1).toString().padStart(2, 0)}-${(todayDate.getDate()-1).toString().padStart(2, 0)}`
+    const keyInStartDate = addDaysToDateStr(todayDate, -1)
 
     const startDate = document.querySelector('input[name="startDate"]')
     expect(startDate).toBeInTheDocument()
@@ -57,7 +57,7 @@ test('add 2 spare parts', async () => {
     await user.type(mileageKm, "135392")
 
     // add engine oil
-    let sparePart = screen.getByPlaceholderText("Find a spare part...")
+    let sparePart = screen.queryByPlaceholderText("Find a spare part...")
     expect(sparePart).toBeInTheDocument()
     await user.click(sparePart)
     await user.click(screen.getByText('Engine Oil 20w-50'))
@@ -86,6 +86,7 @@ test('add 2 spare parts', async () => {
 
     // save it
     await user.click(screen.getByText("Save"))
+    // console.log(Array.from(document.querySelector('form').elements).map(v => v.name + ' ' + v.validationMessage))
     expect(saveService).toBeCalledWith({"id": undefined, "mileageKm": "135392", 
         "notes": undefined, 
         "sparePartUsages": [{"margin": 0, "orderId": 1000, "quantity": "20", "soldPrice": 9.7, "usageDate": keyInStartDate, "vehicleNo": "J 33"}, 
@@ -126,7 +127,7 @@ test('add 3 spare parts, then delete 2nd one', async () => {
         </SupplierOrderContext>)
 
     const todayDate = new Date()
-    const keyInStartDate = `${todayDate.getFullYear()}-${(todayDate.getMonth() + 1).toString().padStart(2, 0)}-${(todayDate.getDate()-1).toString().padStart(2, 0)}`
+    const keyInStartDate = addDaysToDateStr(todayDate, -1)
 
     const startDate = document.querySelector('input[name="startDate"]')
     await user.click(startDate)
@@ -237,7 +238,7 @@ test('add for existing service, to update mileage only', async () => {
     const user = userEvent.setup()
 
     const todayDate = new Date()
-    const keyInStartDate = `${todayDate.getFullYear()}-${(todayDate.getMonth() + 1).toString().padStart(2, 0)}-${(todayDate.getDate()-1).toString().padStart(2, 0)}`
+    const keyInStartDate = addDaysToDateStr(todayDate, -1)
     const prevStartDate = addDaysToDateStr(todayDate, -2)
 
     global.fetch.mockResolvedValueOnce({
@@ -302,7 +303,7 @@ test('add for existing service, navigate around', async () => {
     const user = userEvent.setup()
 
     const todayDate = new Date()
-    const keyInStartDate = `${todayDate.getFullYear()}-${(todayDate.getMonth() + 1).toString().padStart(2, 0)}-${(todayDate.getDate()-1).toString().padStart(2, 0)}`
+    const keyInStartDate = addDaysToDateStr(todayDate, -1)
     const prevStartDate = addDaysToDateStr(todayDate, -2)
 
     const orders = new SupplierOrders([
@@ -363,7 +364,7 @@ test('choose a part, navigate to workmanship, back to part, part name retained',
     const user = userEvent.setup()
 
     const todayDate = new Date()
-    const keyInStartDate = `${todayDate.getFullYear()}-${(todayDate.getMonth() + 1).toString().padStart(2, 0)}-${(todayDate.getDate()-1).toString().padStart(2, 0)}`
+    const keyInStartDate = addDaysToDateStr(todayDate, -1)
     const prevStartDate = addDaysToDateStr(todayDate, -2)
 
     const orders = new SupplierOrders([

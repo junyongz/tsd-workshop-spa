@@ -22,13 +22,25 @@ import { useSupplierOrders } from "./SupplierOrderContextProvider"
 
 /**
  * 
- * @param {*} param0 
+ * @param {Object} props 
+ * @param {React.SetStateAction<number>} props.setTotalFilteredOrders
+ * @param {Object[]} props.selectedSearchOptions
+ * @param {string} props.selectedSearchOptions[].name
+ * @param {string} props.selectedSearchDate
+ * @param {import("./SupplierOrders").Supplier[]} props.suppliers
+ * @param {Object[]} props.vehicles
+ * @param {import("../ServiceTransactions").SparePartUsage[]} props.sparePartUsages
+ * @param {Function} props.refreshSparePartUsages
+ * @param {Function} props.refreshServices
+ * @param {Function} props.onNewVehicleCreated
+ * @param {React.SetStateAction<boolean>} props.setLoading 
+ * @param {Function>} props.showToastMessage 
  * @returns 
  */
 function SuppliersSpareParts({setTotalFilteredOrders, 
-    selectedSearchOptions=[], selectedSearchDate, suppliers=[], vehicles=[], sparePartUsages=[],
-    refreshSparePartUsages=() =>{}, refreshServices=()=>{},
-    onNewVehicleCreated=() => {}, setLoading=()=>{}, showToastMessage}) {
+    selectedSearchOptions, selectedSearchDate, suppliers, vehicles, sparePartUsages,
+    refreshSparePartUsages, refreshServices,
+    onNewVehicleCreated, setLoading, showToastMessage}) {
     const apiUrl = process.env.REACT_APP_API_URL
 
     const supplierOrders = useSupplierOrders()
@@ -220,7 +232,7 @@ function SuppliersSpareParts({setTotalFilteredOrders,
     }
 
     useEffect(() => {
-        if (selectedSearchOptions.length > 0 || selectedSearchDate) {
+        if (selectedSearchOptions?.length > 0 || selectedSearchDate) {
             setActivePage(1)
             setTotalFilteredOrders(filteredOrders.length)
         }

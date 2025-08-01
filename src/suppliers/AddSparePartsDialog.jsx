@@ -9,12 +9,12 @@ import generateUniqueId from "../utils/randomUtils";
 
 /**
  * 
- * @param {*} props
+ * @param {Object} props
  * @param {boolean} props.isShow
  * @param {React.SetStateAction<boolean>} props.setShowDialog
- * @param {Object[]} props.existingOrder existing orders based on the same delivery order no
- * @param {Object[]} props.suppliers
- * @param {Object[]} props.sparePartUsages
+ * @param {import("./SupplierOrders").SupplierOrder[]} props.existingOrder existing orders based on the same delivery order no
+ * @param {import("./SupplierOrders").Supplier[]} props.suppliers
+ * @param {import("../ServiceTransactions").SparePartUsage[]} props.sparePartUsages
  * @param {Function} props.onSaveNewOrders
  * @returns 
  */
@@ -28,6 +28,9 @@ function AddSparePartsDialog({isShow, setShowDialog, existingOrder, suppliers, s
 
     const defaultItem = {rid: generateUniqueId(), itemCode: '', partName: 'Choose one ...', quantity: 0, unit: 'pc', unitPrice: 0, selectedItemCode: [], selectedSparePart: []};
 
+    /**
+     * @type {[import("./SupplierOrders").SupplierOrder[], React.SetStateAction<import("./SupplierOrders").SupplierOrder[]>]}
+     */
     const [items, setItems] = useState(existingOrder || [defaultItem])
     const editing = items && items[0]?.deliveryOrderNo
 

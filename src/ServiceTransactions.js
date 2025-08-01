@@ -1,4 +1,50 @@
 /**
+ * @typedef {Object} SparePartUsage
+ * @property {number} id
+ * @property {number} vehicleId
+ * @property {string} vehicleNo
+ * @property {string} usageDate usage date of the part to the service, in format of '2005-05-05'
+ * @property {number} orderId 
+ * @property {number} serviceId link to {@link WorkshopService#id}
+ * @property {number} quantity
+ * @property {number} margin
+ * @property {number} soldPrice
+ * @property {number} migDataIndex
+ */
+
+/**
+ * @typedef {Object} MigratedHandWrittenSparePart
+ * @property {number} index
+ * @property {string} sheetName
+ * @property {string} vehicleNo
+ * @property {string} creationDate creation date of the part for the service, in format of '2005-05-05'
+ * @property {string} itemDescription item description, what been written
+ * @property {string} partName part name, computed part name
+ * @property {number} orderId 
+ * @property {number} supplierId 
+ * @property {number} serviceId link to {@link WorkshopService#id}
+ * @property {number} quantity
+ * @property {string} unit part name, computed part name
+ * @property {number} unitPrice part name, computed part name
+ * @property {number} totalPrice part name, computed part name
+ * @property {number} calculatedTotalPrice part name, computed part name
+ * @property {boolean} migratedIndicator
+ * @property {string} completionDate completion date for the service, in format of '2005-05-05'
+ */
+
+/**
+ * @typedef {Object} WorkmashipTask
+ * @property {number} id
+ * @property {string} recordedDate record date for the task, in format of '2005-05-05'
+ * @property {number} serviceId link to {@link WorkshopService#id}
+ * @property {number} taskId link task template
+ * @property {string} foremen
+ * @property {string} remarks
+ * @property {number} quotedPrice
+ * @property {number} actualDurationHours
+ */
+
+/**
  * @typedef {Object} WorkshopService a entity represents a workshop service
  * @property {number} id primary key
  * @property {string} startDate start date of a service, in format of '2005-05-05'
@@ -6,6 +52,9 @@
  * @property {string} completionDate completion date of a service, in format of '2005-05-05'
  * @property {number} vehicleId vehicle id
  * @property {string} vehicleNo vehicle no
+ * @property {MigratedHandWrittenSparePart[]} migratedHandWrittenSpareParts migrated hand-written parts data
+ * @property {SparePartUsage[]} sparePartUsages spare part usages against the supplier orders
+ * @property {WorkmashipTask[]} tasks workmanship tasks 
  */
 
 class ServiceTransactions {
@@ -14,7 +63,7 @@ class ServiceTransactions {
      */
     #transactions
     /**
-     * @type {Object<number, number>}
+     * @type {Object<number, number>} key is the workshop service id, value is the index in transactions
      */
     #transactionIndexes
 
@@ -162,8 +211,14 @@ class ServiceTransactions {
         return this.#transactions
     }
 
-    // {vehicle: []}
-    filterByYearMonthGroupByVehicle(year=2025, month=0) {
+    
+    /**
+     * 
+     * @param {number} year 
+     * @param {number} month 
+     * @returns {Object<string, WorkshopService[]>} the services that backed by vehicle no
+     */
+    filterByYearMonthGroupByVehicle(year, month) {
         return this.#transactions.filter(trx => {
             const creationDate = new Date(trx.startDate)
             if (creationDate.getFullYear() === year && creationDate.getMonth() === month) {

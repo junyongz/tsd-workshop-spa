@@ -11,6 +11,8 @@ import createNewVehicle from "../vehicles/createNewVehicle"
  * @param {Object} props
  * @param {boolean} props.isShow
  * @param {React.SetStateAction<boolean>} props.setShowDialog
+ * @param {import("../ServiceTransactions").SparePartUsage} props.usageSpareParts
+ * @param {React.SetStateAction<import("../ServiceTransactions").SparePartUsage>} props.setUsageSpareParts
  * @param {Function} props.onNewVehicleCreated
  * @returns 
  */

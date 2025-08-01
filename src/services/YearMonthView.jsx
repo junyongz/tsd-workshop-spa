@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { Badge, Button, ButtonGroup, Card, Col, Container, Dropdown, DropdownButton, ListGroup, ListGroupItem, Row, Stack } from "react-bootstrap"
 import OrderTooltip from "./OrderTooltip"
 import { ScrollSpy } from "bootstrap"
@@ -9,7 +9,14 @@ import { useNavigate } from "react-router-dom"
 import { useService } from "./ServiceContextProvider"
 import { useSupplierOrders } from "../suppliers/SupplierOrderContextProvider"
 
-function YearMonthView({suppliers=[], taskTemplates}) {
+/**
+ * 
+ * @param {Object} props 
+ * @param {Object[]} props.suppliers 
+ * @param {Object[]} props.taskTemplates 
+ * @returns 
+ */
+function YearMonthView({suppliers, taskTemplates}) {
     const transactions = useService()
     const orders = useSupplierOrders()
 
@@ -23,6 +30,10 @@ function YearMonthView({suppliers=[], taskTemplates}) {
 
     const theme = useTheme()
 
+    /**
+     * @type {[Object<string, import("../ServiceTransactions").WorkshopService[]>, 
+     *  React.SetStateAction<Object<string, import("../ServiceTransactions").WorkshopService[]>>]}
+     */
     const [trxsGroupByVehicles, setTrxsGroupByVehicles] = useState({})
 
     const fetchByYearAndMonth = async (year, month) => {

@@ -1,4 +1,10 @@
 /**
+ * @typedef {Object} Supplier
+ * @property {number} id
+ * @property {string} supplierName
+ */
+
+/**
  * @typedef {Object} SupplierOrder
  * @property {number} id primary key
  * @property {string} invoiceDate invoice date in format of '2005-05-05'
@@ -11,15 +17,24 @@
  * @property {string} notes any handwritten notes
  * @property {string} sheetName excel sheet name, for migrated data only
  * @property {number} sparePartId link to part id
- * @property {number} supplierId link to supplier id
+ * @property {number} supplierId link to {@link Supplier#id}
  * @property {number} supplierName on-the-fly calculated against the suppliers
  * @property {string} status either ACTIVE or DEPLETED
  * @property {number} remaining on-the-fly calculated against spare part usages
  */
 
 class SupplierOrders {
+    /**
+     * @type {SupplierOrder[]}
+     */
     #ordersList
+    /**
+     * @type {Object<number,SupplierOrder>} key is the {@link SupplierOrder#id} value is the {@link SupplierOrder}
+     */
     #ordersMapping
+    /**
+     * @type {Object<number,number>} key is the {@link SupplierOrder#id} value is the index in list
+     */
     #ordersIndexes
 
     /**
@@ -65,7 +80,7 @@ class SupplierOrders {
     /**
      * 
      * @param {number} id 
-     * @returns 
+     * @returns {SupplierOrder}
      */
     byId(id) {
         return this.#ordersMapping[id]
@@ -74,7 +89,7 @@ class SupplierOrders {
     /**
      * 
      * @param {number} id 
-     * @returns 
+     * @returns {number} index for the order id
      */
     forIndex(id) {
         return this.#ordersIndexes[id]

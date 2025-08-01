@@ -16,7 +16,17 @@ export const doFilterServices = (options=[], transactions = new ServiceTransacti
 }
 
 // TODO how to get rid of this sparePartUsages
-export function applyFilterOnOrders(selectedSearchOptions=[], selectedSearchDate, orders=[], sparePartUsages, selectedSupplier) {
+/**
+ * 
+ * @param {Object[]} selectedSearchOptions 
+ * @param {string} selectedSearchOptions[].name 
+ * @param {string} selectedSearchDate 
+ * @param {import("../suppliers/SupplierOrders").SupplierOrder[]} orders 
+ * @param {import("../ServiceTransactions").SparePartUsage[]} sparePartUsages 
+ * @param {import("../suppliers/SupplierOrders").Supplier} selectedSupplier 
+ * @returns 
+ */
+export function applyFilterOnOrders(selectedSearchOptions, selectedSearchDate, orders, sparePartUsages, selectedSupplier) {
   // either no selected search options, or part name, code, notes or usage vehicle no matched
   if (selectedSearchDate) {
     return orders.filter(o => o.invoiceDate === selectedSearchDate)
@@ -39,14 +49,7 @@ export function applyFilterOnOrders(selectedSearchOptions=[], selectedSearchDate
  * @param {string} selectedSearchDate a date in 'yyyy-MM-dd' format, eg '2005-05-05'
  * @param {Object[]} vehicles 
  * @param {string} vehicles[].vehicleNo
- * @param {Object[]} services 
- * @param {string} services[].startDate a date in 'yyyy-MM-dd' format, eg '2005-05-05'
- * @param {string} services[].vehicleNo
- * @param {Object[]} services[].migratedHandWrittenSpareParts
- * @param {string} services[].migratedHandWrittenSpareParts[].partName
- * @param {string} services[].migratedHandWrittenSpareParts[].itemDescription
- * @param {Object[]} services[].sparePartUsages
- * @param {number} services[].sparePartUsages[].orderId
+ * @param {import("../ServiceTransactions").WorkshopService[]} services 
  * @param {SupplierOrders} supplierOrders 
  * @returns 
  */

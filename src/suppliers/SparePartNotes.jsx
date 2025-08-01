@@ -7,12 +7,12 @@ import { Calendar, HandPointer, NoteTaking } from "../Icons"
  * @param {Object} props
  * @param {import("./SupplierOrders").SupplierOrder} props.order
  * @param {Function} props.onNoteClick
- * @param {Object[]} sparePartUsages
+ * @param {import("../ServiceTransactions").SparePartUsage[]} props.sparePartUsages
  * @returns 
  */
 function SparePartNotes({order, onNoteClick, sparePartUsages}) {
 
-    const filteredSparePartUsages = sparePartUsages.filter(spu => spu.orderId === order.id)
+    const filteredSparePartUsages = sparePartUsages?.filter(spu => spu.orderId === order.id)
     const [usageLoadCount, setUsageLoadCount] = useState(5)
 
     return (
@@ -23,7 +23,7 @@ function SparePartNotes({order, onNoteClick, sparePartUsages}) {
                                 </React.Fragment>
                             ))}</span>}
             {filteredSparePartUsages
-                    .sort((a, b) => new Date(b.usageDate) - new Date(a.usageDate))
+                    ?.sort((a, b) => new Date(b.usageDate) - new Date(a.usageDate))
                     .slice(0, usageLoadCount)
                     .map(spu => 
                         <span className="fw-lighter" key={spu.id} style={{display: 'block'}}>Used by {spu.vehicleNo}
@@ -32,7 +32,7 @@ function SparePartNotes({order, onNoteClick, sparePartUsages}) {
                         </span>)
             }
             {
-                filteredSparePartUsages.length > usageLoadCount && <span className="text-secondary" role="button" onClick={() => setUsageLoadCount(usageLoadCount+5)}><HandPointer /> Click to load more.</span>
+                filteredSparePartUsages?.length > usageLoadCount && <span className="text-secondary" role="button" onClick={() => setUsageLoadCount(usageLoadCount+5)}><HandPointer /> Click to load more.</span>
             }
         </div>
     )

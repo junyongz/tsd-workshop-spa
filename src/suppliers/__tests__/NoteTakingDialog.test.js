@@ -7,6 +7,7 @@ import { SupplierOrderContext } from '../SupplierOrderContextProvider'
 import SupplierOrders from '../SupplierOrders'
 
 window.matchMedia = jest.fn()
+const setLoading = jest.fn()
 
 afterAll(() => jest.clearAllMocks())
 
@@ -47,6 +48,7 @@ test('test together with SupplierSpareParts.jsx', async () => {
     }>
         <SuppliersSpareParts suppliers={suppliers}
             vehicles={vehicles}
+            setLoading={setLoading}
         />
     </SupplierOrderContext>)
 

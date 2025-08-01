@@ -7,8 +7,11 @@ import { SupplierOrderContext } from '../SupplierOrderContextProvider'
 import SupplierOrders from '../SupplierOrders'
 
 window.matchMedia = jest.fn()
+const setLoading = jest.fn()
+const refreshSparePartUsages = jest.fn()
+const refreshServices = jest.fn()
 
-afterAll(() => jest.clearAllMocks())
+afterEach(() => jest.clearAllMocks())
 
 test('test together with SupplierSpareParts.jsx', async () => {
     const user = userEvent.setup()
@@ -50,6 +53,9 @@ test('test together with SupplierSpareParts.jsx', async () => {
     <SupplierOrderContext value={ new SupplierOrders(orders, jest.fn())}>
         <SuppliersSpareParts suppliers={suppliers}
             vehicles={vehicles}
+            setLoading={setLoading}
+            refreshSparePartUsages={refreshSparePartUsages}
+            refreshServices={refreshServices}
         />
     </SupplierOrderContext>)
 
@@ -78,6 +84,10 @@ test('test together with SupplierSpareParts.jsx', async () => {
     await waitFor(() => expect(global.fetch).lastCalledWith("http://localhost:8080/api/spare-part-utilizations", 
         {"body": "{\"vehicleId\":3001,\"vehicleNo\":\"J 23\",\"usageDate\":\"2022-02-05\",\"orderId\":1000,\"serviceId\":\"550001\",\"quantity\":\"4\",\"soldPrice\":8.8}", 
             "headers": {"Content-type": "application/json"}, "method": "POST", "mode": "cors"}))
+
+    expect(setLoading).toBeCalledTimes(2)
+    expect(refreshSparePartUsages).toBeCalledTimes(1)
+    expect(refreshServices).toBeCalledTimes(1)
 })
 
 test('remove vehicle, return more than 1 workshop services', async () => {
@@ -126,6 +136,9 @@ test('remove vehicle, return more than 1 workshop services', async () => {
     render(<SupplierOrderContext value={ new SupplierOrders(orders, jest.fn())}>
             <SuppliersSpareParts suppliers={suppliers}
                 vehicles={vehicles}
+                setLoading={setLoading}
+                refreshSparePartUsages={refreshSparePartUsages}
+                refreshServices={refreshServices}
             />
         </SupplierOrderContext>)
 
@@ -162,4 +175,8 @@ test('remove vehicle, return more than 1 workshop services', async () => {
     await waitFor(() => expect(global.fetch).lastCalledWith("http://localhost:8080/api/spare-part-utilizations", 
         {"body": "{\"vehicleId\":3001,\"vehicleNo\":\"J 23\",\"usageDate\":\"2022-02-05\",\"orderId\":1000,\"serviceId\":\"550001\",\"quantity\":\"4\",\"soldPrice\":8.8}", 
             "headers": {"Content-type": "application/json"}, "method": "POST", "mode": "cors"}))
+
+    expect(setLoading).toBeCalledTimes(2)
+    expect(refreshSparePartUsages).toBeCalledTimes(1)
+    expect(refreshServices).toBeCalledTimes(1)
 })

@@ -8,6 +8,21 @@ import PhotoGallery from "../components/PhotoGallery";
 import { useSupplierOrders } from "../suppliers/SupplierOrderContextProvider";
 
 /**
+ * @typedef {Object} SparePart
+ * @property {number} id
+ * @property {string} partNo
+ * @property {string} partName
+ * @property {string} description
+ * @property {Object[]} oems
+ * @property {string} oems[].name
+ * @property {string} oems[].url
+ * @property {Object[]} compatibleTrucks
+ * @property {string} compatibleTrucks[].make
+ * @property {string} compatibleTrucks[].model
+ * @property {number[]} orderIds list of id link to supplier order id
+ */
+
+/**
  * 
  * @param {Object} props 
  * @param {Object[]} props.suppliers
@@ -36,10 +51,18 @@ export default function SpareParts({suppliers, selectedSearchOptions, totalSpare
             compatibleTrucks: [{make: 'Hino', model: '500'}, {make: 'Hino', model: '700'}], 
             supplierIds: [19936, 9799],
             orderIds: [19929, 9767]} */
+    /**
+     * @type {[SparePart[], React.SetStateAction<SparePart[]>]}
+     */
     const [spareParts, setSpareParts] = useState([])
 
     const [existingSparePart, setExistingSparePart] = useState()
 
+    /**
+     * 
+     * @param {SparePart} sp spare part 
+     * @returns whether anything matched to search options
+     */
     const matchSearchOptions = (sp) => {
         if (selectedSearchOptions.length === 0) {
             return true
@@ -57,6 +80,9 @@ export default function SpareParts({suppliers, selectedSearchOptions, totalSpare
     }
 
     // TODO passing the uploaded medias in individual dialog over here
+    /**
+     * @param {SparePart} sparePart spare part 
+     */
     const afterSave = (sparePart) => {
         const existing = spareParts.findIndex(sp => sp.id === sparePart.id)
 
@@ -79,6 +105,10 @@ export default function SpareParts({suppliers, selectedSearchOptions, totalSpare
         setUploadedMedias(prev => [...prev.filter(um => um.id !== media.id)])
     }
 
+    /**
+     * 
+     * @param {SparePart} sparePart 
+     */
     const showDialogFor = (sparePart) => {
         setExistingSparePart(sparePart)
         setShowSparePartDialog(true)

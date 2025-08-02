@@ -1,7 +1,16 @@
-export default async function fetchVehicles(apiUrl = '', setVehicles, setSearchOptions) {
+/**
+ * 
+ * @param {string} apiUrl 
+ * @param {React.SetStateAction<import("./Vehicles").Vehicle[]>} setVehicles 
+ * @param {React.SetStateAction<Object>} setSearchOptions 
+ * @returns 
+ */
+export default async function fetchVehicles(apiUrl, setVehicles, setSearchOptions) {
     return fetch(`${apiUrl}/api/vehicles`, {mode: 'cors'})
       .then(res => res.json())
-      .then(response => {
+      .then(
+        /** @param {import("./Vehicles").Vehicle[]} response */
+        response => {
           setVehicles(response)
           setSearchOptions(prevs => 
             Array.from(new Set([...prevs.map(pv => pv.name), ...response.map(rv => rv.vehicleNo)]))

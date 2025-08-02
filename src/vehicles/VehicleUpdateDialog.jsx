@@ -6,6 +6,16 @@ import { maintenanceServiceKm } from "./maintenanceService"
 import { addMonthsToDateStr } from "../utils/dateUtils"
 import { Calendar, Company, Inspection, Insurance, Roadtax, Services, Trailer, Truck } from "../Icons"
 
+/**
+ * 
+ * @param {Object} props
+ * @param {boolean} props.isShow
+ * @param {React.SetStateAction<boolean>} props.setShowDialog 
+ * @param {import("./Vehicles").Vehicle} props.vehicle
+ * @param {React.SetStateAction<import("./Vehicles").Vehicle[]>} props.setVehicles
+ * @param {Object[]} companies
+ * @returns 
+ */
 function VehicleUpdateDialog({isShow, setShowDialog, vehicle, setVehicles, companies}) {
 
     const apiUrl = process.env.REACT_APP_API_URL

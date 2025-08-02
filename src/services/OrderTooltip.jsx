@@ -1,6 +1,13 @@
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
 import { Calendar, Suppliers } from "../Icons";
 
+/**
+ * 
+ * @param {Object} props
+ * @param {import("../suppliers/SupplierOrders").SupplierOrder} props.order 
+ * @param {import("../suppliers/SupplierOrders").Supplier} props.supplier
+ * @returns 
+ */
 function OrderTooltip({order, supplier}) {
 
     return (

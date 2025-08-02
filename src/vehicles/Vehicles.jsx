@@ -8,10 +8,27 @@ import { addMonthsToDate } from "../utils/dateUtils";
 import { useService } from "../services/ServiceContextProvider";
 
 /**
+ * @typedef {Object} Vehicle
+ * @property {number} id
+ * @property {string} vehicleNo
+ * @property {string} trailerNo
+ * @property {number} companyId
+ * @property {number} latestMileageKm
+ * @property {string} insuranceExpiryDate insurance expiry date in '2005-05-05' format
+ * @property {string} roadTaxExpiryDate roadtax expiry date in '2005-05-05' format
+ * @property {string} inspectionDueDate inspection due date in '2005-05-05' format
+ * @property {string} trailerInspectionDueDate trailer inspection due date in '2005-05-05' format, useful when different from the truck one
+ * @property {string} nextInspectionDate next inspection date in '2005-05-05' format
+ * @property {string} nextTrailerInspectionDate next trailer inspection date in '2005-05-05' format
+ * @property {import("../ServiceTransactions").WorkshopService} lastService on-the-fly calculated field
+ * @property {import("../ServiceTransactions").WorkshopService} lastInspection on-the-fly calculated field
+ */
+
+/**
  * 
  * @param {Object} props
- * @param {Object[]} props.vehicles
- * @param {React.SetStateAction<Object[]>} props.setVehicles
+ * @param {Vehicle[]} props.vehicles
+ * @param {React.SetStateAction<Vehicle[]>} props.setVehicles
  * @param {Object[]} props.companies
  * @param {Object[]} props.selectedSearchOptions
  * @param {string} props.selectedSearchOptions[].name
@@ -173,10 +190,10 @@ export default function Vehicles({vehicles, setVehicles, companies, selectedSear
             }
             {
                 filteredVehicles.length > vehicleLoadCount && <><Col xs="12" className="text-center">
-                    <span className="text-secondary" role="button" onClick={() => setVehicleLoadCount(vehicleLoadCount+12)}><HandPointer /> Click to load more.</span>
+                    <span className="text-secondary" role="button" aria-label="load more" onClick={() => setVehicleLoadCount(vehicleLoadCount+12)}><HandPointer /> Click to load more.</span>
                 </Col>
                 <Col xs="12" className="text-center">
-                    <span className="text-secondary" role="button" onClick={() => setVehicleLoadCount(Number.MAX_SAFE_INTEGER)}><HandPointer /> Load all.</span>
+                    <span className="text-secondary" role="button" aria-label="load all"  onClick={() => setVehicleLoadCount(Number.MAX_SAFE_INTEGER)}><HandPointer /> Load all.</span>
                 </Col></>
             }
         </Row>

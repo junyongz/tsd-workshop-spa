@@ -4,6 +4,14 @@ import { maintenanceServiceKm, triggerWarning } from "./maintenanceService";
 import { Inspection, MaintenanceServices } from "../Icons";
 import { addMonthsToDate } from "../utils/dateUtils";
 
+/**
+ * 
+ * @param {Object} props 
+ * @param {import("../ServiceTransactions").WorkshopService} props.lastService 
+ * @param {import("../ServiceTransactions").WorkshopService} props.lastInspection 
+ * @param {import("./Vehicles").Vehicle} props.vehicle
+ * @returns 
+ */
 export default function VehicleServices({lastService, lastInspection, vehicle}) {
 
     const mileageKmDiff = (lastService && lastService.mileageKm) ? (maintenanceServiceKm - (vehicle.latestMileageKm - lastService.mileageKm)) : undefined

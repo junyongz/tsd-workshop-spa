@@ -23,11 +23,11 @@ import MigratedItemToSupplierOrderDialog from './services/MigratedItemToSupplier
  * @param {Object} props 
  * @param {React.SetStateAction<number>} props.setTotalFilteredServices
  * @param {Function} props.refreshSparePartUsages
- * @param {Object[]} props.vehicles
- * @param {React.SetStateAction<Object[]>} props.setVehicles
- * @param {Object[]} props.sparePartUsages
- * @param {Object[]} props.suppliers
- * @param {Object[]} props.taskTemplates
+ * @param {import('./vehicles/Vehicles').Vehicle[]} props.vehicles
+ * @param {React.SetStateAction<import('./vehicles/Vehicles').Vehicle[]>} props.setVehicles
+ * @param {import('./ServiceTransactions').SparePartUsage[]} props.sparePartUsages
+ * @param {import('./suppliers/SupplierOrders').Supplier[]} props.suppliers
+ * @param {import('./ServiceTransactions').TaskTemplate[]} props.taskTemplates
  * @param {Function} props.onNewVehicleCreated
  * @param {React.SetStateAction<boolean>} props.setLoading
  * @param {Object[]} props.selectedSearchOptions
@@ -60,6 +60,7 @@ function ServiceListing({
 
   const [activePage, setActivePage] = useState(1)
   const filteredServices = applyFilterOnServices(selectedSearchOptions, selectedSearchDate, vehicles, transactions.services(), orders)
+  /** @type {import('./ServiceTransactions').WorkshopService[][]} */
   const chunkedItems = chunkArray(filteredServices, 10)
   const totalPages = chunkedItems.length;
 

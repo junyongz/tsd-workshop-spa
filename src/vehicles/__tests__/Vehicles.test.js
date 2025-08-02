@@ -20,6 +20,8 @@ const services = [
     {id: 5002, vehicleId: 82003, vehicleNo: "JJ 3", startDate: "2005-02-01", transactionTypes: ["REPAIR"], mileageKm: 2000},
     {id: 5003, vehicleId: 82003, vehicleNo: "JJ 3", startDate: "2005-02-11", transactionTypes: ["SERVICE"], mileageKm: 3000},
     {id: 5004, vehicleId: 82004, vehicleNo: "JJ 4", startDate: "2005-04-01", transactionTypes: ["INSPECTION"], mileageKm: 10000},
+    {id: 5005, vehicleId: 82005, vehicleNo: "JJ 5", startDate: "2005-04-01", transactionTypes: ["SERVICE"], mileageKm: 5000},
+    {id: 5006, vehicleId: 82006, vehicleNo: "JJ 6", startDate: "2005-04-01", transactionTypes: ["SERVICE"], mileageKm: 3000},
 ]
 
 const companies = [
@@ -32,6 +34,29 @@ const vehicles = [
     {id: 82002, vehicleNo: "JJ 2", companyId: 8000, latestMileageKm: 18000, insuranceExpiryDate: '2005-08-31', roadTaxExpiryDate: '2005-08-31', inspectionDueDate: '2005-09-30'},
     {id: 82003, vehicleNo: "JJ 3", companyId: 8001, latestMileageKm: 12000, insuranceExpiryDate: '2005-08-31', roadTaxExpiryDate: '2005-08-31', inspectionDueDate: '2005-09-30'},
     {id: 82004, vehicleNo: "JJ 4", companyId: 8001, latestMileageKm: 15000 },
+]
+
+const newVehicles =[
+    {id: 82001, vehicleNo: "JJ 1", companyId: 8000, latestMileageKm: 20000, insuranceExpiryDate: '2005-06-30', roadTaxExpiryDate: '2005-06-30', inspectionDueDate: '2005-07-30'},
+    {id: 82002, vehicleNo: "JJ 2", companyId: 8000, latestMileageKm: 18000, insuranceExpiryDate: '2005-08-31', roadTaxExpiryDate: '2005-08-31', inspectionDueDate: '2005-09-30'},
+    {id: 82003, vehicleNo: "JJ 3", companyId: 8001, latestMileageKm: 12000, insuranceExpiryDate: '2005-08-31', roadTaxExpiryDate: '2005-08-31', inspectionDueDate: '2005-09-30'},
+    {id: 82004, vehicleNo: "JJ 4", companyId: 8001, latestMileageKm: 15000 },
+    {id: 82005, vehicleNo: "JJ 5", companyId: 8000, latestMileageKm: 20000, insuranceExpiryDate: '2005-06-30', roadTaxExpiryDate: '2005-06-30', inspectionDueDate: '2005-07-30'},
+    {id: 82006, vehicleNo: "JJ 6", companyId: 8000, latestMileageKm: 18000, insuranceExpiryDate: '2005-08-31', roadTaxExpiryDate: '2005-08-31', inspectionDueDate: '2005-09-30'},
+    {id: 82007, vehicleNo: "JJ 7", companyId: 8001, latestMileageKm: 12000, insuranceExpiryDate: '2005-08-31', roadTaxExpiryDate: '2005-08-31', inspectionDueDate: '2005-09-30'},
+    {id: 82008, vehicleNo: "JJ 8", companyId: 8001, latestMileageKm: 15000 },
+    {id: 82009, vehicleNo: "JJ 9", companyId: 8000, latestMileageKm: 20000, insuranceExpiryDate: '2005-06-30', roadTaxExpiryDate: '2005-06-30', inspectionDueDate: '2005-07-30'},
+    {id: 82010, vehicleNo: "JK 1", companyId: 8000, latestMileageKm: 18000, insuranceExpiryDate: '2005-08-31', roadTaxExpiryDate: '2005-08-31', inspectionDueDate: '2005-09-30'},
+    {id: 82011, vehicleNo: "JK 2", companyId: 8001, latestMileageKm: 12000, insuranceExpiryDate: '2005-08-31', roadTaxExpiryDate: '2005-08-31', inspectionDueDate: '2005-09-30'},
+    {id: 82012, vehicleNo: "JK 3", companyId: 8001, latestMileageKm: 15000 },
+    {id: 82013, vehicleNo: "JK 4", companyId: 8000, latestMileageKm: 20000, insuranceExpiryDate: '2005-06-30', roadTaxExpiryDate: '2005-06-30', inspectionDueDate: '2005-07-30'},
+    {id: 82014, vehicleNo: "JK 5", companyId: 8000, latestMileageKm: 18000, insuranceExpiryDate: '2005-08-31', roadTaxExpiryDate: '2005-08-31', inspectionDueDate: '2005-09-30'},
+    {id: 82015, vehicleNo: "JK 6", companyId: 8001, latestMileageKm: 12000, insuranceExpiryDate: '2005-08-31', roadTaxExpiryDate: '2005-08-31', inspectionDueDate: '2005-09-30'},
+    {id: 82016, vehicleNo: "JK 7", companyId: 8001, latestMileageKm: 15000 },
+    {id: 82017, vehicleNo: "JK 8", companyId: 8000, latestMileageKm: 20000, insuranceExpiryDate: '2005-06-30', roadTaxExpiryDate: '2005-06-30', inspectionDueDate: '2005-07-30'},
+    {id: 82018, vehicleNo: "JK 9", companyId: 8000, latestMileageKm: 18000, insuranceExpiryDate: '2005-08-31', roadTaxExpiryDate: '2005-08-31', inspectionDueDate: '2005-09-30'},
+    {id: 82019, vehicleNo: "JL 1", companyId: 8001, latestMileageKm: 12000, insuranceExpiryDate: '2005-08-31', roadTaxExpiryDate: '2005-08-31', inspectionDueDate: '2005-09-30'},
+    {id: 82029, vehicleNo: "JL 2", companyId: 8001, latestMileageKm: 15000 },
 ]
 
 test('render many vehicles', async () => {
@@ -273,4 +298,68 @@ test('to load trailer different inspection date', async () => {
     await user.click(screen.getByRole('button', {name: 'Save'}))
     expect(screen.getByPlaceholderText('Choose a company...').validationMessage)
         .toEqual('not a valid company, either choose one and create one first')
+})
+
+test('render lots of vehicles, load more', async () => {
+    const user = userEvent.setup()
+
+    render(<ServiceContext value={new ServiceTransactions(services, jest.fn())}>
+            <Vehicles vehicles={newVehicles} companies={companies}></Vehicles>
+        </ServiceContext>)
+
+    expect(screen.getAllByRole("button")
+        .map(elem => elem.className)
+        .filter(clz => clz === 'card')).toHaveLength(10)
+
+    // show all vehicles
+    await user.click(screen.getByText('Only showing for Harsoon'))
+
+    expect(screen.getAllByRole("button")
+        .map(elem => elem.className)
+        .filter(clz => clz === 'card')).toHaveLength(12)
+
+    expect(screen.queryByLabelText('load more')).toBeInTheDocument()
+    expect(screen.queryByLabelText('load all')).toBeInTheDocument()
+
+    await user.click(screen.getByLabelText('load more'))
+
+    expect(screen.getAllByRole("button")
+        .map(elem => elem.className)
+        .filter(clz => clz === 'card')).toHaveLength(20)
+
+    expect(screen.queryByLabelText('load more')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('load all')).not.toBeInTheDocument()
+})
+
+test('render lots of vehicles, load all', async () => {
+    const user = userEvent.setup()
+
+    render(<ServiceContext value={new ServiceTransactions(services, jest.fn())}>
+            <Vehicles vehicles={newVehicles} companies={companies}></Vehicles>
+        </ServiceContext>)
+
+    expect(screen.getAllByRole("button")
+        .map(elem => elem.className)
+        .filter(clz => clz === 'card')).toHaveLength(10)
+
+    // show all vehicles
+    await user.click(screen.getByText('Only showing for Harsoon'))
+
+    expect(screen.getAllByRole("button")
+        .map(elem => elem.className)
+        .filter(clz => clz === 'card')).toHaveLength(12)
+
+    expect(screen.queryByLabelText('load more')).toBeInTheDocument()
+    expect(screen.queryByLabelText('load all')).toBeInTheDocument()
+
+    await user.click(screen.getByLabelText('load all'))
+
+    expect(screen.getAllByRole("button")
+        .map(elem => elem.className)
+        .filter(clz => clz === 'card')).toHaveLength(20)
+    
+    await user.click(screen.getByRole('checkbox', {name: 'Service due soon'}))
+
+    expect(screen.queryByLabelText('load more')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('load all')).not.toBeInTheDocument()
 })

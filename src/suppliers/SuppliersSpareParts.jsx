@@ -32,9 +32,9 @@ import { useSupplierOrders } from "./SupplierOrderContextProvider"
  * @param {import("../ServiceTransactions").SparePartUsage[]} props.sparePartUsages
  * @param {Function} props.refreshSparePartUsages
  * @param {Function} props.refreshServices
- * @param {Function} props.onNewVehicleCreated
+ * @param {import("../App").CreateNewVehicleCallback} props.onNewVehicleCreated
  * @param {React.SetStateAction<boolean>} props.setLoading 
- * @param {Function>} props.showToastMessage 
+ * @param {Function} props.showToastMessage 
  * @returns 
  */
 function SuppliersSpareParts({setTotalFilteredOrders, 
@@ -94,7 +94,7 @@ function SuppliersSpareParts({setTotalFilteredOrders,
         }
     }
 
-    const onSaveNewOrders = (newOrders=[], callback=() => {}) => {
+    const onSaveNewOrders = (newOrders, callback) => {
         setLoading(true)
         requestAnimationFrame(() => {
             fetch(`${apiUrl}/api/supplier-spare-parts`, {
@@ -111,7 +111,7 @@ function SuppliersSpareParts({setTotalFilteredOrders,
             })
             .then(() => callback && callback())
             .then(() => clearState())
-            .catch(e => showToastMessage('failed to save orders: ' + e))
+            .catch(e => showToastMessage('failed to save orders: ' + e.message))
             .finally(() => setLoading(false))
         })
     }

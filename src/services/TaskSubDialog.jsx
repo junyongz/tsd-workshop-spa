@@ -123,7 +123,7 @@ export default function TaskSubDialog({taskTemplates, tasks, setTasks, removeTas
     }, [])
 
     return (
-        <ListGroup>
+        <ListGroup key="tasks">
             {tasks?.map((v, i) =>
             <ListGroup.Item key={v.rid || v.id}>
                 <Row>

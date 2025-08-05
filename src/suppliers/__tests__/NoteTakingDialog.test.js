@@ -69,3 +69,68 @@ test('test together with SupplierSpareParts.jsx', async () => {
         {"body": "[{\"id\":1001,\"itemCode\":\"100001\",\"partName\":\"Brake Adjuster\",\"supplierId\":2002,\"quantity\":5,\"unit\":\"pc\",\"unitPrice\":230,\"notes\":\"What am i going to do without you\",\"status\":\"ACTIVE\",\"remaining\":5,\"supplierName\":\"GD Workzone\"}]", 
             "headers": {"Content-type": "application/json"}, "method": "POST", "mode": "cors"}))
 })
+
+test('test together with SupplierSpareParts.jsx but failed to update', async () => {
+    const user = userEvent.setup()
+
+    global.fetch = jest.fn()
+    global.fetch.mockResolvedValueOnce({
+        ok: false,
+        json: () => Promise.resolve({status: 500, code: 'SP-QUANTITY-002', reason: 'overdose!'})
+    })
+
+    window.matchMedia.mockReturnValue({
+        refCount: 0,
+        addListener: jest.fn(),
+        removeListener: jest.fn(),
+        matches: false,           // Added for completeness, can be adjusted
+        media: '(min-width: 768px)', // Default media query, can be adjusted
+        onchange: null            // Added for completeness
+    })
+
+    const suppliers = [
+        {id: 2001, supplierName: 'Tong Fong'},
+        {id: 2002, supplierName: 'GD Workzone'},
+    ]
+    const vehicles = [
+        {id: 3001, vehicleNo: 'J 23'},
+        {id: 3002, vehicleNo: 'J 33'},
+    ]
+    const orders = [
+        {id: 1000, itemCode: '100001', partName: 'Brake Pads', supplierId: 2001, quantity: 8, unit: 'pc', unitPrice: 8.8, notes: 'Hello World', status: 'ACTIVE'},
+        {id: 1001, itemCode: '100001', partName: 'Brake Adjuster', supplierId: 2002, quantity: 5, unit: 'pc', unitPrice: 230, notes: 'To return to Supplier', status: 'ACTIVE'}
+    ]
+
+    const showToastMessage = jest.fn()
+    render(
+    <SupplierOrderContext value={
+        new SupplierOrders(orders, jest.fn())
+    }>
+        <SuppliersSpareParts suppliers={suppliers}
+            vehicles={vehicles}
+            setLoading={setLoading}
+            showToastMessage={showToastMessage}
+        />
+    </SupplierOrderContext>)
+
+    const noteButtons = document.querySelectorAll('.bi-pencil')
+    expect(noteButtons).toHaveLength(2)
+        
+    await user.click(noteButtons[1])
+    expect(screen.getByText('Brake Adjuster (5 left)')).toBeInTheDocument()
+
+    // key in the information
+    expect(screen.getAllByText('To return to Supplier')).toHaveLength(2)
+    await user.click(document.querySelector('textarea[name="notes"]'))
+    await user.keyboard('{Control>}A{/Control}[Backspace]What am i going to do without you')
+
+    // and save it to call fetch api
+    await user.click(screen.getByText('Save'))
+    await waitFor(() => expect(global.fetch).lastCalledWith("http://localhost:8080/api/supplier-spare-parts?op=NOTES", 
+        {"body": "[{\"id\":1001,\"itemCode\":\"100001\",\"partName\":\"Brake Adjuster\",\"supplierId\":2002,\"quantity\":5,\"unit\":\"pc\",\"unitPrice\":230,\"notes\":\"What am i going to do without you\",\"status\":\"ACTIVE\",\"remaining\":5,\"supplierName\":\"GD Workzone\"}]", 
+            "headers": {"Content-type": "application/json"}, "method": "POST", "mode": "cors"}))
+
+    expect(showToastMessage).toBeCalledTimes(2)
+    expect(showToastMessage.mock.calls[0][0]).toEqual("failed to update order {\"id\":1001,\"itemCode\":\"100001\",\"partName\":\"Brake Adjuster\",\"supplierId\":2002,\"quantity\":5,\"unit\":\"pc\",\"unitPrice\":230,\"notes\":\"What am i going to do without you\",\"status\":\"ACTIVE\",\"remaining\":5,\"supplierName\":\"GD Workzone\"}")
+    expect(showToastMessage.mock.calls[1][0]).toEqual("failed to update order, response: {\"status\":500,\"code\":\"SP-QUANTITY-002\",\"reason\":\"overdose!\"}")
+})

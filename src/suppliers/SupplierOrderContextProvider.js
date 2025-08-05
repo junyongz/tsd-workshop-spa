@@ -7,8 +7,20 @@ import SupplierOrders from "./SupplierOrders";
  */
 export const SupplierOrderContext = createContext()
 
-export function SupplierOrderProvider({initialOrders=[], children}) {
-    const reducer = (prev = new SupplierOrders(), newOrders=[]) => {
+/**
+ * 
+ * @param {Object} props
+ * @param {import("./SupplierOrders").SupplierOrder[]} props.initialOrders
+ * @returns 
+ */
+export function SupplierOrderProvider({initialOrders, children}) {
+    /**
+     * 
+     * @param {SupplierOrders} prev 
+     * @param {import("./SupplierOrders").SupplierOrder[]} newOrders 
+     * @returns 
+     */
+    const reducer = (prev, newOrders) => {
         return new SupplierOrders(newOrders, prev.dispatch)
     }
 

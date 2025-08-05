@@ -7,8 +7,8 @@ import { useSupplierOrders } from "./SupplierOrderContextProvider"
 
 /**
  * 
- * @param {Object[]} orders 
- * @param {Object[]} suppliers 
+ * @param {import("./SupplierOrders").SupplierOrder[]} orders 
+ * @param {import("./SupplierOrders").Supplier[]} suppliers 
  * @param {number} year 
  * @param {number} month 
  * @returns 
@@ -35,10 +35,10 @@ const filterOrdersBySupplier = (orders, suppliers, year, month) => {
 
 /**
  * 
- * @param {Object[]} supplierOrders 
+ * @param {import("./SupplierOrders").SupplierOrder[]} supplierOrders 
  * @returns 
  */
-const itemsByOrder = (supplierOrders=[]) => {
+const itemsByOrder = (supplierOrders) => {
     const itemsByDO = {}
     supplierOrders.forEach(order => {
         const orderByDO = itemsByDO[order.deliveryOrderNo] || []

@@ -6,7 +6,6 @@ import { SupplierOrderContext } from '../suppliers/SupplierOrderContextProvider'
 import ServiceListing from '../ServiceListing';
 import SupplierOrders from '../suppliers/SupplierOrders';
 import { addDaysToDateStr } from '../utils/dateUtils';
-import TransactionTypes from '../components/TransactionTypes';
 
 jest.mock('../services/ServiceNoteTakingDialog', () => ({isShow, onSaveNote}) => 
     <div>
@@ -273,7 +272,8 @@ test('on save note and save media', async () => {
             <ServiceListing selectedSearchOptions={[]} 
                 setTotalFilteredServices={setTotalFilteredServices}
                 suppliers={[...suppliers]}
-                setLoading={setLoading} />
+                setLoading={setLoading}
+                vehicles={[]} />
         </SupplierOrderContext>
     </WorkshopServicesProvider>)
 
@@ -412,7 +412,8 @@ test('view the completed service, and load individual', async () => {
                 taskTemplates={[
                     {id: 8700001, workmanshipTask: 'adjust brake', component: {subsystem: 'Braking', component: 'Parking Brake'}}
                 ]}
-                setLoading={setLoading} />
+                setLoading={setLoading}
+                vehicles={[]} />
         </SupplierOrderContext>
     </WorkshopServicesProvider>)
 

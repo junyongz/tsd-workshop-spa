@@ -28,7 +28,7 @@ import MigratedItemToSupplierOrderDialog from './services/MigratedItemToSupplier
  * @param {import('./ServiceTransactions').SparePartUsage[]} props.sparePartUsages
  * @param {import('./suppliers/SupplierOrders').Supplier[]} props.suppliers
  * @param {import('./ServiceTransactions').TaskTemplate[]} props.taskTemplates
- * @param {Function} props.onNewVehicleCreated
+ * @param {import('./App').CreateNewVehicleCallback} props.onNewVehicleCreated
  * @param {React.SetStateAction<boolean>} props.setLoading
  * @param {Object[]} props.selectedSearchOptions
  * @param {string} props.selectedSearchOptions[].name

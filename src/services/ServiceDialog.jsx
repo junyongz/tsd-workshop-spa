@@ -8,9 +8,23 @@ import TaskSubDialog from "./TaskSubDialog";
 import { addDaysToDateStr } from "../utils/dateUtils";
 import createNewVehicle from "../vehicles/createNewVehicle";
 
-function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[], 
-    suppliers=[], sparePartUsages=[], taskTemplates=[],
-    onNewVehicleCreated=() => {}}) {
+/**
+ * 
+ * @param {Object} props 
+ * @param {boolean} props.isShow 
+ * @param {React.SetStateAction<boolean>} props.isShow 
+ * @param {React.RefObject<import("../ServiceTransactions").WorkshopService>} props.trx
+ * @param {Function} props.onNewServiceCreated
+ * @param {import("../vehicles/Vehicles").Vehicle[]} props.vehicles
+ * @param {import("../suppliers/SupplierOrders").Supplier[]} props.suppliers
+ * @param {import("../ServiceTransactions").SparePartUsage[]} props.sparePartUsages
+ * @param {import("../ServiceTransactions").TaskTemplate[]} taskTemplates
+ * @param {import("../App").CreateNewVehicleCallback} props.onNewVehicleCreated
+ * @returns 
+ */
+function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles, 
+    suppliers, sparePartUsages, taskTemplates,
+    onNewVehicleCreated}) {
 
     const apiUrl = process.env.REACT_APP_API_URL
 

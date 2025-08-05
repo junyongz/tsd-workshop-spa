@@ -42,7 +42,7 @@ export default function SparePartsSubDialog({
     }
 
     return (
-        <ListGroup>
+        <ListGroup key="parts">
             {items?.map((v, i) =>
             <ListGroup.Item key={i}>
                 <Row>                                

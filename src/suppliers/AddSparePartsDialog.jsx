@@ -156,7 +156,12 @@ function AddSparePartsDialog({isShow, setShowDialog, existingOrder, suppliers, s
         })
     }
 
-    const updatePriceByQuantity = (val=0, i) => {
+    /**
+     * 
+     * @param {number} val 
+     * @param {number} i index of part items
+     */
+    const updatePriceByQuantity = (val, i) => {
         setItems(prevs => {
             const newItems = [...prevs]
             newItems[i] = {...newItems[i], quantity: parseFloat(val)}
@@ -164,7 +169,12 @@ function AddSparePartsDialog({isShow, setShowDialog, existingOrder, suppliers, s
         })
     }
 
-    const updatePriceByUnitPrice = (val=0.0, i) => {
+    /**
+     * 
+     * @param {number} val 
+     * @param {number} i index of part items
+     */
+    const updatePriceByUnitPrice = (val, i) => {
         setItems(prevs => {
             const newItems = [...prevs]
             newItems[i] = {...newItems[i], unitPrice: parseFloat(val)}

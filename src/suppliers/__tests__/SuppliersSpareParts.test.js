@@ -1,4 +1,4 @@
-import { test, expect, jest } from '@jest/globals'
+import { test, expect, jest, afterEach } from '@jest/globals'
 import { render, screen, fireEvent, waitFor, createEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
@@ -44,10 +44,13 @@ const mockSuppliers = [
     { id: 2002, supplierName: 'Aik Leong' }
 ]; 
 
-let defaultProps;
+afterEach(() => {
+  jest.clearAllMocks()
+  jest.restoreAllMocks()
+})
 
+let defaultProps;
 beforeEach(() => {
-  jest.clearAllMocks();
   global.matchMedia.mockReturnValue({
       refCount: 0,
       addListener: jest.fn(),
@@ -171,7 +174,11 @@ test('handles API POST for new orders', async () => {
   global.fetch.mockResolvedValueOnce({
     ok: true,
     json: () => Promise.resolve(newOrders)
-  });
+  })
+  .mockResolvedValueOnce({
+    ok: false,
+    json: () => Promise.resolve({status: 500, code: 'SPP-001', reason: 'already exists'})
+  })
 
   const container = render(
     <SupplierOrderProvider initialOrders={[...mockOrders]}>
@@ -192,6 +199,36 @@ test('handles API POST for new orders', async () => {
     );
     expect(screen.getAllByRole("listitem")).toHaveLength(6)
   });
+
+  container.unmount()
+});
+
+test('handles failed fetch for new orders', async () => {
+  const newOrders = [
+    { id: 1004, supplierId: 2001 },
+    { id: 1005, supplierId: 2001 },
+    { id: 1006, supplierId: 2001 }
+  ];
+  global.fetch.mockRejectedValueOnce(new Error("failed to connect database"))
+
+  const container = render(
+    <SupplierOrderProvider initialOrders={[...mockOrders]}>
+      <SuppliersSpareParts {...defaultProps} />
+    </SupplierOrderProvider>);
+  
+  const consoleError = jest.spyOn(console, 'error')
+  const span = container.getByTestId('add-spare-parts')
+  const evt = createEvent.click(span, {target: {orders: newOrders}})
+  fireEvent.click(span, evt)
+
+  await waitFor(() => expect(global.fetch).lastCalledWith("http://localhost:8080/api/supplier-spare-parts", 
+      {"body": "[{\"id\":1004,\"supplierId\":2001},{\"id\":1005,\"supplierId\":2001},{\"id\":1006,\"supplierId\":2001}]", 
+        "headers": {"Content-type": "application/json"}, "method": "POST", "mode": "cors"}))
+  
+  expect(screen.getAllByRole("listitem")).toHaveLength(4)
+
+  expect(consoleError).toBeCalledTimes(1)
+  expect(consoleError.mock.calls[0][0]).toEqual('failed to save orders: failed to connect database')
 
   container.unmount()
 });
@@ -269,6 +306,10 @@ test('deplete order and remain 2', async () => {
       { id: 1001, status: 'DEPLETED', supplierId: 2000}
     ])
   })
+  .mockResolvedValueOnce({
+    ok: false,
+    json: () => Promise.resolve({status: 500, code: 'SPP-001', reason: 'Database down for 15minutes'})
+  })
 
   render(
     <SupplierOrderProvider initialOrders={[...mockOrders]}>
@@ -277,13 +318,24 @@ test('deplete order and remain 2', async () => {
 
   expect(screen.queryByLabelText('deplete order Engine Oil')).toBeInTheDocument()
   
-  await user.click(screen.queryByLabelText('deplete order Engine Oil'))
+  await user.click(screen.getByLabelText('deplete order Engine Oil'))
   await waitFor(() => expect(global.fetch).lastCalledWith("http://localhost:8080/api/supplier-spare-parts?op=DEPLETE", 
     {"body": "[{\"id\":1001,\"invoiceDate\":\"2023-01-01\",\"supplierId\":2000,\"itemCode\":\"ABC123\",\"partName\":\"Engine Oil\",\"quantity\":10,\"unit\":\"ltr\",\"unitPrice\":5,\"deliveryOrderNo\":\"DO001\",\"status\":\"ACTIVE\"}]", 
       "headers": {"Content-type": "application/json"}, "method": "POST", "mode": "cors"}))
 
   expect(screen.getAllByRole("listitem")).toHaveLength(4)
   await waitFor(() => expect(screen.queryByLabelText('deplete order Engine Oil')).not.toBeInTheDocument())
+  
+  // failed to deplete order
+  const consoleError = jest.spyOn(console, 'error')
+  await user.click(screen.getByLabelText('deplete order Brake Pads'))
+  await waitFor(() => expect(global.fetch).lastCalledWith("http://localhost:8080/api/supplier-spare-parts?op=DEPLETE", 
+    {"body": "[{\"id\":1003,\"invoiceDate\":\"2023-01-03\",\"supplierId\":2000,\"sheetName\":\"JUL 23\",\"itemCode\":\"DEF456\",\"partName\":\"Brake Pads\",\"quantity\":8,\"unit\":\"set\",\"unitPrice\":25,\"deliveryOrderNo\":\"DO003\",\"status\":\"ACTIVE\"}]", 
+      "headers": {"Content-type": "application/json"}, "method": "POST", "mode": "cors"}))
+
+  expect(consoleError).toBeCalledTimes(2)
+  expect(consoleError.mock.calls[0][0]).toEqual("failed to deplete order {\"id\":1003,\"invoiceDate\":\"2023-01-03\",\"supplierId\":2000,\"sheetName\":\"JUL 23\",\"itemCode\":\"DEF456\",\"partName\":\"Brake Pads\",\"quantity\":8,\"unit\":\"set\",\"unitPrice\":25,\"deliveryOrderNo\":\"DO003\",\"status\":\"ACTIVE\"}")
+  expect(consoleError.mock.calls[1][0]).toEqual("failed to update order, response: {\"status\":500,\"code\":\"SPP-001\",\"reason\":\"Database down for 15minutes\"}")
 });
 
 test('show supplier in recent order and name ordering', async () => {

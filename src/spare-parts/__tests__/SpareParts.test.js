@@ -1,6 +1,6 @@
 import { createEvent, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { jest, test, expect, afterAll } from '@jest/globals';
+import { jest, test, expect, afterAll, afterEach } from '@jest/globals';
 
 import SpareParts from '../SpareParts';
 import SupplierOrders from '../../suppliers/SupplierOrders';
@@ -22,6 +22,8 @@ afterAll(() => {
     jest.clearAllTimers()
     jest.useRealTimers()
 })
+
+afterEach(() => jest.restoreAllMocks())
 
 const theOrders = [
     {id: 5000, supplierId: 2000, sparePartId: 1000, unitPrice: 5},
@@ -157,6 +159,122 @@ test('filters spare parts based on search options, then remove search options la
 
     await waitFor(() => expect(global.fetch).lastCalledWith("http://localhost:8080/api/spare-parts/1003", 
         {"headers": {"Content-type": "application/json"}, "method": "DELETE", "mode": "cors"}))
+});
+
+test('intersection observer and timeout navigation', async () => {
+    const user = userEvent.setup({advanceTimers: jest.advanceTimersByTime})
+
+    let intersectionFunc;
+    const disconnectFn = jest.fn()
+    const observeFn = jest.fn()
+    const unobserveFn = jest.fn()
+    global.IntersectionObserver = jest.fn((fn) => {
+        intersectionFunc = fn
+        return {
+            disconnect: disconnectFn,
+            observe: observeFn,
+            unobserve: unobserveFn
+        }
+    })
+
+    global.fetch = jest.fn().mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([
+            { id: 1000, partNo: '11110000', partName: 'Air Tank', description: 'Air A Tank', oems:[], compatibleTrucks:[{make: 'Hino', model: '700'}] },
+            { id: 1001, partNo: '22220000', partName: 'Flame Tank', description: 'Flame F Tank', oems:[], compatibleTrucks:[{make: 'Hino', model: '500'}] },
+            { id: 1002, partNo: '33220000', partName: 'Brake Adjuster', description: 'Brake adjuster for Fuso', oems:[], compatibleTrucks:[{make: 'Fuso', model: 'Super Great'}] }
+        ])
+    })
+    .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([{id: 3000, sparePartId: 1000}, {id: 3001, sparePartId: 1000}])
+    }).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([{id: 3002, sparePartId: 1001}, {id: 3003, sparePartId: 1001}])
+    }).mockResolvedValueOnce({
+        ok: true,
+        blob: () => Promise.resolve("")
+    }).mockResolvedValueOnce({
+        ok: true,
+        blob: () => Promise.resolve("")
+    }).mockResolvedValueOnce({
+        ok: true,
+        blob: () => Promise.resolve("")
+    }).mockResolvedValueOnce({
+        ok: true,
+        blob: () => Promise.resolve("")
+    })
+
+    const clearTimeoutFn = jest.spyOn(global, 'clearTimeout')
+    const mockOrders = new SupplierOrders([...theOrders], jest.fn());
+    const mockSearchOptions = [];
+
+    const {rerender} =render(
+        <SupplierOrderContext value={mockOrders}><SpareParts
+        suppliers={mockSuppliers}
+        selectedSearchOptions={mockSearchOptions}
+        totalSpareParts={10}
+        setTotalSpareParts={jest.fn()}
+        /></SupplierOrderContext>
+    );
+
+    // Wait for the spare part to be rendered
+    await waitFor(() => {
+        screen.getByText('11110000');
+    })
+
+    const partName = await screen.findByText('Flame Tank');
+    expect(partName).toBeInTheDocument();
+
+    expect(global.fetch).nthCalledWith(1, "http://localhost:8080/api/spare-parts", {"headers": {"Content-type": "application/json"}, "mode": "cors"})
+
+    expect(screen.getAllByRole("menuitem")).toHaveLength(3)
+    expect(document.querySelectorAll('img')).toHaveLength(0)
+
+    const entries = [
+        {isIntersecting: true, target: {dataset: {sparePartId: 1000}}}, 
+        {isIntersecting: true, target: {dataset: {sparePartId: 1001}}},
+        {isIntersecting: true, target: {dataset: {sparePartId: 1002}}},
+    ]
+
+    expect(intersectionFunc).toBeDefined()
+    intersectionFunc(entries)
+    entries[2].isIntersecting = false
+    jest.advanceTimersByTime(800)
+
+    await waitFor(() => {
+        expect(global.fetch).nthCalledWith(2, "http://localhost:8080/api/spare-parts/1000/medias")
+        expect(global.fetch).nthCalledWith(3, "http://localhost:8080/api/spare-parts/1001/medias")
+        expect(global.fetch).nthCalledWith(4, "http://localhost:8080/api/spare-parts/1000/medias/3000/data")
+        expect(global.fetch).nthCalledWith(5, "http://localhost:8080/api/spare-parts/1000/medias/3001/data")
+        expect(global.fetch).nthCalledWith(6, "http://localhost:8080/api/spare-parts/1001/medias/3002/data")
+        expect(global.fetch).nthCalledWith(7, "http://localhost:8080/api/spare-parts/1001/medias/3003/data") 
+    })
+
+    expect(document.querySelectorAll('img')).toHaveLength(4)
+    expect(disconnectFn).toBeCalledTimes(1)
+    expect(observeFn).toBeCalledTimes(3)
+    expect(unobserveFn).toBeCalledTimes(2)
+
+    // complete the else-part flow
+    entries[0].isIntersecting = false
+    entries[1].isIntersecting = false
+    intersectionFunc(entries)
+
+    expect(clearTimeoutFn).toBeCalledTimes(3)
+
+    // to clear by useEffect clean up
+    intersectionFunc(entries.map(e => {e.isIntersecting=true; return e}))
+    rerender(
+        <SupplierOrderContext value={mockOrders}><SpareParts
+        suppliers={mockSuppliers}
+        selectedSearchOptions={[{name: 'tank'}, {name: 'Hino'}]}
+        totalSpareParts={10}
+        setTotalSpareParts={jest.fn()}
+        /></SupplierOrderContext>)
+    
+    expect(clearTimeoutFn).toBeCalledTimes(4)
+    expect(screen.getAllByRole("menuitem")).toHaveLength(2)
 });
 
 test('update existing parts', async() => {

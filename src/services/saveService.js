@@ -5,7 +5,7 @@ import ServiceTransactions from "../ServiceTransactions"
  * @param {ServiceTransactions} transactions
  * @param {Function} refreshSparePartUsages 
  * @param {Function} clearState to remove state checking from session storage, so wont refresh again
- * @param {Object} service 
+ * @param {import("../ServiceTransactions").WorkshopService} service 
  */
 export default function saveService( 
     setLoading, transactions,
@@ -29,7 +29,9 @@ export default function saveService(
         }
         return res.json()
       })
-      .then(service => {
+      .then(
+        /** @param {import("../ServiceTransactions").WorkshopService service} */
+      service => {
         transactions.addNewTransaction(service)
       })
       .then(() => refreshSparePartUsages())

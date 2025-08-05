@@ -314,7 +314,7 @@ test('add for existing service, navigate around', async () => {
     const saveService = jest.fn()
     const setShow = jest.fn()
     render(<SupplierOrderContext value={orders}>
-        <ServiceDialog 
+        <ServiceDialog
             isShow={true}
             setShow={setShow}
             vehicles={[{id: 50001, vehicleNo: "J 23"}, {id: 50002, vehicleNo: "J 33"}]} 
@@ -322,6 +322,7 @@ test('add for existing service, navigate around', async () => {
             sparePartUsages={[]}
             onNewServiceCreated={saveService}
             trx={{current: {id: 100001, vehicleNo: "J 23", startDate: prevStartDate}}}
+            taskTemplates={[]}
         />
         </SupplierOrderContext>)
 

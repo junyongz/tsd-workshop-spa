@@ -27,6 +27,18 @@ import YearMonthView from './services/YearMonthView';
 import { useService } from './services/ServiceContextProvider';
 import { useSupplierOrders } from './suppliers/SupplierOrderContextProvider';
 
+/**
+ * @typedef SearchOption search option in navigation bar, other page use it for filtering
+ * @type {Object}
+ * @property {string} name the value of the search option
+ */
+
+/**
+ * @callback CreateNewVehicleCallback
+ * @param {string} vehicleNo vehicle no
+ * @returns {Promise<import('./vehicles/Vehicles').Vehicle>}
+ */
+
 function App() {
   const apiUrl = process.env.REACT_APP_API_URL
 
@@ -57,13 +69,19 @@ function App() {
   }
   
   // search box
+  /** @type {[SearchOption[], React.SetStateAction<SearchOption[]>]} */
   const [searchOptions, setSearchOptions] = useState([])
+  /** @type {[SearchOption[], React.SetStateAction<SearchOption[]>]} */
   const [selectedSearchOptions, setSelectedSearchOptions] = useState([])
+  /** @type {React.RefObject<Set<string>>} */
   const searchedOptions = useRef(new Set())
   const clearCount = () => {
     setTotalFilteredOrders(0)
     setTotalFilteredServices(0)
   }
+  /**
+   * @param {SearchOption[]} opts 
+   */
   const storeSelectedSearchOptions = (opts=[]) => {
     setSelectedSearchOptions(opts)
     clearCount()
@@ -111,6 +129,9 @@ function App() {
 
   const refreshVehicles = useCallback(() => fetchVehicles(apiUrl, setVehicles, setSearchOptions), [apiUrl])
 
+  /**
+   * @type CreateNewVehicleCallback
+   */
   const onNewVehicleCreated = async (vehicleNo) => {
     if (!/([A-Z]{1,3})\s([\d]{1,4})(\s([A-Z]{1,2}))?/.test(vehicleNo)) {
       alert('Wrong vehicle no format: ' + vehicleNo)

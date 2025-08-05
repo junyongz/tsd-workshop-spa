@@ -25,8 +25,8 @@ import { useSupplierOrders } from "../suppliers/SupplierOrderContextProvider";
 /**
  * 
  * @param {Object} props 
- * @param {Object[]} props.suppliers
- * @param {Object[]} props.selectedSearchOptions
+ * @param {import("../suppliers/SupplierOrders").Supplier[]} props.suppliers
+ * @param {import("../App").SearchOption[]} props.selectedSearchOptions
  * @param {number} props.totalSpareParts
  * @param {React.SetStateAction<number>} props.setTotalSpareParts
  * @returns 
@@ -56,6 +56,9 @@ export default function SpareParts({suppliers, selectedSearchOptions, totalSpare
      */
     const [spareParts, setSpareParts] = useState([])
 
+        /**
+     * @type {[SparePart, React.SetStateAction<SparePart>]}
+     */
     const [existingSparePart, setExistingSparePart] = useState()
 
     /**

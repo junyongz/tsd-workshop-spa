@@ -67,7 +67,7 @@
  * @property {string} completionDate completion date of a service, in format of '2005-05-05'
  * @property {number} vehicleId vehicle id
  * @property {string} vehicleNo vehicle no
- * @property {string[]} transactionTypes possible values of 'REPAIR', 'SERVICE' & 'INSPECTION'
+ * @property {string[]} transactionTypes possible values of 'REPAIR', 'SERVICE', 'INSPECTION' & 'TYRE'
  * @property {number} mileageKm the mileage in KM for the service
  * @property {MigratedHandWrittenSparePart[]} migratedHandWrittenSpareParts migrated hand-written parts data
  * @property {SparePartUsage[]} sparePartUsages spare part usages against the supplier orders

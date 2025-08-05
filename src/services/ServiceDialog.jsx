@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { Modal, Button, Container, Col, Row, InputGroup, Nav } from "react-bootstrap";
 import { Typeahead } from "react-bootstrap-typeahead";
 import Form from "react-bootstrap/Form";
-import { Calendar, Inspection, MaintenanceServices, Repair, Truck } from "../Icons";
+import { Calendar, Inspection, MaintenanceServices, Repair, Truck, Tyre } from "../Icons";
 import SparePartsSubDialog from "./SparePartsSubDialog";
 import TaskSubDialog from "./TaskSubDialog";
 import { addDaysToDateStr } from "../utils/dateUtils";
@@ -22,6 +22,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
     const repairSwitchRef = useRef()
     const maintSwitchRef = useRef()
     const inspectionSwitchRef = useRef()
+    const tyreSwitchRef = useRef()
 
     const [tabView, setTabView] = useState('spareParts')
     
@@ -233,6 +234,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles=[],
                             <Form.Check ref={repairSwitchRef} inline name="transactionTypes" type="switch" defaultChecked={trx?.current?.transactionTypes?.includes('REPAIR')} value="REPAIR" label={ <span aria-label="service type: repair" onClick={() => repairSwitchRef.current.click()}><Repair /> Repair</span> }></Form.Check>
                             <Form.Check ref={maintSwitchRef} inline name="transactionTypes" type="switch" defaultChecked={trx?.current?.transactionTypes?.includes('SERVICE')} value="SERVICE" label={ <span aria-label="service type: service" onClick={() => maintSwitchRef.current.click()}><MaintenanceServices /> Maintenance Service</span> }></Form.Check>
                             <Form.Check ref={inspectionSwitchRef} inline name="transactionTypes" type="switch" defaultChecked={trx?.current?.transactionTypes?.includes('INSPECTION')} value="INSPECTION" label={ <span aria-label="service type: inspection" onClick={() => inspectionSwitchRef.current.click()}><Inspection /> Inspection</span> }></Form.Check>
+                            <Form.Check ref={tyreSwitchRef} inline name="transactionTypes" type="switch" defaultChecked={trx?.current?.transactionTypes?.includes('TYRE')} value="TYRE" label={ <span aria-label="service type: tyre" onClick={() => tyreSwitchRef.current.click()}><Tyre /> Change Tyre</span> }></Form.Check>
                             </Col>
                         </Row>
                         <Row>

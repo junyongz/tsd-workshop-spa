@@ -352,12 +352,13 @@ test('add for existing service, navigate around', async () => {
     await user.click(screen.getByLabelText('service type: repair'))
     await user.click(screen.getByLabelText('service type: service'))
     await user.click(screen.getByLabelText('service type: inspection'))
+    await user.click(screen.getByLabelText('service type: tyre'))
 
     // save it
     await user.click(screen.getByText("Save"))
     expect(saveService).toBeCalledWith({"id": 100001, "mileageKm": "", 
         "notes": undefined, "sparePartUsages": [], "sparePartsMargin": undefined, "startDate": prevStartDate, 
-        "tasks": [], "transactionTypes": ['REPAIR', 'SERVICE', 'INSPECTION'], "vehicleId": 50001, "vehicleNo": "J 23"})
+        "tasks": [], "transactionTypes": ['REPAIR', 'SERVICE', 'INSPECTION', 'TYRE'], "vehicleId": 50001, "vehicleNo": "J 23"})
 })
 
 test('choose a part, navigate to workmanship, back to part, part name retained', async () => {

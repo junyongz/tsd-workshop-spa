@@ -26,6 +26,10 @@ export function Inspection() {
     return (<i className="bi bi-calendar-check"></i>)
 }
 
+export function Tyre() {
+    return (<i className="bi bi-record-circle-fill"></i>)
+}
+
 export function Insurance() {
     return (<i className="bi bi-journal-text"></i>)
 }

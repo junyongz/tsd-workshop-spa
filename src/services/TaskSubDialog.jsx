@@ -114,6 +114,7 @@ export default function TaskSubDialog({taskTemplates, tasks, setTasks, removeTas
         })
     }
 
+    /* istanbul ignore next */
     const imagesContext = process.env.NODE_ENV === 'test' 
     ? Object.assign( (key) => `../images/${key}`, { keys: () => ['braking.png', 'cab.png'],} )
     : require.context('../images', false, /\.png$/)

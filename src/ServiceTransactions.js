@@ -86,10 +86,10 @@ class ServiceTransactions {
 
     /**
      * 
-     * @param {WorkshopService[]} transactions 
+     * @param {!WorkshopService[]} [transactions]
      * @param {React.ActionDispatch<WorkshopService[]>} dispatch 
      */
-    constructor(transactions = [], dispatch) {
+    constructor(transactions=[], dispatch) {
         this.#transactions = transactions
         this.#refreshIndexes()
         this.dispatch = dispatch

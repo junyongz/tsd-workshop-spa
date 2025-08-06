@@ -137,8 +137,8 @@ function ServiceMediaDialog({isShow, setShowDialog, ws, onSaveMedia}) {
                     <Row className="mb-3">
                     <Col>
                         <Carousel key={uploadedMedias.length} data-bs-theme="light" interval={null} 
-                            nextIcon={<Button><i className="bi bi-chevron-right"></i></Button>}
-                            prevIcon={<Button><i className="bi bi-chevron-left"></i></Button>}
+                            nextIcon={<Button aria-label="next media"><i className="bi bi-chevron-right"></i></Button>}
+                            prevIcon={<Button aria-label="prev media"><i className="bi bi-chevron-left"></i></Button>}
                             defaultActiveIndex={currentIndex}
                             onSelect={(eventKey) => setCurrentIndex(eventKey)}>
                             { uploadedMedias.map((v, i) => 

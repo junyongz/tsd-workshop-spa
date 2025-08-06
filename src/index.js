@@ -9,6 +9,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { WorkshopServicesProvider } from './services/ServiceContextProvider';
 import { SupplierOrderProvider } from './suppliers/SupplierOrderContextProvider';
 
+/* istanbul ignore file */
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>

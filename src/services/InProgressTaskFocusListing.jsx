@@ -9,8 +9,19 @@ import { isInternal } from '../companies/companyEvaluation';
 import { useService } from './ServiceContextProvider';
 import { useSupplierOrders } from '../suppliers/SupplierOrderContextProvider';
 
-function InProgressTaskFocusListing({suppliers=[], taskTemplates=[], onNewServiceCreated, removeTask, 
-    vehicles=[], companies=[]}) {
+/**
+ * 
+ * @param {Object} props
+ * @param {import('../suppliers/SupplierOrders').Supplier[]} props.suppliers
+ * @param {import('../ServiceTransactions').TaskTemplate[]} props.taskTemplates
+ * @param {import('../App').CreateNewVehicleCallback} props.onNewServiceCreated
+ * @param {Function} props.removeTask
+ * @param {import('../vehicles/Vehicles').Vehicle[]} vehicles
+ * @param {Object[]} companies
+ * @returns 
+ */
+function InProgressTaskFocusListing({suppliers, taskTemplates, onNewServiceCreated, removeTask, 
+    vehicles, companies}) {
 
   const services = useService()
   const orders = useSupplierOrders()

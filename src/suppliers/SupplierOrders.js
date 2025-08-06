@@ -21,6 +21,7 @@
  * @property {number} supplierName on-the-fly calculated against the suppliers
  * @property {string} status either ACTIVE or DEPLETED
  * @property {number} remaining on-the-fly calculated against spare part usages
+ * @property {SupplierOrder[]} [selectedSpareParts] selected spare part in the dialog, must be an array
  */
 
 class SupplierOrders {
@@ -39,10 +40,10 @@ class SupplierOrders {
 
     /**
      * 
-     * @param {SupplierOrder[]} orders 
+     * @param {SupplierOrder[]} [orders] 
      * @param {React.ActionDispatch<SupplierOrder[]>} dispatch 
      */
-    constructor(orders, dispatch) {
+    constructor(orders=[], dispatch) {
         this.#ordersList = orders
         this.#refreshIndexes()
         this.#refreshMapping()

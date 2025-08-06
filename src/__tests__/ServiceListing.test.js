@@ -63,8 +63,13 @@ const newTransactions = () => {
     })
 }
 
-const orders = [{id: 1000, supplierId: 60001, itemCode: '1000', partName: 'Engine Oil 20w-50', quantity: 100, unit: 'litres', unitPrice: 9.7, status: 'ACTIVE'},
-    {id: 2000, supplierId: 60002, itemCode: '2000', partName: 'Oil Filter', quantity: 5, unit: 'pc', unitPrice: 29.5, status: 'ACTIVE'}]
+const orders = [
+    {id: 1000, supplierId: 60001, itemCode: '1000', 
+            partName: 'Engine Oil 20w-50', quantity: 100, unit: 'litres', unitPrice: 9.7, 
+            notes:'to be depleted later on', status: 'ACTIVE'},
+    {id: 2000, supplierId: 60002, itemCode: '2000', 
+            partName: 'Oil Filter', quantity: 5, unit: 'pc', unitPrice: 29.5, 
+            notes: 'to follow up closely for the missing quantity', status: 'ACTIVE'}]
 
 afterEach(() => {
     jest.clearAllMocks()
@@ -475,7 +480,7 @@ test('view the completed service, migrate item to spare part usage', async () =>
     render(<WorkshopServicesProvider initialServices={initialServices}>
         <SupplierOrderContext value={
             new SupplierOrders([{id: 1002, supplierId: 60001, itemCode: '1000', 
-                partName: 'Brake adjuster 40001', quantity: 5, unit: 'pc', unitPrice: 289.8, status: 'ACTIVE'}], jest.fn())}>
+                partName: 'Brake adjuster 40001', quantity: 5, unit: 'pc', unitPrice: 289.8, status: 'ACTIVE', notes: 'depleting soon'}], jest.fn())}>
             <ServiceListing selectedSearchOptions={[]} 
                 setTotalFilteredServices={setTotalFilteredServices}
                 refreshSparePartUsages={() => Promise.resolve([])}

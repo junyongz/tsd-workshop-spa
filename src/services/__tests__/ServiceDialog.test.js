@@ -21,7 +21,7 @@ test('add 2 spare parts', async () => {
 
     const orders = new SupplierOrders([
         {id: 1000, supplierId: 60001, itemCode: '1000', partName: 'Engine Oil 20w-50', quantity: 100, unit: 'litres', unitPrice: 9.7, status: 'ACTIVE'},
-        {id: 2000, supplierId: 60002, itemCode: '2000', partName: 'Oil Filter', quantity: 5, unit: 'pc', unitPrice: 29.5, status: 'ACTIVE'}
+        {id: 2000, supplierId: 60002, itemCode: '2000', partName: 'Oil Filter', quantity: 5, unit: 'pc', unitPrice: 29.5, status: 'ACTIVE', notes: 'finishing soon'}
     ], jest.fn())
 
     const saveService = jest.fn()
@@ -370,8 +370,8 @@ test('choose a part, navigate to workmanship, back to part, part name retained',
     const prevStartDate = addDaysToDateStr(todayDate, -2)
 
     const orders = new SupplierOrders([
-        {id: 1000, supplierId: 60001, itemCode: '1000', partName: 'Engine Oil 20w-50', quantity: 100, unit: 'litres', unitPrice: 9.7, status: 'ACTIVE'},
-        {id: 2000, supplierId: 60002, itemCode: '2000', partName: 'Oil Filter', quantity: 5, unit: 'pc', unitPrice: 29.5, status: 'ACTIVE'}
+        {id: 1000, supplierId: 60001, itemCode: '1000', partName: 'Engine Oil 20w-50', quantity: 100, unit: 'litres', unitPrice: 9.7, status: 'ACTIVE', notes: 'to order soon'},
+        {id: 2000, supplierId: 60002, itemCode: '2000', partName: 'Oil Filter', quantity: 5, unit: 'pc', unitPrice: 29.5, status: 'ACTIVE', notes: 'depleting soon'}
     ], jest.fn())
 
     const saveService = jest.fn()

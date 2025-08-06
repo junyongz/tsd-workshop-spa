@@ -34,6 +34,8 @@ test('didnt upload any file', async () => {
 
     // and close
     expect(setShowDialog).not.toBeCalled()
+    await user.click(screen.getByLabelText('Close'))
+    expect(setShowDialog).toBeCalledWith(false)
 })
 
 test('upload single photo', async () => {
@@ -54,6 +56,8 @@ test('upload single photo', async () => {
     })
 
     URL.createObjectURL.mockReturnValueOnce('http://preview.test.jpg')
+        .mockReturnValueOnce('http://preview.uploaded.hello.jpg')
+        .mockReturnValueOnce('http://preview.uploaded.world.jpg')
 
     const ws = {id: 10001, vehicleNo: "J 23", transactionTypes: ['REPAIR']}
     const setShowDialog = jest.fn()
@@ -71,7 +75,7 @@ test('upload single photo', async () => {
     await user.click(upload)
     await user.upload(upload, new File([Uint8Array.from(atob("/9j/4AAQSkZJRgABAQEAAAAAAA=="), c => c.charCodeAt(0)).buffer], 'test.jpg', { type: 'image/jpeg' }) )
 
-    await waitFor(() => expect(screen.getAllByRole('img')).toHaveLength(1))
+    await waitFor(() => expect(screen.getAllByRole('img')).toHaveLength(2))
 
     // download
     const removeChild = jest.spyOn(document.body, 'removeChild')
@@ -87,8 +91,10 @@ test('upload single photo', async () => {
     await user.click(screen.getByText('Save'))
 
     // onClose
-    expect(URL.revokeObjectURL).toBeCalledTimes(2)
-    expect(URL.revokeObjectURL).nthCalledWith(1, "http://preview.test.jpg")
+    expect(URL.revokeObjectURL).toBeCalledTimes(3)
+    expect(URL.revokeObjectURL).nthCalledWith(1, "http://preview.uploaded.world.jpg")
+    expect(URL.revokeObjectURL).nthCalledWith(2, "http://preview.test.jpg")
+    expect(URL.revokeObjectURL).nthCalledWith(3, "http://preview.uploaded.hello.jpg")
     expect(setShowDialog).toBeCalledWith(false)
 })
 
@@ -109,6 +115,8 @@ test('remove existing media', async () => {
         blob: () => Promise.resolve([Buffer.from("/9j/4AAQSkZJRgABAQEAAAAAAA==", 'base64')])
     })
     .mockResolvedValueOnce({ ok: true })
+    .mockResolvedValueOnce({ ok: false })
+    .mockResolvedValueOnce({ ok: true })
 
     const ws = {id: 10001, vehicleNo: "J 23", transactionTypes: ['REPAIR']}
     const setShowDialog = jest.fn()
@@ -118,9 +126,24 @@ test('remove existing media', async () => {
 
     await waitFor(() => expect(global.fetch).nthCalledWith(3, 'http://localhost:8080/api/workshop-services/10001/medias/6200002/data'))
 
+    await user.click(screen.getByLabelText('next media'))
+
     // let's remove
-    await user.click(screen.getByLabelText('remove media hello.png'))
+    await user.click(screen.getByLabelText('remove media world.mp4'))
     await waitFor(() => expect(global.fetch).nthCalledWith(4, 
+        "http://localhost:8080/api/workshop-services/10001/medias/6200002", {"method": "DELETE"}))
+    await waitFor(() => expect(screen.queryByLabelText('remove media world.mp4')).not.toBeInTheDocument())
+
+    // and failed to remove
+    await user.click(screen.getByLabelText('remove media hello.png'))
+    await waitFor(() => expect(global.fetch).nthCalledWith(5, 
+        "http://localhost:8080/api/workshop-services/10001/medias/6200001", {"method": "DELETE"}))
+
+    await waitFor(() => expect(screen.queryByLabelText('remove media hello.png')).toBeInTheDocument())
+
+    // one last time
+    await user.click(screen.getByLabelText('remove media hello.png'))
+    await waitFor(() => expect(global.fetch).nthCalledWith(6, 
         "http://localhost:8080/api/workshop-services/10001/medias/6200001", {"method": "DELETE"}))
 
     await waitFor(() => expect(screen.queryByLabelText('remove media hello.png')).not.toBeInTheDocument())
@@ -157,11 +180,34 @@ test('upload multiple photos', async () => {
     // could be due to /testing-library/user-event/blob/main/src/utils/edit/setFiles.ts to playing with original files
     // raised issue https://github.com/testing-library/user-event/issues/1293
     const checkValidity = jest.spyOn(screen.getByLabelText('upload form'), 'checkValidity')
-    checkValidity.mockReturnValueOnce(true)
+    checkValidity.mockReturnValue(true)
     await user.click(screen.getByText('Save & Continue'))
 
     expect(onSaveMedia).lastCalledWith({"id": 10001, "transactionTypes": ["REPAIR"], "vehicleNo": "J 23"}, expect.any(File), expect.any(Function))
-    const afterSaveMedia = onSaveMedia.mock.calls[0][2]
+    let afterSaveMedia = onSaveMedia.mock.calls[0][2]
     afterSaveMedia(620001)
     await waitFor(() => expect(screen.getAllByRole('img')).toHaveLength(2))
+
+    // upload 1 more file
+    const file2 = new File([Uint8Array.from(atob(''), c => c.charCodeAt(0)).buffer], 'hello-world.mp4', { type: 'video/mp4' })
+
+    await user.upload(upload, file2)
+    await user.click(screen.getByText('Save & Continue'))
+    expect(onSaveMedia).toBeCalledTimes(2)
+
+    afterSaveMedia = onSaveMedia.mock.calls[1][2]
+    afterSaveMedia(620003)
+
+    // should 3 medias now
+    await waitFor(() => expect(screen.getAllByRole('img')).toHaveLength(2))
+    await waitFor(() => expect(document.querySelectorAll('video')).toHaveLength(1))
+
+    await user.click(screen.getByLabelText('next media'))
+    expect(screen.queryByLabelText('download media hello.png')).toBeInTheDocument()
+    await user.click(screen.getByLabelText('next media'))
+    expect(screen.queryByLabelText('download media test.jpg')).toBeInTheDocument()
+    await user.click(screen.getByLabelText('next media'))
+    expect(screen.queryByLabelText('download media hello-world.mp4')).toBeInTheDocument()
+    await user.click(screen.getByLabelText('prev media'))
+    expect(screen.queryByLabelText('download media test.jpg')).toBeInTheDocument()
 })

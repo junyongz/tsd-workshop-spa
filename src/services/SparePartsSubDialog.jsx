@@ -4,6 +4,17 @@ import { Dollar, Suppliers, Tools, Trash } from "../Icons";
 import remainingQuantity, { decimalPointUomAvailable } from "../utils/quantityUtils";
 import { useSupplierOrders } from "../suppliers/SupplierOrderContextProvider";
 
+/**
+ * 
+ * @param {Object} props
+ * @param {boolean} props.migration 
+ * @param {import("../suppliers/SupplierOrders").SupplierOrder[]} props.items
+ * @param {React.SetStateAction<import("../suppliers/SupplierOrders").SupplierOrder[]>} props.setItems
+ * @param {import("../suppliers/SupplierOrders").Supplier[]} props.suppliers
+ * @param {import("../ServiceTransactions").SparePartUsage[]} props.sparePartUsages
+ * @param {number} props.sparePartsMargin
+ * @returns 
+ */
 export default function SparePartsSubDialog({
     migration, items, setItems, suppliers, sparePartUsages, sparePartsMargin
 }) {

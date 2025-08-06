@@ -150,6 +150,10 @@ test('remove a spare part usage', () => {
         {"id": 5002, "mileageKm": 2000, "sparePartUsages": undefined, "startDate": "2006-02-01", "tasks": undefined, "transactionTypes": ["REPAIR"], "vehicleId": 82003, "vehicleNo": "JJ 3"}, 
         {"id": 5001, "sparePartUsages": undefined, "startDate": "2005-03-01", "tasks": undefined, "transactionTypes": ["INSPECTION"], "vehicleId": 82002, "vehicleNo": "JJ 2"}, 
         {"id": 5000, "sparePartUsages": undefined, "startDate": "2005-01-01", "tasks": undefined, "transactionTypes": ["SERVICE"], "vehicleId": 82001, "vehicleNo": "JJ 1"}])
+
+    expect(dispatch).toBeCalledTimes(2) 
+    trsx.removeTransaction(5005, 60003)
+    expect(dispatch).toBeCalledTimes(2)
 })
 
 test('remove a task', () => {
@@ -165,6 +169,10 @@ test('remove a task', () => {
         {"id": 5002, "mileageKm": 2000, "sparePartUsages": undefined, "startDate": "2006-02-01", "tasks": undefined, "transactionTypes": ["REPAIR"], "vehicleId": 82003, "vehicleNo": "JJ 3"}, 
         {"id": 5001, "sparePartUsages": undefined, "startDate": "2005-03-01", "tasks": undefined, "transactionTypes": ["INSPECTION"], "vehicleId": 82002, "vehicleNo": "JJ 2"}, 
         {"id": 5000, "sparePartUsages": undefined, "startDate": "2005-01-01", "tasks": undefined, "transactionTypes": ["SERVICE"], "vehicleId": 82001, "vehicleNo": "JJ 1"}])
+
+    expect(dispatch).toBeCalledTimes(2)
+    trsx.removeTask(5005, 70003)
+    expect(dispatch).toBeCalledTimes(2)
 })
 
 test('sort with completion date too', () => {

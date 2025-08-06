@@ -4,6 +4,16 @@ import { Button, Col, Dropdown, Form, Image, InputGroup, ListGroup, Row } from "
 import { Typeahead } from "react-bootstrap-typeahead";
 
 let searchTimer
+
+/**
+ * 
+ * @param {Object} props
+ * @param {import("../ServiceTransactions").TaskTemplate[]} props.taskTemplates
+ * @param {import("../ServiceTransactions").WorkmashipTask[]} props.tasks
+ * @param {React.SetStateAction<import("../ServiceTransactions").WorkmashipTask[]>} props.setTasks
+ * @param {Function} props.removeTask
+ * @returns 
+ */
 export default function TaskSubDialog({taskTemplates, tasks, setTasks, removeTask}) {
     const afterChooseTask = ([task], i) => {
         setTasks(prevs => {

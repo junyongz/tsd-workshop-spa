@@ -10,8 +10,11 @@ import SupplierOrders from '../suppliers/SupplierOrders';
 
 jest.mock('react-bootstrap-typeahead/types/utils/getOptionLabel', () => ((opt, labelKey) => opt[labelKey]));
 
-jest.mock('../schedule/SchedulingCalendarView', () => 
-    ({onNewVehicleCreated}) => <div><span data-testid="onNewVehicleCreated"  onClick={() => onNewVehicleCreated("JJ 3")}></span></div>
+jest.mock('../schedule/SchedulingCalendarView', () => ({onNewVehicleCreated}) => 
+    <div>
+        <span data-testid="create-new-vehicle-success"  onClick={() => onNewVehicleCreated("JJ 3")}></span>
+        <span data-testid="create-new-vehicle-failed"  onClick={() => onNewVehicleCreated("JJ1W")}></span>
+    </div>
 )
 jest.mock('../vehicles/Vehicles', () => 
     ({}) => <div data-testid="vehicle-page"></div>
@@ -25,11 +28,17 @@ jest.mock('../services/InProgressTaskFocusListing', () =>
 jest.mock('../services/YearMonthView', () => 
     ({}) => <div data-testid="service-year-month-page"></div>
 )
-jest.mock('../suppliers/SuppliersSpareParts', () => 
-    ({showToastMessage}) => <div data-testid="supplier-orders-page" onClick={() => showToastMessage('failed the job')}></div>
+jest.mock('../suppliers/SuppliersSpareParts', () => ({showToastMessage, refreshServices}) => 
+    <div>
+        <span data-testid="supplier-orders-page" onClick={() => showToastMessage('failed the job')}></span>
+        <span data-testid="supplier-orders-page-refresh-service" onClick={() => refreshServices()}></span>
+        
+    </div>
 )
-jest.mock('../ServiceListing', () => ({}) => 
-    <div data-testid="service-listing-page"></div>
+jest.mock('../ServiceListing', () => ({setSelectedSearchOptions}) => 
+    <div data-testid="service-listing-page">
+        <span data-testid="change-selected-search-option" onClick={() => setSelectedSearchOptions([{name: 'brake'}, {name: 'oil'}])}></span>
+    </div>
 )
 // lesson learnt: if the mock JSX is drawing an object/array, the jest test would just hang (selectedSearchOptions vs selectedSearchOptions.length)
 jest.mock('../NavigationBar', () => ({filterServices, selectedSearchOptions, 
@@ -45,6 +54,8 @@ jest.mock('../NavigationBar', () => ({filterServices, selectedSearchOptions,
 )
 jest.useFakeTimers()
 global.fetch = jest.fn()
+
+afterEach(() => jest.restoreAllMocks())
 
 afterAll(() => {
     jest.clearAllMocks()
@@ -144,6 +155,20 @@ test('draw with mocked components and click the new vehicle created', async () =
             { id: 3001, startDate: "2005-02-01", vehicleNo: "JJ 2", notes: 'Hello drainage '}
         ])
     })
+    .mockResolvedValueOnce({ 
+        ok: true, // /api/workshop-services
+        json: () => Promise.resolve([
+            { id: 3000, startDate: "2005-01-01", vehicleNo: "JJ 1"},
+            { id: 3001, startDate: "2005-02-01", vehicleNo: "JJ 2"}
+        ]) 
+    })
+    .mockResolvedValueOnce({
+        ok: true, // /api/workshop-services?keyword=X
+        json: () => Promise.resolve([
+            { id: 3000, startDate: "2005-01-01", vehicleNo: "JJ 1", notes: 'Hello world'},
+            { id: 3001, startDate: "2005-02-01", vehicleNo: "JJ 2", notes: 'Hello drainage '}
+        ])
+    })
 
     const trxsDispatch = jest.fn()
     render(<ServiceContext value={new ServiceTransactions([], trxsDispatch)}>
@@ -170,16 +195,21 @@ test('draw with mocked components and click the new vehicle created', async () =
     jest.advanceTimersByTime(30000)
     await waitFor(() => expect(global.fetch).toBeCalledTimes(10))
     expect(global.fetch).nthCalledWith(10, "http://localhost:8080/api/stats/dbtables", {"mode": "cors"})
-
     await waitFor(() => expect(global.fetch).toBeCalledTimes(10))
-    expect(screen.getByTestId('onNewVehicleCreated')).toBeVisible()
-    fireEvent.click(screen.getByTestId('onNewVehicleCreated'))
 
+    // create new vehicle
+    expect(screen.getByTestId('create-new-vehicle-success')).toBeVisible()
+    fireEvent.click(screen.getByTestId('create-new-vehicle-success'))
     await waitFor(() => expect(global.fetch).toBeCalledTimes(12))
     expect(global.fetch).nthCalledWith(11, "http://localhost:8080/api/vehicles", 
             {"body": "{\"vehicleNo\":\"JJ 3\"}", 
                 "headers": {"Content-type": "application/json"}, "method": "POST", "mode": "cors"})
     expect(global.fetch).nthCalledWith(12, "http://localhost:8080/api/vehicles", {"mode": "cors"})
+
+    // failed to create vehicle
+    const globalAlert = jest.spyOn(global, 'alert')
+    fireEvent.click(screen.getByTestId('create-new-vehicle-failed'))
+    expect(globalAlert).toBeCalledWith('Wrong vehicle no format: JJ1W')
 
     // test filter service
     fireEvent.click(screen.getByTestId('filter-services-some-options'))
@@ -214,4 +244,13 @@ test('draw with mocked components and click the new vehicle created', async () =
     const consoleTrace = jest.spyOn(console, 'trace')
     fireEvent.click(screen.getByTestId('supplier-orders-page'))
     expect(consoleTrace.mock.calls[0][0]).toEqual('who is showing toast that causing error')
+
+    // filter after services refreshed too 
+    fireEvent.click(screen.getByTestId('change-selected-search-option')) // brake and oil, check the 15th fetch call keywords param
+    fireEvent.click(screen.getByTestId('supplier-orders-page-refresh-service'))
+    await waitFor(() => expect(global.fetch).nthCalledWith(14, "http://localhost:8080/api/workshop-services", {"mode": "cors"}))
+    fireEvent.click(screen.getByTestId('filter-services-some-options'))
+    jest.advanceTimersByTime(600)
+    // the keywords matched with the one fireEvent.click(screen.getByTestId('change-selected-search-option'))
+    await waitFor(() => expect(global.fetch).nthCalledWith(15, "http://localhost:8080/api/workshop-services?keyword=brake&keyword=oil"))
 })

@@ -2,7 +2,7 @@
  * 
  * @param {string} apiUrl 
  * @param {React.SetStateAction<import("./Vehicles").Vehicle[]>} setVehicles 
- * @param {React.SetStateAction<Object>} setSearchOptions 
+ * @param {React.SetStateAction<import("../App").SearchOption[]>} setSearchOptions 
  * @returns 
  */
 export default async function fetchVehicles(apiUrl, setVehicles, setSearchOptions) {

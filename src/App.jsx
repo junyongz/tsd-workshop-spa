@@ -82,7 +82,7 @@ function App() {
   /**
    * @param {SearchOption[]} opts 
    */
-  const storeSelectedSearchOptions = (opts=[]) => {
+  const storeSelectedSearchOptions = (opts) => {
     setSelectedSearchOptions(opts)
     clearCount()
     if (opts && opts.length > 0) {
@@ -95,6 +95,7 @@ function App() {
   const [totalSpareParts, setTotalSpareParts] = useState(0)
 
   // domain data
+  /** @type {[import('./companies/fetchCompanies').Company[], React.SetStateAction<import('./companies/fetchCompanies').Company[]]} */
   const [companies, setCompanies] = useState([])
   const [suppliers, setSuppliers] = useState([])
   const [vehicles, setVehicles] = useState([])
@@ -102,8 +103,12 @@ function App() {
   
   const filterTimeoutRef = useRef()
 
-  // to be used on .filter
-  const filterServices = (options=[]) => {
+  /**
+   * 
+   * @param {SearchOption[]} options 
+   * @returns 
+   */
+  const filterServices = (options) => {
     clearTimeout(filterTimeoutRef.current)
     if (!options || options.length === 0) {
       storeSelectedSearchOptions([])
@@ -297,7 +302,6 @@ function App() {
               setLoading={setLoading}
               selectedSearchOptions={selectedSearchOptions}
               selectedSearchDate={selectedSearchDate}
-              filterServices={filterServices}
               showToastMessage={showToastMessage}
             />} />
           <Route path="/vehicles" element={ 

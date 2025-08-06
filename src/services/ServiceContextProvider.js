@@ -10,10 +10,10 @@ export const ServiceContext = createContext()
 /**
  * 
  * @param {Object} props 
- * @param {import("../ServiceTransactions").WorkshopService[]} [props.initialServices]
+ * @param {import("../ServiceTransactions").WorkshopService[]} props.initialServices
  * @returns 
  */
-export function WorkshopServicesProvider({initialServices=[], children}) {
+export function WorkshopServicesProvider({initialServices, children}) {
 
     /**
      * 

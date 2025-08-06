@@ -22,6 +22,7 @@ const services = [
     {id: 5004, vehicleId: 82004, vehicleNo: "JJ 4", startDate: "2005-04-01", transactionTypes: ["INSPECTION"], mileageKm: 10000},
     {id: 5005, vehicleId: 82005, vehicleNo: "JJ 5", startDate: "2005-04-01", transactionTypes: ["SERVICE"], mileageKm: 5000},
     {id: 5006, vehicleId: 82006, vehicleNo: "JJ 6", startDate: "2005-04-01", transactionTypes: ["SERVICE"], mileageKm: 3000},
+    {id: 5007, vehicleId: 82008, vehicleNo: "JJ 8", startDate: "2005-04-04", transactionTypes: ["SERVICE"], mileageKm: 1000},
 ]
 
 const companies = [
@@ -44,7 +45,7 @@ const newVehicles =[
     {id: 82005, vehicleNo: "JJ 5", companyId: 8000, latestMileageKm: 20000, insuranceExpiryDate: '2005-06-30', roadTaxExpiryDate: '2005-06-30', inspectionDueDate: '2005-07-30'},
     {id: 82006, vehicleNo: "JJ 6", companyId: 8000, latestMileageKm: 18000, insuranceExpiryDate: '2005-08-31', roadTaxExpiryDate: '2005-08-31', inspectionDueDate: '2005-09-30'},
     {id: 82007, vehicleNo: "JJ 7", companyId: 8001, latestMileageKm: 12000, insuranceExpiryDate: '2005-08-31', roadTaxExpiryDate: '2005-08-31', inspectionDueDate: '2005-09-30'},
-    {id: 82008, vehicleNo: "JJ 8", companyId: 8001, latestMileageKm: 15000 },
+    {id: 82008, vehicleNo: "JJ 8", companyId: 8001, latestMileageKm: 20000 },
     {id: 82009, vehicleNo: "JJ 9", companyId: 8000, latestMileageKm: 20000, insuranceExpiryDate: '2005-06-30', roadTaxExpiryDate: '2005-06-30', inspectionDueDate: '2005-07-30'},
     {id: 82010, vehicleNo: "JK 1", companyId: 8000, latestMileageKm: 18000, insuranceExpiryDate: '2005-08-31', roadTaxExpiryDate: '2005-08-31', inspectionDueDate: '2005-09-30'},
     {id: 82011, vehicleNo: "JK 2", companyId: 8001, latestMileageKm: 12000, insuranceExpiryDate: '2005-08-31', roadTaxExpiryDate: '2005-08-31', inspectionDueDate: '2005-09-30'},
@@ -57,6 +58,7 @@ const newVehicles =[
     {id: 82018, vehicleNo: "JK 9", companyId: 8000, latestMileageKm: 18000, insuranceExpiryDate: '2005-08-31', roadTaxExpiryDate: '2005-08-31', inspectionDueDate: '2005-09-30'},
     {id: 82019, vehicleNo: "JL 1", companyId: 8001, latestMileageKm: 12000, insuranceExpiryDate: '2005-08-31', roadTaxExpiryDate: '2005-08-31', inspectionDueDate: '2005-09-30'},
     {id: 82029, vehicleNo: "JL 2", companyId: 8001, latestMileageKm: 15000 },
+    {id: 82030, vehicleNo: "JL 3", latestMileageKm: 15000 },
 ]
 
 test('render many vehicles', async () => {
@@ -68,8 +70,8 @@ test('render many vehicles', async () => {
 
     expect(screen.getAllByRole("button")).toHaveLength(2)
     expect(screen.getAllByRole("button")
-        .map(elem => elem.className)
-        .filter(clz => clz === 'card')).toHaveLength(2)
+        .filter(elem => elem.classList.contains('card')))
+        .toHaveLength(2)
 
     expect(screen.getAllByText('10,000 KM @ 2005-04-01')).toHaveLength(1)
     expect(screen.getAllByText('3,000 KM @ 2005-02-11')).toHaveLength(1)
@@ -78,8 +80,8 @@ test('render many vehicles', async () => {
     // to show all vehicles
     await user.click(screen.getByText('Only showing for Harsoon'))
     expect(screen.getAllByRole("button")
-        .map(elem => elem.className)
-        .filter(clz => clz === 'card')).toHaveLength(4)
+        .filter(elem => elem.classList.contains('card')))
+        .toHaveLength(4)
     expect(screen.getAllByText('TSD')).toHaveLength(2)
 })
 
@@ -308,15 +310,15 @@ test('render lots of vehicles, load more', async () => {
         </ServiceContext>)
 
     expect(screen.getAllByRole("button")
-        .map(elem => elem.className)
-        .filter(clz => clz === 'card')).toHaveLength(10)
+        .filter(elem => elem.classList.contains('card')))
+        .toHaveLength(10)
 
     // show all vehicles
     await user.click(screen.getByText('Only showing for Harsoon'))
 
     expect(screen.getAllByRole("button")
-        .map(elem => elem.className)
-        .filter(clz => clz === 'card')).toHaveLength(12)
+        .filter(elem => elem.classList.contains('card')))
+        .toHaveLength(12)
 
     expect(screen.queryByLabelText('load more')).toBeInTheDocument()
     expect(screen.queryByLabelText('load all')).toBeInTheDocument()
@@ -324,8 +326,8 @@ test('render lots of vehicles, load more', async () => {
     await user.click(screen.getByLabelText('load more'))
 
     expect(screen.getAllByRole("button")
-        .map(elem => elem.className)
-        .filter(clz => clz === 'card')).toHaveLength(20)
+        .filter(elem => elem.classList.contains('card')))
+        .toHaveLength(21)
 
     expect(screen.queryByLabelText('load more')).not.toBeInTheDocument()
     expect(screen.queryByLabelText('load all')).not.toBeInTheDocument()
@@ -339,15 +341,15 @@ test('render lots of vehicles, load all', async () => {
         </ServiceContext>)
 
     expect(screen.getAllByRole("button")
-        .map(elem => elem.className)
-        .filter(clz => clz === 'card')).toHaveLength(10)
+        .filter(elem => elem.classList.contains('card')))
+        .toHaveLength(10)
 
     // show all vehicles
     await user.click(screen.getByText('Only showing for Harsoon'))
 
     expect(screen.getAllByRole("button")
-        .map(elem => elem.className)
-        .filter(clz => clz === 'card')).toHaveLength(12)
+        .filter(elem => elem.classList.contains('card')))
+        .toHaveLength(12)
 
     expect(screen.queryByLabelText('load more')).toBeInTheDocument()
     expect(screen.queryByLabelText('load all')).toBeInTheDocument()
@@ -355,11 +357,27 @@ test('render lots of vehicles, load all', async () => {
     await user.click(screen.getByLabelText('load all'))
 
     expect(screen.getAllByRole("button")
-        .map(elem => elem.className)
-        .filter(clz => clz === 'card')).toHaveLength(20)
+        .filter(elem => elem.classList.contains('card')))
+        .toHaveLength(21)
     
     await user.click(screen.getByRole('checkbox', {name: 'Service due soon'}))
 
     expect(screen.queryByLabelText('load more')).not.toBeInTheDocument()
     expect(screen.queryByLabelText('load all')).not.toBeInTheDocument()
+
+    // zoom into vehicle not belong to any company
+    await user.click(screen.getByText('JL 3'))
+    await user.click(screen.getByLabelText('Close'))
+
+    // the one with service
+    await user.click(screen.getByText('JJ 5'))
+    expect(screen.getByRole('textbox', {name: 'latest mileage'})).toHaveValue('20000 KM')
+    expect(screen.getByRole('textbox', {name: 'last service'})).toHaveValue('5000 KM @ 2005-04-01')
+    expect(screen.getByRole('textbox', {name: 'next service'})).toHaveValue('3000 KM more to go')
+
+    await user.click(screen.getByLabelText('Close'))
+    await user.click(screen.getByText('JJ 8'))
+    expect(screen.getByRole('textbox', {name: 'latest mileage'})).toHaveValue('20000 KM')
+    expect(screen.getByRole('textbox', {name: 'last service'})).toHaveValue('1000 KM @ 2005-04-04')
+    expect(screen.getByRole('textbox', {name: 'next service'})).toHaveValue('Do it now!')
 })

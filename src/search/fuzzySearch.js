@@ -1,7 +1,13 @@
 import ServiceTransactions from "../ServiceTransactions"
 import SupplierOrders from "../suppliers/SupplierOrders"
 
-export const doFilterServices = (options=[], transactions = new ServiceTransactions(), setSelectedSearchOptions) => {
+/**
+ * 
+ * @param {import("../App").SearchOption[]} options 
+ * @param {ServiceTransactions} transactions 
+ * @param {React.SetStateAction<import("../App").SearchOption{}} setSelectedSearchOptions 
+ */
+export const doFilterServices = (options, transactions, setSelectedSearchOptions) => {
     const apiUrl = process.env.REACT_APP_API_URL
 
     const keywords = options.map(opt => `keyword=${opt.name}`).join('&')
@@ -18,8 +24,7 @@ export const doFilterServices = (options=[], transactions = new ServiceTransacti
 // TODO how to get rid of this sparePartUsages
 /**
  * 
- * @param {Object[]} selectedSearchOptions 
- * @param {string} selectedSearchOptions[].name 
+ * @param {import("../App").SearchOption[]} selectedSearchOptions 
  * @param {string} selectedSearchDate 
  * @param {import("../suppliers/SupplierOrders").SupplierOrder[]} orders 
  * @param {import("../ServiceTransactions").SparePartUsage[]} sparePartUsages 
@@ -44,16 +49,14 @@ export function applyFilterOnOrders(selectedSearchOptions, selectedSearchDate, o
 
 /**
  * 
- * @param {Object[]} selectedSearchOptions 
- * @param {string} selectedSearchOptions[].name 
+ * @param {import("../App").SearchOption[]} selectedSearchOptions 
  * @param {string} selectedSearchDate a date in 'yyyy-MM-dd' format, eg '2005-05-05'
- * @param {Object[]} vehicles 
- * @param {string} vehicles[].vehicleNo
+ * @param {import("../vehicles/Vehicles").Vehicle[]} vehicles 
  * @param {import("../ServiceTransactions").WorkshopService[]} services 
  * @param {SupplierOrders} supplierOrders 
  * @returns 
  */
-export function applyFilterOnServices(selectedSearchOptions, selectedSearchDate, vehicles, services=[], supplierOrders) {
+export function applyFilterOnServices(selectedSearchOptions, selectedSearchDate, vehicles, services, supplierOrders) {
   if (selectedSearchDate) {
     return services.filter(ws => ws.startDate === selectedSearchDate)
   }

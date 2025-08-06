@@ -24,11 +24,10 @@ import { useSupplierOrders } from "./SupplierOrderContextProvider"
  * 
  * @param {Object} props 
  * @param {React.SetStateAction<number>} props.setTotalFilteredOrders
- * @param {Object[]} props.selectedSearchOptions
- * @param {string} props.selectedSearchOptions[].name
+ * @param {import("../App").SearchOption[]} props.selectedSearchOptions
  * @param {string} props.selectedSearchDate
  * @param {import("./SupplierOrders").Supplier[]} props.suppliers
- * @param {Object[]} props.vehicles
+ * @param {import("../vehicles/Vehicles").Vehicle[]} props.vehicles
  * @param {import("../ServiceTransactions").SparePartUsage[]} props.sparePartUsages
  * @param {Function} props.refreshSparePartUsages
  * @param {Function} props.refreshServices

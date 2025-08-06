@@ -29,7 +29,7 @@ import { useService } from "../services/ServiceContextProvider";
  * @param {Object} props
  * @param {Vehicle[]} props.vehicles
  * @param {React.SetStateAction<Vehicle[]>} props.setVehicles
- * @param {Object[]} props.companies
+ * @param {import("../companies/fetchCompanies").Company[]} props.companies
  * @param {Object[]} props.selectedSearchOptions
  * @param {string} props.selectedSearchOptions[].name
  * @returns 
@@ -155,7 +155,7 @@ export default function Vehicles({vehicles, setVehicles, companies, selectedSear
             { filteredVehicles.slice(0, vehicleLoadCount)
                 .map(v => 
                     <Col key={v.id} xs="12" sm="6" md="4" lg="3" className="mb-3">
-                    <Card role="button" onClick={() => showVehicle(v.id)}>
+                    <Card role="button" onClick={() => showVehicle(v.id)} className="vehicle-card">
                         <Card.Header>
                             <Row>
                                 <Col xs="12" lg="6"><h3>{v.vehicleNo}</h3></Col>

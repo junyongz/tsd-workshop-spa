@@ -10,10 +10,10 @@ export const SupplierOrderContext = createContext()
 /**
  * 
  * @param {Object} props
- * @param {import("./SupplierOrders").SupplierOrder[]} [props.initialOrders]
+ * @param {import("./SupplierOrders").SupplierOrder[]} props.initialOrders
  * @returns 
  */
-export function SupplierOrderProvider({initialOrders=[], children}) {
+export function SupplierOrderProvider({initialOrders, children}) {
     /**
      * 
      * @param {SupplierOrders} prev 

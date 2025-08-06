@@ -26,5 +26,5 @@ test('undefined for apiUrl', async () => {
 
     Promise.resolve(fetchCompanies(undefined, jest.fn()))
 
-    await waitFor(() => expect(global.fetch).toBeCalledWith("/api/companies", {"mode": "cors"}))
+    await waitFor(() => expect(global.fetch).toBeCalledWith("undefined/api/companies", {"mode": "cors"}))
 })

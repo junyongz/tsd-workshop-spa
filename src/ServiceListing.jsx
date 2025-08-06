@@ -30,10 +30,9 @@ import MigratedItemToSupplierOrderDialog from './services/MigratedItemToSupplier
  * @param {import('./ServiceTransactions').TaskTemplate[]} props.taskTemplates
  * @param {import('./App').CreateNewVehicleCallback} props.onNewVehicleCreated
  * @param {React.SetStateAction<boolean>} props.setLoading
- * @param {Object[]} props.selectedSearchOptions
- * @param {string} props.selectedSearchOptions[].name
- * @param {React.SetStateAction<Object[]>} props.setSelectedSearchOptions
- * @param {string} props.selectedSearchDate
+ * @param {import('./App').SearchOption[]} props.selectedSearchOptions
+ * @param {React.SetStateAction<import('./App').SearchOption[]>} props.setSelectedSearchOptions
+ * @param {string} props.selectedSearchDate date to search service, in format of '2005-05-05'
  * @param {Function} props.onNewServiceCreated
  * @param {Function} props.removeTask
  * @returns 

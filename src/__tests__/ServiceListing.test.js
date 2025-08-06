@@ -40,21 +40,21 @@ const transactions = [
 
 /** @type {import('../ServiceTransactions').WorkshopService[]} */
 const lotTransactions = [
-    {id: 10001, creationDate: '2022-02-02', startDate: '2022-02-02', vehicleId: 20001, vehicleNo: "J 23"},
-    {id: 10002, creationDate: '2022-01-11', startDate: '2022-01-10', vehicleId: 20002, vehicleNo: "J 33"},
-    {id: 10003, creationDate: '2022-01-01', startDate: '2022-01-01', vehicleId: 20003, vehicleNo: "J 34", transactionTypes: ['REPAIR', 'TYRE']},
-    {id: 10004, creationDate: '2022-02-01', startDate: '2022-03-01', vehicleId: 20001, vehicleNo: "J 23"},
-    {id: 10005, creationDate: '2022-03-01', startDate: '2022-04-01', vehicleId: 20002, vehicleNo: "J 33", transactionTypes: ['SERVICE', 'INSPECTION']},
-    {id: 10006, creationDate: '2022-04-01', startDate: '2022-04-02', vehicleId: 20003, vehicleNo: "J 34"},
-    {id: 10007, creationDate: '2022-04-01', startDate: '2022-03-03', vehicleId: 20001, vehicleNo: "J 23"},
-    {id: 10008, creationDate: '2022-03-01', startDate: '2022-04-07', vehicleId: 20002, vehicleNo: "J 33", transactionTypes: ['REPAIR', 'INSPECTION']},
-    {id: 10009, creationDate: '2022-02-01', startDate: '2022-05-06', vehicleId: 20003, vehicleNo: "J 34"},
-    {id: 10010, creationDate: '2022-03-01', startDate: '2022-04-03', vehicleId: 20001, vehicleNo: "J 23", transactionTypes: ['TYRE']},
-    {id: 10011, creationDate: '2022-04-01', startDate: '2022-08-05', vehicleId: 20002, vehicleNo: "J 33"},
-    {id: 10012, creationDate: '2022-05-01', startDate: '2022-05-04', vehicleId: 20003, vehicleNo: "J 34"},
-    {id: 10013, creationDate: '2022-03-01', startDate: '2022-03-03', vehicleId: 20001, vehicleNo: "J 23", transactionTypes: ['TYRE']},
-    {id: 10014, creationDate: '2022-02-01', startDate: '2022-07-03', vehicleId: 20002, vehicleNo: "J 33", transactionTypes: ['REPAIR', 'SERVICE']},
-    {id: 10015, creationDate: '2022-07-01', startDate: '2022-03-07', vehicleId: 20003, vehicleNo: "J 34"}
+    {id: 10001, creationDate: '2022-02-02', startDate: '2022-02-02', vehicleId: 20001, vehicleNo: "J 23", uploadedMediasCount: 2},
+    {id: 10002, creationDate: '2022-01-11', startDate: '2022-01-10', vehicleId: 20002, vehicleNo: "J 33", uploadedMediasCount: 1},
+    {id: 10003, creationDate: '2022-01-01', startDate: '2022-01-01', completionDate: '2022-01-01',  vehicleId: 20003, vehicleNo: "J 34", transactionTypes: ['REPAIR', 'TYRE'], uploadedMediasCount: 5},
+    {id: 10004, creationDate: '2022-02-01', startDate: '2022-03-01', vehicleId: 20001, vehicleNo: "J 23", uploadedMediasCount: 3},
+    {id: 10005, creationDate: '2022-03-01', startDate: '2022-04-01', vehicleId: 20002, vehicleNo: "J 33", transactionTypes: ['SERVICE', 'INSPECTION'], uploadedMediasCount: 1},
+    {id: 10006, creationDate: '2022-04-01', startDate: '2022-04-02', vehicleId: 20003, vehicleNo: "J 34", uploadedMediasCount: 2},
+    {id: 10007, creationDate: '2022-04-01', startDate: '2022-03-03', vehicleId: 20001, vehicleNo: "J 23", uploadedMediasCount: 0},
+    {id: 10008, creationDate: '2022-03-01', startDate: '2022-04-07', completionDate: '2022-04-07', vehicleId: 20002, vehicleNo: "J 33", transactionTypes: ['REPAIR', 'INSPECTION'], uploadedMediasCount: 4},
+    {id: 10009, creationDate: '2022-02-01', startDate: '2022-05-06', vehicleId: 20003, vehicleNo: "J 34", uploadedMediasCount: 3},
+    {id: 10010, creationDate: '2022-03-01', startDate: '2022-04-03', vehicleId: 20001, vehicleNo: "J 23", transactionTypes: ['TYRE'], uploadedMediasCount: 8},
+    {id: 10011, creationDate: '2022-04-01', startDate: '2022-08-05', vehicleId: 20002, vehicleNo: "J 33", uploadedMediasCount: 1},
+    {id: 10012, creationDate: '2022-05-01', startDate: '2022-05-04', vehicleId: 20003, vehicleNo: "J 34", uploadedMediasCount: 3},
+    {id: 10013, creationDate: '2022-03-01', startDate: '2022-03-03', vehicleId: 20001, vehicleNo: "J 23", transactionTypes: ['TYRE'], uploadedMediasCount: 2},
+    {id: 10014, creationDate: '2022-02-01', startDate: '2022-07-03', vehicleId: 20002, vehicleNo: "J 33", transactionTypes: ['REPAIR', 'SERVICE'], uploadedMediasCount: 1},
+    {id: 10015, creationDate: '2022-07-01', startDate: '2022-03-07', vehicleId: 20003, vehicleNo: "J 34", uploadedMediasCount: 6}
 ]
 
 const newTransactions = () => {
@@ -167,7 +167,7 @@ test('listing no search options, delete one item, delete service', async () => {
         </SupplierOrderContext>
     </WorkshopServicesProvider>)
 
-    expect(screen.queryAllByText('Complete Service')).toHaveLength(10)
+    expect(screen.queryAllByText('Complete Service')).toHaveLength(8)
     expect(container.querySelectorAll('.list-group-item')).toHaveLength(0)
 
     expect(screen.queryAllByRole('listitem', {name: 'service type: repair', current: true})).toHaveLength(2)

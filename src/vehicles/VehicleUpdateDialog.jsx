@@ -6,6 +6,8 @@ import { maintenanceServiceKm } from "./maintenanceService"
 import { addMonthsToDateStr } from "../utils/dateUtils"
 import { Calendar, Company, Inspection, Insurance, Roadtax, Services, Trailer, Truck } from "../Icons"
 
+const apiUrl = process.env.REACT_APP_API_URL
+
 /**
  * 
  * @param {Object} props
@@ -13,13 +15,10 @@ import { Calendar, Company, Inspection, Insurance, Roadtax, Services, Trailer, T
  * @param {React.SetStateAction<boolean>} props.setShowDialog 
  * @param {import("./Vehicles").Vehicle} props.vehicle
  * @param {React.SetStateAction<import("./Vehicles").Vehicle[]>} props.setVehicles
- * @param {Object[]} companies
+ * @param {import("../companies/fetchCompanies").Company[]} companies
  * @returns 
  */
 function VehicleUpdateDialog({isShow, setShowDialog, vehicle, setVehicles, companies}) {
-
-    const apiUrl = process.env.REACT_APP_API_URL
-
     const formRef = useRef()
     const [validated, setValidated] = useState(false)
 
@@ -46,13 +45,11 @@ function VehicleUpdateDialog({isShow, setShowDialog, vehicle, setVehicles, compa
     }
 
     const checkCompanyValidity = (companyInput) => {
-        if (companyInput) {
-            if (companies.findIndex(co => co.companyName === companyInput.value) === -1) {
-                companyInput.setCustomValidity('not a valid company, either choose one and create one first')
-            }
-            else {
-                companyInput.setCustomValidity('')
-            }
+        if (companyInput.value && companies.findIndex(co => co.companyName === companyInput.value) === -1) {
+            companyInput.setCustomValidity('not a valid company, either choose one and create one first')
+        }
+        else {
+            companyInput.setCustomValidity('')
         }
     }
 
@@ -86,9 +83,7 @@ function VehicleUpdateDialog({isShow, setShowDialog, vehicle, setVehicles, compa
                 'Content-type': 'application/json'
             }
         })
-        .then(res => {
-            return res.json()
-        })
+        .then(res => res.json())
         .then(saved => {
             if (saved.id !== vehicle.id) {
                 console.error("failed to save vehicles: " + JSON.stringify(saved))
@@ -248,21 +243,21 @@ function VehicleUpdateDialog({isShow, setShowDialog, vehicle, setVehicles, compa
                                             <Col xs="12" lg="4">
                                                 <Form.Group>
                                                     <FloatingLabel label="Latest Mileage">
-                                                    <Form.Control plaintext readOnly defaultValue={vehicle?.latestMileageKm ? `${vehicle?.latestMileageKm} KM` : '-'} />
+                                                    <Form.Control aria-label="latest mileage" plaintext readOnly defaultValue={vehicle?.latestMileageKm ? `${vehicle?.latestMileageKm} KM` : '-'} />
                                                     </FloatingLabel>
                                                 </Form.Group>
                                             </Col>
                                             <Col xs="12" lg="4">
                                                 <Form.Group>
                                                     <FloatingLabel label="Last Service">
-                                                    <Form.Control plaintext readOnly defaultValue={vehicle?.lastService?.mileageKm ? `${vehicle?.lastService?.mileageKm} KM @ ${vehicle?.lastService?.startDate}` : '-' } /> 
+                                                    <Form.Control aria-label="last service" plaintext readOnly defaultValue={vehicle?.lastService?.mileageKm ? `${vehicle?.lastService?.mileageKm} KM @ ${vehicle?.lastService?.startDate}` : '-' } /> 
                                                     </FloatingLabel>
                                                 </Form.Group>
                                             </Col>
                                             <Col xs="12" lg="4">
                                                 <Form.Group>
                                                     <FloatingLabel label={`Next Service (every ${formatThousandSeparator(maintenanceServiceKm)}KM)`}>
-                                                    <Form.Control plaintext readOnly defaultValue={(vehicle?.lastService?.mileageKm && vehicle?.latestMileageKm) ? (((vehicle?.latestMileageKm - vehicle?.lastService?.mileageKm) > maintenanceServiceKm) ? 'Do it now!' : `${maintenanceServiceKm - (vehicle?.latestMileageKm - vehicle?.lastService?.mileageKm)} KM more to go`) : 'No Service/Distance Recorded' } /> 
+                                                    <Form.Control aria-label="next service" plaintext readOnly defaultValue={(vehicle?.lastService?.mileageKm && vehicle?.latestMileageKm) ? (((vehicle?.latestMileageKm - vehicle?.lastService?.mileageKm) > maintenanceServiceKm) ? 'Do it now!' : `${maintenanceServiceKm - (vehicle?.latestMileageKm - vehicle?.lastService?.mileageKm)} KM more to go`) : 'No Service/Distance Recorded' } /> 
                                                     </FloatingLabel>
                                                 </Form.Group>
                                             </Col>

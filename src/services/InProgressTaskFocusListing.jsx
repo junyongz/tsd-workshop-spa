@@ -16,8 +16,8 @@ import { useSupplierOrders } from '../suppliers/SupplierOrderContextProvider';
  * @param {import('../ServiceTransactions').TaskTemplate[]} props.taskTemplates
  * @param {import('../App').CreateNewVehicleCallback} props.onNewServiceCreated
  * @param {Function} props.removeTask
- * @param {import('../vehicles/Vehicles').Vehicle[]} vehicles
- * @param {Object[]} companies
+ * @param {import('../vehicles/Vehicles').Vehicle[]}  props.vehicles
+ * @param {import('../companies/fetchCompanies').Company[]}  props.companies
  * @returns 
  */
 function InProgressTaskFocusListing({suppliers, taskTemplates, onNewServiceCreated, removeTask, 

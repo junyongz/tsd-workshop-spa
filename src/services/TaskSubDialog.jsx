@@ -107,7 +107,7 @@ export default function TaskSubDialog({taskTemplates, tasks, setTasks, removeTas
             const newItems = [...prevs]
             let newSubsystem = subsystem
             if (newItems[idx].subsystem === subsystem) {
-                newSubsystem = ''
+                newSubsystem = ''  // so to unselect
             }
             newItems[idx] = {...prevs[idx], subsystem: newSubsystem}
             return newItems
@@ -150,7 +150,7 @@ export default function TaskSubDialog({taskTemplates, tasks, setTasks, removeTas
                 </Row>
                 <Row className="mb-1">
                     <Col xs="12" lg="1">
-                        {v.selectedTask && v.selectedTask.length > 0 && <Image width={100} src={require(`../images/${v.selectedTask[0].component.subsystem.toLowerCase().replaceAll(' ', '-')}.png`)} />}
+                        {v.selectedTask && v.selectedTask.length > 0 && <Image aria-label={`selected subsystem ${i}`} width={100} src={require(`../images/${v.selectedTask[0].component.subsystem.toLowerCase().replaceAll(' ', '-')}.png`)} />}
                     </Col>
                     <Col xs="12" lg="11">
                     <Row>
@@ -191,15 +191,14 @@ export default function TaskSubDialog({taskTemplates, tasks, setTasks, removeTas
                             as="textarea" name="remarks" rows={2} value={v.remarks}></Form.Control>
                             {v.remarkPrice && <InputGroup.Text role="button" aria-label={`opt for previous price ${i}`} onClick={() => afterChangeUnitPrice(v.remarkPrice, i)}>${v.remarkPrice}</InputGroup.Text> }
                         </InputGroup>
-                        {showMigTasks[i] && migratedTasks.length > 0 && <Dropdown show={true} onToggle={nextShow => {
-                            if (!nextShow) {
+                        {showMigTasks[i] && migratedTasks.length > 0 && <Dropdown show={true} 
+                            onToggle={nextShow => 
                                 setShowMigTasks(prev => {
                                     const newShows = [...prev]
-                                    newShows[i] = false
+                                    newShows[i] = nextShow
                                     return newShows
                                 })
-                            }
-                        }} onSelect={(eventKey) => afterChooseMigTasks(eventKey, i)} autoClose>
+                            } onSelect={(eventKey) => afterChooseMigTasks(eventKey, i)} autoClose>
                             <Dropdown.Menu style={{maxHeight: '20rem'}} className="overflow-y-scroll">
                                 {
                                     migratedTasks.map((vv, ii) => 

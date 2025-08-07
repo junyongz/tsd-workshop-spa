@@ -1,5 +1,5 @@
 import { jest, test, expect, afterAll } from '@jest/globals'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import TaskSubDialog from '../TaskSubDialog'
 import { useState } from 'react'
@@ -10,7 +10,9 @@ const taskTemplates = [
     {id: 540002, workmanshipTask: 'Touch up seat', component: {componentName: "Driver's Seat", subsystem: 'Cab'}, 
         description: 'touch up cabin seat with thread and needle', complexity: 'HIGH', unitPrice: 250 },
     {id: 540003, workmanshipTask: 'Replace filter', component: {componentName: "Oil Filter", subsystem: 'Lubrication'}, 
-        description: 'Installs new oil filter to trap contaminants', complexity: 'LOW', unitPrice: 50 }
+        description: 'Installs new oil filter to trap contaminants', complexity: 'LOW', unitPrice: 50 },
+    {id: 540004, component: {componentName: "transmission", subsystem: 'transmission'}, 
+        description: 'General checking', complexity: 'MEDIUM', unitPrice: 150 }
 ]
 
 global.fetch = jest.fn()
@@ -129,19 +131,19 @@ test('with brand new tasks', async () => {
 test('with brand new tasks, chosen from picture', async () => {
     const user = userEvent.setup({advanceTimers: jest.advanceTimersByTime})
 
-    global.fetch.mockResolvedValue({
+    global.fetch.mockResolvedValueOnce({
         ok: true, // GET /api/mig-tasks
         json: () => Promise.resolve([{description: 'to adjust brake and apply grease', unitPrice: 200}])
     })
-    .mockResolvedValue({
+    .mockResolvedValueOnce({
         ok: true, // GET /api/mig-tasks
         json: () => Promise.resolve([{description: 'to sew the cushion seat for passenger', unitPrice: 50}])
     })
-    .mockResolvedValue({ 
+    .mockResolvedValueOnce({ 
         ok: true, // GET /api/mig-tasks (after choose sub task)
         json: () => Promise.resolve([])
     })
-    .mockResolvedValue({
+    .mockResolvedValueOnce({
         ok: true, // GET /api/mig-tasks (after key remark)
         json: () => Promise.resolve([])
     })
@@ -161,10 +163,20 @@ test('with brand new tasks, chosen from picture', async () => {
     await user.click(screen.getByText('Add New'))
 
     await user.click(screen.getByLabelText('choose subsystem braking.png'))
+    expect(within(screen.getByLabelText('choose subsystem braking.png')).getByRole('img')).toHaveClass('bg-primary')
+    // unselect
+    await user.click(screen.getByLabelText('choose subsystem braking.png'))
+    expect(within(screen.getByLabelText('choose subsystem braking.png')).getByRole('img')).not.toHaveClass('bg-primary')
+    // and select again
+    await user.click(screen.getByLabelText('choose subsystem braking.png'))
+    expect(within(screen.getByLabelText('choose subsystem braking.png')).getByRole('img')).toHaveClass('bg-primary')
+    // select task
     await user.click(screen.getByPlaceholderText('Find a suitable task'))
     await user.click(screen.getByLabelText('Adjust brake (Braking - Parking Brake)'))
     jest.advanceTimersByTime(600)
     await waitFor(() => expect(global.fetch).toBeCalledWith("http://localhost:8080/api/mig-tasks?workshopTasks=Adjust brake&subsystem=Braking"))
+    await waitFor(() => expect(screen.queryByText('to adjust brake and apply grease ($200)')).toBeInTheDocument())
+    await user.click(screen.getByLabelText('selected subsystem 0'))
 
     expect(screen.getByLabelText('price for labour 0')).toHaveValue(150)
 
@@ -190,4 +202,34 @@ test('with brand new tasks, chosen from picture', async () => {
     await user.keyboard('Hello world')
     jest.advanceTimersByTime(600)
     await waitFor(() => expect(global.fetch).lastCalledWith("http://localhost:8080/api/mig-tasks?keyword=Hello world"))
+})
+
+test('with brand new tasks, select and unselect', async () => {
+    const user = userEvent.setup({advanceTimers: jest.advanceTimersByTime})
+
+    global.fetch.mockResolvedValueOnce({
+        ok: true, // GET /api/mig-tasks
+        json: () => Promise.resolve([{description: 'to adjust brake and apply grease', unitPrice: 200}])
+    })
+
+    const removeTask = jest.fn()
+    const TaskSubDialogWrapper = () => {
+        const [tasks, setTasks] = useState([])
+
+        return (<div><span onClick={() => setTasks(prev => [...prev, {}])}>Add New</span>
+            <TaskSubDialog taskTemplates={taskTemplates} tasks={tasks} 
+                setTasks={setTasks} removeTask={removeTask}>
+            </TaskSubDialog></div>)
+    }
+
+    render(<TaskSubDialogWrapper></TaskSubDialogWrapper>)
+
+    await user.click(screen.getByText('Add New'))
+    await user.click(screen.getByPlaceholderText('Find a suitable task'))
+    await user.click(screen.getByText('(transmission - transmission)'))
+    expect(screen.getByPlaceholderText('Find a suitable task')).toHaveValue('undefined (transmission - transmission)')
+    expect(global.fetch).not.toBeCalled()
+
+    await user.click(screen.getByRole('button', {name: 'Clear'}))
+    expect(screen.getByPlaceholderText('Find a suitable task')).toHaveValue('')
 })

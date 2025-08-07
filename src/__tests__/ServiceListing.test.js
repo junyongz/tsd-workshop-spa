@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { test, expect, jest, afterEach } from '@jest/globals'
 import { WorkshopServicesProvider } from '../services/ServiceContextProvider';
@@ -6,6 +6,7 @@ import { SupplierOrderContext } from '../suppliers/SupplierOrderContextProvider'
 import ServiceListing from '../ServiceListing';
 import SupplierOrders from '../suppliers/SupplierOrders';
 import { addDaysToDateStr } from '../utils/dateUtils';
+import { BrowserRouter, useNavigate } from 'react-router-dom';
 
 jest.mock('../services/ServiceNoteTakingDialog', () => ({isShow, onSaveNote}) => 
     <div>
@@ -26,6 +27,7 @@ global.fetch = jest.fn()
 
 const suppliers = [{id: 60001, supplierName: "Tok Kong"}, {id: 60002, supplierName: "KHD"}]
 
+/** @type {import('../ServiceTransactions').WorkshopService[]} */
 const transactions = [
     {id: 10001, creationDate: '2022-02-02', startDate: '2022-02-02', vehicleId: 20001, vehicleNo: "J 23", mileageKm: 230000,
         sparePartUsages: [{id: 990001, orderId: 1000, quantity: 20, usageDate: '2022-02-03', soldPrice: 10}]
@@ -34,7 +36,7 @@ const transactions = [
         sparePartUsages: [{id: 990002, orderId: 1000, quantity: 30, usageDate: '2022-01-11', soldPrice: 11}]    
     },
     {id: 10003, creationDate: '2022-01-01', startDate: '2022-01-01', vehicleId: 20003, vehicleNo: "J 34", mileageKm: 3100,
-        sparePartUsages: [{id: 990003, orderId: 2000, quantity: 2, usageDate: '2022-01-03', soldPrice: 35}]    
+        sparePartUsages: [{id: 990003, orderId: 2000, quantity: 2, usageDate: '2022-01-03', soldPrice: 35}]
     }
 ]
 
@@ -78,7 +80,32 @@ afterEach(() => {
     cleanup()
 })
 
-test('listing no search options, delete one item, delete service', async () => {
+test('nothing in listing, navigate to overview', async () => {
+    const user = userEvent.setup()
+
+    window.matchMedia = jest.fn(() => {return {
+        refCount: 0,
+        addListener: jest.fn(),
+        removeListener: jest.fn(),
+        matches: false,           // Added for completeness, can be adjusted
+        media: '(min-width: 768px)', // Default media query, can be adjusted
+        onchange: null            // Added for completeness
+    }})
+
+    const setSelectedSearchOptions = jest.fn()
+    render(<BrowserRouter><WorkshopServicesProvider initialServices={[]}>
+        <SupplierOrderContext value={new SupplierOrders([...orders], jest.fn())}>
+            <ServiceListing 
+                selectedSearchOptions={[]}
+                setSelectedSearchOptions={setSelectedSearchOptions} />
+        </SupplierOrderContext>
+    </WorkshopServicesProvider></BrowserRouter>)
+
+    await user.click(screen.getByText('Calendar View'))
+    expect(useNavigate()).toBeCalledWith('/services-overview')
+})
+
+test('listing no search options, delete one item, and task, delete service', async () => {
     global.fetch.mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve(990001)
@@ -100,18 +127,23 @@ test('listing no search options, delete one item, delete service', async () => {
 
     const setTotalFilteredServices = jest.fn()
     const setLoading = jest.fn()  
+    const removeTask = jest.fn()
     const initialServices = newTransactions()
+    initialServices[2].tasks = [{id: 9700001, recordedDate: '2022-01-09', quotedPrice: 250, taskId: 8700001, remarks: 'To adjust brake'}]
     const { container, unmount } = render(<WorkshopServicesProvider initialServices={initialServices}>
         <SupplierOrderContext value={new SupplierOrders([...orders], jest.fn())}>
             <ServiceListing selectedSearchOptions={[]} 
                 setTotalFilteredServices={setTotalFilteredServices}
                 refreshSparePartUsages={() => Promise.resolve([])}
+                removeTask={removeTask}
+                taskTemplates={[{id: 8700001, component: {subsystem: 'brake'}, description: 'adjust brake', complexity: 'LOW', unitPrice: 150}, 
+    {id: 8700002, component: {subsystem: 'cab'}, description: 'touch up cabin seat', complexity: 'HIGH', unitPrice: 250 }]}
                 suppliers={[...suppliers]} setLoading={setLoading} />
         </SupplierOrderContext>
     </WorkshopServicesProvider>)
 
     expect(screen.getAllByText('Complete Service')).toHaveLength(3)
-    expect(container.querySelectorAll('.list-group-item')).toHaveLength(3)
+    expect(container.querySelectorAll('.list-group-item')).toHaveLength(4)
 
     // let's try delete one item
     const priceTags = document.querySelectorAll('.price-tag')
@@ -121,7 +153,16 @@ test('listing no search options, delete one item, delete service', async () => {
     // click 2nd time, deleted
     await user.click(priceTags[0])
 
-    await waitFor(() => expect(document.querySelectorAll('.list-group-item')).toHaveLength(2))
+    expect(screen.queryByText('To adjust brake')).toBeInTheDocument()
+    const taskPriceTag = screen.getByText('To adjust brake').parentElement.parentElement.querySelector('.price-tag')
+    expect(taskPriceTag).toBeInTheDocument()
+    await user.hover(taskPriceTag)
+    await user.click(taskPriceTag)
+    await user.click(taskPriceTag)
+
+    expect(removeTask).toBeCalledWith(10003, 9700001)
+
+    await waitFor(() => expect(document.querySelectorAll('.list-group-item')).toHaveLength(3))
     expect(global.fetch).toBeCalledWith("http://localhost:8080/api/spare-part-utilizations/990001", 
         {"headers": {"Content-type": "application/json"}, "method": "DELETE"})
 
@@ -135,7 +176,7 @@ test('listing no search options, delete one item, delete service', async () => {
         {"headers": {"Content-type": "application/json"}, "method": "DELETE"})
 
     // check again
-    expect(container.querySelectorAll('.list-group-item')).toHaveLength(2)
+    expect(container.querySelectorAll('.list-group-item')).toHaveLength(3)
     await waitFor(() => expect(setLoading).toBeCalledTimes(4))
 
     // finally click on Add New button
@@ -145,7 +186,7 @@ test('listing no search options, delete one item, delete service', async () => {
     unmount()
 })
 
-test('listing no search options, delete one item, delete service', async () => {
+test('listing no search options, then add search option', async () => {
     window.matchMedia = jest.fn(() => {return {
         refCount: 0,
         addListener: jest.fn(),

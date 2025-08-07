@@ -1,10 +1,12 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { test, expect, jest, afterAll } from '@jest/globals'
+import { test, expect, jest, afterAll, afterEach } from '@jest/globals'
 import SchedulingCalendarView from '../SchedulingCalendarView';
 import { addDaysToDateStr, sameMonth } from '../../utils/dateUtils';
 
 afterAll(() => jest.clearAllMocks())
+
+afterEach(() => jest.restoreAllMocks())
 
 test('scheduling info only', async () => {
     const todayDate = new Date()
@@ -82,14 +84,17 @@ test('create a new event', async () => {
         ok: true,
         json: () => Promise.resolve([])
     }))
+    .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([])
+    })
+    .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({id: 1004})
+    })
 
     window.matchMedia = jest.fn(() => {return {
-        refCount: 0,
-        addListener: jest.fn(),
-        removeListener: jest.fn(),
-        matches: true,           // Added for completeness, can be adjusted
-        media: '(min-width: 992px)', // Default media query, can be adjusted
-        onchange: null            // Added for completeness
+        matches: true
     }})
 
     const onNewVehicleCreated = jest.fn((vehNo) => Promise.resolve({
@@ -141,6 +146,58 @@ test('create a new event', async () => {
             "headers": {"Content-type": "application/json"}, "method": "POST"}))
 })
 
+test('failed to create a new event', async () => {
+    const user = userEvent.setup()
+
+    global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([])
+    })
+    .mockResolvedValueOnce({
+        ok: false,
+        json: () => Promise.resolve({status: 500, reason: 'system down'})
+    })
+
+    window.matchMedia = jest.fn(() => {return {
+        matches: true
+    }})
+
+    const onNewVehicleCreated = jest.fn((vehNo) => Promise.resolve({
+        id: 70005, vehiclenNo: vehNo
+    }))
+
+    const todayDate = new Date()
+    const vehicles = [{id: 70005, vehicleNo: 'JJ 23'}]
+
+    render(<SchedulingCalendarView vehicles={vehicles} onNewVehicleCreated={onNewVehicleCreated}></SchedulingCalendarView>)
+    await waitFor(() => {
+        expect(global.fetch).lastCalledWith("http://localhost:8080/api/scheduling", 
+            {"headers": {"Content-type": "application/json"}})
+        
+        expect(document.querySelectorAll('span.badge')).toHaveLength(0)
+    })
+
+    await user.click(screen.getByRole('button', {name: `day of ${todayDate.getMonth()}-${todayDate.getDate()}`}))
+    // key in vehicle new number
+    await user.click(screen.getByPlaceholderText('Choose a vehicle...'))
+    await user.keyboard("JJ 23")
+
+    // notes
+    await user.click(screen.getByPlaceholderText('What to take note?'))
+    await user.keyboard("Sent for inspection")
+
+    // save
+    const consoleError = jest.spyOn(console, 'error')
+    await user.click(screen.getByText('Save'))
+
+    await waitFor(() => expect(global.fetch).lastCalledWith("http://localhost:8080/api/scheduling", 
+        {"body": "{\"scheduledDate\":\""+ addDaysToDateStr(todayDate, 0) +"\",\"vehicleId\":70005,\"vehicleNo\":\"JJ 23\",\"notes\":\"Sent for inspection\"}", 
+            "headers": {"Content-type": "application/json"}, "method": "POST"}))
+
+    expect(consoleError).nthCalledWith(1, 'failed to create new schedule: {"scheduledDate":"2025-08-07","vehicleId":70005,"vehicleNo":"JJ 23","notes":"Sent for inspection"}')
+    expect(consoleError).nthCalledWith(2, 'failed to create because: {"status":500,"reason":"system down"}')
+})
+
 
 test('removing scheduling', async () => {
     const user = userEvent.setup()
@@ -164,14 +221,8 @@ test('removing scheduling', async () => {
             json: () => Promise.resolve(1000)
         }))
 
-
     window.matchMedia = jest.fn(() => {return {
-        refCount: 0,
-        addListener: jest.fn(),
-        removeListener: jest.fn(),
-        matches: true,           // Added for completeness, can be adjusted
-        media: '(min-width: 992px)', // Default media query, can be adjusted
-        onchange: null            // Added for completeness
+        matches: true
     }})
 
     render(<SchedulingCalendarView vehicles={[]} ></SchedulingCalendarView>)

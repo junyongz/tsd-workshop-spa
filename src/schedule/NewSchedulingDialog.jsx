@@ -24,13 +24,11 @@ function NewSchedulingDialog({isShow, setShowDialog, vehicles, theDate = new Dat
     }
 
     const checkVehicleValidity = (vehicleInput) => {
-        if (vehicleInput) {
-            if (vehicles.findIndex(veh => veh.vehicleNo === vehicleInput.value) === -1) {
-                vehicleInput.setCustomValidity('not a valid vehicle, either choose one and create one first')
-            }
-            else {
-                vehicleInput.setCustomValidity('')
-            }
+        if (vehicleInput?.value && vehicles.findIndex(veh => veh.vehicleNo === vehicleInput.value) === -1) {
+            vehicleInput.setCustomValidity('not a valid vehicle, either choose one and create one first')
+        }
+        else {
+            vehicleInput.setCustomValidity('')
         }
     }
 
@@ -46,7 +44,7 @@ function NewSchedulingDialog({isShow, setShowDialog, vehicles, theDate = new Dat
     const saveChange = () => {
         const nativeForm = formRef.current
 
-        checkVehicleValidity( nativeForm.elements.namedItem('vehicle'))
+        checkVehicleValidity(nativeForm.elements.namedItem('vehicle'))
         if (nativeForm.checkValidity() === false) {
             setValidated(true)
             return
@@ -69,12 +67,18 @@ function NewSchedulingDialog({isShow, setShowDialog, vehicles, theDate = new Dat
         })
         .then(res => {
             if (!res.ok) {
-                console.trace("Issue with POST scheduling: " + JSON.stringify(res.body))
-                throw Error("not good")
+                console.error('failed to create new schedule: ' + JSON.stringify(toSave))
             }
             return res.json()
         })
-        .then(schJson => setEvents(prev => [...prev, mapToCalendarEvent(schJson)]))
+        .then(schJson => {
+            if (schJson.id) {
+                setEvents(prev => [...prev, mapToCalendarEvent(schJson)])
+            }
+            else {
+                console.error("failed to create because: " + JSON.stringify(schJson))
+            }
+        })
         .finally(() => handleClose())
     }
 

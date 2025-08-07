@@ -11,13 +11,16 @@ jest.mock('../../utils/getPaginationItems', () => () => [<div key="1">Pagination
 jest.mock('../AddSparePartsDialog', () => 
     ({onSaveNewOrders, existingOrder}) => <div role="dialog">
         <span>AddSparePartsDialog</span>
-        <span data-testid="add-spare-parts" onClick={(e) => onSaveNewOrders(e.target.orders)}></span>
+        <span data-testid="add-spare-parts" onClick={(e) => onSaveNewOrders(e.target.orders, () => {})}></span>
         { existingOrder?.map(v => <span key={v.id}>{v.partName}</span>) }
       </div>
 );
 
 jest.mock('../SparePartsUsageDialog', () => () => <div>SparePartsUsageDialog</div>);
 jest.mock('../NoteTakingDialog', () => () => <div>NoteTakingDialog</div>);
+jest.mock('../SupplierSparePartsYearMonthView', () => ({backToOrders}) => 
+  <div data-testid="back-to-orders" onClick={backToOrders}>SupplierSparePartsYearMonthView</div>
+)
 
 // Mock fetch globally
 global.fetch = jest.fn();
@@ -144,11 +147,13 @@ test('calls recordUsage for specific order', () => {
 });
 
 test('handles removal of specific order', async () => {
-  global.fetch.mockResolvedValueOnce({ ok: true });
+  global.fetch
+  .mockResolvedValueOnce({ ok: true })
+  .mockResolvedValueOnce({ ok: false, json: () => Promise.resolve({status: "500", reason: "database down"}) });  
   
-  const container = render(<SupplierOrderContext value={new SupplierOrders([...mockOrders], jest.fn())}><SuppliersSpareParts {...defaultProps} /></SupplierOrderContext>);
+  const container = render(<SupplierOrderProvider initialOrders={[...mockOrders]}><SuppliersSpareParts {...defaultProps} /></SupplierOrderProvider>);
   
-  const deleteButtons = document.querySelectorAll('.bi-trash3')
+  let deleteButtons = document.querySelectorAll('.bi-trash3')
   expect(deleteButtons.length).toBe(2);
   
   fireEvent.click(deleteButtons[0]);
@@ -161,6 +166,24 @@ test('handles removal of specific order', async () => {
     );
     expect(defaultProps.setLoading).toHaveBeenCalledTimes(2);
   });
+
+  deleteButtons = document.querySelectorAll('.bi-trash3')
+  expect(deleteButtons.length).toBe(1)
+
+  // delete and failed
+  const consoleError = jest.spyOn(console, 'error')
+  fireEvent.click(deleteButtons[0])
+  fireEvent.click(screen.getAllByRole('button', { name: 'remove' })[0]);
+
+  await waitFor(() => {
+    expect(global.fetch).toHaveBeenCalledWith(
+      'http://localhost:8080/api/supplier-spare-parts/1002',
+      expect.objectContaining({ method: 'DELETE' })
+    );
+    expect(defaultProps.setLoading).toHaveBeenCalledTimes(4);
+  });
+
+  expect(consoleError).toBeCalledWith("failed to delete order {\"id\":1002,\"invoiceDate\":\"2023-01-02\",\"supplierId\":2001,\"itemCode\":\"XYZ789\",\"partName\":\"Air Filter\",\"quantity\":5,\"unit\":\"pcs\",\"unitPrice\":15,\"deliveryOrderNo\":\"DO002\",\"status\":\"ACTIVE\"} because: {\"status\":\"500\",\"reason\":\"database down\"}")
 
   container.unmount()
 });
@@ -254,7 +277,7 @@ test('displays correct quantities and supplier info for all orders', async () =>
     { id: 110006, orderId: 1001, quantity: 2, usageDate: "2024-02-13", vehicleNo: "JJ 6" },
     { id: 110007, orderId: 1001, quantity: 2, usageDate: "2024-03-02", vehicleNo: "JJ 7" },
     { id: 110008, orderId: 1002, quantity: 1, usageDate: "2024-01-02", vehicleNo: "JJ 8" },
-    { id: 110009, orderId: 1003, quantity: 1, usageDate: "2024-01-02", vehicleNo: "JJ 9" },
+    { id: 110009, orderId: 1003, quantity: 8, usageDate: "2024-01-02", vehicleNo: "JJ 9" },
   ];
   
   const container = render(<SupplierOrderContext value={new SupplierOrders([...mockOrders], jest.fn())}>
@@ -264,7 +287,7 @@ test('displays correct quantities and supplier info for all orders', async () =>
   expect(quantities).toHaveLength(3)
   expect(screen.getByText('1 left')).toBeInTheDocument();  
   expect(screen.getByText('4 left')).toBeInTheDocument();  
-  expect(screen.getByText('7 left')).toBeInTheDocument();
+  expect(screen.getByText('0 left')).toBeInTheDocument();
 
   expect(screen.queryAllByText(/Used by/)).toHaveLength(7)
   expect(Array.from(screen.queryAllByText(/Used by/))
@@ -276,7 +299,7 @@ test('displays correct quantities and supplier info for all orders', async () =>
     "Used by JJ 51 2024-02-12", 
     "Used by JJ 21 2024-02-02", 
     "Used by JJ 81 2024-01-02", 
-    "Used by JJ 91 2024-01-02"])
+    "Used by JJ 98 2024-01-02"])
   expect(screen.queryByText('Click to load more.')).toBeInTheDocument()
 
   // load the less of spare part usages
@@ -293,7 +316,7 @@ test('displays correct quantities and supplier info for all orders', async () =>
       "Used by JJ 41 2024-01-03", 
       "Used by JJ 11 2024-01-02", 
       "Used by JJ 81 2024-01-02", 
-      "Used by JJ 91 2024-01-02"])
+      "Used by JJ 98 2024-01-02"])
   
 });
 
@@ -367,4 +390,28 @@ test('show supplier in recent order and name ordering', async () => {
   await user.click(screen.getByRole('button', {name: 'Aik Leong'}))
   await user.click(screen.getByRole('button', {name: 'Close'}))
   expect(screen.queryAllByRole("listitem")).toHaveLength(4)
+
+  // by recent order
+  await user.click(screen.getByText('Showing All'))
+  await user.click(screen.getByRole('button', {name: 'By Recent Order'}))
+  navLinks = Array.from(document.querySelectorAll('.nav-link')).map(elem => elem.textContent)
+  expect(navLinks).toEqual(["By Recent Order", "By Name", "Han Seng", "PNB Precision", "Aik Leong"])
+})
+
+test('overview and un-overview', async () => {
+  const user = userEvent.setup()
+
+  render(
+    <SupplierOrderProvider initialOrders={[...mockOrders]}>
+      <SuppliersSpareParts {...defaultProps} />
+    </SupplierOrderProvider>);
+
+  expect(screen.queryByText('Showing All')).toBeInTheDocument()
+  await user.click(screen.getByText('Overview'))
+  expect(screen.queryByText('SupplierSparePartsYearMonthView')).toBeInTheDocument()
+  expect(screen.queryByText('Showing All')).not.toBeInTheDocument()
+
+  // go back
+  await user.click(screen.getByText('SupplierSparePartsYearMonthView'))
+  expect(screen.queryByText('Showing All')).toBeInTheDocument()
 })

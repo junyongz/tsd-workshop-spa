@@ -98,6 +98,7 @@ export default function TaskSubDialog({taskTemplates, tasks, setTasks, removeTas
             return newItems
         })
         doSetShowMigTasks(false, taskIdx)
+        setMigratedTasks([])
     }
 
     const afterChooseSubsystem = (idx, filename) => {
@@ -173,7 +174,7 @@ export default function TaskSubDialog({taskTemplates, tasks, setTasks, removeTas
                             clearButton
                             selected={v.selectedTask}
                             />
-                            {v.selectedTask && v.selectedTask[0] && <InputGroup.Text role="button" onClick={() => afterChangeUnitPrice((v.selectedTask[0].unitPrice), i)}>${v.selectedTask[0].unitPrice}</InputGroup.Text> }
+                            {v.selectedTask && v.selectedTask[0] && <InputGroup.Text role="button" aria-label={`opt for template price ${i}`}  onClick={() => afterChangeUnitPrice((v.selectedTask[0].unitPrice), i)}>${v.selectedTask[0].unitPrice}</InputGroup.Text> }
                         </InputGroup>
                     </Col>
                     <Col xs={{span: 12, order: 2}} lg={{span: 3, order: 0}}  className="mb-3 order-xs-5">
@@ -188,9 +189,9 @@ export default function TaskSubDialog({taskTemplates, tasks, setTasks, removeTas
                             <Form.Control size="lg" aria-label={`remarks for task ${i}`} onFocus={(e) => afterKeyRemarks(e.target.value, i)} 
                             onChange={(e) => afterKeyRemarks(e.target.value, i)} 
                             as="textarea" name="remarks" rows={2} value={v.remarks}></Form.Control>
-                            {v.remarkPrice && <InputGroup.Text role="button" onClick={() => afterChangeUnitPrice(v.remarkPrice, i)}>${v.remarkPrice}</InputGroup.Text> }
+                            {v.remarkPrice && <InputGroup.Text role="button" aria-label={`opt for previous price ${i}`} onClick={() => afterChangeUnitPrice(v.remarkPrice, i)}>${v.remarkPrice}</InputGroup.Text> }
                         </InputGroup>
-                        <Dropdown show={showMigTasks[i]} onToggle={nextShow => {
+                        {showMigTasks[i] && migratedTasks.length > 0 && <Dropdown show={true} onToggle={nextShow => {
                             if (!nextShow) {
                                 setShowMigTasks(prev => {
                                     const newShows = [...prev]
@@ -206,7 +207,7 @@ export default function TaskSubDialog({taskTemplates, tasks, setTasks, removeTas
                                     )
                                 }
                             </Dropdown.Menu>
-                        </Dropdown>
+                        </Dropdown> }
                     </Col>
                     <Col xs={{span: "12", order: 'last'}} lg="1" className="text-end order-xs-last">
                         <Button size="lg" variant="danger" aria-label={`remove task ${i}`} onClick={() => removeItem(v, i)}><Trash /></Button>

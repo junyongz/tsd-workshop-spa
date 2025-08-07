@@ -3,6 +3,25 @@ import { Typeahead } from "react-bootstrap-typeahead";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Calendar, Foreman, Services, Suppliers, Tools, Truck } from "./Icons";
 
+/**
+ * 
+ * @param {Object} props
+ * @param {boolean} props.showToastBox
+ * @param {React.SetStateAction<boolean>} props.setShowToastBox
+ * @param {Function} props.toastBoxMessage
+ * @param {import("./App").SearchOption[]} props.searchOptions
+ * @param {import("./App").SearchOption[]} props.selectedSearchOptions
+ * @param {string} props.selectedSearchDate
+ * @param {React.SetStateAction<string>} props.setSelectedSearchDate
+ * @param {number} props.totalFilteredServices
+ * @param {number} props.totalFilteredOrders
+ * @param {Function} props.filterServices
+ * @param {boolean} props.searchByDate
+ * @param {React.SetStateAction<boolean>} props.setSearchByDate
+ * @param {Function} props.clearFilterDate
+ * @param {number} props.totalSpareParts
+ * @returns 
+ */
 export default function NavigationBar({
     showToastBox, setShowToastBox, toastBoxMessage,
     searchOptions, selectedSearchOptions, selectedSearchDate, setSelectedSearchDate, totalFilteredServices, totalFilteredOrders,

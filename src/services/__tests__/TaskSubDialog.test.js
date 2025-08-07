@@ -16,6 +16,7 @@ const taskTemplates = [
 global.fetch = jest.fn()
 
 jest.useFakeTimers()
+afterEach(() => jest.clearAllMocks())
 afterAll(() => jest.useRealTimers())
 
 test('with existing tasks', async () => {
@@ -69,11 +70,11 @@ test('with existing tasks', async () => {
 test('with brand new tasks', async () => {
     const user = userEvent.setup({advanceTimers: jest.advanceTimersByTime})
 
-    global.fetch.mockResolvedValue({
+    global.fetch.mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve([{description: 'to adjust brake and apply grease', unitPrice: 200}])
     })
-    .mockResolvedValue({
+    .mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve([{description: 'to sew the cushion seat for passenger', unitPrice: 50}])
     })
@@ -82,7 +83,8 @@ test('with brand new tasks', async () => {
     const TaskSubDialogWrapper = () => {
         const [tasks, setTasks] = useState([])
 
-        return (<div><span onClick={() => setTasks(prev => [...prev, {}])}>Add New</span><TaskSubDialog taskTemplates={taskTemplates} tasks={tasks} setTasks={setTasks} removeTask={removeTask}></TaskSubDialog></div>)
+        return (<div><span onClick={() => setTasks(prev => [...prev, {}])}>Add New</span>
+        <TaskSubDialog taskTemplates={taskTemplates} tasks={tasks} setTasks={setTasks} removeTask={removeTask}></TaskSubDialog></div>)
     }
 
     render(<TaskSubDialogWrapper></TaskSubDialogWrapper>)
@@ -92,7 +94,10 @@ test('with brand new tasks', async () => {
     await user.click(screen.getByPlaceholderText('Find a suitable task'))
     await user.click(screen.getByLabelText('Replace filter (Lubrication - Oil Filter)'))
     jest.advanceTimersByTime(600)
-    await waitFor(() => expect(global.fetch).toBeCalledWith("http://localhost:8080/api/mig-tasks?workshopTasks=Replace filter&subsystem=Lubrication"))
+    await waitFor(() => expect(global.fetch).lastCalledWith("http://localhost:8080/api/mig-tasks?workshopTasks=Replace filter&subsystem=Lubrication"))
+    await waitFor(() => expect(screen.queryByText('to adjust brake and apply grease ($200)')).toBeInTheDocument())
+    await user.click(screen.getByText('to adjust brake and apply grease ($200)'))
+    await waitFor(() => expect(screen.queryByText('to adjust brake and apply grease ($200)')).not.toBeInTheDocument())
 
     expect(screen.getByLabelText('price for labour 0')).toHaveValue(50)
 
@@ -103,7 +108,17 @@ test('with brand new tasks', async () => {
     await user.click(screen.getByLabelText('Touch up seat (Cab - Driver\'s Seat)'))
     jest.advanceTimersByTime(600)
     await waitFor(() => expect(global.fetch).lastCalledWith("http://localhost:8080/api/mig-tasks?workshopTasks=Touch up seat&subsystem=Cab"))
+    await waitFor(() => expect(screen.queryByText('to sew the cushion seat for passenger ($50)')).toBeInTheDocument())
+    await user.click(screen.getByText('to sew the cushion seat for passenger ($50)'))
+    await waitFor(() => expect(screen.queryByText('to sew the cushion seat for passenger ($50)')).not.toBeInTheDocument())
 
+    expect(screen.getByLabelText('opt for previous price 1')).toHaveTextContent('$50')
+
+    expect(screen.getByLabelText('price for labour 1')).toHaveValue(250)
+
+    await user.click(screen.getByLabelText('opt for previous price 1'))
+    expect(screen.getByLabelText('price for labour 1')).toHaveValue(50)
+    await user.click(screen.getByLabelText('opt for template price 1'))
     expect(screen.getByLabelText('price for labour 1')).toHaveValue(250)
 
     // let's remove the first one

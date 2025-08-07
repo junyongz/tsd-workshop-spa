@@ -14,10 +14,11 @@ import PromptDeletionIcon from "../components/PromptDeletionIcon"
 import { applyFilterOnOrders } from "../search/fuzzySearch"
 import { useSupplierOrders } from "./SupplierOrderContextProvider"
 
+const apiUrl = process.env.REACT_APP_API_URL
+
 /**
- * @callback UpdateOrderFunction
- * @param {import("./SupplierOrders").SupplierOrder} order an order to update
- * @param {boolean} note whether to just update notes only
+ * @callback UpdateOrderNoteFunction
+ * @param {import("./SupplierOrders").SupplierOrder} order an order to update for the note
  */
 
 /**
@@ -40,7 +41,6 @@ function SuppliersSpareParts({setTotalFilteredOrders,
     selectedSearchOptions, selectedSearchDate, suppliers, vehicles, sparePartUsages,
     refreshSparePartUsages, refreshServices,
     onNewVehicleCreated, setLoading, showToastMessage}) {
-    const apiUrl = process.env.REACT_APP_API_URL
 
     const supplierOrders = useSupplierOrders()
 
@@ -145,13 +145,18 @@ function SuppliersSpareParts({setTotalFilteredOrders,
             })
             .then(res => {
                 if (!res.ok) {
-                    showToastMessage(`failed to delete order ${JSON.stringify(order)}`)
+                    return res.json()
                 }
             })
-            .then(_ => {
-                supplierOrders.removeOrder(order)
-                return Promise.all([refreshSparePartUsages(),
-                refreshServices()])
+            .then(json => {
+                if (json?.status) {
+                     showToastMessage(`failed to delete order ${JSON.stringify(order)} because: ${JSON.stringify(json)}` )
+                }
+                else {
+                    supplierOrders.removeOrder(order)
+                    return Promise.all([refreshSparePartUsages(),
+                    refreshServices()])
+                }
             })
             .then(() => clearState())
             .finally(() => setLoading(false))
@@ -189,13 +194,13 @@ function SuppliersSpareParts({setTotalFilteredOrders,
     }
 
     /**
-     * @type {UpdateOrderFunction}
+     * @type {UpdateOrderNoteFunction}
      * @private
      */
-    const onUpdateOrder = (order, note) => {
+    const onUpdateOrderNote = (order) => {
         setLoading(true)
         requestAnimationFrame(() => {
-            fetch(`${apiUrl}/api/supplier-spare-parts${note ? '?op=NOTES' : ''}`, {
+            fetch(`${apiUrl}/api/supplier-spare-parts?op=NOTES`, {
                 method: 'POST',
                 mode: 'cors',
                 headers: {
@@ -210,7 +215,7 @@ function SuppliersSpareParts({setTotalFilteredOrders,
                 return res.json()
             })
             .then(json => {
-                if (json.status === 500 || json.code === 'SP-QUANTITY-002' || json.code === 'SPP-001') {
+                if (json.status === 500) {
                     showToastMessage(`failed to update order, response: ${JSON.stringify(json)}`)
                 }
                 else {
@@ -250,7 +255,7 @@ function SuppliersSpareParts({setTotalFilteredOrders,
                 { noteSparePart && <NoteTakingDialog isShow={showNoteDialog} 
                     setShowDialog={setShowNoteDialog} 
                     noteSparePart={noteSparePart}
-                    onUpdateOrder={onUpdateOrder}
+                    onUpdateOrderNote={onUpdateOrderNote}
                 ></NoteTakingDialog> }
                 { usageSpareParts && <SparePartsUsageDialog isShow={showUsageDialog}
                     setShowDialog={setShowUsageDialog} 

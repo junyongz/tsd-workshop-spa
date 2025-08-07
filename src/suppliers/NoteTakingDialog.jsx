@@ -7,11 +7,11 @@ import { Notes } from "../Icons";
  * @param {Object} props
  * @param {boolean} props.isShow
  * @param {React.SetStateAction<boolean>} props.setShowDialog
- * @param {import("./SuppliersSpareParts").UpdateOrderFunction} props.onUpdateOrder
+ * @param {import("./SuppliersSpareParts").UpdateOrderNoteFunction} props.onUpdateOrderNote
  * @param {import("./SupplierOrders").SupplierOrder} props.noteSparePart
  * @returns 
  */
-function NoteTakingDialog({isShow, setShowDialog, onUpdateOrder, noteSparePart}) {
+function NoteTakingDialog({isShow, setShowDialog, onUpdateOrderNote, noteSparePart}) {
     const formRef = useRef()
     const [validated, setValidated] = useState(false)
 
@@ -22,7 +22,7 @@ function NoteTakingDialog({isShow, setShowDialog, onUpdateOrder, noteSparePart})
 
     const saveChange = () => {
         const nativeForm = formRef.current
-        onUpdateOrder({...noteSparePart, notes: nativeForm.elements.namedItem('notes').value}, true)
+        onUpdateOrderNote({...noteSparePart, notes: nativeForm.elements.namedItem('notes').value})
         handleClose()
     }
 

@@ -22,6 +22,8 @@ import { useSupplierOrders } from "../suppliers/SupplierOrderContextProvider";
  * @property {number[]} orderIds list of id link to supplier order id
  */
 
+const apiUrl = process.env.REACT_APP_API_URL
+
 /**
  * 
  * @param {Object} props 
@@ -32,8 +34,6 @@ import { useSupplierOrders } from "../suppliers/SupplierOrderContextProvider";
  * @returns 
  */
 export default function SpareParts({suppliers, selectedSearchOptions, totalSpareParts, setTotalSpareParts}) {
-    const apiUrl = process.env.REACT_APP_API_URL
-
     const orders = useSupplierOrders()
 
     const [showSparePartDialog, setShowSparePartDialog] = useState(false)
@@ -170,6 +170,8 @@ export default function SpareParts({suppliers, selectedSearchOptions, totalSpare
     }, [])
 
     useEffect(() => {
+        const fetchMediaTimeoutVals = fetchMediaTimeouts.current
+
         observer.current = new IntersectionObserver(
             (entries) => {
                 entries.forEach((entry) => {
@@ -189,15 +191,15 @@ export default function SpareParts({suppliers, selectedSearchOptions, totalSpare
                                         fetchedMediasSparePartIds.current.add(sparePartId)
                                     })
                             }
-                            fetchMediaTimeouts.current.delete(sparePartId);
+                            fetchMediaTimeoutVals.delete(sparePartId);
                         }, 800);
-                        fetchMediaTimeouts.current.set(sparePartId, timeoutId);
+                        fetchMediaTimeoutVals.set(sparePartId, timeoutId);
                     } 
                     else {
-                        const timeoutId = fetchMediaTimeouts.current.get(sparePartId);
+                        const timeoutId = fetchMediaTimeoutVals.get(sparePartId);
                         if (timeoutId) {
                             clearTimeout(timeoutId);
-                            fetchMediaTimeouts.current.delete(sparePartId);
+                            fetchMediaTimeoutVals.delete(sparePartId);
                         }
                     }
                 });
@@ -210,8 +212,8 @@ export default function SpareParts({suppliers, selectedSearchOptions, totalSpare
         document.querySelectorAll('.spare-part-card').forEach(elem => observer.current.observe(elem))
 
         return () => {
-            fetchMediaTimeouts.current.forEach(timeoutId => clearTimeout(timeoutId))
-            fetchMediaTimeouts.current.clear()
+            fetchMediaTimeoutVals.forEach(timeoutId => clearTimeout(timeoutId))
+            fetchMediaTimeoutVals.clear()
             observer.current.disconnect()
         };
     }, [spareParts, selectedSearchOptions]);

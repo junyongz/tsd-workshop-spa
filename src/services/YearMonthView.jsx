@@ -58,7 +58,7 @@ function YearMonthView({suppliers, taskTemplates}) {
     const sortedKeys = Object.keys(trxsGroupByVehicles).sort((a, b) => a > b ? -1 : 1)
 
     const amountByVehicles = sortedKeys.map(veh => {
-        const services = trxsGroupByVehicles[veh] || []
+        const services = trxsGroupByVehicles[veh]
 
         return {vehicle: veh, amount: 
             (services.flatMap(s => s.migratedHandWrittenSpareParts || []).reduce((pv, cv) => pv + (cv.totalPrice || 0), 0) +
@@ -81,7 +81,11 @@ function YearMonthView({suppliers, taskTemplates}) {
         )
     }
 
-    const calcVariant = (i=0) => {
+    /**
+     * @param {number} i 
+     * @returns 
+     */
+    const calcVariant = (i) => {
         return month === i ? ((theme === 'dark') ? 'outline-light': 'outline-dark') : ((theme === 'dark') ? 'light': 'dark')
     }
 
@@ -221,7 +225,7 @@ function YearMonthView({suppliers, taskTemplates}) {
                                                 })
                     
 
-                                            return ((migrated || []).concat(usages) || []).concat(tasks)
+                                            return ((migrated || []).concat(usages)).concat(tasks)
                                         })}
                                     </Card.Body>
                                 </Card>

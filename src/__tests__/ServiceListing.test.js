@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { test, expect, jest, afterEach } from '@jest/globals'
 import { WorkshopServicesProvider } from '../services/ServiceContextProvider';
@@ -410,6 +410,9 @@ test('view the completed service, notes and medias', async () => {
     await user.click(screen.getByLabelText('download media img_001.png'))
     expect(removeChild.mock.calls[0][0].href).toEqual('http://image.data.url/')
     expect(removeChild.mock.calls[0][0].download).toEqual('img_001.png')
+
+    // close it, TODO: how to test the visibility properly
+    await user.click(screen.getAllByLabelText('show medias')[1])
 
     unmount()
 })

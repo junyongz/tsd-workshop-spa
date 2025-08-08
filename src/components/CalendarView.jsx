@@ -4,8 +4,24 @@ import { useEffect, useState } from "react";
 import './CalendarView.css'
 import { HandPointer, Trash } from "../Icons";
 
+/**
+ * @typedef {Object} CalendarEvent
+ * @property {number} id
+ * @property {Date} date
+ * @property {string} display
+ * @property {string} description 
+ */
+
+/**
+ * 
+ * @param {Object} props
+ * @param {CalendarEvent[]} props.events
+ * @param {Function} props.onClickNew 
+ * @param {Function} props.onClickRemove 
+ * @returns 
+ */
 export default function CalendarView({
-    events=[{date: new Date(), display: 'JTN 1288', description: 'due for service'}], 
+    events, 
     onClickNew,
     onClickRemove
 }) {
@@ -57,11 +73,18 @@ export default function CalendarView({
        }
     }, [])
 
-    const AllEvents = ({events=[], onDoClickNew}) => {
+    /**
+     * 
+     * @param {Object} props
+     * @param {CalendarEvent[]} props.events 
+     * @param {Function} props.onDoClickNew
+     * @returns 
+     */
+    const AllEvents = ({events, onDoClickNew}) => {
         return (
             <ListGroup>
                 <ListGroup.Item key={'add-new'} className="text-end"><Button aria-label="create new event" className="responsive-width-25" onClick={() => onDoClickNew()}>Add New</Button></ListGroup.Item>
-                { choosenDate && events.filter(evt => sameDay(evt.date, choosenDate))
+                { choosenDate && events?.filter(evt => sameDay(evt.date, choosenDate))
                     .map(evt => <ListGroup.Item key={evt.id}>
                         <Row>
                         <Col xs="10"><span className="fw-semibold">{ evt.display }</span></Col> 
@@ -70,12 +93,21 @@ export default function CalendarView({
                         </Row>
                         </ListGroup.Item>) 
                 }
-                { (!choosenDate || events.filter(evt => sameDay(evt.date, choosenDate)).length === 0) && <ListGroup.Item key={'no-item'}>Nothing scheduled yet</ListGroup.Item>}
+                { (!choosenDate || events?.filter(evt => sameDay(evt.date, choosenDate)).length === 0) && <ListGroup.Item key={'no-item'}>Nothing scheduled yet</ListGroup.Item>}
             </ListGroup>
         )
     }
 
-    const EventDisplay = ({item={display: '', description: '', variant: 'primary'}}) => {
+    /**
+     * 
+     * @param {Object} props
+     * @param {Object} props.item
+     * @param {string} props.item.display
+     * @param {string} props.item.description
+     * @param {string} props.item.variant
+     * @returns 
+     */
+    const EventDisplay = ({item}) => {
         return (
             <OverlayTrigger overlay={<Tooltip>{item.description}</Tooltip>}>
                 <Badge bg={item.variant ?? 'primary'}>{item.display}</Badge>
@@ -118,16 +150,16 @@ export default function CalendarView({
                             <Card.Body style={{height: maxHeight, maxHeight: maxHeight, '--bs-card-spacer-y': '5px'}}>
                                 <Row className="d-none d-lg-flex">
                                 {
-                                    events.filter(evt => sameDay(evt.date, boxDate))
+                                    events?.filter(evt => sameDay(evt.date, boxDate))
                                     .slice(0, 3)
                                     .map(evt => <Col xs="12" key={evt.id} style={{whiteSpace: 'none'}}><EventDisplay item={evt} /></Col>)
                                 }
                                 </Row>
-                                {events.filter(evt => sameDay(evt.date, boxDate)).length > 0 && <Row className="d-none d-lg-flex">
+                                {events?.filter(evt => sameDay(evt.date, boxDate)).length > 0 && <Row className="d-none d-lg-flex">
                                     <span className="text-secondary" role="button" onClick={(e) => prepareToShowEventDialog(e, boxDate)}><HandPointer /> more...</span>
                                 </Row> }
                                 <Row className="d-flex d-lg-none">
-                                    { events.filter(evt => sameDay(evt.date, boxDate)).length > 0 && <Badge pill>{ events.filter(evt => sameDay(evt.date, boxDate)).length}</Badge> }
+                                    { events?.filter(evt => sameDay(evt.date, boxDate)).length > 0 && <Badge pill>{ events.filter(evt => sameDay(evt.date, boxDate)).length}</Badge> }
                                 </Row>
                             </Card.Body>
                         </Card>

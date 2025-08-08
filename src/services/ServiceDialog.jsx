@@ -63,7 +63,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles,
             })
         }
         else if (tabView === 'workmanship') {
-            setTasks(prev => (!prev && [{}]) || [...prev, {}])
+            setTasks(prev => [...prev, {}])
         }
     }
 
@@ -104,13 +104,11 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles,
     }
 
     const checkVehicleValidity = (vehicleInput) => {
-        if (vehicleInput) {
-            if (vehicles.findIndex(veh => veh.vehicleNo === vehicleInput.value) === -1) {
-                vehicleInput.setCustomValidity('not a valid vehicle, either choose one and create one first')
-            }
-            else {
-                vehicleInput.setCustomValidity('')
-            }
+        if (vehicleInput?.value && vehicles.findIndex(veh => veh.vehicleNo === vehicleInput.value) === -1) {
+            vehicleInput.setCustomValidity('not a valid vehicle, either choose one and create one first')
+        }
+        else {
+            vehicleInput.setCustomValidity('')
         }
     }
 
@@ -164,7 +162,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles,
                     orderId: v.selectedSpareParts[0].id,
                 }
             }),
-            tasks: (tasks || []).map(v => {
+            tasks: tasks.map(v => {
                 return {
                     recordedDate: startDateElem.value,
                     taskId: v.taskId,

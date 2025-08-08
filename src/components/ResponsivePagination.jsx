@@ -2,6 +2,16 @@ import { useEffect, useState } from "react"
 import { Pagination } from "react-bootstrap";
 import getPaginationItems from "../utils/getPaginationItems";
 
+/**
+ * 
+ * @param {Object} props
+ * @param {number} props.activePage 
+ * @param {React.SetStateAction<number>} props.setActivePage 
+ * @param {number} props.totalPages
+ * @param {number} [props.lgPageNum] page number viewable in 'lg' breakpoint
+ * @param {number} [props.xsPageNum] page number viewable in 'xs' breakpoint
+ * @returns 
+ */
 export default function ResponsivePagination({
     activePage, setActivePage, totalPages, lgPageNum=10, xsPageNum=3
 }) {

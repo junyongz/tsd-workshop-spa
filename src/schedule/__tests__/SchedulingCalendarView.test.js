@@ -1,6 +1,7 @@
+import { test, expect, jest, afterAll, afterEach } from '@jest/globals'
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { test, expect, jest, afterAll, afterEach } from '@jest/globals'
+
 import SchedulingCalendarView from '../SchedulingCalendarView';
 import { addDaysToDateStr, sameMonth } from '../../utils/dateUtils';
 
@@ -194,7 +195,7 @@ test('failed to create a new event', async () => {
         {"body": "{\"scheduledDate\":\""+ addDaysToDateStr(todayDate, 0) +"\",\"vehicleId\":70005,\"vehicleNo\":\"JJ 23\",\"notes\":\"Sent for inspection\"}", 
             "headers": {"Content-type": "application/json"}, "method": "POST"}))
 
-    expect(consoleError).nthCalledWith(1, 'failed to create new schedule: {"scheduledDate":"2025-08-07","vehicleId":70005,"vehicleNo":"JJ 23","notes":"Sent for inspection"}')
+    expect(consoleError).nthCalledWith(1, `failed to create new schedule: {"scheduledDate":"${addDaysToDateStr(new Date(), 0)}","vehicleId":70005,"vehicleNo":"JJ 23","notes":"Sent for inspection"}`)
     expect(consoleError).nthCalledWith(2, 'failed to create because: {"status":500,"reason":"system down"}')
 })
 

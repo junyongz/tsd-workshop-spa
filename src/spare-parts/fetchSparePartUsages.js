@@ -1,3 +1,10 @@
+/**
+ * 
+ * @param {string} apiUrl 
+ * @param {React.SetStateAction<import("../ServiceTransactions").SparePartUsage[]>} setSparePartUsages 
+ * @param {Function} showToastMessage 
+ * @returns {Promise<Response>}
+ */
 export default async function fetchSparePartUsages(apiUrl, setSparePartUsages, showToastMessage) {
 
     return fetch(`${apiUrl}/api/spare-part-utilizations`, {mode: 'cors'})

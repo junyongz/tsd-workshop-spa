@@ -4,6 +4,8 @@ import NewSchedulingDialog from "./NewSchedulingDialog";
 import { mapToCalendarEvent } from "./mappingUtils.js";
 import { addDaysToDate } from "../utils/dateUtils.js";
 
+const apiUrl = process.env.REACT_APP_API_URL
+
 /**
  * 
  * @param {Object} props
@@ -12,11 +14,10 @@ import { addDaysToDate } from "../utils/dateUtils.js";
  * @returns 
  */
 export default function SchedulingCalendarView({vehicles, onNewVehicleCreated}) {
-    const apiUrl = process.env.REACT_APP_API_URL
-
     const [showEventDialog, setShowEventDialog] = useState(false)
     const [events, setEvents] = useState([])
 
+    /** @type {React.RefObject<Date>} */
     const theDate = useRef()
 
     const showDialog = (choosenDate) => {
@@ -74,8 +75,8 @@ export default function SchedulingCalendarView({vehicles, onNewVehicleCreated}) 
 
     return (
         <>
-        <NewSchedulingDialog isShow={showEventDialog} setShowDialog={setShowEventDialog} theDate={theDate.current}
-            vehicles={vehicles} onNewVehicleCreated={onNewVehicleCreated} setEvents={setEvents}/>
+        { showEventDialog && <NewSchedulingDialog isShow={true} setShowDialog={setShowEventDialog} theDate={theDate.current}
+            vehicles={vehicles} onNewVehicleCreated={onNewVehicleCreated} setEvents={setEvents}/> }
         <CalendarView 
             events={events} 
             onClickNew={showDialog}

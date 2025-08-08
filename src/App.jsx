@@ -39,9 +39,9 @@ import { useSupplierOrders } from './suppliers/SupplierOrderContextProvider';
  * @returns {Promise<import('./vehicles/Vehicles').Vehicle>}
  */
 
-function App() {
-  const apiUrl = process.env.REACT_APP_API_URL
+const apiUrl = process.env.REACT_APP_API_URL
 
+function App() {
   const [loading, setLoading] = useState(false)
   const [loadingTime, setLoadingTime] = useState(0)
 
@@ -132,7 +132,7 @@ function App() {
     setSelectedSearchDate()
   }
 
-  const refreshVehicles = useCallback(() => fetchVehicles(apiUrl, setVehicles, setSearchOptions), [apiUrl])
+  const refreshVehicles = useCallback(() => fetchVehicles(apiUrl, setVehicles, setSearchOptions), [])
 
   /**
    * @type CreateNewVehicleCallback
@@ -161,19 +161,19 @@ function App() {
     .finally(() => clearState())
   }
 
-  const refreshCompanies = useCallback(() => fetchCompanies(apiUrl, setCompanies), [apiUrl])
+  const refreshCompanies = useCallback(() => fetchCompanies(apiUrl, setCompanies), [])
 
-  const refreshSparePartUsages = useCallback(() => fetchSparePartUsages(apiUrl, setSparePartUsages, showToastMessage), [apiUrl])
+  const refreshSparePartUsages = useCallback(() => fetchSparePartUsages(apiUrl, setSparePartUsages, showToastMessage), [])
 
   const refreshServices = useCallback(() =>
       selectedSearchOptions.length > 0
           ? fetchServices(apiUrl, transactions, searchedOptions).then(() => filterServices(selectedSearchOptions))
           : fetchServices(apiUrl, transactions, searchedOptions)
-  , [apiUrl, selectedSearchOptions])
-  const refreshFewPagesServices = useCallback(() => fetchFewPagesServices(apiUrl, transactions, searchedOptions), [apiUrl])
+  , [selectedSearchOptions])
+  const refreshFewPagesServices = useCallback(() => fetchFewPagesServices(apiUrl, transactions, searchedOptions), [])
 
   const refreshSupplierSpareParts = useCallback(() => fetchSupplierSpareParts(apiUrl, supplierOrders), [apiUrl])
-  const refreshWithUsageSupplierSpareParts = useCallback(() => fetchWithUsageSupplierSpareParts(apiUrl, supplierOrders), [apiUrl])
+  const refreshWithUsageSupplierSpareParts = useCallback(() => fetchWithUsageSupplierSpareParts(apiUrl, supplierOrders), [])
 
   const onNewServiceCreated = saveService.bind(this, setLoading, transactions, refreshSparePartUsages, clearState)
   const removeTask = removeServiceTask.bind(this, setLoading, transactions, clearState);
@@ -202,7 +202,7 @@ function App() {
       })
 
       return () => clearTimeout(sparePartFetchTimer)
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
       const fetchStatsTimer = setInterval(() => {

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react"
+import { useRef, useState } from "react"
 import { Container, Form, Modal, Row, Col, Button, InputGroup } from "react-bootstrap"
 import { Typeahead } from "react-bootstrap-typeahead"
 import { NoteTaking, Truck } from "../Icons"
@@ -6,10 +6,20 @@ import { months3EngChars } from "../utils/dateUtils"
 import { mapToCalendarEvent } from "./mappingUtils.js"
 import createNewVehicle from "../vehicles/createNewVehicle.js"
 
-function NewSchedulingDialog({isShow, setShowDialog, vehicles, theDate = new Date(), onNewVehicleCreated, setEvents}) {
+const apiUrl = process.env.REACT_APP_API_URL
 
-    const apiUrl = process.env.REACT_APP_API_URL
-
+/**
+ * 
+ * @param {Object} props
+ * @param {boolean} props.isShow 
+ * @param {React.SetStateAction<boolean>} props.setShowDialog
+ * @param {Date} props.theDate
+ * @param {import("../App.jsx").CreateNewVehicleCallback} props.onNewVehicleCreated
+ * @param {React.SetStateAction<Object[]>} props.setEvents
+ * @returns 
+ */
+function NewSchedulingDialog({isShow, setShowDialog, vehicles, theDate, onNewVehicleCreated, setEvents}) {
+    /** @type {React.RefObject<HTMLFormElement>} */
     const formRef = useRef()
     const [validated, setValidated] = useState(false)
     const [selectedVehicles, setSelectedVehicles] = useState()

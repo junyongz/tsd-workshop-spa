@@ -1,8 +1,6 @@
-import ServiceTransactions from "../ServiceTransactions"
-
 /**
  * @param {React.SetStateAction<boolean>} setLoading 
- * @param {ServiceTransactions} transactions
+ * @param {import("../ServiceTransactions").default} transactions
  * @param {Function} refreshSparePartUsages 
  * @param {Function} clearState to remove state checking from session storage, so wont refresh again
  * @param {import("../ServiceTransactions").WorkshopService} service 

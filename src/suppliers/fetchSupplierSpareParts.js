@@ -1,9 +1,7 @@
-import SupplierOrders from "./SupplierOrders";
-
 /**
  * 
  * @param {string} apiUrl 
- * @param {SupplierOrders} supplierOrders 
+ * @param {import('./SupplierOrders').default} supplierOrders 
  * @param {string} fetchMode either ACTIVE or ALL (ACTIVE only for those being used)
  * @returns 
  */
@@ -23,7 +21,7 @@ async function fetchSupplierSparePartsWithFetchMode(apiUrl, supplierOrders, fetc
 /**
  * 
  * @param {string} apiUrl 
- * @param {SupplierOrders} supplierOrders 
+ * @param {import('./SupplierOrders').default} supplierOrders 
  * @returns 
  */
 export async function fetchWithUsageSupplierSpareParts(apiUrl, supplierOrders) {
@@ -33,7 +31,7 @@ export async function fetchWithUsageSupplierSpareParts(apiUrl, supplierOrders) {
 /**
  * 
  * @param {string} apiUrl 
- * @param {SupplierOrders} supplierOrders 
+ * @param {import('./SupplierOrders').default} supplierOrders 
  * @returns 
  */
 export async function fetchSupplierSpareParts(apiUrl, supplierOrders) {

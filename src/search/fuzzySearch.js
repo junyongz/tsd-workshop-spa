@@ -1,10 +1,7 @@
-import ServiceTransactions from "../ServiceTransactions"
-import SupplierOrders from "../suppliers/SupplierOrders"
-
 /**
  * 
  * @param {import("../App").SearchOption[]} options 
- * @param {ServiceTransactions} transactions 
+ * @param {import('../ServiceTransactions').default} transactions 
  * @param {React.SetStateAction<import("../App").SearchOption{}} setSelectedSearchOptions 
  */
 export const doFilterServices = (options, transactions, setSelectedSearchOptions) => {
@@ -53,7 +50,7 @@ export function applyFilterOnOrders(selectedSearchOptions, selectedSearchDate, o
  * @param {string} selectedSearchDate a date in 'yyyy-MM-dd' format, eg '2005-05-05'
  * @param {import("../vehicles/Vehicles").Vehicle[]} vehicles 
  * @param {import("../ServiceTransactions").WorkshopService[]} services 
- * @param {SupplierOrders} supplierOrders 
+ * @param {import("../suppliers/SupplierOrders").default} supplierOrders 
  * @returns 
  */
 export function applyFilterOnServices(selectedSearchOptions, selectedSearchDate, vehicles, services, supplierOrders) {

@@ -312,8 +312,8 @@ function ServiceListing({
                 <Row>
                   <Col xs="12" lg="2"><h5>{v.vehicleNo}</h5></Col>
                   <Col xs="12" lg={{span: 12, order: 5}}><h5 className="text-body-secondary">started since {v.startDate}</h5></Col>
-                  <Col xs="4" lg="8" className='mb-2'><TransactionTypes service={v} /></Col>
-                  <Col xs="8" lg="2" className='text-end'>
+                  <Col xs="6" lg="8" className='mb-2'><TransactionTypes service={v} /></Col>
+                  <Col xs="6" lg="2" className='text-end'>
                   {v.mileageKm > 0 && <h6><span className="text-body-secondary">At {v.mileageKm} KM</span></h6> }
                   </Col>
                 </Row>

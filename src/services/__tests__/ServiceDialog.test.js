@@ -98,6 +98,82 @@ test('add 2 spare parts', async () => {
     expect(setShow).toBeCalledWith(false)
 })
 
+test('add a spare parts, then add workmanship without fill up, last fill up again', async () => {
+    const user = userEvent.setup()
+
+    global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([])
+    })
+
+    const orders = new SupplierOrders([
+        {id: 1000, supplierId: 60001, itemCode: '1000', partName: 'Engine Oil 20w-50', quantity: 100, unit: 'litres', unitPrice: 9.7, status: 'ACTIVE'},
+        {id: 2000, supplierId: 60002, itemCode: '2000', partName: 'Oil Filter', quantity: 5, unit: 'pc', unitPrice: 29.5, status: 'ACTIVE', notes: 'finishing soon'}
+    ], jest.fn())
+
+    const saveService = jest.fn()
+    const setShow = jest.fn()
+    render(<SupplierOrderContext value={orders}>
+        <ServiceDialog 
+            isShow={true}
+            setShow={setShow}
+            vehicles={[{id: 50001, vehicleNo: "J 23"}, {id: 50002, vehicleNo: "J 33"}]} 
+            suppliers={[{id: 60001, supplierName: "Kotong"}, {id: 60002, supplierName: "Facaw"}]}
+            sparePartUsages={[]}
+            taskTemplates={[{id: 8700001, component: {subsystem: 'brake'}, description: 'adjust brake', complexity: 'LOW', unitPrice: 150}, 
+    {id: 8700002, component: {subsystem: 'cab'}, description: 'touch up cabin seat', complexity: 'HIGH', unitPrice: 250 }]}
+            onNewServiceCreated={saveService}
+        />
+        </SupplierOrderContext>)
+
+    const todayDate = new Date()
+    const keyInStartDate = addDaysToDateStr(todayDate, -1)
+
+    const startDate = document.querySelector('input[name="startDate"]')
+    expect(startDate).toBeInTheDocument()
+    await user.click(startDate)
+    await user.type(startDate, keyInStartDate)
+
+    const vehicle = screen.getByPlaceholderText("Choose a vehicle...")
+    expect(vehicle).toBeInTheDocument()
+    await user.click(vehicle)
+    await user.type(vehicle, "J 33")
+    await user.click(screen.getByText('J 33'))
+
+    const mileageKm = document.querySelector('input[name="mileageKm"]')
+    expect(mileageKm).toBeInTheDocument()
+    await user.click(mileageKm)
+    await user.type(mileageKm, "135392")
+
+    // add engine oil
+    let sparePart = screen.queryByPlaceholderText("Find a spare part...")
+    expect(sparePart).toBeInTheDocument()
+    await user.click(sparePart)
+    await user.click(screen.getByText('Engine Oil 20w-50'))
+
+    await user.click(screen.getByPlaceholderText('Quantity'))
+    // delete the key in 20
+    await user.keyboard("[Backspace]20")
+    expect(screen.getByText("$ 194.00")).toBeInTheDocument()
+
+    // navigate to 'Workmanship'
+    await user.click(screen.getByRole('button', {name: 'Workmanship'}))
+    // add new
+    await user.click(screen.getByText("Add New"))
+
+    expect(screen.getByRole('button', {name: 'All'})).not.toHaveClass('active')
+    
+    // just play with escape key
+    await user.keyboard('{Escape}')
+    // save it
+    await user.click(screen.getByText("Save"))
+    // console.log(Array.from(document.querySelector('form').elements).map(v => v.name + ' ' + v.validationMessage))
+    expect(saveService).not.toBeCalled()
+    expect(setShow).not.toBeCalled()
+
+    expect(screen.getByRole('button', {name: 'All'})).toHaveClass('active')
+})
+
 test('add 3 spare parts, then delete 2nd one', async () => {
     const user = userEvent.setup()
 

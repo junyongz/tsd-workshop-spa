@@ -104,12 +104,12 @@ function SparePartDialog({isShow, setShowDialog,
         }
 
         if (hasPrevOrder) {
-            if (selectedSuppliers.length == 0) {
+            if (selectedSuppliers.length === 0) {
                 alert('Sorry, no suppliers added')
                 return
             }
     
-            if (matchingOrders.length == 0) {
+            if (matchingOrders.length === 0) {
                 alert('Sorry, no orders added')
                 return
             }

@@ -1,11 +1,9 @@
-import ServiceTransactions from "./ServiceTransactions";
-
 /**
  * 
  * @param {string} apiUrl 
- * @param {ServiceTransactions} transactions 
+ * @param {import('./ServiceTransactions').default} transactions 
  * @param {React.RefObject<Set<string>>} searchedOptions 
- * @returns {Promise}
+ * @returns {Promise<Response>}
  */
 export async function fetchFewPagesServices(apiUrl, transactions, searchedOptions) {
 
@@ -24,9 +22,9 @@ export async function fetchFewPagesServices(apiUrl, transactions, searchedOption
 /**
  * 
  * @param {string} apiUrl 
- * @param {ServiceTransactions} transactions 
+ * @param {import('./ServiceTransactions').default} transactions 
  * @param {React.RefObject<Set<string>>} searchedOptions 
- * @returns {Promise}
+ * @returns {Promise<Response>}
  */
 export default async function fetchServices(apiUrl, transactions, searchedOptions) {
 

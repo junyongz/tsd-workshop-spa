@@ -320,6 +320,7 @@ describe('AddSparePartsDialog Component', () => {
     await user.clear(screen.getByPlaceholderText('Find a existing one as template'))
     await user.keyboard('Engine Oil 1880')
 
+    await user.keyboard('{Escape}')
     await user.click(screen.getByText('Save'));
     expect(defaultProps.onSaveNewOrders).lastCalledWith(
       [{"deliveryOrderNo": "DO456", "id": 2, "invoiceDate": "2023-01-02", "itemCode": "XYZ789", 

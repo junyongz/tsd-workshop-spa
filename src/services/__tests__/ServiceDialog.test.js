@@ -99,11 +99,15 @@ test('add 2 spare parts', async () => {
 })
 
 test('add a spare parts, then add workmanship without fill up, last fill up again', async () => {
-    const user = userEvent.setup()
+    jest.useFakeTimers()
+    const user = userEvent.setup({advanceTimers: jest.advanceTimersByTime})
 
     global.fetch.mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve([])
+    }).mockResolvedValueOnce({
+        ok: true, // GET /api/mig-tasks
+        json: () => Promise.resolve([{description: 'to adjust brake and apply grease', unitPrice: 200}])
     })
 
     const orders = new SupplierOrders([
@@ -120,8 +124,12 @@ test('add a spare parts, then add workmanship without fill up, last fill up agai
             vehicles={[{id: 50001, vehicleNo: "J 23"}, {id: 50002, vehicleNo: "J 33"}]} 
             suppliers={[{id: 60001, supplierName: "Kotong"}, {id: 60002, supplierName: "Facaw"}]}
             sparePartUsages={[]}
-            taskTemplates={[{id: 8700001, component: {subsystem: 'brake'}, description: 'adjust brake', complexity: 'LOW', unitPrice: 150}, 
-    {id: 8700002, component: {subsystem: 'cab'}, description: 'touch up cabin seat', complexity: 'HIGH', unitPrice: 250 }]}
+            taskTemplates={[
+                {id: 540002, workmanshipTask: 'Touch up seat', component: {componentName: "Driver's Seat", subsystem: 'Cab'}, 
+                    description: 'touch up cabin seat with thread and needle', complexity: 'HIGH', unitPrice: 250 },
+                {id: 540003, workmanshipTask: 'Replace filter', component: {componentName: "Oil Filter", subsystem: 'Lubrication'}, 
+                    description: 'Installs new oil filter to trap contaminants', complexity: 'LOW', unitPrice: 50 },
+            ]}
             onNewServiceCreated={saveService}
         />
         </SupplierOrderContext>)
@@ -172,6 +180,24 @@ test('add a spare parts, then add workmanship without fill up, last fill up agai
     expect(setShow).not.toBeCalled()
 
     expect(screen.getByRole('button', {name: 'All'})).toHaveClass('active')
+
+    // back to fill up workmanship
+    await user.click(screen.getByRole('button', {name: 'Workmanship'}))
+    await user.click(screen.getByPlaceholderText('Find a suitable task'))
+    await user.click(screen.getByLabelText('Replace filter (Lubrication - Oil Filter)'))
+    jest.advanceTimersByTime(600)
+    await waitFor(() => expect(global.fetch).lastCalledWith("http://localhost:8080/api/mig-tasks?workshopTasks=Replace filter&subsystem=Lubrication"))
+    await waitFor(() => expect(screen.queryByText('to adjust brake and apply grease ($200)')).toBeInTheDocument())
+    await user.click(screen.getByText('to adjust brake and apply grease ($200)'))
+    expect(screen.getByLabelText('price for labour 0')).toHaveValue(50)
+
+    // save it
+    await user.click(screen.getByText("Save"))
+    expect(saveService).lastCalledWith({"id": undefined, "mileageKm": "135392", "notes": undefined, 
+        "sparePartUsages": [{"margin": 0, "orderId": 1000, "quantity": "20", "soldPrice": 9.7, "usageDate": "2025-08-08", "vehicleNo": "J 33"}], "sparePartsMargin": undefined, "startDate": "2025-08-08", 
+        "tasks": [{"quotedPrice": 50, "recordedDate": "2025-08-08", "remarks": "to adjust brake and apply grease", "taskId": 540003}], "transactionTypes": [], "vehicleId": 50002, "vehicleNo": "J 33"})
+
+    jest.useRealTimers()
 })
 
 test('add 3 spare parts, then delete 2nd one', async () => {

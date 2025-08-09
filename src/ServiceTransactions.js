@@ -69,6 +69,7 @@
  * @property {string} vehicleNo vehicle no
  * @property {string[]} transactionTypes possible values of 'REPAIR', 'SERVICE', 'INSPECTION' & 'TYRE'
  * @property {number} mileageKm the mileage in KM for the service
+ * @property {string} notes any handwritten notes
  * @property {MigratedHandWrittenSparePart[]} migratedHandWrittenSpareParts migrated hand-written parts data
  * @property {SparePartUsage[]} sparePartUsages spare part usages against the supplier orders
  * @property {WorkmashipTask[]} tasks workmanship tasks 

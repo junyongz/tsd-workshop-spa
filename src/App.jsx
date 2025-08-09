@@ -39,6 +39,12 @@ import { useSupplierOrders } from './suppliers/SupplierOrderContextProvider';
  * @returns {Promise<import('./vehicles/Vehicles').Vehicle>}
  */
 
+/**
+ * @callback CreateNewServiceCallback
+ * @param {import('./ServiceTransactions').WorkshopService} workshopService workshop Serivce
+ * @returns {void}
+ */
+
 const apiUrl = process.env.REACT_APP_API_URL
 
 function App() {

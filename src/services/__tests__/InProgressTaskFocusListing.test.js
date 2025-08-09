@@ -202,6 +202,7 @@ test('change margin individually', async () => {
     await user.click(screen.getByText('Engine Oil 20w-50'))
     await user.click(screen.getByRole('spinbutton', {name: 'manual input margin for 1 part'}))
     await user.keyboard("[Backspace][Backspace]55")
+    await user.keyboard('{Escape}')
     await user.click(screen.getByText('OKAY'))
 
     expect(onNewServiceCreated).lastCalledWith({"id": 10001, "mileageKm": 230000, 

@@ -33,7 +33,7 @@ import MigratedItemToSupplierOrderDialog from './services/MigratedItemToSupplier
  * @param {import('./App').SearchOption[]} props.selectedSearchOptions
  * @param {React.SetStateAction<import('./App').SearchOption[]>} props.setSelectedSearchOptions
  * @param {string} props.selectedSearchDate date to search service, in format of '2005-05-05'
- * @param {Function} props.onNewServiceCreated
+ * @param {import('./App').CreateNewServiceCallback} props.onNewServiceCreated
  * @param {Function} props.removeTask
  * @returns 
  */

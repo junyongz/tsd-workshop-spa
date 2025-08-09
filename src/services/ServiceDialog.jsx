@@ -14,7 +14,7 @@ import createNewVehicle from "../vehicles/createNewVehicle";
  * @param {boolean} props.isShow 
  * @param {React.SetStateAction<boolean>} props.isShow 
  * @param {React.RefObject<import("../ServiceTransactions").WorkshopService>} props.trx
- * @param {Function} props.onNewServiceCreated
+ * @param {import("../App").CreateNewServiceCallback} props.onNewServiceCreated
  * @param {import("../vehicles/Vehicles").Vehicle[]} props.vehicles
  * @param {import("../suppliers/SupplierOrders").Supplier[]} props.suppliers
  * @param {import("../ServiceTransactions").SparePartUsage[]} props.sparePartUsages
@@ -57,6 +57,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles,
     const addNewItem = () => {
         setValidated(false)
         // check view tab
+        /* istanbul ignore else */
         if (tabView === 'spareParts') {
             setItems(prev => {
                 return [...prev, {partName: 'Choose one ...', quantity: 1, unit: 'pc', unitPrice: 0, selectedSpareParts:[]}]
@@ -143,6 +144,7 @@ function ServiceDialog({isShow, setShow, trx, onNewServiceCreated, vehicles,
         const mileageKmElem = nativeForm.elements.namedItem('mileageKm')
         const transactionTypesElems = document.querySelectorAll('input[name="transactionTypes"]')
 
+        /** @type {import("../ServiceTransactions").WorkshopService} */
         const service = {
             id: selectedExistingService?.id,
             vehicleId: selectedVehicles[0].id,

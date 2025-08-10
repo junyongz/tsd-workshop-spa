@@ -14,6 +14,8 @@ jest.mock('bootstrap', () => {
     }
 })
 
+window.matchMedia = jest.fn()
+
 afterAll(() => jest.clearAllMocks())
 
 const mockSuppliers = [{ id: 2000, supplierName: 'Han Seng' }, { id: 2001, supplierName: 'Kok Song' }];
@@ -34,21 +36,24 @@ const makeNewOrders = () => new SupplierOrders([...theOrders], jest.fn());
 
 test('this year only', async() => {
     const user = userEvent.setup()
+    window.matchMedia.mockReturnValue({matches: true})
+
+    const todayDate = new Date()
 
     render(<SupplierOrderContext value={makeNewOrders()}>
             <SupplierSparePartsYearMonthView suppliers={mockSuppliers}>
             </SupplierSparePartsYearMonthView>
         </SupplierOrderContext>)
 
-    await waitFor(() => expect(screen.getAllByRole('button', {name: new Date().getFullYear()})).toHaveLength(2))
+    await waitFor(() => expect(screen.getAllByRole('button', {name: new Date().getFullYear()})).toHaveLength(1))
     await user.click(screen.getAllByRole('button', {name: new Date().getFullYear()})[0])
 
-    expect(screen.getAllByRole('button', {name: '2005'})).toHaveLength(1)
-    expect(screen.getAllByRole('button', {name: '2006'})).toHaveLength(1)
+    expect(screen.getAllByRole('button', {name: todayDate.getFullYear()})).toHaveLength(1)
+    expect(screen.getAllByRole('button', {name: 'change to year 2006'})).toHaveLength(1)
 
     // click on 2005
-    await user.click(screen.getByRole('button', {name: '2005'}))
-    await user.click(screen.getByRole('button', {name: 'Feb'}))
+    await user.click(screen.getByRole('button', {name: 'change to year 2005'}))
+    await user.click(screen.getByRole('button', {name: 'change to month Feb'}))
 
     expect(screen.queryAllByRole('document')).toHaveLength(2)
     expect(screen.queryAllByText('Air Hose')).toHaveLength(1)

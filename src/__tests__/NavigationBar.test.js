@@ -44,6 +44,22 @@ test('render navigation bar', async () => {
     expect(setSearchByDate).toBeCalledWith(true)
 })
 
+test('render navigation bar, but in vehicle page', async () => {
+    const user = userEvent.setup()
+
+    useLocation.mockReturnValue({pathname: '/vehicles'})
+
+    const setSearchByDate = jest.fn()
+    render(<NavigationBar setSearchByDate={setSearchByDate} totalFilteredServices={3} 
+        totalFilteredOrders={2} selectedSearchOptions={[{name: 'J 23'}, {name: 'oil'}]}
+        totalSpareParts={1}></NavigationBar>)
+
+    // click the calendar
+    await user.click(screen.getByLabelText('search by date'))
+    // and nothing happen, because in vehicle page
+    expect(setSearchByDate).not.toBeCalled()
+})
+
 test('render navigation bar with date search', async () => {
     const user = userEvent.setup()
 

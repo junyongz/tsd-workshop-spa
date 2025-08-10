@@ -54,7 +54,7 @@ const lotTransactions = [
     {id: 10010, creationDate: '2022-03-01', startDate: '2022-04-03', vehicleId: 20001, vehicleNo: "J 23", transactionTypes: ['TYRE'], uploadedMediasCount: 8},
     {id: 10011, creationDate: '2022-04-01', startDate: '2022-08-05', vehicleId: 20002, vehicleNo: "J 33", uploadedMediasCount: 1},
     {id: 10012, creationDate: '2022-05-01', startDate: '2022-05-04', vehicleId: 20003, vehicleNo: "J 34", uploadedMediasCount: 3},
-    {id: 10013, creationDate: '2022-03-01', startDate: '2022-03-03', vehicleId: 20001, vehicleNo: "J 23", transactionTypes: ['TYRE'], uploadedMediasCount: 2},
+    {id: 10013, creationDate: '2022-03-01', startDate: '2022-03-14', vehicleId: 20001, vehicleNo: "J 23", transactionTypes: ['TYRE'], uploadedMediasCount: 2},
     {id: 10014, creationDate: '2022-02-01', startDate: '2022-07-03', vehicleId: 20002, vehicleNo: "J 33", transactionTypes: ['REPAIR', 'SERVICE'], uploadedMediasCount: 1},
     {id: 10015, creationDate: '2022-07-01', startDate: '2022-03-07', vehicleId: 20003, vehicleNo: "J 34", uploadedMediasCount: 6}
 ]
@@ -105,11 +105,21 @@ test('nothing in listing, navigate to overview', async () => {
     expect(useNavigate()).toBeCalledWith('/services-overview')
 })
 
-test('listing no search options, delete one item, and task, delete service', async () => {
-    global.fetch.mockResolvedValueOnce({
+test('listing no search options, delete one item, and task, delete service, failed then succes', async () => {
+    global.fetch
+    .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(990009)
+    })
+    .mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve(990001)
-    }).mockResolvedValueOnce({
+    })
+    .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(10299)
+    })
+    .mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve(10001)
     })
@@ -128,6 +138,7 @@ test('listing no search options, delete one item, and task, delete service', asy
     const setTotalFilteredServices = jest.fn()
     const setLoading = jest.fn()  
     const removeTask = jest.fn()
+    const showToastMessage = jest.fn()
     const initialServices = newTransactions()
     initialServices[2].tasks = [{id: 9700001, recordedDate: '2022-01-09', quotedPrice: 250, taskId: 8700001, remarks: 'To adjust brake'}]
     const { container, unmount } = render(<WorkshopServicesProvider initialServices={initialServices}>
@@ -138,7 +149,7 @@ test('listing no search options, delete one item, and task, delete service', asy
                 removeTask={removeTask}
                 taskTemplates={[{id: 8700001, component: {subsystem: 'brake'}, description: 'adjust brake', complexity: 'LOW', unitPrice: 150}, 
     {id: 8700002, component: {subsystem: 'cab'}, description: 'touch up cabin seat', complexity: 'HIGH', unitPrice: 250 }]}
-                suppliers={[...suppliers]} setLoading={setLoading} />
+                suppliers={[...suppliers]} setLoading={setLoading} showToastMessage={showToastMessage}/>
         </SupplierOrderContext>
     </WorkshopServicesProvider>)
 
@@ -146,13 +157,34 @@ test('listing no search options, delete one item, and task, delete service', asy
     expect(container.querySelectorAll('.list-group-item')).toHaveLength(4)
 
     // let's try delete one item
-    const priceTags = document.querySelectorAll('.price-tag')
-    await user.hover(priceTags[0])
-    // click first time, become red
-    await user.click(priceTags[0])
-    // click 2nd time, deleted
-    await user.click(priceTags[0])
+    const removeSteps = async () => {
+        const priceTags = document.querySelectorAll('.price-tag')
+        const firstButton = priceTags[0]
+        await user.hover(firstButton)
+        // click first time, become red
+        await user.click(firstButton)
+        // click 2nd time, deleted
+        await user.click(firstButton)
+        // move out, this is important, show that it wont get clicked again
+        await user.unhover(firstButton)
+    }
 
+    // failed
+    await removeSteps()
+    await waitFor(() => expect(global.fetch).nthCalledWith(1, "http://localhost:8080/api/spare-part-utilizations/990001", 
+        {"headers": {"Content-type": "application/json"}, "method": "DELETE"}))
+    await waitFor(() => expect(showToastMessage).nthCalledWith(1, 'seems nothing deleted, returning 990009'))
+    expect(container.querySelectorAll('.list-group-item')).toHaveLength(4)
+
+    // then success
+    await removeSteps()
+    await waitFor(() => expect(container.querySelectorAll('.list-group-item')).toHaveLength(3))
+    expect(global.fetch).nthCalledWith(2, "http://localhost:8080/api/spare-part-utilizations/990001", 
+        {"headers": {"Content-type": "application/json"}, "method": "DELETE"})
+    expect(global.fetch).toBeCalledTimes(2)
+    expect(showToastMessage).toBeCalledTimes(1)
+
+    // delete task
     expect(screen.queryByText('To adjust brake')).toBeInTheDocument()
     const taskPriceTag = screen.getByText('To adjust brake').parentElement.parentElement.querySelector('.price-tag')
     expect(taskPriceTag).toBeInTheDocument()
@@ -161,30 +193,35 @@ test('listing no search options, delete one item, and task, delete service', asy
     await user.click(taskPriceTag)
 
     expect(removeTask).toBeCalledWith(10003, 9700001)
-
     await waitFor(() => expect(document.querySelectorAll('.list-group-item')).toHaveLength(3))
-    expect(global.fetch).toBeCalledWith("http://localhost:8080/api/spare-part-utilizations/990001", 
-        {"headers": {"Content-type": "application/json"}, "method": "DELETE"})
 
-    // delete service
-    await user.click(document.querySelectorAll('.bi-trash3')[0])
-    // click again when it is red
-    await user.click(document.querySelectorAll('.bi-trash3')[0])
+    const deleteService = async() => {
+        // delete service
+        await user.click(document.querySelectorAll('.bi-trash3')[0])
+        // click again when it is red
+        await user.click(document.querySelectorAll('.bi-trash3')[0])
+    }
+    // failed 
+    await deleteService()
+    await waitFor(() => expect(global.fetch).toBeCalledWith("http://localhost:8080/api/workshop-services/10001", 
+        {"headers": {"Content-type": "application/json"}, "method": "DELETE"}))
+    await waitFor(() => expect(showToastMessage).nthCalledWith(2, 'seems nothing deleted, returning 10299'))
 
+    // then success
+    await deleteService()
     await waitFor(() => expect(screen.queryByText("J 23")).not.toBeInTheDocument())
     expect(global.fetch).toBeCalledWith("http://localhost:8080/api/workshop-services/10001", 
         {"headers": {"Content-type": "application/json"}, "method": "DELETE"})
-
     // check again
     expect(container.querySelectorAll('.list-group-item')).toHaveLength(3)
-    await waitFor(() => expect(setLoading).toBeCalledTimes(4))
+    await waitFor(() => expect(setLoading).toBeCalledTimes(8))
 
     // finally click on Add New button
     await user.click(screen.getByText('Add New'))
     expect(screen.queryByText('Service started at ' + addDaysToDateStr(new Date(), 0))).toBeInTheDocument()
 
     unmount()
-})
+}, 50000)
 
 test('listing no search options, then add search option', async () => {
     window.matchMedia = jest.fn(() => {return {
@@ -225,6 +262,7 @@ test('listing no search options, then add search option', async () => {
     expect(screen.queryAllByRole('listitem', {name: 'service type: inspection', current: true})).toHaveLength(0)
     expect(screen.queryAllByRole('listitem', {name: 'service type: tyre', current: true})).toHaveLength(1)
 
+    // add vehicle no for searching
     rerender(<WorkshopServicesProvider initialServices={[...lotTransactions]}>
         <SupplierOrderContext value={new SupplierOrders([...orders], jest.fn())}>
             <ServiceListing selectedSearchOptions={[{name: 'J 23'}]} 
@@ -236,6 +274,18 @@ test('listing no search options, then add search option', async () => {
     // should be 5 items
     expect(screen.queryAllByText('Complete Service')).toHaveLength(5)
     expect(screen.queryAllByRole('button', {name: 'page 2 button'})).toHaveLength(0)
+
+    // add date to search items
+    rerender(<WorkshopServicesProvider initialServices={[...lotTransactions]}>
+        <SupplierOrderContext value={new SupplierOrders([...orders], jest.fn())}>
+            <ServiceListing selectedSearchOptions={[{name: 'J 23'}]}
+                selectedSearchDate='2022-03-03'
+                setTotalFilteredServices={setTotalFilteredServices}
+                suppliers={[...suppliers]} setLoading={setLoading} />
+        </SupplierOrderContext>
+    </WorkshopServicesProvider>)
+
+    expect(screen.queryAllByText('Complete Service')).toHaveLength(1)
 
     unmount()
 })
@@ -250,7 +300,7 @@ test('to complete service', async () => {
         refCount: 0,
         addListener: jest.fn(),
         removeListener: jest.fn(),
-        matches: false,           // Added for completeness, can be adjusted
+        matches: true,           // Added for completeness, can be adjusted
         media: '(min-width: 768px)', // Default media query, can be adjusted
         onchange: null            // Added for completeness
     }})
@@ -279,8 +329,17 @@ test('to complete service', async () => {
     // choose a date
     const todayDate = new Date()
     const keyInCompletionDate = addDaysToDateStr(todayDate, 0)
+    await user.click(screen.getByPlaceholderText('key in completion date'))
+    await user.keyboard('[Backspace]')
 
-    // click on green color go
+    // click on green color go, but failed
+    await user.click(screen.getByText('Go'))
+    await waitFor(() => expect(global.fetch).not.toBeCalled())
+    expect(screen.getByPlaceholderText('key in completion date').validity.valueMissing).toBeTruthy()
+
+    // key in proper value
+    await user.click(screen.getByPlaceholderText('key in completion date'))
+    await user.keyboard(`{Control>}A{/Control}[Backspace]${keyInCompletionDate}`)
     await user.click(screen.getByText('Go'))
 
     await waitFor(() => expect(global.fetch).toBeCalledWith("http://localhost:8080/api/workshop-services?op=COMPLETE", {"body": "{\"id\":10001,\"creationDate\":\"2022-02-02\",\"startDate\":\"2022-02-02\",\"vehicleId\":20001,\"vehicleNo\":\"J 23\",\"mileageKm\":230000,\"sparePartUsages\":[{\"id\":990001,\"orderId\":1000,\"quantity\":20,\"usageDate\":\"2022-02-03\",\"soldPrice\":10}],\"completionDate\":\""+keyInCompletionDate+"\"}", 
@@ -296,7 +355,12 @@ test('on save note and save media', async () => {
     global.fetch.mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve({...transactions[0], notes: 'Hello World'})
-    }).mockResolvedValueOnce({
+    })
+    .mockResolvedValueOnce({
+        ok: true,
+        text: () => Promise.resolve("AA0000009")
+    })
+    .mockResolvedValueOnce({
         ok: true,
         text: () => Promise.resolve("222000009")
     })
@@ -312,6 +376,7 @@ test('on save note and save media', async () => {
 
     const setTotalFilteredServices = jest.fn()
     const setLoading = jest.fn()
+    const showToastMessage = jest.fn()
     const initialServices = newTransactions()
     const { container, unmount } = render(<WorkshopServicesProvider initialServices={initialServices}>
         <SupplierOrderContext value={new SupplierOrders([...orders], jest.fn())}>
@@ -319,6 +384,7 @@ test('on save note and save media', async () => {
                 setTotalFilteredServices={setTotalFilteredServices}
                 suppliers={[...suppliers]}
                 setLoading={setLoading}
+                showToastMessage={showToastMessage}
                 vehicles={[]} />
         </SupplierOrderContext>
     </WorkshopServicesProvider>)
@@ -339,16 +405,24 @@ test('on save note and save media', async () => {
 
     expect(screen.queryAllByRole('button', {name: 'photo-taking'})).toHaveLength(3)
     await user.click(screen.queryAllByRole('button', {name: 'photo-taking'})[0])
-    fireEvent.click(screen.getByTestId('onSaveMedia'))
 
-    await waitFor(() => expect(global.fetch).lastCalledWith("http://localhost:8080/api/workshop-services/10001/medias", 
+    // failed
+    fireEvent.click(screen.getByTestId('onSaveMedia'))
+    await waitFor(() => expect(showToastMessage).toBeCalledWith('uploaded media failed, not a proper id AA0000009'))
+    expect(global.fetch).lastCalledWith("http://localhost:8080/api/workshop-services/10001/medias", 
+        {"body": expect.any(FormData), "method": "POST"})
+    
+    // then success
+    fireEvent.click(screen.getByTestId('onSaveMedia'))
+    await waitFor(() => expect(global.fetch).nthCalledWith(3, "http://localhost:8080/api/workshop-services/10001/medias", 
         {"body": expect.any(FormData), "method": "POST"}))
+    expect(showToastMessage).toBeCalledTimes(1)
 
     const formData = global.fetch.mock.calls[1][1].body
     expect(formData.get("file").name).toEqual('test.txt')
 
-    expect(setLoading).nthCalledWith(3, true)
-    expect(setLoading).nthCalledWith(4, false)
+    expect(setLoading).nthCalledWith(5, true)
+    expect(setLoading).nthCalledWith(6, false)
 
     unmount()
 })

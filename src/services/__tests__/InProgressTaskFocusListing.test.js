@@ -8,7 +8,11 @@ import { SupplierOrderContext } from '../../suppliers/SupplierOrderContextProvid
 import SupplierOrders from '../../suppliers/SupplierOrders';
 
 const suppliers = [{id: 60001, supplierName: "Tok Kong"}, {id: 60002, supplierName: "KHD"}]
-const vehicles = [{id: 20001, vehicleNo: "J 23", companyId: 50001}, {id: 20002, vehicleNo: "J 33", companyId: 50002}, {id: 20003, vehicleNo: "J 34", companyId: 50001}]
+const vehicles = [
+    {id: 20001, vehicleNo: "J 23", companyId: 50001}, 
+    {id: 20002, vehicleNo: "J 33", companyId: 50002}, 
+    {id: 20003, vehicleNo: "J 34", companyId: 50001}
+]
 const companies = [{id: 50001, internal: false}, {id: 50002, internal: true}]
 
 const transactions = [
@@ -227,7 +231,10 @@ test('just view and go back', async () => {
     const user = userEvent.setup()
 
     const onNewServiceCreated = jest.fn()
-    render(<ServiceContext value={new ServiceTransactions(newTransactions(), jest.fn())}>
+    const trxs = newTransactions()
+    trxs[2].sparePartUsages = []
+    delete trxs[2].mileageKm
+    render(<ServiceContext value={new ServiceTransactions(trxs, jest.fn())}>
         <SupplierOrderContext value={new SupplierOrders(orders, jest.fn())}>
             <InProgressTaskFocusListing 
                 suppliers={suppliers} vehicles={vehicles} 
@@ -240,6 +247,7 @@ test('just view and go back', async () => {
 
     // click on the first one.
     await user.click(document.querySelectorAll('.card')[0])
+    expect(screen.queryByText('Nothing added yet')).not.toBeInTheDocument()
 
     expect(screen.queryByText('Engine Oil 20w-50')).toBeInTheDocument()
     expect(screen.queryByText('Oil Filter')).toBeInTheDocument()
@@ -252,6 +260,10 @@ test('just view and go back', async () => {
 
     // OKAY and save
     await user.click(screen.getByText('OKAY'))
+
+    // click on the 2nd one
+    await user.click(document.querySelectorAll('.card')[1])
+    expect(screen.queryByText('Nothing added yet')).toBeInTheDocument()
 
     expect(onNewServiceCreated).not.toBeCalled()
 })

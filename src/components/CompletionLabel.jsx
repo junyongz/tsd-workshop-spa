@@ -52,7 +52,7 @@ const CompletionLabel = ({ws, onCompletion, onDelete, noteForService, mediaForSe
                             <Popover.Header><Calendar /> Choose a date for completion</Popover.Header>
                             <Popover.Body>
                                 <InputGroup>
-                                <Form.Control ref={completionDateRef} required name="completionDate" type="date" defaultValue={todayDate} min={ws.startDate} max={todayDate}></Form.Control>
+                                <Form.Control ref={completionDateRef} placeholder="key in completion date" required name="completionDate" type="date" defaultValue={todayDate} min={ws.startDate} max={todayDate}></Form.Control>
                                 <InputGroupText><Button variant="success" className="px-1 py-0" onClick={confirmComplete}>Go</Button></InputGroupText>
                                 </InputGroup>
                                 <Form.Text>Default is today's date {todayDate}</Form.Text>

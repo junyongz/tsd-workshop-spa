@@ -8,17 +8,14 @@ import { useSupplierOrders } from "../suppliers/SupplierOrderContextProvider"
 
 /**
  * 
- * @param {*} props
+ * @param {Object} props
  * @param {boolean} props.isShow
  * @param {React.SetStateAction<boolean>} props.setShowDialog
- * @param {Object} props.sparePart
- * @param {React.SetStateAction<Object>} props.setSparePart
- * @param {Object[]} props.suppliers
- * @param {number} props.suppliers[].id
- * @param {string} props.suppliers[].supplierName
+ * @param {import("./SpareParts").SparePart} props.sparePart
+ * @param {React.SetStateAction<import("./SpareParts").SparePart>} props.setSparePart
+ * @param {import("../suppliers/SupplierOrders").Supplier[]} props.suppliers
  * @param {Function} props.afterSave
  * @param {Function} props.afterRemoveMedia
- * @returns 
  */
 function SparePartDialog({isShow, setShowDialog, 
         sparePart, setSparePart,
@@ -153,9 +150,11 @@ function SparePartDialog({isShow, setShowDialog,
                 .then(mediaId => {
                     // check first one is enough    
                     if (!isFinite(mediaId[0])) {
-                        throw new Error("uploaded media failed")
+                        // TODO: to show in toast box
+                        throw new Error(`getting non number ${mediaId[0]}`)
                     }
                 })
+                .catch(err => console.error("failed to upload media: " + err.message))
                 .finally(() => doAfterSave())
             }
             else {

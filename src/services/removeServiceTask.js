@@ -20,6 +20,7 @@ export default function removeServiceTask (
         transactions.removeTask(serviceId, taskId)
       })
       .then(() => clearState())
+      .catch(err => console.error(`failed to remove task, service id: ${serviceId} task id: ${taskId}, because ${err.message}`))
       .finally(() => setLoading(false))
     })
 }

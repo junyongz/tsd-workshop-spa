@@ -28,6 +28,8 @@ export default function CalendarView({
     const todayDate = new Date()
     const [choosenDate, setChoosenDate] = useState(todayDate)
 
+    const [viewMode, setViewMode] = useState('expanded') // either expanded (lg and above) or compact (below lg)
+
     const [showEventsDialog, setShowEventDialog] = useState(false)
 
     const idealHeight = () => (document.body.clientHeight - 350) / 5
@@ -63,14 +65,17 @@ export default function CalendarView({
     }
 
     useEffect(() => {
-       const settingMaxHeight = () => setMaxHeight(calculateMinHeight())
-       settingMaxHeight()
+        const adjustForResponsive = () => {
+            setMaxHeight(calculateMinHeight())
+            setViewMode(window.matchMedia('(min-width: 992px)').matches ? 'expanded': 'compact')
+        }
+        adjustForResponsive()
        
-       window.addEventListener("resize", settingMaxHeight)
+        window.addEventListener("resize", adjustForResponsive)
 
-       return () => {
-            window.removeEventListener('resize', settingMaxHeight)
-       }
+        return () => {
+            window.removeEventListener('resize', adjustForResponsive)
+        }
     }, [])
 
     /**
@@ -148,27 +153,27 @@ export default function CalendarView({
                         <Card>
                             <Card.Header className={sameDay(choosenDate || todayDate, boxDate) ? 'text-bg-primary' : ''}>{ date }</Card.Header>
                             <Card.Body style={{height: maxHeight, maxHeight: maxHeight, '--bs-card-spacer-y': '5px'}}>
-                                <Row className="d-none d-lg-flex">
+                                {viewMode === 'expanded' && <Row className="d-none d-lg-flex">
                                 {
                                     events?.filter(evt => sameDay(evt.date, boxDate))
                                     .slice(0, 3)
                                     .map(evt => <Col xs="12" key={evt.id} style={{whiteSpace: 'none'}}><EventDisplay item={evt} /></Col>)
                                 }
-                                </Row>
-                                {events?.filter(evt => sameDay(evt.date, boxDate)).length > 0 && <Row className="d-none d-lg-flex">
+                                </Row> }
+                                {viewMode === 'expanded' && events?.filter(evt => sameDay(evt.date, boxDate)).length > 0 && <Row className="d-none d-lg-flex">
                                     <span className="text-secondary" role="button" onClick={(e) => prepareToShowEventDialog(e, boxDate)}><HandPointer /> more...</span>
                                 </Row> }
-                                <Row className="d-flex d-lg-none">
+                                {viewMode === 'compact' && <Row className="d-flex d-lg-none">
                                     { events?.filter(evt => sameDay(evt.date, boxDate)).length > 0 && <Badge pill>{ events.filter(evt => sameDay(evt.date, boxDate)).length}</Badge> }
-                                </Row>
+                                </Row>}
                             </Card.Body>
                         </Card>
                     </div> ) }
                 )}
             </div>
-            <div className="d-block d-lg-none">
+            {viewMode === 'compact' && <div className="d-block d-lg-none">
                 <AllEvents events={events} onDoClickNew={() => onClickNew(choosenDate)} />
-            </div>
+            </div>}
         </Container>
     )
 }

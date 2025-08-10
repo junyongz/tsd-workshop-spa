@@ -9,7 +9,7 @@ import { SupplierOrderContext } from '../../suppliers/SupplierOrderContextProvid
 jest.mock('../SparePartDialog', () => ({afterSave, afterRemoveMedia, sparePart}) => 
     <div>
         <span aria-label="existing part detail">{sparePart?.id} {sparePart?.partNo} {sparePart?.partName}</span>
-        <span data-testid="afterSave" onClick={(e) => afterSave(e.target.sparePart)}></span>
+        <span data-testid="afterSave" onClick={(e) => afterSave(e.target.sparePart, e.target.orderIds)}></span>
         <span data-testid="afterRemoveMedia" onClick={() => afterRemoveMedia({id: 3001})}></span>
     </div>
 )
@@ -280,13 +280,6 @@ test('intersection observer and timeout navigation', async () => {
 test('update existing parts', async() => {
     const user = userEvent.setup({advanceTimers: jest.advanceTimersByTime})
 
-    jest.doMock('../SparePartDialog', () => ({afterSave, afterRemoveMedia}) => 
-        <div>
-            <span data-testid="afterSave" onClick={() => afterSave({id: 1002, partNo: '33220000', partName: 'Brake Adjuster B', description: 'Brake Adjuster B', oems: [], compatibleTrucks: []})}></span>
-            <span data-testid="afterRemoveMedia" onClick={() => afterRemoveMedia({id: 3001})}></span>
-        </div>
-    )
-
     global.IntersectionObserver = jest.fn((fn) => {
         intersectionFunc = fn
         return {
@@ -339,7 +332,7 @@ test('update existing parts', async() => {
         id: 1002, partNo: '33220000', partName: 'Brake Adjuster XB', description: 'Brake adjuster for Heavy Tank', 
             oems:[{name: 'OSK', url: 'http://osk.com'}], 
             compatibleTrucks:[{make: 'Hino', model: '700'}], 
-            orderIds: [] 
+            orderIds: [5001, 5002]
     }}})
     fireEvent.click(mockAfterSave, evt)
 

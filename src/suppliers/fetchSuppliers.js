@@ -6,6 +6,6 @@ export default async function fetchSuppliers(apiUrl, setSuppliers) {
             setSuppliers(response)
         })
         .catch(error => {
-            console.error('There was an error fetching the spare parts:', error);
+            console.error('There was an error fetching the suppliers:', error);
         });
 }

@@ -9,7 +9,10 @@ afterAll(() => jest.clearAllMocks())
 
 afterEach(() => jest.restoreAllMocks())
 
+window.matchMedia = jest.fn()
+
 test('scheduling info only', async () => {
+    window.matchMedia.mockReturnValue({ matches: true })
     const todayDate = new Date()
 
     const events = [
@@ -39,6 +42,7 @@ test('scheduling info only', async () => {
 })
 
 test('scheduling info with inspection and roadtax', async () => {
+    window.matchMedia.mockReturnValue({ matches: true})
     const todayDate = new Date()
 
     const events = [
@@ -222,9 +226,9 @@ test('removing scheduling', async () => {
             json: () => Promise.resolve(1000)
         }))
 
-    window.matchMedia = jest.fn(() => {return {
+    window.matchMedia.mockReturnValue({
         matches: true
-    }})
+    })
 
     render(<SchedulingCalendarView vehicles={[]} ></SchedulingCalendarView>)
     await waitFor(() => {
@@ -237,11 +241,11 @@ test('removing scheduling', async () => {
 
     await user.click(screen.getByRole('button', {name: 'more...'}))
     // the bottom part and the dialog
-    expect(document.querySelectorAll('.bi-trash3')).toHaveLength(8)
+    expect(document.querySelectorAll('.bi-trash3')).toHaveLength(4)
     await user.click(document.querySelectorAll('.bi-trash3')[0])
 
     await waitFor(() => expect(global.fetch).lastCalledWith("http://localhost:8080/api/scheduling/1000", 
         {"headers": {"Content-type": "application/json"}, "method": "DELETE"}))
 
-    await waitFor(() => expect(document.querySelectorAll('.bi-trash3')).toHaveLength(6))
+    await waitFor(() => expect(document.querySelectorAll('.bi-trash3')).toHaveLength(3))
 })

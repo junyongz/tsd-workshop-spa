@@ -58,7 +58,12 @@ export default function Vehicles({vehicles, setVehicles, companies, selectedSear
     const defaultTargetedMonthOvershot = 5
     const today = new Date()
     const twoWeeksMs = 14 * 24 * 60 * 60 * 1000
-    const applySorting = (vehiclesPendingSort = []) => {
+    /**
+     * 
+     * @param {Vehicle[]} vehiclesPendingSort 
+     * @returns {Vehicle[]}
+     */
+    const applySorting = (vehiclesPendingSort) => {
         if (toSortByServiceDueSoon) {
             return vehiclesPendingSort
                     .map(veh => {

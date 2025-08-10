@@ -1,4 +1,4 @@
-import { jest, test, expect, afterAll } from '@jest/globals'
+import { jest, test, expect, afterAll, afterEach } from '@jest/globals'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
@@ -9,7 +9,7 @@ import { addDaysToDateStr } from '../../utils/dateUtils'
 
 global.fetch = jest.fn()
 
-afterAll(() => jest.clearAllMocks())
+afterEach(() => jest.clearAllMocks())
 
 test('add 2 spare parts', async () => {
     const user = userEvent.setup()
@@ -194,8 +194,8 @@ test('add a spare parts, then add workmanship without fill up, last fill up agai
     // save it
     await user.click(screen.getByText("Save"))
     expect(saveService).lastCalledWith({"id": undefined, "mileageKm": "135392", "notes": undefined, 
-        "sparePartUsages": [{"margin": 0, "orderId": 1000, "quantity": "20", "soldPrice": 9.7, "usageDate": "2025-08-08", "vehicleNo": "J 33"}], "sparePartsMargin": undefined, "startDate": "2025-08-08", 
-        "tasks": [{"quotedPrice": 50, "recordedDate": "2025-08-08", "remarks": "to adjust brake and apply grease", "taskId": 540003}], "transactionTypes": [], "vehicleId": 50002, "vehicleNo": "J 33"})
+        "sparePartUsages": [{"margin": 0, "orderId": 1000, "quantity": "20", "soldPrice": 9.7, "usageDate": addDaysToDateStr(todayDate, -1), "vehicleNo": "J 33"}], "sparePartsMargin": undefined, "startDate": addDaysToDateStr(todayDate, -1), 
+        "tasks": [{"quotedPrice": 50, "recordedDate": addDaysToDateStr(todayDate, -1), "remarks": "to adjust brake and apply grease", "taskId": 540003}], "transactionTypes": [], "vehicleId": 50002, "vehicleNo": "J 33"})
 
     jest.useRealTimers()
 })

@@ -4,6 +4,7 @@ import { ScrollSpy } from "bootstrap"
 import { Calendar } from "../Icons"
 import { months3EngChars } from "../utils/dateUtils"
 import { useSupplierOrders } from "./SupplierOrderContextProvider"
+import YearMonthsSelector from "../components/YearMonthsSelector"
 
 /**
  * 
@@ -50,8 +51,8 @@ const itemsByOrder = (supplierOrders) => {
 
 /**
  * 
- * @param {*} props
- * @param {Object[]} props.suppliers
+ * @param {Object} props
+ * @param {import("./SupplierOrders").Supplier[]} props.suppliers
  * @param {Function} props.backToOrders
  * @returns 
  */
@@ -73,16 +74,6 @@ function SupplierSparePartsYearMonthView({suppliers, backToOrders}) {
         return {supplier: supplier, amount: orders.reduce((pv, cv) => pv + ((cv.quantity * cv.unitPrice) || 0), 0).toFixed(2)}
     }).sort((a, b) => b.amount - a.amount)
 
-    const DropDownYears = () => {
-        return (
-            <DropdownButton id="dropdown-year" as={ButtonGroup} title={year} variant="success" >
-            { availableYears.map(
-                v => <Dropdown.Item key={v} onClick={() => setYear(v)} eventKey={v}>{v}</Dropdown.Item> )
-            }
-            </DropdownButton> 
-        )
-    }
-
     const scrollSpyDataZoneRef = useRef()
     const scrollSpyNavZoneRef = useRef()
     useEffect(() => {
@@ -95,31 +86,13 @@ function SupplierSparePartsYearMonthView({suppliers, backToOrders}) {
         return () => {
           scrollSpy.dispose();
         };
-      }, [year, month]);    
+      }, [year, month]);
 
     return (
         <Container>
             <Row className="mb-3 justify-content-between">
                 <Col xs="6" lg="10">
-                    <ButtonGroup className="d-flex d-lg-none">
-                    <DropDownYears />
-                    <DropdownButton id="dropdown-month" as={ButtonGroup} title={months3EngChars[month]} variant="primary" >
-                        {
-                            months3EngChars.map((v, i) => 
-                                    <Dropdown.Item key={v} variant={month === i ? 'outline-primary' : 'primary'} onClick={() => setMonth(i)}>{v}</Dropdown.Item>
-                                )
-                        }
-                    </DropdownButton>
-                    </ButtonGroup>
-
-                    <ButtonGroup className="d-none d-lg-flex">
-                    <DropDownYears />
-                        {
-                            months3EngChars.map((v, i) => 
-                                <Button key={v} variant={month === i ? 'outline-primary' : 'primary'} onClick={() => setMonth(i)}>{v}</Button>
-                            )
-                        }
-                    </ButtonGroup>
+                    <YearMonthsSelector availableYears={availableYears} year={year} month={month} changeYear={setYear} changeMonth={setMonth} />
                 </Col>
                 <Col xs="6" lg="2" className="text-end">
                     <Button variant="outline-secondary" onClick={backToOrders}><i className="bi bi-file-earmark-text-fill"></i> Back to Orders</Button>

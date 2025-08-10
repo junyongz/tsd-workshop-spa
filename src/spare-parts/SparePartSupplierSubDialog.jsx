@@ -7,16 +7,16 @@ import { useSupplierOrders } from "../suppliers/SupplierOrderContextProvider";
 
 /**
  * 
- * @param {*} props
+ * @param {Object} props
  * @param {number} props.maxSelectedOrdersShown
  * @param {React.SetStateAction<number>} props.setMaxSelectedOrdersShown
- * @param {Object[]} props.selectedSuppliers
- * @param {React.SetStateAction<Object[]>} props.setSelectedSuppliers
+ * @param {import("../suppliers/SupplierOrders").Supplier[]} props.selectedSuppliers
+ * @param {React.SetStateAction<import("../suppliers/SupplierOrders").Supplier[]>} props.setSelectedSuppliers
  * @param {number} props.activeSupplierId
  * @param {React.SetStateAction<number>} props.setActiveSupplierId
- * @param {Object[]} props.suppliers
- * @param {Object[]} props.matchingOrders
- * @param {React.SetStateAction<Object[]>} props.matchingOrders
+ * @param {import("../suppliers/SupplierOrders").Supplier[]} props.suppliers
+ * @param {import("../suppliers/SupplierOrders").SupplierOrder[]} props.matchingOrders
+ * @param {React.SetStateAction<import("../suppliers/SupplierOrders").SupplierOrder[]>} props.matchingOrders
  * @param {boolean} props.hasPrevOrder
  * @param {React.SetStateAction<boolean>} props.setHasPrevOrder
  * @returns 
@@ -41,6 +41,7 @@ export default function SparePartSupplierSubDialog({
     }
 
     const afterChooseSupplier = (options) => {
+        /* istanbul ignore else */
         if (options && options.length > 0) {
             setSelectedSuppliers(sups => [...sups, options[0]])
             setActiveSupplierId(options[0].id)
@@ -58,7 +59,12 @@ export default function SparePartSupplierSubDialog({
         setMatchingOrders(prev => [...prev.filter(mo => mo.supplierId !== supplier.id)])
     }
 
-    const afterChooseOrders = (options=[], supplierId) => {
+    /**
+     * 
+     * @param {import("../suppliers/SupplierOrders").SupplierOrder[]} options 
+     * @param {number} supplierId 
+     */
+    const afterChooseOrders = (options, supplierId) => {
         const newSupplierIds = Array.from(new Set(
             options.map(opt => opt.supplierId)
                 .filter(spid => !selectedSuppliers.map(sp => sp.id).includes(spid))))
@@ -78,7 +84,7 @@ export default function SparePartSupplierSubDialog({
             if (options && options.length > 0) {
                 setMatchingOrders(prev => [...prev]
                         .filter(mo => !!supplierId ? mo.supplierId != activeSupplierId : true)
-                        .concat(options || []))
+                        .concat(options))
                 setActiveSupplierId(options[0].supplierId)
             }
             else {

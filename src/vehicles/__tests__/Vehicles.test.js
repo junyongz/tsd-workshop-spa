@@ -14,6 +14,8 @@ afterEach(() => {
 
 global.fetch = jest.fn()
 
+const todayDate = new Date()
+
 const services = [
     {id: 5000, vehicleId: 82001, vehicleNo: "JJ 1", startDate: "2005-01-01", transactionTypes: ["SERVICE"]},
     {id: 5001, vehicleId: 82002, vehicleNo: "JJ 2", startDate: "2005-03-01", transactionTypes: ["INSPECTION"]},
@@ -23,6 +25,9 @@ const services = [
     {id: 5005, vehicleId: 82005, vehicleNo: "JJ 5", startDate: "2005-04-01", transactionTypes: ["SERVICE"], mileageKm: 5000},
     {id: 5006, vehicleId: 82006, vehicleNo: "JJ 6", startDate: "2005-04-01", transactionTypes: ["SERVICE"], mileageKm: 3000},
     {id: 5007, vehicleId: 82008, vehicleNo: "JJ 8", startDate: "2005-04-04", transactionTypes: ["SERVICE"], mileageKm: 1000},
+    {id: 5008, vehicleId: 82017, vehicleNo: "JK 8", startDate: addDaysToDateStr(todayDate, (5*30+14)), transactionTypes: ["SERVICE"], mileageKm: 19000},
+    {id: 5009, vehicleId: 82018, vehicleNo: "JK 9", startDate: addDaysToDateStr(todayDate, -(5*30+14)), transactionTypes: ["SERVICE"], mileageKm: 17000},
+    {id: 5010, vehicleId: 82019, vehicleNo: "JL 1", startDate: addDaysToDateStr(todayDate, (5*30+14)), transactionTypes: ["SERVICE"], mileageKm: 11000},
 ]
 
 const companies = [
@@ -64,7 +69,7 @@ const newVehicles =[
 test('render many vehicles', async () => {
     const user = userEvent.setup()
 
-    render(<ServiceContext value={new ServiceTransactions(services, jest.fn())}>
+    const { rerender } = render(<ServiceContext value={new ServiceTransactions(services, jest.fn())}>
             <Vehicles vehicles={vehicles} companies={companies}></Vehicles>
         </ServiceContext>)
 
@@ -83,6 +88,13 @@ test('render many vehicles', async () => {
         .filter(elem => elem.classList.contains('card')))
         .toHaveLength(4)
     expect(screen.getAllByText('TSD')).toHaveLength(2)
+
+    rerender(<ServiceContext value={new ServiceTransactions(services, jest.fn())}>
+            <Vehicles vehicles={vehicles} companies={companies} selectedSearchOptions={[{name: 'JJ 1'}]}></Vehicles>
+        </ServiceContext>)
+    expect(screen.getAllByRole("button")
+        .filter(elem => elem.classList.contains('card')))
+        .toHaveLength(1)
 })
 
 test('filter service due soon', async () => {
@@ -128,7 +140,7 @@ test('show update dialog for vehicle and update', async () => {
     const setVehicles = jest.fn()
 
     render(<ServiceContext value={new ServiceTransactions(services, jest.fn())}>
-            <Vehicles vehicles={vehicles} companies={companies} setVehicles={setVehicles}></Vehicles>
+            <Vehicles vehicles={vehicles} companies={companies} setVehicles={setVehicles} selectedSearchOptions={[]}></Vehicles>
         </ServiceContext>)
 
     expect(screen.getAllByRole("button")).toHaveLength(2)
@@ -356,14 +368,22 @@ test('render lots of vehicles, load all', async () => {
 
     await user.click(screen.getByLabelText('load all'))
 
+    expect(screen.queryByLabelText('load more')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('load all')).not.toBeInTheDocument()
+
     expect(screen.getAllByRole("button")
         .filter(elem => elem.classList.contains('card')))
         .toHaveLength(21)
+
+    expect(Array.from(document.querySelectorAll('h3')).map(h3 => h3.textContent))
+        .toEqual(["JJ 1", "JJ 5", "JJ 8", "JJ 9", "JK 4", "JK 8", "JJ 2", "JJ 6", "JK 1", 
+            "JK 5", "JK 9", "JJ 4", "JK 3", "JK 7", "JL 2", "JL 3", "JJ 3", "JJ 7", "JK 2", "JK 6", "JL 1"])
     
     await user.click(screen.getByRole('checkbox', {name: 'Service due soon'}))
 
-    expect(screen.queryByLabelText('load more')).not.toBeInTheDocument()
-    expect(screen.queryByLabelText('load all')).not.toBeInTheDocument()
+    expect(Array.from(document.querySelectorAll('h3')).map(h3 => h3.textContent))
+        .toEqual(["JJ 1", "JJ 8", "JJ 5", "JJ 3", "JJ 9", "JK 4", "JJ 6", "JK 9", "JK 8", 
+            "JJ 2", "JK 1", "JK 5", "JJ 4", "JK 3", "JK 7", "JL 2", "JL 3", "JJ 7", "JK 2", "JK 6", "JL 1"])
 
     // zoom into vehicle not belong to any company
     await user.click(screen.getByText('JL 3'))

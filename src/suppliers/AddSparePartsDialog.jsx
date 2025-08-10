@@ -191,6 +191,7 @@ function AddSparePartsDialog({isShow, setShowDialog, existingOrder, suppliers, s
     }
 
     const updateSelectedSpartPart = (e, idx)  => {
+        /* istanbul ignore else */
         if (e.target.value) {
             setItems(prevs => {
                 const newItems = [...prevs]
@@ -201,6 +202,7 @@ function AddSparePartsDialog({isShow, setShowDialog, existingOrder, suppliers, s
     }
 
     const updateSelectedItemCode = (e, idx)  => {
+        /* istanbul ignore else */
         if (e.target.value) {
             setItems(prevs => {
                 const newItems = [...prevs]

@@ -128,6 +128,15 @@ test('2 search options, vehicle matched, hand written migrated part matched', ()
         ])
 })
 
+test('2 search options, vehicle matched, hand written migrated part not matched', () => {
+    expect(applyFilterOnServices([{name: 'brake'}], undefined,
+            [{vehicleNo: 'J 1000'}, {vehicleNo: 'J 2000'}],
+            [{startDate: '2020-02-02', vehicleNo: 'J 1000', migratedHandWrittenSpareParts: [{partName: 'Clutch disc'}]}, 
+            {startDate: '2020-03-02', vehicleNo: 'J 2000', migratedHandWrittenSpareParts: [{itemDescription: 'Clutch pump'}]},
+            {startDate: '2020-01-02', vehicleNo: 'J 1000'}
+        ])).toEqual([])
+})
+
 // can only cater existing one
 test('search via api call through keywords', async () => {
     const dispatch = jest.fn()
@@ -164,7 +173,7 @@ test('search service by date only', () => {
     expect(applyFilterOnServices([], '2022-12-12', [], services)).toEqual([])
 })
 
-test('search order by date only', () => {
+test('search order by date & vehicle no', () => {
     const orders = [
         {id: 5000, supplierId: 2000, partName: 'Air Tank', invoiceDate: '2005-01-01', status: 'ACTIVE'},
         {id: 5001, supplierId: 2001, partName: 'Air Hose', invoiceDate: '2005-02-01', status: 'ACTIVE'},
@@ -188,4 +197,7 @@ test('search order by date only', () => {
     ])
 
     expect(applyFilterOnOrders([], '2005-09-02', orders)).toEqual([])
+
+    expect(applyFilterOnOrders([{name: 'J 23'}], undefined, orders, [{orderId: 5012, vehicleNo: 'J 23'}]))
+        .toEqual([{id: 5012, supplierId: 2000, partName: 'Steering Box Assy', invoiceDate: '2005-01-02', status: 'DEPLETED'}])
 })

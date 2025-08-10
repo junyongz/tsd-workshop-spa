@@ -91,7 +91,7 @@ export default function SparePartMediaSubDialog({sparePart, uploadedMedias, setU
                     To upload:
                     <InputGroup>
                         <InputGroup.Text><Camera /></InputGroup.Text>
-                        <Form.Control type="file" multiple name="file" role="button" aria-label="upload file(s)" accept="image/*,movie/*"
+                        <Form.Control type="file" multiple name="file" role="button" aria-label="upload file(s)" accept="image/*,video/*"
                             onChange={afterUploadMedia}></Form.Control>
                     </InputGroup>
                 </Col>
@@ -105,7 +105,8 @@ export default function SparePartMediaSubDialog({sparePart, uploadedMedias, setU
                 <Card>
                     <Card.Header>File Type: {uploadedFiles[i].type} File Size: {uploadedFiles[i].size} bytes</Card.Header>
                     <Card.Body>
-                    <Image className="d-block w-100" src={previewDataUrls[i]} width={640}></Image>
+                    {uploadedFiles[i].type.startsWith('video') && <video autoPlay controls src={v.dataUrl} aria-label={`video of ${v.fileName}`} className="d-block w-100" width={640} height={480}/> }
+                    {uploadedFiles[i].type.startsWith('image') && <Image className="d-block w-100" src={previewDataUrls[i]} width={640}></Image> }
                     </Card.Body>
                 </Card> 
                 </Carousel.Item>

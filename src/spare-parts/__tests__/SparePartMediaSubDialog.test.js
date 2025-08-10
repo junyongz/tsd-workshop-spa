@@ -107,3 +107,41 @@ test('upload single file then multiple files', async () => {
 
     await waitFor(() => expect(screen.queryAllByRole('img')).toHaveLength(2))
 })
+
+test('upload single video file', async () => {
+    const user = userEvent.setup()
+
+    global.fetch.mockResolvedValueOnce({
+        ok: true
+    })
+
+    const subscribe = jest.fn(() => (x) => {})
+    const afterRemoveMedia = jest.fn()
+    const setUploadedMedias = jest.fn()
+    URL.revokeObjectURL = jest.fn()
+    URL.createObjectURL = jest.fn((file) => 'http://' + file.fileName)
+
+    const uploadedMedias = []
+
+    const SparePartMediaSubDialogWrapper = () => {
+        const [uploadedFiles, setUploadedFiles] = useState([])
+
+        return (<SparePartMediaSubDialog 
+            sparePart={{id: 50001, partNo: '200001'}}
+            uploadedMedias={uploadedMedias}
+            setUploadedMedias={setUploadedMedias}
+            subscribe={subscribe}
+            afterRemoveMedia={afterRemoveMedia}
+            uploadedFiles={uploadedFiles}
+            setUploadedFiles={setUploadedFiles}>
+            </SparePartMediaSubDialog>)
+    }
+
+    render(<SparePartMediaSubDialogWrapper></SparePartMediaSubDialogWrapper>)
+
+    const uploadButton = screen.getByRole('button', {name: 'upload file(s)'})
+    await user.click(uploadButton)
+    await user.upload(uploadButton, new File([Uint8Array.from(atob("/9j/4AAQSkZJRgABAQEAAAAAAA=="), c => c.charCodeAt(0)).buffer], 'test.mp4', { type: 'video/mp4' }))
+
+    await waitFor(() => expect(document.querySelectorAll('video')).toHaveLength(1))
+})

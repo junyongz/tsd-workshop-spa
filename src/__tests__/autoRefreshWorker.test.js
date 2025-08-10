@@ -34,6 +34,39 @@ test('refresh nothing', async () => {
     expect(refreshFn).not.toBeCalled()
 })
 
+test('refresh nothing, but api failed', async () => {
+    const dbTableStats = [
+        { tableName: "vehicles", lastTransactionId: 200000 }
+    ]
+
+    global.fetch.mockRejectedValueOnce({
+        status: 'failed to connect'
+    })
+
+    const setLoading = jest.fn()
+    const refreshFn = jest.fn()
+
+    sessionStorage.setItem('stats-dbtables', JSON.stringify(dbTableStats))
+
+    const consoleError = jest.spyOn(console, 'error')
+    autoRefreshWorker(setLoading, {
+        'vehicles': () => Promise.resolve('vehicles').then(v => refreshFn(v)),
+        'services': () => Promise.resolve('services').then(v => refreshFn(v)),
+        'orders': () => Promise.resolve('orders').then(v => refreshFn(v))
+    })
+
+    await waitFor(() => expect(global.fetch).lastCalledWith(
+        "http://localhost:8080/api/stats/dbtables", {"mode": "cors"}))
+    sessionStorage.removeItem('stats-dbtables')
+
+    expect(consoleError).lastCalledWith('There was an error fetching the db stats:', {"status": "failed to connect"})
+
+    expect(setLoading).not.toBeCalled()
+    expect(refreshFn).not.toBeCalled()
+
+    jest.restoreAllMocks()
+})
+
 test('lets refresh something, nothing in session storage', async () => {
     const dbTableStats = [
         { tableName: "vehicles", lastTransactionId: 200000 }

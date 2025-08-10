@@ -37,11 +37,19 @@ test('add new parts with supplier and photo', async () => {
     const user = userEvent.setup()
 
     global.fetch.mockResolvedValueOnce({
-        ok: true,
+        ok: true, // POST /api/spare-parts
         json: () => Promise.resolve({ id: 50001 })
     })
     .mockResolvedValueOnce({
-        ok: true,
+        ok: true, // POST /api/spare-parts/:sparePartId/medias
+        json: () => Promise.resolve(["AB650001"])
+    })
+    .mockResolvedValueOnce({
+        ok: true, // POST /api/spare-parts
+        json: () => Promise.resolve({ id: 50001 })
+    })
+    .mockResolvedValueOnce({
+        ok: true, // POST /api/spare-parts/:sparePartId/medias
         json: () => Promise.resolve([650001])
     })
 
@@ -64,6 +72,9 @@ test('add new parts with supplier and photo', async () => {
     }
 
     render(<SupplierOrderContext value={mockOrders}><SparePartWrapper /></SupplierOrderContext>)
+
+    await user.click(screen.getByRole('button', {name: 'Save'}))
+    expect(screen.getByPlaceholderText('OE No').validity.valueMissing).toBeTruthy()
 
     await user.click(screen.getByPlaceholderText('OE No'))
     await user.keyboard('11220000')
@@ -89,27 +100,28 @@ test('add new parts with supplier and photo', async () => {
     await user.keyboard('700')
 
     // supplier tab
-    await user.click(screen.getByRole('tabpanel', {name: 'Suppliers'}))
+    await user.click(screen.getByRole('tab', {name: 'Suppliers'}))
     // find from order
     await user.click(screen.getByPlaceholderText('How about start with an order'))
     await user.keyboard('Air Tank')
     await user.click(screen.getByRole('option', {name: 'Air Tank (2005-01-01) - Han Seng'}))
 
     // go to gallery
-    await user.click(screen.getByRole('tabpanel', {name: 'Gallery'}))
+    await user.click(screen.getByRole('tab', {name: 'Gallery'}))
     const upload = screen.getByLabelText('upload file(s)')
     user.upload(upload, new File([Uint8Array.from(atob("/9j/4AAQSkZJRgABAQEAAAAAAA=="), c => c.charCodeAt(0)).buffer], 'test.jpg', { type: 'image/jpeg' })) 
 
     // go to detail
-    await user.click(screen.getByRole('tabpanel', {name: 'Detail'}))
+    await user.click(screen.getByRole('tab', {name: 'Detail'}))
 
     // and back to gallery changed to 1
-    await user.click(screen.getByRole('tabpanel', {name: 'Gallery 1'}))
+    await user.click(screen.getByRole('tab', {name: 'Gallery 1'}))
 
     // go to detail and save
-    await user.click(screen.getByRole('tabpanel', {name: 'Detail'}))
-    await user.click(screen.getByRole('button', {name: 'Save'}))
+    await user.click(screen.getByRole('tab', {name: 'Detail'}))
 
+    const consoleError = jest.spyOn(console, 'error')
+    await user.click(screen.getByRole('button', {name: 'Save'}))
     await waitFor(() => {
         expect(global.fetch).nthCalledWith(1, "http://localhost:8080/api/spare-parts", 
             {"body": "{\"oems\":[{\"name\":\"TSO\",\"url\":\"http://tso.com/1122000/air-tank\"}],\"compatibleTrucks\":[{\"make\":\"Hino\",\"model\":\"700\"}],\"partNo\":\"11220000\",\"partName\":\"Air Tank\",\"description\":\"Air Tank for storing air from compressor\",\"supplierIds\":[2000],\"orderIds\":[5000]}", 
@@ -117,9 +129,12 @@ test('add new parts with supplier and photo', async () => {
 
         expect(global.fetch).nthCalledWith(2, "http://localhost:8080/api/spare-parts/50001/medias", {"body": expect.any(FormData), "method": "POST"})
     })
+    expect(consoleError).toBeCalledWith('failed to upload media: getting non number AB650001')
 
     expect(setShowDialog).lastCalledWith(false)
     expect(afterSave).lastCalledWith({"id": 50001, "orderIds": [5000]})
+
+    jest.restoreAllMocks()
 })
 
 test('add new parts without any supplier', async () => {
@@ -163,37 +178,37 @@ test('add new parts without any supplier', async () => {
     expect(global.alert).toBeCalledWith('Sorry, no suppliers added')
 
     // supplier tab
-    await user.click(screen.getByRole('tabpanel', {name: 'Suppliers'}))
+    await user.click(screen.getByRole('tab', {name: 'Suppliers'}))
     // find from supplier
     await user.click(screen.getByPlaceholderText('Find a supplier then choose an order'))
     await user.click(screen.getByText('Han Seng'))
 
     // back to detail
-    await user.click(screen.getByRole('tabpanel', {name: 'Detail'}))
+    await user.click(screen.getByRole('tab', {name: 'Detail'}))
     await user.click(screen.getByRole('button', {name: 'Save'}))
     expect(global.alert).lastCalledWith('Sorry, no orders added')
 
     // back to supplier tab, add a new order for another supplier
     // supplier tab
-    await user.click(screen.getByRole('tabpanel', {name: 'Suppliers 1'}))
+    await user.click(screen.getByRole('tab', {name: 'Suppliers 1'}))
     await user.click(screen.getByPlaceholderText('How about start with an order'))
     await user.keyboard('Air Tank')
     await user.click(screen.getByRole('option', {name: 'Air Tank (2005-02-09) - Kok Song'}))
     expect(screen.queryAllByRole('listitem')).toHaveLength(1)
 
     // back to detail
-    await user.click(screen.getByRole('tabpanel', {name: 'Detail'}))
+    await user.click(screen.getByRole('tab', {name: 'Detail'}))
     await user.click(screen.getByRole('button', {name: 'Save'}))
     expect(global.alert).lastCalledWith('Sorry, following suppliers has no orders: Han Seng')
 
     // untick that never order before
-    await user.click(screen.getByRole('tabpanel', {name: 'Suppliers 2'}))
+    await user.click(screen.getByRole('tab', {name: 'Suppliers 2'}))
     await user.click(screen.getByLabelText('remove supplier Kok Song'))
     await user.click(screen.getByLabelText('remove supplier Han Seng'))
     await user.click(screen.getByLabelText('Did we order this spare part before?'))
 
     // back to detail
-    await user.click(screen.getByRole('tabpanel', {name: 'Detail'}))
+    await user.click(screen.getByRole('tab', {name: 'Detail'}))
     await user.click(screen.getByRole('button', {name: 'Save'}))
 
     await waitFor(() => expect(global.fetch).lastCalledWith("http://localhost:8080/api/spare-parts", 
@@ -242,7 +257,7 @@ test('add spare part with many orders, remove supplier and add photo', async () 
     await user.keyboard('Air Tank for storing air from compressor')
 
     // supplier tab
-    await user.click(screen.getByRole('tabpanel', {name: 'Suppliers'}))
+    await user.click(screen.getByRole('tab', {name: 'Suppliers'}))
     // find from order
     await user.click(screen.getByPlaceholderText('How about start with an order'))
     await user.keyboard('Air Tank')
@@ -290,18 +305,24 @@ test('add spare part with many orders, remove supplier and add photo', async () 
     expect(screen.queryAllByRole('listitem')).toHaveLength(1)
 
     // go to detail and back to supplier now which is 2
-    await user.click(screen.getByRole('tabpanel', {name: 'Detail'}))
+    await user.click(screen.getByRole('tab', {name: 'Detail'}))
     // supplier tab
-    await user.click(screen.getByRole('tabpanel', {name: 'Suppliers 2'}))
+    await user.click(screen.getByRole('tab', {name: 'Suppliers 2'}))
     // remove Kok Song
     await waitFor(() => {
         expect(screen.queryByRole('button', {name: 'Han Seng'})).toBeInTheDocument()
         expect(screen.queryByRole('button', {name: 'Kok Song'})).toBeInTheDocument()
     })
-    await user.click(screen.queryByRole('button', {name: 'Kok Song'}))
-    await user.click(screen.queryByRole('button', {name: 'remove supplier Kok Song'}))
+    await user.click(screen.getByRole('button', {name: 'Kok Song'}))
+    expect(screen.queryByPlaceholderText('Find a spare part from orders')).not.toBeInTheDocument()
+    await user.click(screen.getByLabelText('Clear'))
+    expect(screen.queryByPlaceholderText('Find a spare part from orders')).toHaveValue('')
+
+    await user.click(screen.getByRole('button', {name: 'remove supplier Kok Song'}))
     await waitFor(() => expect(screen.queryByRole('button', {name: 'Kok Song'})).not.toBeInTheDocument())
 
+    await user.click(screen.getByRole('tab', {name: 'Detail'}))
+    await user.keyboard('{Escape}')
     await user.click(screen.getByRole('button', {name: 'Save'}))
 
     await waitFor(() => expect(global.fetch).lastCalledWith("http://localhost:8080/api/spare-parts", 
@@ -350,7 +371,7 @@ test('add spare part with many orders through suppliers order box', async () => 
     await user.keyboard('Air Tank for storing air from compressor')
 
     // supplier tab
-    await user.click(screen.getByRole('tabpanel', {name: 'Suppliers'}))
+    await user.click(screen.getByRole('tab', {name: 'Suppliers'}))
     // find from supplier
     await user.click(screen.getByPlaceholderText('Find a supplier then choose an order'))
     await user.click(screen.getByText('Han Seng'))
@@ -398,14 +419,15 @@ test('add spare part with many orders through suppliers order box', async () => 
     expect(screen.queryAllByRole('listitem')).toHaveLength(7)
 
     // go to detail and back to supplier now which is 2
-    await user.click(screen.getByRole('tabpanel', {name: 'Detail'}))
+    await user.click(screen.getByRole('tab', {name: 'Detail'}))
     // supplier tab
-    await user.click(screen.getByRole('tabpanel', {name: 'Suppliers 1'}))
+    await user.click(screen.getByRole('tab', {name: 'Suppliers 1'}))
     // remove Kok Song
     await waitFor(() => {
         expect(screen.queryByRole('button', {name: 'Han Seng'})).toBeInTheDocument()
     })
 
+    await user.click(screen.getByRole('tab', {name: 'Detail'}))
     await user.click(screen.getByRole('button', {name: 'Save'}))
 
     await waitFor(() => expect(global.fetch).lastCalledWith("http://localhost:8080/api/spare-parts", 

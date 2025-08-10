@@ -64,6 +64,10 @@ function App() {
   const [showToastBox, setShowToastBox] = useState(false)
   const [toastBoxMessage, setToastBoxMessage] = useState()
 
+  /**
+   * 
+   * @param {string} msg message to show in toast box
+   */
   const showToastMessage = (msg) => {
     try {
       setToastBoxMessage(msg)
@@ -278,6 +282,7 @@ function App() {
               setLoading={setLoading}
               onNewServiceCreated={onNewServiceCreated}
               removeTask={removeTask}
+              showToastMessage={showToastMessage}
             />
           } />
           <Route exact path="/services-overview" element={

@@ -35,6 +35,7 @@ import MigratedItemToSupplierOrderDialog from './services/MigratedItemToSupplier
  * @param {string} props.selectedSearchDate date to search service, in format of '2005-05-05'
  * @param {import('./App').CreateNewServiceCallback} props.onNewServiceCreated
  * @param {Function} props.removeTask
+ * @param {Function} props.showToastMessage
  * @returns 
  */
 function ServiceListing({
@@ -45,7 +46,9 @@ function ServiceListing({
     onNewVehicleCreated, setLoading,
     selectedSearchOptions, setSelectedSearchOptions, 
     selectedSearchDate,
-    onNewServiceCreated, removeTask}) {
+    onNewServiceCreated, 
+    removeTask,
+    showToastMessage}) {
   
   const transactions = useService()
   const orders = useSupplierOrders()
@@ -137,12 +140,13 @@ function ServiceListing({
       .then(res => res.json())
       .then(deleteId => {
         if (deleteId !== sparePartUsageId) {
-          throw Error("seems nothing deleted")
+          throw Error(`seems nothing deleted, returning ${JSON.stringify(deleteId)}`)
         }
         transactions.removeTransaction(serviceId, sparePartUsageId)
       })
       .then(() => refreshSparePartUsages())
       .then(() => clearState())
+      .catch(err => showToastMessage(err.message))
       .finally(() => setLoading(false))
     })
   }
@@ -200,10 +204,11 @@ function ServiceListing({
       .then(res => res.text())
       .then(mediaId => {
         if (!isFinite(mediaId)) {
-          throw new Error("uploaded media failed")
+          throw new Error(`uploaded media failed, not a proper id ${mediaId}`)
         }
         afterSaveMedia && afterSaveMedia(mediaId)
       })
+      .catch(err => showToastMessage(err.message))
       .finally(() => setLoading(false))
     })
   }
@@ -226,6 +231,7 @@ function ServiceListing({
       })
       .then(() => clearState())
       .then(() => refreshSparePartUsages())
+      .catch(err => showToastMessage(err.message))
       .finally(() => setLoading(false))
     })
   }

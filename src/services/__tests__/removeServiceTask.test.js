@@ -52,3 +52,30 @@ test('DELETE and delete, return string', async () => {
     expect(transactions.removeTask).toBeCalledWith(20000, 10000)
     expect(clearState).toBeCalled()
 })
+
+test('DELETE and delete, return different string', async () => {
+    global.fetch.mockResolvedValueOnce({
+        ok: true,
+        text: () => Promise.resolve("20000")
+    })
+
+    const setLoading = jest.fn()
+    const transactions = {
+        removeTask: jest.fn()
+    }
+    const clearState = jest.fn()
+
+    const consoleError = jest.spyOn(console, 'error')
+    removeServiceTask(setLoading, transactions, clearState, 20000, 10000)
+    await waitFor(() => expect(global.fetch).lastCalledWith("http://localhost:8080/api/workshop-services/20000/tasks/10000",
+         {"headers": {"Content-type": "application/json"}, "method": "DELETE"}))
+        
+    expect(consoleError).lastCalledWith('failed to remove task, service id: 20000 task id: 10000, because seems nothing deleted')
+
+    expect(setLoading).toBeCalledTimes(2)
+    expect(setLoading).lastCalledWith(false)
+    expect(transactions.removeTask).not.toBeCalled()
+    expect(clearState).not.toBeCalled()
+
+    jest.restoreAllMocks()
+})

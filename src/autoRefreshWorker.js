@@ -3,7 +3,16 @@ export default async function autoRefreshWorker(setLoading, refresherByTableName
 
     const apiUrl = process.env.REACT_APP_API_URL
 
-    const refreshBasedOnStats = (stats = [], response = []) => {
+    /**
+     * 
+     * @param {Object[]} stats 
+     * @param {string} stats[].tableName
+     * @param {number} stats[].lastTransactionId
+     * @param {Object[]} response 
+     * @param {string} response[].tableName
+     * @param {number} response[].lastTransactionId
+     */
+    const refreshBasedOnStats = (stats, response) => {
         const promises = []
         stats.forEach(v => { 
             const currVal = response.find(r => v.tableName === r.tableName)?.lastTransactionId

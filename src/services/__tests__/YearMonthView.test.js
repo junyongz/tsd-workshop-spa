@@ -9,7 +9,7 @@ import { months3EngChars } from '../../utils/dateUtils';
 import userEvent from '@testing-library/user-event';
 
 jest.mock('../OrderTooltip', () => ({ order, supplier }) => (
-  <div>OrderTooltip for {order.id} from {supplier.supplierName}</div>
+  <div>OrderTooltip for {order.id} from {supplier?.supplierName}</div>
 ));
 
 jest.mock('bootstrap')
@@ -159,11 +159,13 @@ test('render the overview page with small screen, with parts and tasks', async()
     const newTransactions = [...transactions]
     newTransactions[8].migratedHandWrittenSpareParts = [
         {index: 1000, itemDescription: 'Brake Adjuster', quantity: 1, unit: 'pc', unitPrice: 250, totalPrice: 250},
-        {index: 1001, itemDescription: 'Brake Lining', quantity: 4, unit: 'pc', unitPrice: 12, totalPrice: 48}
+        {index: 1001, itemDescription: 'Brake Lining', quantity: 4, unit: 'pc', unitPrice: 12, totalPrice: 48},
+        {index: 1002, itemDescription: 'Brake Shoes', quantity: 4, unit: 'pc'}
     ]
     newTransactions[9].sparePartUsages = [
         {id: 90001, orderId: 1001, quantity: 2, soldPrice: 5},
-        {id: 90002, orderId: 1002, quantity: 1, soldPrice: 15, margin: 20}
+        {id: 90002, orderId: 1002, quantity: 1, soldPrice: 15, margin: 20},
+        {id: 90003, orderId: 1005}
     ]
     newTransactions[9].tasks = [
         {id: 880001, taskId: 750001, recordedDate: '2022-08-10', remarks: 'to adjust brake', quotedPrice: 150},
@@ -179,7 +181,8 @@ test('render the overview page with small screen, with parts and tasks', async()
     })
 
     render(<WorkshopServicesProvider initialServices={newTransactions}>
-            <SupplierOrderContext value={new SupplierOrders(orders, jest.fn())}>
+            <SupplierOrderContext value={new SupplierOrders(
+                [...orders, {id: 1005, partName: 'polish service'}], jest.fn())}>
             <YearMonthView suppliers={[
                 {id: 2000, supplierName: 'Kah Seng'}, 
                 {id: 2001, supplierName: 'Seribu Bintang'} 
@@ -207,7 +210,7 @@ test('render the overview page with small screen, with parts and tasks', async()
     await waitFor(() => expect(screen.queryAllByRole('document')).toHaveLength(2))
 
     // check value
-    expect(screen.getAllByRole('document')[0]).toHaveTextContent('J 34$248.002022-08-09Engine Oil OrderTooltip for 1001 from Kah Seng2 ltr @ $5.00$ 18.002022-08-09Air Filter OrderTooltip for 1002 from Seribu Bintang1 pcs @ $15.00original: $80.00 20%$ 80.002022-08-10 (Brake - Parking Brake) to adjust brake$ 150.00')
+    expect(screen.getAllByRole('document')[0]).toHaveTextContent('J 34$NaN2022-08-09Engine Oil OrderTooltip for 1001 from Kah Seng2 ltr @ $5.00$ 18.002022-08-09Air Filter OrderTooltip for 1002 from Seribu Bintang1 pcs @ $15.00original: $80.00 20%$ 80.002022-08-09polish service OrderTooltip for 1005 from $ 02022-08-10 (Brake - Parking Brake) to adjust brake$ 150.00')
     expect(screen.getAllByRole('document')[1]).toHaveTextContent('J 33$298.002022-08-07Brake Adjuster1 pc @ $250.00$ 250.002022-08-07Brake Lining4 pc @ $12.00$ 48.00')
 
     // back

@@ -139,7 +139,7 @@ function YearMonthView({suppliers, taskTemplates}) {
                                             const usages = trx.sparePartUsages?.map(v => {
                                                 const order = orders.byId(v.orderId)
                                                 const supplier = suppliers.find(s => s.id === order.supplierId)
-                                                const totalPrice = (v.quantity * order.unitPrice).toFixed(2) || 0
+                                                const totalPrice = v.quantity && (v.quantity * order.unitPrice).toFixed(2) || 0
                                                 
                                                 return (<ListGroupItem key={v.id}>
                                                         <Row>

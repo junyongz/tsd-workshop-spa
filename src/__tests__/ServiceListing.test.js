@@ -105,7 +105,7 @@ test('nothing in listing, navigate to overview', async () => {
     expect(useNavigate()).toBeCalledWith('/services-overview')
 })
 
-test('listing no search options, delete one item, and task, delete service, failed then succes', async () => {
+test('listing no search options, delete one item, and task, delete service, failed then success', async () => {
     global.fetch
     .mockResolvedValueOnce({
         ok: true,
@@ -169,6 +169,8 @@ test('listing no search options, delete one item, and task, delete service, fail
         await user.unhover(firstButton)
     }
 
+    // nothing would happen if not hovered
+    fireEvent.click(document.querySelectorAll('.price-tag')[0])
     // failed
     await removeSteps()
     await waitFor(() => expect(global.fetch).nthCalledWith(1, "http://localhost:8080/api/spare-part-utilizations/990001", 

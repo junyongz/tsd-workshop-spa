@@ -44,6 +44,7 @@ test('this year only', async() => {
             <SupplierSparePartsYearMonthView suppliers={mockSuppliers}>
             </SupplierSparePartsYearMonthView>
         </SupplierOrderContext>)
+    document.documentElement.setAttribute('data-bs-theme', 'dark')
 
     await waitFor(() => expect(screen.getAllByRole('button', {name: new Date().getFullYear()})).toHaveLength(1))
     await user.click(screen.getAllByRole('button', {name: new Date().getFullYear()})[0])
@@ -51,9 +52,15 @@ test('this year only', async() => {
     expect(screen.getAllByRole('button', {name: todayDate.getFullYear()})).toHaveLength(1)
     expect(screen.getAllByRole('button', {name: 'change to year 2006'})).toHaveLength(1)
 
+    // over here will failed the rest
+    // document.documentElement.removeAttribute('data-bs-theme')
+
     // click on 2005
     await user.click(screen.getByRole('button', {name: 'change to year 2005'}))
     await user.click(screen.getByRole('button', {name: 'change to month Feb'}))
+
+    // setting undefined wont work, just removeAttribute
+    document.documentElement.removeAttribute('data-bs-theme')
 
     expect(screen.queryAllByRole('document')).toHaveLength(2)
     expect(screen.queryAllByText('Air Hose')).toHaveLength(1)

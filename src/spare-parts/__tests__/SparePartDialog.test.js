@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { jest, test, expect, afterAll } from '@jest/globals';
+import { jest, test, expect, afterEach } from '@jest/globals';
 import SparePartDialog from '../SparePartDialog';
 import SupplierOrders from '../../suppliers/SupplierOrders';
 import { SupplierOrderContext } from '../../suppliers/SupplierOrderContextProvider';
@@ -31,7 +31,10 @@ const mockSuppliers = [{ id: 2000, supplierName: 'Han Seng' }, { id: 2001, suppl
 
 global.fetch = jest.fn()
 global.alert = jest.fn()
-afterAll(() => jest.clearAllMocks())
+afterEach(() => {
+    jest.clearAllMocks()
+    jest.resetAllMocks()
+})
 
 test('add new parts with supplier and photo, but failed to save media', async () => {
     const user = userEvent.setup()

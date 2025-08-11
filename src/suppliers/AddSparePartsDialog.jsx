@@ -263,7 +263,7 @@ function AddSparePartsDialog({isShow, setShowDialog, existingOrder, suppliers, s
                         </Row>
                         <Row className="my-3">
                             <Col className="text-end">
-                                <Button size="sm" disabled={editing} onClick={addNewItem}><i className="bi bi-plus-circle-fill me-2"></i>Add More</Button>
+                                <Button size="sm" aria-label="Add new order" disabled={editing} onClick={addNewItem}><i className="bi bi-plus-circle-fill me-2"></i>Add More</Button>
                             </Col>
                         </Row>
                         
@@ -324,15 +324,21 @@ function AddSparePartsDialog({isShow, setShowDialog, existingOrder, suppliers, s
                                     <Row className="mb-3">
                                         <Col lg="4"></Col>
                                         <Col xs="3" lg="2">
-                                            <Form.Control onChange={(e) => updatePriceByQuantity(e.target.value, i)} required disabled={v.disabled} type="number" min={decimalPointUomAvailable(v?.unit) ? 0.1 : 1} step={decimalPointUomAvailable(v?.unit) ? 0.1 : 1} name="quantity" placeholder="Quantity" value={v?.quantity}/>
+                                            <Form.Control onChange={(e) => updatePriceByQuantity(e.target.value, i)} required 
+                                                disabled={v.disabled} type="number" min={decimalPointUomAvailable(v?.unit) ? 0.1 : 1} 
+                                                    placeholder="Quantity" step={decimalPointUomAvailable(v?.unit) ? 0.1 : 1} name="quantity"
+                                                    value={v?.quantity}/>
                                         </Col>
                                         <Col xs="3" lg="2">
-                                            <Form.Control onChange={(e) => updateUnit(e.target.value, i)} required type="text" name="unit" placeholder="Unit" disabled={v.disabled} value={v?.unit}/>
+                                            <Form.Control onChange={(e) => updateUnit(e.target.value, i)} required type="text" name="unit" 
+                                                placeholder="Unit" disabled={v.disabled} value={v?.unit}/>
                                         </Col>
                                         <Col xs="6" lg="4">
                                             <InputGroup>
                                                 <InputGroup.Text><Dollar /></InputGroup.Text>
-                                                <Form.Control onChange={(e) => updatePriceByUnitPrice(e.target.value, i)} required disabled={v.disabled} type="number" min="0" step="0.01" name="unitPrice" placeholder="Price $" value={v?.unitPrice} />
+                                                <Form.Control onChange={(e) => updatePriceByUnitPrice(e.target.value, i)} required 
+                                                    disabled={v.disabled} type="number" min="0" step="0.01" name="unitPrice" 
+                                                    placeholder="Price $" value={v?.unitPrice} />
                                             </InputGroup>
                                         </Col>
                                     </Row>
@@ -352,10 +358,10 @@ function AddSparePartsDialog({isShow, setShowDialog, existingOrder, suppliers, s
                 </Container>
             </Modal.Body>
             <Modal.Footer>
-            {editing && <Button variant="secondary" onClick={clone} disabled={isPending}>
+            {editing && <Button variant="secondary" aria-label="Clone orders" onClick={clone} disabled={isPending}>
                 <i className="bi bi-copy me-2"></i><span>Clone</span>
             </Button> }
-            <Button variant="primary" onClick={saveChange} disabled={isPending || items.filter(it => !!!it.disabled).length === 0}>
+            <Button variant="primary" aria-label="Save orders" onClick={saveChange} disabled={isPending || items.filter(it => !!!it.disabled).length === 0}>
                 <i className="bi bi-save2 me-2"></i><span>Save</span> 
             </Button>
             </Modal.Footer>

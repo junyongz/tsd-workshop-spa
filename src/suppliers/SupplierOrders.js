@@ -43,7 +43,7 @@ class SupplierOrders {
      * @param {SupplierOrder[]} [orders] 
      * @param {React.ActionDispatch<SupplierOrder[]>} dispatch 
      */
-    constructor(orders=[], dispatch) {
+    constructor(orders, dispatch) {
         this.#ordersList = orders
         this.#refreshIndexes()
         this.#refreshMapping()

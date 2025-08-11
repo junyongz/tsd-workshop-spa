@@ -111,10 +111,6 @@ test('upload single file then multiple files', async () => {
 test('upload single video file', async () => {
     const user = userEvent.setup()
 
-    global.fetch.mockResolvedValueOnce({
-        ok: true
-    })
-
     const subscribe = jest.fn(() => (x) => {})
     const afterRemoveMedia = jest.fn()
     const setUploadedMedias = jest.fn()
@@ -144,4 +140,46 @@ test('upload single video file', async () => {
     await user.upload(uploadButton, new File([Uint8Array.from(atob("/9j/4AAQSkZJRgABAQEAAAAAAA=="), c => c.charCodeAt(0)).buffer], 'test.mp4', { type: 'video/mp4' }))
 
     await waitFor(() => expect(document.querySelectorAll('video')).toHaveLength(1))
+})
+
+test('upload single file, but bad response', async () => {
+    const user = userEvent.setup()
+
+    global.fetch.mockResolvedValueOnce({
+        ok: false
+    })
+
+    const subscribe = jest.fn(() => (x) => {})
+    const afterRemoveMedia = jest.fn()
+    const setUploadedMedias = jest.fn()
+    URL.revokeObjectURL = jest.fn()
+    URL.createObjectURL = jest.fn((file) => 'http://' + file.fileName)
+
+    const uploadedMedias = [
+        {id: 600001, dataUrl: 'http://hello.jpg', fileName: 'hello.jpg'},
+        {id: 600002, dataUrl: 'http://world.png', fileName: 'world.png'},
+        {id: 600003, dataUrl: 'http://jurassic.png', fileName: 'jurassic.png'},
+    ]
+
+    const SparePartMediaSubDialogWrapper = () => {
+        const [uploadedFiles, setUploadedFiles] = useState([])
+
+        return (<SparePartMediaSubDialog 
+            sparePart={{id: 50001, partNo: '200001'}}
+            uploadedMedias={uploadedMedias}
+            setUploadedMedias={setUploadedMedias}
+            subscribe={subscribe}
+            afterRemoveMedia={afterRemoveMedia}
+            uploadedFiles={uploadedFiles}
+            setUploadedFiles={setUploadedFiles}>
+            </SparePartMediaSubDialog>)
+    }
+
+    render(<SparePartMediaSubDialogWrapper></SparePartMediaSubDialogWrapper>)
+    expect(screen.getAllByRole('img')).toHaveLength(3)
+
+    // but failed to delete 
+    await user.click(screen.getByLabelText('remove jurassic.png'))
+    await waitFor(() => expect(global.fetch).lastCalledWith("http://localhost:8080/api/spare-parts/undefined/medias/600003", {"method": "DELETE"}))
+    expect(screen.getAllByRole('img')).toHaveLength(3)
 })

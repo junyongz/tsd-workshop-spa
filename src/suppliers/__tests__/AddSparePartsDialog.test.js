@@ -1,331 +1,418 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { jest, test, expect } from '@jest/globals'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+
 import AddSparePartsDialog from '../AddSparePartsDialog';
 import SupplierOrders from '../SupplierOrders';
 import { SupplierOrderContext } from '../SupplierOrderContextProvider';
+import { addDaysToDateStr } from '../../utils/dateUtils';
+import clearAllThen from '../../__mocks__/userEventUtil';
 
-import { describe, test, expect } from '@jest/globals'
+/** @type {import('../SupplierOrders').Supplier} */
+const suppliers = [ 
+    {id: 2000, supplierName: 'Aik Han'}, 
+    {id: 2001, supplierName: 'Mutiara Bintang'},
+    {id: 2002, supplierName: 'TSD'} 
+]
 
-describe('AddSparePartsDialog Component', () => {
-  const mockSuppliers = [
-    { id: 1, supplierName: 'Supplier A' },
-    { id: 2, supplierName: 'Supplier B' }
-  ];
+/** @type {import('../SupplierOrders').SupplierOrder[]} */
+const mockOrders = [
+  {id:1001, invoiceDate: "2023-01-01", supplierId: 2000,
+    itemCode: "00016", partName:"Engine Oil", quantity: 600, unit: "ltr", unitPrice: 9,
+    deliveryOrderNo: "DO001", status: "ACTIVE"},
+  {id:1002, invoiceDate: "2023-01-02", supplierId: 2001,
+    itemCode: "06690", partName:"Air Filter", quantity: 5, unit: "pcs", unitPrice: 80,
+    deliveryOrderNo: "DO002", status: "ACTIVE"},
+  {id:1003, invoiceDate: "2023-01-03", supplierId: 2000, sheetName: 'JUL 23',
+    itemCode :"07411", partName:"Brake Pads", quantity: 100, unit:"set", unitPrice: 25,
+    deliveryOrderNo: "DO003", status: "ACTIVE"},
+  {id:1004, invoiceDate: "2023-01-03", supplierId: 2001, sheetName: 'JUL 23',
+    itemCode: "26283", partName: "Hub Bolt", quantity: 40, unit: "pc", unitPrice: 8,
+    deliveryOrderNo: "DO003", status: "ACTIVE"}
+];
 
-  const mockOrders = [
-    { id: 1, supplierId: 1, invoiceDate: '2023-01-01', itemCode: 'ABC123', partName: 'Engine Oil', unitPrice: 50, unit: 'ltr', quantity: 20},
-    { id: 2, supplierId: 1, invoiceDate: '2023-01-01', itemCode: 'XYZ789', partName: 'Best Tire', unitPrice: 50, unit: 'ltr', quantity: 20},
-    { id: 3, supplierId: 2, invoiceDate: '2023-01-02', itemCode: 'XYZ789', partName: 'Tire', unitPrice: 75, unit: 'pcs', quantity: 20 }
-  ];
+const todayDateStr = addDaysToDateStr(new Date(), 0)
 
-  const mockSparePartUsages = [
-    { orderId: 1, quantity: 5 }
-  ];
-
-  const defaultProps = {
-    isShow: true,
-    setShowDialog: jest.fn(),
-    existingOrder: undefined,
-    suppliers: mockSuppliers,
-    sparePartUsages: mockSparePartUsages,
-    onSaveNewOrders: jest.fn()
-  };
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  test('renders dialog with initial state', () => {
-    render(<SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}><AddSparePartsDialog {...defaultProps} /></SupplierOrderContext>);
-
-    expect(screen.getByText('Adding New Spare Parts')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Choose a supplier')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Key in DO. #')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Key in item code')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Find a existing one as template')).toBeInTheDocument();
-    expect(screen.getByText('Add More')).toBeInTheDocument();
-    expect(screen.getByText('Save')).toBeInTheDocument();
-  });
-
-  test('closes dialog and resets state', () => {
-    const setShowDialog = jest.fn();
-    render(<SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}><AddSparePartsDialog {...defaultProps} setShowDialog={setShowDialog} /></SupplierOrderContext>);
-
-    fireEvent.click(screen.getByRole('button', { name: /close/i }));
-    expect(setShowDialog).toHaveBeenCalledWith(false);
-  });
-
-  test('adds new item', () => {
-    render(<SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}><AddSparePartsDialog {...defaultProps} /></SupplierOrderContext>);
-
-    expect(document.querySelectorAll('.list-group-item').length).toBe(2)
-    fireEvent.click(screen.getByText('Add More'));
-    expect(document.querySelectorAll('.list-group-item').length).toBe(3)
-  });
-
-  test('removes an item', async () => {
+test('show dialog to add new parts, and close it', async () => {
     const user = userEvent.setup()
 
-    render(<SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}><AddSparePartsDialog {...defaultProps} /></SupplierOrderContext>);
-    fireEvent.click(screen.getByText('Add More'));
-    fireEvent.click(screen.getByText('Add More'));
+    const setShowDialog = jest.fn()
+    const onSaveNewOrders = jest.fn()
 
-    expect(document.querySelectorAll('.list-group-item').length).toBe(4)
+    render(<SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}>
+        <AddSparePartsDialog isShow={true} setShowDialog={setShowDialog} 
+            onSaveNewOrders={onSaveNewOrders} sparePartUsages={[]} suppliers={suppliers}></AddSparePartsDialog>
+        </SupplierOrderContext>)
 
-    const itemCodeInputs = screen.getAllByPlaceholderText('Key in item code');
-    expect(itemCodeInputs).toHaveLength(3)
-    await user.click(itemCodeInputs[0])
-    await user.click(screen.getByText('ABC123'))
+    expect(screen.queryByText('Adding New Spare Parts')).toBeInTheDocument()
+    expect(screen.queryByPlaceholderText('Key in item code')).toBeInTheDocument()
+    expect(screen.queryByLabelText('Clone orders')).not.toBeInTheDocument()
 
-    await user.click(itemCodeInputs[1])
-    await user.click(screen.getByText('XYZ789'))
+    // just delete the only item
+    await user.click(document.querySelector('.bi-trash3'))
+    await user.click(document.querySelector('.bi-trash3'))
+    expect(screen.queryByPlaceholderText('Key in item code')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Save orders')).toBeDisabled()
 
-    expect(screen.getAllByRole('button', { name: 'remove' })).toHaveLength(3)
-    await user.click(screen.getAllByRole('button', { name: 'remove' })[1]); 
-    await user.click(screen.getAllByRole('button', { name: 'remove' })[1]);
-    expect(document.querySelectorAll('.list-group-item').length).toBe(3)
+    // add new and save to throw error
+    await user.click(screen.getByLabelText('Add new order'))
+    await user.click(screen.getByLabelText('Save orders'))
 
-    expect(document.querySelector('[value="Best Tire"]')).not.toBeInTheDocument()
-    expect(document.querySelector('[value="Engine Oil"]')).toBeInTheDocument()
-  });
+    // close it
+    await user.keyboard('{Escape}')
+    expect(setShowDialog).not.toBeCalled()
+    await user.click(screen.getByLabelText('Close'))
+    expect(setShowDialog).toBeCalledWith(false)
+})
 
-  test('updates supplier and filters spare parts', async () => {
-    render(<SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}><AddSparePartsDialog {...defaultProps} /></SupplierOrderContext>);
-
-    const supplierInput = screen.getByPlaceholderText('Choose a supplier');
-    fireEvent.click(supplierInput);
-    fireEvent.change(supplierInput, { target: { value: 'Supplier A' } });
-    await waitFor(() => {
-      const supplierOption = screen.getByText('Supplier A');
-      fireEvent.click(supplierOption);
-    });
-
-    expect(supplierInput).toHaveValue('Supplier A');
-
-    // Check spare part options are filtered
-    const sparePartInput = screen.getByPlaceholderText('Find a existing one as template');
-    fireEvent.click(sparePartInput);
-    await waitFor(() => {
-      expect(screen.getByText('Engine Oil')).toBeInTheDocument();
-      expect(screen.queryByText('Tire')).not.toBeInTheDocument();
-    });
-  });
-
-  test('selects item code and updates supplier', async () => {
-    render(<SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}><AddSparePartsDialog {...defaultProps} /></SupplierOrderContext>);
-
-    const itemCodeInput = screen.getByPlaceholderText('Key in item code');
-    fireEvent.click(itemCodeInput);
-    fireEvent.change(itemCodeInput, { target: { value: 'ABC123' } });
-    await waitFor(() => {
-      const itemCodeOption = screen.getByText('ABC123');
-      fireEvent.click(itemCodeOption);
-    });
-
-    expect(screen.getByPlaceholderText('Choose a supplier')).toHaveValue('Supplier A');
-    expect(itemCodeInput).toHaveValue('ABC123');
-  });
-
-  test('selects spare part and updates supplier', async () => {
-    render(<SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}><AddSparePartsDialog {...defaultProps} /></SupplierOrderContext>);
-
-    const sparePartInput = screen.getByPlaceholderText('Find a existing one as template');
-    fireEvent.click(sparePartInput);
-    fireEvent.change(sparePartInput, { target: { value: 'Tire' } });
-    await waitFor(() => {
-      const sparePartOption = screen.getByText('Tire');
-      fireEvent.click(sparePartOption);
-    });
-
-    expect(screen.getByPlaceholderText('Choose a supplier')).toHaveValue('Supplier B');
-    expect(sparePartInput).toHaveValue('Tire');
-  });
-
-  test('updates quantity and unit price', () => {
-    render(<SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}><AddSparePartsDialog {...defaultProps} /></SupplierOrderContext>);
-
-    const quantityInput = screen.getByPlaceholderText('Quantity');
-    fireEvent.change(quantityInput, { target: { value: '5' } });
-
-    const unitPriceInput = screen.getByPlaceholderText('Price $');
-    fireEvent.change(unitPriceInput, { target: { value: '10' } });
-
-    expect(quantityInput).toHaveValue(5);
-    expect(unitPriceInput).toHaveValue(10);
-    expect(screen.getAllByText('$ 50.00').length).toEqual(2)
-  });
-
-  test('validates form and prevents save on invalid input', async () => {
-    render(<SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}><AddSparePartsDialog {...defaultProps} /></SupplierOrderContext>);
-
-    fireEvent.click(screen.getByText('Save'));
-    expect(screen.getByPlaceholderText('Find a existing one as template').closest('form')).toHaveClass('was-validated');
-    expect(defaultProps.onSaveNewOrders).not.toHaveBeenCalled();
-  });
-
-  test('saves valid form data', async () => {
-    render(<SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}><AddSparePartsDialog {...defaultProps} /></SupplierOrderContext>);
-
-    fireEvent.change(screen.getByPlaceholderText('Key in Invoice Date'), { target: { value: '2023-01-01' } });
-    const supplierInput = screen.getByPlaceholderText('Choose a supplier');
-    fireEvent.click(supplierInput);
-    fireEvent.change(supplierInput, { target: { value: 'Supplier A' } });
-    await waitFor(() => {
-      fireEvent.click(screen.getByText('Supplier A'));
-    });
-    fireEvent.change(screen.getByPlaceholderText('Key in DO. #'), { target: { value: 'DO123' } });
-
-    const sparePartInput = screen.getByPlaceholderText('Find a existing one as template');
-    fireEvent.click(sparePartInput);
-    fireEvent.change(sparePartInput, { target: { value: 'Engine Oil' } });
-    await waitFor(() => {
-      fireEvent.click(screen.getByText('Engine Oil'));
-    });
-    fireEvent.change(screen.getByPlaceholderText('Quantity'), { target: { value: '5' } });
-    fireEvent.change(screen.getByPlaceholderText('Price $'), { target: { value: '50' } });
-
-    fireEvent.click(screen.getByText('Save'));
-
-    await waitFor(() => {
-      expect(defaultProps.onSaveNewOrders).toHaveBeenCalledWith(
-        expect.arrayContaining([
-          expect.objectContaining({
-            invoiceDate: '2023-01-01',
-            deliveryOrderNo: 'DO123',
-            supplierId: 1,
-            itemCode: 'ABC123',
-            partName: 'Engine Oil',
-            quantity: 5,
-            unit: 'ltr',
-            unitPrice: 50,
-            totalPrice: 250
-          })
-        ]),
-        expect.any(Function)
-      );
-    });
-  });
-
-  test('saves valid form data, using "onblur"', async () => {
+test('create a single item order, choose ordered before parts', async () => {
     const user = userEvent.setup()
 
-    render(<SupplierOrderContext value={new SupplierOrders([], jest.fn())}><AddSparePartsDialog {...defaultProps} /></SupplierOrderContext>);
+    const setShowDialog = jest.fn()
+    const onSaveNewOrders = jest.fn()
+
+    render(<SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}>
+        <AddSparePartsDialog isShow={true} setShowDialog={setShowDialog} 
+            onSaveNewOrders={onSaveNewOrders} sparePartUsages={[]} suppliers={suppliers}></AddSparePartsDialog>
+        </SupplierOrderContext>)
 
     await user.click(screen.getByPlaceholderText('Key in Invoice Date'))
-    await user.keyboard('2023-01-01')
+    await user.keyboard(todayDateStr)
 
     await user.click(screen.getByPlaceholderText('Choose a supplier'))
-    await user.click(screen.getByText('Supplier A'))
+    await user.click(screen.getByText('Mutiara Bintang'))
 
     await user.click(screen.getByPlaceholderText('Key in DO. #'))
-    await user.keyboard('DO123')
+    await user.keyboard("DO-00002")
+
+    // start to add items
+    await user.click(screen.getByPlaceholderText('Key in item code'))
+    await user.click(screen.getByText('06690'))
+
+    expect(screen.getByPlaceholderText('Find a existing one as template')).toHaveValue('Air Filter')
+    // remove item code
+    await user.click(screen.getAllByLabelText('Clear')[1])
+    // manually key the item code
+    await user.click(screen.getByPlaceholderText('Key in item code'))
+    await user.keyboard('06690A')
+
+    // key in quantity
+    await user.click(screen.getByPlaceholderText('Quantity'))
+    await user.keyboard('10')
+
+    // key in unit, although already have the value
+    expect(screen.getByPlaceholderText('Unit')).toHaveValue('pcs')
+    await user.click(screen.getByPlaceholderText('Unit'))
+    await user.keyboard(clearAllThen('pc'))
+
+    // Unit price, although already have the value
+    expect(screen.getByPlaceholderText('Price $')).toHaveValue(80)
+    await user.click(screen.getByPlaceholderText('Price $'))
+    await user.keyboard(clearAllThen('82'))
+
+    // save it
+    await user.click(screen.getByLabelText('Save orders'))
+    expect(onSaveNewOrders).toBeCalledWith([{"deliveryOrderNo": "DO-00002", "id": undefined, "invoiceDate": todayDateStr, 
+        "itemCode": "06690A", "notes": undefined, 
+        "partName": "Air Filter", "quantity": 10, "sparePartId": undefined, 
+        "supplierId": 2001, "totalPrice": 820, "unit": "pc", "unitPrice": 82}], expect.anything())
+    
+    onSaveNewOrders.mock.calls[0][1]()
+    expect(setShowDialog).toBeCalledWith(false)
+})
+
+test('create a single item order, newly order parts', async () => {
+    const user = userEvent.setup()
+
+    const setShowDialog = jest.fn()
+    const onSaveNewOrders = jest.fn()
+
+    render(<SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}>
+        <AddSparePartsDialog isShow={true} setShowDialog={setShowDialog} 
+            onSaveNewOrders={onSaveNewOrders} sparePartUsages={[]} suppliers={suppliers}></AddSparePartsDialog>
+        </SupplierOrderContext>)
+
+    await user.click(screen.getByPlaceholderText('Key in Invoice Date'))
+    await user.keyboard(todayDateStr)
+
+    await user.click(screen.getByPlaceholderText('Choose a supplier'))
+    await user.click(screen.getByText('Mutiara Bintang'))
+
+    await user.click(screen.getByPlaceholderText('Key in DO. #'))
+    await user.keyboard("DO-00002")
+
+    // start to add items
+    await user.click(screen.getByPlaceholderText('Key in item code'))
+    await user.keyboard('06690A')
 
     await user.click(screen.getByPlaceholderText('Find a existing one as template'))
-    await user.keyboard('Engine Oil')
+    await user.keyboard('Air Filter 6642')
 
     await user.click(screen.getByPlaceholderText('Quantity'))
     await user.keyboard('5')
 
-    // replace the default 'pc'
-    await user.dblClick(screen.getByPlaceholderText('Unit'))
-    await user.keyboard('ltr')
+    await user.click(screen.getByPlaceholderText('Unit'))
+    await user.keyboard(clearAllThen('set'))
 
     await user.click(screen.getByPlaceholderText('Price $'))
-    await user.keyboard('50')
+    await user.keyboard('105')
 
-    await user.click(screen.getByText('Save'));
+    // save it
+    await user.click(screen.getByLabelText('Save orders'))
+    expect(onSaveNewOrders).toBeCalledWith([{"deliveryOrderNo": "DO-00002", "id": undefined, "invoiceDate": todayDateStr, 
+        "itemCode": "06690A", "notes": undefined, 
+        "partName": "Air Filter 6642", "quantity": 5, "sparePartId": undefined, 
+        "supplierId": 2001, "totalPrice": 525, "unit": "set", "unitPrice": 105}], expect.anything())
+})
 
-    await waitFor(() => {
-      expect(defaultProps.onSaveNewOrders).toHaveBeenCalledWith(
-        expect.arrayContaining([
-          expect.objectContaining({
-            invoiceDate: '2023-01-01',
-            deliveryOrderNo: 'DO123',
-            supplierId: 1,
-            partName: 'Engine Oil',
-            quantity: 5,
-            unit: 'ltr',
-            unitPrice: 50,
-            totalPrice: 250
-          })
-        ]),
-        expect.any(Function)
-      );
-    });
-  });
-
-  test('renders existing order in edit mode with disabled fields', async () => {
+test('create a 2 items order, same supplier', async() => {
     const user = userEvent.setup()
 
-    const existingOrder = [{
-      id: 1,
-      invoiceDate: '2023-01-01',
-      deliveryOrderNo: 'DO123',
-      supplierId: 1,
-      itemCode: 'ABC123',
-      partName: 'Engine Oil',
-      quantity: 10,
-      unit: 'ltr',
-      unitPrice: 50
-    }];
-    render(<SupplierOrderContext value={new SupplierOrders([], jest.fn())}><AddSparePartsDialog {...defaultProps} existingOrder={existingOrder} /></SupplierOrderContext>);
+    const setShowDialog = jest.fn()
+    const onSaveNewOrders = jest.fn()
 
-    expect(screen.queryByText('Update Spare Parts')).toBeInTheDocument();
-    expect(screen.queryByPlaceholderText('Key in Invoice Date')).toHaveValue('2023-01-01');
-    expect(screen.queryByPlaceholderText('Choose a supplier')).toHaveValue('Supplier A');
-    expect(screen.queryByPlaceholderText('Key in DO. #')).toHaveValue('DO123');
-    expect(screen.queryByPlaceholderText('Key in item code')).toHaveValue('ABC123');
-    expect(screen.queryByPlaceholderText('Find a existing one as template')).toHaveValue('Engine Oil');
-    expect(screen.queryByPlaceholderText('Quantity')).toHaveValue(10);
-    expect(screen.queryByPlaceholderText('Price $')).toHaveValue(50);
+    render(<SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}>
+        <AddSparePartsDialog isShow={true} setShowDialog={setShowDialog} 
+            onSaveNewOrders={onSaveNewOrders} sparePartUsages={[]} suppliers={suppliers}></AddSparePartsDialog>
+        </SupplierOrderContext>)
 
-    expect(screen.queryByPlaceholderText('Key in item code')).toBeDisabled();
-    expect(screen.queryByPlaceholderText('Find a existing one as template')).toBeDisabled();
-    expect(screen.queryByPlaceholderText('Quantity')).toBeDisabled();
-    expect(screen.queryByPlaceholderText('Price $')).toBeDisabled();
-    expect(screen.queryByText('Add More')).toBeDisabled();
-    expect(screen.queryByText('Clone')).toBeInTheDocument();
+    await user.click(screen.getByPlaceholderText('Key in Invoice Date'))
+    await user.keyboard(todayDateStr)
 
-    await user.click(screen.getByText('Clone'))
-    expect(screen.queryByText('Clone')).not.toBeInTheDocument();
-  });
+    await user.click(screen.getByPlaceholderText('Choose a supplier'))
+    await user.click(screen.getByText('Aik Han'))
 
-  test('renders existing order with full quantity available', async () => {
-    const user = userEvent.setup()
-    const existingOrder = [{
-      id: 2,
-      invoiceDate: '2023-01-02',
-      deliveryOrderNo: 'DO456',
-      supplierId: 2,
-      itemCode: 'XYZ789',
-      partName: 'Tire',
-      quantity: 8,
-      unit: 'pcs',
-      unitPrice: 75
-    }];
-    render(<SupplierOrderContext value={new SupplierOrders([], jest.fn())}><AddSparePartsDialog {...defaultProps} existingOrder={existingOrder} /></SupplierOrderContext>);
+    await user.click(screen.getByPlaceholderText('Key in DO. #'))
+    await user.keyboard("DO-00003")
 
-    expect(screen.getByPlaceholderText('Key in item code')).toHaveValue('XYZ789');
-    expect(screen.getByPlaceholderText('Find a existing one as template')).toHaveValue('Tire');
-    expect(screen.getByPlaceholderText('Quantity')).toHaveValue(8);
-    expect(screen.getByPlaceholderText('Price $')).toHaveValue(75);
+    // start to add items
+    await user.click(screen.getByPlaceholderText('Key in item code'))
+    await user.keyboard('06690A')
 
-    expect(screen.getByPlaceholderText('Key in item code')).not.toBeDisabled();
-    expect(screen.getByPlaceholderText('Find a existing one as template')).not.toBeDisabled();
-    expect(screen.getByPlaceholderText('Quantity')).not.toBeDisabled();
-    expect(screen.getByPlaceholderText('Price $')).not.toBeDisabled();
-
-    // change text, id should retain, part name should get changed to new one
     await user.click(screen.getByPlaceholderText('Find a existing one as template'))
-    await user.clear(screen.getByPlaceholderText('Find a existing one as template'))
-    await user.keyboard('Engine Oil 1880')
+    await user.keyboard('Air Filter 6642')
 
-    await user.keyboard('{Escape}')
-    await user.click(screen.getByText('Save'));
-    expect(defaultProps.onSaveNewOrders).lastCalledWith(
-      [{"deliveryOrderNo": "DO456", "id": 2, "invoiceDate": "2023-01-02", "itemCode": "XYZ789", 
-        "notes": undefined, "partName": "Engine Oil 1880", "quantity": 8, 
-        "sparePartId": undefined, "supplierId": 2, "totalPrice": 600, 
-        "unit": "pcs", "unitPrice": 75}], expect.any(Function))
-  });
-});
+    await user.click(screen.getByPlaceholderText('Quantity'))
+    await user.keyboard('5')
+
+    await user.click(screen.getByPlaceholderText('Unit'))
+    await user.keyboard(clearAllThen('set'))
+
+    await user.click(screen.getByPlaceholderText('Price $'))
+    await user.keyboard('105')
+
+    // add item #2
+    await user.click(screen.getByLabelText('Add new order'))
+
+    await user.click(screen.getAllByPlaceholderText('Key in item code')[1])
+    await user.keyboard('00016-X') // it will get changed later on to 00016
+
+    await user.click(screen.getAllByPlaceholderText('Find a existing one as template')[1])
+    await user.click(screen.getByText('Engine Oil'))
+
+    await user.click(screen.getAllByPlaceholderText('Quantity')[1])
+    await user.keyboard('400')
+
+    await user.click(screen.getAllByPlaceholderText('Price $')[1])
+    await user.keyboard(clearAllThen(9.7))
+
+    // save it
+    await user.click(screen.getByLabelText('Save orders'))
+    expect(onSaveNewOrders).toBeCalledWith([
+        {"deliveryOrderNo": "DO-00003", "id": undefined, 
+            "invoiceDate": todayDateStr, "itemCode": "06690A", "notes": undefined, 
+            "partName": "Air Filter 6642", "quantity": 5, "sparePartId": undefined, 
+            "supplierId": 2000, "totalPrice": 525, "unit": "set", "unitPrice": 105}, 
+        {"deliveryOrderNo": "DO-00003", "id": undefined, 
+            "invoiceDate": todayDateStr, "itemCode": "00016", "notes": undefined, 
+            "partName": "Engine Oil", "quantity": 400, "sparePartId": undefined, 
+            "supplierId": 2000, "totalPrice": 3879.9999999999995, "unit": "ltr", "unitPrice": 9.7}
+        ], expect.anything())
+
+    onSaveNewOrders.mock.calls[0][1]()
+    expect(setShowDialog).toBeCalledWith(false)
+})
+
+test('create a 2 items order, from different suppliers, then choose a new supplier', async() => {
+    const user = userEvent.setup()
+
+    const setShowDialog = jest.fn()
+    const onSaveNewOrders = jest.fn()
+
+    render(<SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}>
+        <AddSparePartsDialog isShow={true} setShowDialog={setShowDialog} 
+            onSaveNewOrders={onSaveNewOrders} sparePartUsages={[]} suppliers={suppliers}></AddSparePartsDialog>
+        </SupplierOrderContext>)
+
+    // let the parts below to choose the supplier
+
+    await user.click(screen.getByPlaceholderText('Key in Invoice Date'))
+    await user.keyboard(todayDateStr)
+
+    await user.click(screen.getByPlaceholderText('Key in DO. #'))
+    await user.keyboard("DO-00003")
+
+    // start to add items
+    await user.click(screen.getByPlaceholderText('Key in item code'))
+    await user.click(screen.getByText('07411'))
+
+    expect(screen.getByPlaceholderText('Find a existing one as template')).toHaveValue('Brake Pads')
+    await user.click(screen.getAllByLabelText('Clear')[2])
+    await user.click(screen.getByPlaceholderText('Find a existing one as template'))
+    await user.keyboard('Brake Pads Yz')
+
+    await user.click(screen.getByPlaceholderText('Quantity'))
+    await user.keyboard('8')
+
+    await user.click(screen.getByPlaceholderText('Unit'))
+    await user.keyboard(clearAllThen('pc'))
+
+    await user.click(screen.getByPlaceholderText('Price $'))
+    await user.keyboard(clearAllThen(250))
+
+    // add item #2
+    await user.click(screen.getByLabelText('Add new order'))
+
+    await user.click(screen.getAllByPlaceholderText('Key in item code')[1])
+    await user.keyboard('06690')
+
+    await user.click(screen.getAllByPlaceholderText('Find a existing one as template')[1])
+    await user.keyboard('Engine Oil')
+
+    await user.click(screen.getAllByPlaceholderText('Quantity')[1])
+    await user.keyboard('200')
+
+    await user.click(screen.getAllByPlaceholderText('Price $')[1])
+    await user.keyboard(clearAllThen('9.7'))
+
+    // finally select a different supplier
+    await user.click(screen.getAllByLabelText('Clear')[0])
+    await user.click(screen.getByPlaceholderText('Choose a supplier'))
+    await user.click(screen.getByText('TSD'))
+
+    // save it
+    await user.click(screen.getByLabelText('Save orders'))
+    expect(onSaveNewOrders).toBeCalledWith([
+        {"deliveryOrderNo": "DO-00003", "id": undefined, "invoiceDate": todayDateStr,
+            "itemCode": "07411", "notes": undefined, "partName": "Brake Pads Yz", 
+            "quantity": 8, "sparePartId": undefined, "supplierId": 2002, 
+            "totalPrice": 2000, "unit": "pc", "unitPrice": 250}, 
+        {"deliveryOrderNo": "DO-00003", "id": undefined, "invoiceDate": todayDateStr, 
+            "itemCode": "06690", "notes": undefined, "partName": "Engine Oil", 
+            "quantity": 200, "sparePartId": undefined, "supplierId": 2002, 
+            "totalPrice": 1939.9999999999998, "unit": "pc", "unitPrice": 9.7}], expect.anything())
+
+    onSaveNewOrders.mock.calls[0][1]()
+    expect(setShowDialog).toBeCalledWith(false)
+})
+
+test('create a 2 items orders, delete 1st, then 2nd one should be the only one', async() => {
+    const user = userEvent.setup()
+
+    const setShowDialog = jest.fn()
+    const onSaveNewOrders = jest.fn()
+
+    render(<SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}>
+        <AddSparePartsDialog isShow={true} setShowDialog={setShowDialog} 
+            onSaveNewOrders={onSaveNewOrders} sparePartUsages={[]} suppliers={suppliers}></AddSparePartsDialog>
+        </SupplierOrderContext>)
+
+    await user.click(screen.getByPlaceholderText('Key in Invoice Date'))
+    await user.keyboard(todayDateStr)
+
+    await user.click(screen.getByPlaceholderText('Choose a supplier'))
+    await user.click(screen.getByText('Aik Han'))
+
+    await user.click(screen.getByPlaceholderText('Key in DO. #'))
+    await user.keyboard("DO-00003")
+
+    // start to add items
+    await user.click(screen.getByPlaceholderText('Key in item code'))
+    await user.keyboard('06690A')
+
+    await user.click(screen.getByPlaceholderText('Find a existing one as template'))
+    await user.keyboard('Air Filter 6642')
+
+    await user.click(screen.getByPlaceholderText('Quantity'))
+    await user.keyboard('5')
+
+    await user.click(screen.getByPlaceholderText('Unit'))
+    await user.keyboard(clearAllThen('set'))
+
+    await user.click(screen.getByPlaceholderText('Price $'))
+    await user.keyboard('105')
+
+    // add item #2
+    await user.click(screen.getByLabelText('Add new order'))
+
+    await user.click(screen.getAllByPlaceholderText('Key in item code')[1])
+    await user.keyboard('00016-X') // it will get changed later on to 00016
+
+    await user.click(screen.getAllByPlaceholderText('Find a existing one as template')[1])
+    await user.click(screen.getByText('Engine Oil'))
+
+    await user.click(screen.getAllByPlaceholderText('Quantity')[1])
+    await user.keyboard('400')
+
+    await user.click(screen.getAllByPlaceholderText('Price $')[1])
+    await user.keyboard(clearAllThen(9.7))
+
+    // delete the first one
+    await user.click(document.querySelectorAll('.bi-trash3')[0])
+    await user.click(document.querySelectorAll('.bi-trash3')[0])
+
+    expect(screen.getByPlaceholderText('Key in item code')).toHaveValue('00016')
+})
+
+test('edit existing order, not allow to add and change value', async() => {
+    const user = userEvent.setup()
+
+    const setShowDialog = jest.fn()
+    const onSaveNewOrders = jest.fn()
+
+    render(<SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}>
+        <AddSparePartsDialog isShow={true} setShowDialog={setShowDialog} 
+            existingOrder={[
+        {"deliveryOrderNo": "DO-00003", "id": 20001, "invoiceDate": todayDateStr, 
+            "itemCode": "07411", "notes": "hello world", "partName": "Brake Pads Yz", 
+            "quantity": 8, "sparePartId": 900001, "supplierId": 2002, 
+            "totalPrice": 2000, "unit": "pc", "unitPrice": 250}, 
+        {"deliveryOrderNo": "DO-00003", "id": 20002, "invoiceDate": todayDateStr, 
+            "itemCode": undefined, "notes": "hi", "partName": "Engine Oil", 
+            "quantity": 200, "sparePartId": undefined, "supplierId": 2002, 
+            "totalPrice": 1939.9999999999998, "unit": "pc", "unitPrice": 9.7}]}
+            onSaveNewOrders={onSaveNewOrders} sparePartUsages={[
+                {id: 990001, orderId: 20001 , quantity: 5}
+            ]} suppliers={suppliers}></AddSparePartsDialog>
+        </SupplierOrderContext>)
+
+    expect(screen.queryByText('Update Spare Parts')).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('Key in DO. #')).toBeDisabled()
+    expect(screen.getAllByPlaceholderText('Key in item code')[0]).toBeDisabled()
+    expect(screen.getAllByPlaceholderText('Key in item code')[1]).toBeEnabled()
+
+    // clone the orders
+    await user.click(screen.getByLabelText('Clone orders'))
+    await waitFor(() => expect(screen.queryByText('Adding New Spare Parts')).toBeInTheDocument())
+
+    fireEvent.change(screen.getByPlaceholderText('Key in Invoice Date'), todayDateStr)
+    // await user.keyboard(todayDateStr) // weird, this is not working
+
+    await user.click(screen.getByPlaceholderText('Key in DO. #'))
+    await user.keyboard(clearAllThen('DO-00004'))
+
+    await user.click(screen.getByLabelText('Save orders'))
+    // console.log(Array.from(document.querySelector('form').elements).map(v => v.name + ' ' + v.validationMessage))
+    expect(onSaveNewOrders).toBeCalledWith([
+        {"deliveryOrderNo": "DO-00004", "id": undefined, "invoiceDate": todayDateStr, 
+            "itemCode": "07411", "notes": 'hello world', "partName": "Brake Pads Yz", 
+            "quantity": 8, "sparePartId": 900001, "supplierId": 2002, 
+            "totalPrice": 2000, "unit": "pc", "unitPrice": 250}, 
+        {"deliveryOrderNo": "DO-00004", "id": undefined, "invoiceDate": todayDateStr, 
+            "itemCode": undefined, "notes": 'hi', "partName": "Engine Oil", 
+            "quantity": 200, "sparePartId": undefined, "supplierId": 2002, 
+            "totalPrice": 1939.9999999999998, "unit": "pc", "unitPrice": 9.7}], expect.anything())
+
+    onSaveNewOrders.mock.calls[0][1]()
+    expect(setShowDialog).toBeCalledWith(false)
+})

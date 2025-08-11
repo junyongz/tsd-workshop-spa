@@ -33,7 +33,7 @@ global.fetch = jest.fn()
 global.alert = jest.fn()
 afterAll(() => jest.clearAllMocks())
 
-test('add new parts with supplier and photo', async () => {
+test('add new parts with supplier and photo, but failed to save media', async () => {
     const user = userEvent.setup()
 
     global.fetch.mockResolvedValueOnce({
@@ -43,14 +43,6 @@ test('add new parts with supplier and photo', async () => {
     .mockResolvedValueOnce({
         ok: true, // POST /api/spare-parts/:sparePartId/medias
         json: () => Promise.resolve(["AB650001"])
-    })
-    .mockResolvedValueOnce({
-        ok: true, // POST /api/spare-parts
-        json: () => Promise.resolve({ id: 50001 })
-    })
-    .mockResolvedValueOnce({
-        ok: true, // POST /api/spare-parts/:sparePartId/medias
-        json: () => Promise.resolve([650001])
     })
 
     const afterSave = jest.fn()
@@ -135,6 +127,74 @@ test('add new parts with supplier and photo', async () => {
     expect(afterSave).lastCalledWith({"id": 50001, "orderIds": [5000]})
 
     jest.restoreAllMocks()
+})
+
+test('add new parts with supplier and photo', async () => {
+    const user = userEvent.setup()
+
+    global.fetch.mockResolvedValueOnce({
+        ok: true, // POST /api/spare-parts
+        json: () => Promise.resolve({ id: 50001 })
+    })
+    .mockResolvedValueOnce({
+        ok: true, // POST /api/spare-parts/:sparePartId/medias
+        json: () => Promise.resolve([650001])
+    })
+
+    const afterSave = jest.fn()
+    const afterRemoveMedia = jest.fn()
+    const setShowDialog = jest.fn()
+
+    const SparePartWrapper = () => {
+        const [sparePart, setSparePart] = useState({oems:[],compatibleTrucks:[]})
+
+        return (
+            <SparePartDialog afterSave={afterSave} 
+                afterRemoveMedia={afterRemoveMedia} 
+                suppliers={mockSuppliers}
+                isShow
+                setShowDialog={setShowDialog}
+                sparePart={sparePart}
+                setSparePart={setSparePart}></SparePartDialog>
+        )
+    }
+
+    render(<SupplierOrderContext value={mockOrders}><SparePartWrapper /></SupplierOrderContext>)
+
+    await user.click(screen.getByPlaceholderText('OE No'))
+    await user.keyboard('11220000')
+
+    await user.click(screen.getByPlaceholderText('Part Name'))
+    await user.keyboard('Air Tank')
+
+    await user.click(screen.getByPlaceholderText('Description'))
+    await user.keyboard('Air Tank for storing air from compressor')
+
+    // supplier tab
+    await user.click(screen.getByRole('tab', {name: 'Suppliers'}))
+    // find from order
+    await user.click(screen.getByPlaceholderText('How about start with an order'))
+    await user.keyboard('Air Tank')
+    await user.click(screen.getByRole('option', {name: 'Air Tank (2005-01-01) - Han Seng'}))
+
+    // go to gallery
+    await user.click(screen.getByRole('tab', {name: 'Gallery'}))
+    const upload = screen.getByLabelText('upload file(s)')
+    user.upload(upload, new File([Uint8Array.from(atob("/9j/4AAQSkZJRgABAQEAAAAAAA=="), c => c.charCodeAt(0)).buffer], 'test.jpg', { type: 'image/jpeg' })) 
+
+    // go to detail
+    await user.click(screen.getByRole('tab', {name: 'Detail'}))
+    await user.click(screen.getByRole('button', {name: 'Save'}))
+    await waitFor(() => {
+        expect(global.fetch).nthCalledWith(1, "http://localhost:8080/api/spare-parts", 
+            {"body": "{\"oems\":[],\"compatibleTrucks\":[],\"partNo\":\"11220000\",\"partName\":\"Air Tank\",\"description\":\"Air Tank for storing air from compressor\",\"supplierIds\":[2000],\"orderIds\":[5000]}", 
+                "headers": {"Content-type": "application/json"}, "method": "POST", "mode": "cors"}) 
+
+        expect(global.fetch).nthCalledWith(2, "http://localhost:8080/api/spare-parts/50001/medias", {"body": expect.any(FormData), "method": "POST"})
+    })
+
+    expect(setShowDialog).lastCalledWith(false)
+    expect(afterSave).lastCalledWith({"id": 50001, "orderIds": [5000]})
 })
 
 test('add new parts without any supplier', async () => {

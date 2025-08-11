@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from "react"
-import { Badge, Button, ButtonGroup, Card, Col, Container, Dropdown, DropdownButton, ListGroup, ListGroupItem, Row, Stack } from "react-bootstrap"
+import { Badge, Button, Card, Col, Container, ListGroup, ListGroupItem, Row, Stack } from "react-bootstrap"
 import { ScrollSpy } from "bootstrap"
 import { Calendar } from "../Icons"
-import { months3EngChars } from "../utils/dateUtils"
 import { useSupplierOrders } from "./SupplierOrderContextProvider"
 import YearMonthsSelector from "../components/YearMonthsSelector"
 
@@ -12,7 +11,7 @@ import YearMonthsSelector from "../components/YearMonthsSelector"
  * @param {import("./SupplierOrders").Supplier[]} suppliers 
  * @param {number} year 
  * @param {number} month 
- * @returns 
+ * @returns { Object<string, import("./SupplierOrders").SupplierOrder[]> }
  */
 const filterOrdersBySupplier = (orders, suppliers, year, month) => {
     const matchedYearMonthOrders = orders.filter(order => {
@@ -64,7 +63,7 @@ function SupplierSparePartsYearMonthView({suppliers, backToOrders}) {
     const [month, setMonth] = useState(currentDate.getMonth())
 
     const trxsGroupBySuppliers = filterOrdersBySupplier(supplierOrders.list(), suppliers, year, month)
-    const sortedKeys = Object.keys(trxsGroupBySuppliers).sort((a, b) => a > b ? -1 : 1)
+    const sortedKeys = Object.keys(trxsGroupBySuppliers).sort((a, b) => a.localeCompare(b))
     const availableYears = Array.from(new Set(supplierOrders.list().map(order => 
         new Date(order.invoiceDate).getFullYear()))).sort((a, b) => b - a)
 

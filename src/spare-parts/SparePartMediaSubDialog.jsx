@@ -21,6 +21,7 @@ export default function SparePartMediaSubDialog({sparePart, uploadedMedias, setU
         fetch(`${apiUrl}/api/spare-parts/${media.sparePartId}/medias/${media.id}`, 
             { method: 'DELETE' })
             .then(resp => {
+                // TODO, deal with bad response
                 if (resp.ok) {
                     URL.revokeObjectURL(media.dataUrl)
                     setUploadedMedias(prev => {

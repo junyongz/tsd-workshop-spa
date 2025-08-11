@@ -18,7 +18,12 @@ window.matchMedia = jest.fn()
 
 afterAll(() => jest.clearAllMocks())
 
-const mockSuppliers = [{ id: 2000, supplierName: 'Han Seng' }, { id: 2001, supplierName: 'Kok Song' }];
+const mockSuppliers = [
+    
+    { id: 2001, supplierName: 'Kok Song' },
+    { id: 2002, supplierName: 'Ak Ak Sook'},
+    { id: 2000, supplierName: 'Han Seng' }, 
+    ];
 
 /** @type {import('../SupplierOrders').SupplierOrder[]} */
 const theOrders = [
@@ -30,6 +35,9 @@ const theOrders = [
     {id: 5005, supplierId: 2001, partName: 'Air Hose', invoiceDate: '2006-03-05', status: 'ACTIVE', unitPrice: 50, quantity: 10, unit: 'ft'},
     {id: 5006, supplierId: 2000, partName: 'AirX Hose', invoiceDate: '2005-02-04', status: 'ACTIVE'},
     {id: 5007, supplierId: 2000, partName: 'FireX Ext', invoiceDate: '2005-02-12', status: 'ACTIVE', unitPrice: 44, quantity: 30, unit: 'meters'},
+    {id: 5008, supplierId: 2002, partName: 'Brake Chamber', invoiceDate: '2005-02-13', status: 'ACTIVE', unitPrice: 220, quantity: 2, unit: 'pc'},
+    {id: 5009, supplierId: 2002, partName: 'Brake Shoe', invoiceDate: '2005-02-12', status: 'ACTIVE', unitPrice: 350, quantity: 3, unit: 'pc'},
+    {id: 5010, supplierId: 2002, partName: 'Brake Adjuster', invoiceDate: '2005-02-14', status: 'ACTIVE', unitPrice: 290, quantity: 10, unit: 'unit'},
 ]
 
 const makeNewOrders = () => new SupplierOrders([...theOrders], jest.fn());
@@ -62,7 +70,7 @@ test('this year only', async() => {
     // setting undefined wont work, just removeAttribute
     document.documentElement.removeAttribute('data-bs-theme')
 
-    expect(screen.queryAllByRole('document')).toHaveLength(2)
+    expect(screen.queryAllByRole('document')).toHaveLength(3)
     expect(screen.queryAllByText('Air Hose')).toHaveLength(1)
     expect(screen.queryAllByText('Fire Ext')).toHaveLength(1)
     expect(screen.queryAllByText('AirX Hose')).toHaveLength(1)

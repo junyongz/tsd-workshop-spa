@@ -27,7 +27,7 @@ const services = [
     {id: 5007, vehicleId: 82008, vehicleNo: "JJ 8", startDate: "2005-04-04", transactionTypes: ["SERVICE"], mileageKm: 1000},
     {id: 5008, vehicleId: 82017, vehicleNo: "JK 8", startDate: addDaysToDateStr(todayDate, (5*30+14)), transactionTypes: ["SERVICE"], mileageKm: 19000},
     {id: 5009, vehicleId: 82018, vehicleNo: "JK 9", startDate: addDaysToDateStr(todayDate, -(5*30+14)), transactionTypes: ["SERVICE"], mileageKm: 17000},
-    {id: 5010, vehicleId: 82019, vehicleNo: "JL 1", startDate: addDaysToDateStr(todayDate, (5*30+14)), transactionTypes: ["SERVICE"], mileageKm: 11000},
+    {id: 5010, vehicleId: 82019, vehicleNo: "JL 1", startDate: addDaysToDateStr(todayDate, (5*30+14)), transactionTypes: ["SERVICE"], mileageKm: 11000}
 ]
 
 const companies = [
@@ -64,6 +64,7 @@ const newVehicles =[
     {id: 82019, vehicleNo: "JL 1", companyId: 8001, latestMileageKm: 12000, insuranceExpiryDate: '2005-08-31', roadTaxExpiryDate: '2005-08-31', inspectionDueDate: '2005-09-30'},
     {id: 82029, vehicleNo: "JL 2", companyId: 8001, latestMileageKm: 15000 },
     {id: 82030, vehicleNo: "JL 3", latestMileageKm: 15000 },
+    {id: 82031, vehicleNo: "JL 4"},
 ]
 
 test('render many vehicles', async () => {
@@ -339,7 +340,7 @@ test('render lots of vehicles, load more', async () => {
 
     expect(screen.getAllByRole("button")
         .filter(elem => elem.classList.contains('card')))
-        .toHaveLength(21)
+        .toHaveLength(22)
 
     expect(screen.queryByLabelText('load more')).not.toBeInTheDocument()
     expect(screen.queryByLabelText('load all')).not.toBeInTheDocument()
@@ -348,7 +349,7 @@ test('render lots of vehicles, load more', async () => {
 test('render lots of vehicles, load all', async () => {
     const user = userEvent.setup()
 
-    render(<ServiceContext value={new ServiceTransactions(services, jest.fn())}>
+    const { rerender } = render(<ServiceContext value={new ServiceTransactions(services, jest.fn())}>
             <Vehicles vehicles={newVehicles} companies={companies}></Vehicles>
         </ServiceContext>)
 
@@ -373,19 +374,21 @@ test('render lots of vehicles, load all', async () => {
 
     expect(screen.getAllByRole("button")
         .filter(elem => elem.classList.contains('card')))
-        .toHaveLength(21)
+        .toHaveLength(22)
 
     expect(Array.from(document.querySelectorAll('h3')).map(h3 => h3.textContent))
         .toEqual(["JJ 1", "JJ 5", "JJ 8", "JJ 9", "JK 4", "JK 8", "JJ 2", "JJ 6", "JK 1", 
-            "JK 5", "JK 9", "JJ 4", "JK 3", "JK 7", "JL 2", "JL 3", "JJ 3", "JJ 7", "JK 2", "JK 6", "JL 1"])
+            "JK 5", "JK 9", "JJ 4", "JK 3", "JK 7", "JL 2", "JL 3", "JJ 3", "JJ 7", "JK 2", "JK 6", "JL 1", "JL 4"])
     
     await user.click(screen.getByRole('checkbox', {name: 'Service due soon'}))
 
     expect(Array.from(document.querySelectorAll('h3')).map(h3 => h3.textContent))
         .toEqual(["JJ 1", "JJ 8", "JJ 5", "JJ 3", "JJ 9", "JK 4", "JJ 6", "JK 9", "JK 8", 
-            "JJ 2", "JK 1", "JK 5", "JJ 4", "JK 3", "JK 7", "JL 2", "JL 3", "JJ 7", "JK 2", "JK 6", "JL 1"])
+            "JJ 2", "JK 1", "JK 5", "JJ 4", "JK 3", "JK 7", "JL 2", "JL 3", "JJ 7", "JK 2", "JK 6", "JL 1", "JL 4"])
 
-    // zoom into vehicle not belong to any company
+    expect(document.querySelectorAll('.text-warning')).toHaveLength(1)
+
+// zoom into vehicle not belong to any company
     await user.click(screen.getByText('JL 3'))
     await user.click(screen.getByLabelText('Close'))
 
@@ -400,4 +403,18 @@ test('render lots of vehicles, load all', async () => {
     expect(screen.getByRole('textbox', {name: 'latest mileage'})).toHaveValue('20000 KM')
     expect(screen.getByRole('textbox', {name: 'last service'})).toHaveValue('1000 KM @ 2005-04-04')
     expect(screen.getByRole('textbox', {name: 'next service'})).toHaveValue('Do it now!')
+    await user.click(screen.getByLabelText('Close'))
+
+    rerender(<ServiceContext value={
+            new ServiceTransactions([...services, 
+                {id: 5011, vehicleId: 82032, vehicleNo: "JL 5", startDate: addMonthsToDateStr(todayDate, 3), 
+                    transactionTypes: ["SERVICE"], mileageKm: 10500}], jest.fn())}>
+            <Vehicles vehicles={[...newVehicles, {id: 82032, vehicleNo: "JL 5", latestMileageKm: 28000 }]} companies={companies}></Vehicles>
+        </ServiceContext>)
+    expect(document.querySelectorAll('.text-warning')).toHaveLength(2)
+
+    await user.click(screen.getByText('JL 5'))
+    expect(screen.getByRole('textbox', {name: 'latest mileage'})).toHaveValue('28000 KM')
+    expect(screen.getByRole('textbox', {name: 'last service'})).toHaveValue('10500 KM @ ' + addMonthsToDateStr(todayDate, 3))
+    expect(screen.getByRole('textbox', {name: 'next service'})).toHaveValue('500 KM more to go')
 })

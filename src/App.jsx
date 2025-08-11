@@ -142,7 +142,7 @@ function App() {
     setSelectedSearchDate()
   }
 
-  const refreshVehicles = useCallback(() => fetchVehicles(apiUrl, setVehicles, setSearchOptions), [])
+  const refreshVehicles = useCallback(() => fetchVehicles(apiUrl, setVehicles, setSearchOptions), [setVehicles, setSearchOptions])
 
   /**
    * @type CreateNewVehicleCallback
@@ -173,17 +173,17 @@ function App() {
 
   const refreshCompanies = useCallback(() => fetchCompanies(apiUrl, setCompanies), [])
 
-  const refreshSparePartUsages = useCallback(() => fetchSparePartUsages(apiUrl, setSparePartUsages, showToastMessage), [])
+  const refreshSparePartUsages = useCallback(() => fetchSparePartUsages(apiUrl, setSparePartUsages, showToastMessage), [setSparePartUsages])
 
   const refreshServices = useCallback(() =>
       selectedSearchOptions.length > 0
           ? fetchServices(apiUrl, transactions, searchedOptions).then(() => filterServices(selectedSearchOptions))
           : fetchServices(apiUrl, transactions, searchedOptions)
-  , [selectedSearchOptions])
-  const refreshFewPagesServices = useCallback(() => fetchFewPagesServices(apiUrl, transactions, searchedOptions), [])
+  , [transactions, searchedOptions, selectedSearchOptions])  // eslint-disable-line react-hooks/exhaustive-deps
+  const refreshFewPagesServices = useCallback(() => fetchFewPagesServices(apiUrl, transactions, searchedOptions), [transactions, searchedOptions])
 
-  const refreshSupplierSpareParts = useCallback(() => fetchSupplierSpareParts(apiUrl, supplierOrders), [apiUrl])
-  const refreshWithUsageSupplierSpareParts = useCallback(() => fetchWithUsageSupplierSpareParts(apiUrl, supplierOrders), [])
+  const refreshSupplierSpareParts = useCallback(() => fetchSupplierSpareParts(apiUrl, supplierOrders), [supplierOrders])
+  const refreshWithUsageSupplierSpareParts = useCallback(() => fetchWithUsageSupplierSpareParts(apiUrl, supplierOrders), [supplierOrders])
 
   const onNewServiceCreated = saveService.bind(this, setLoading, transactions, refreshSparePartUsages, clearState)
   const removeTask = removeServiceTask.bind(this, setLoading, transactions, clearState);
@@ -227,7 +227,7 @@ function App() {
       }, 30000)
 
       return () => clearInterval(fetchStatsTimer)
-  }, [refreshServices])
+  }, [refreshServices, refreshSupplierSpareParts, refreshSparePartUsages, refreshVehicles]) 
 
   useEffect(() => {
     let loadingTimer 

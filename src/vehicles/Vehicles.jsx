@@ -35,7 +35,8 @@ import { useService } from "../services/ServiceContextProvider";
  * @returns 
  */
 export default function Vehicles({vehicles, setVehicles, companies, selectedSearchOptions}) {
-    const services = useService()
+    const service = useService()
+    const workshopServices = service.services()
 
     const [serviceByVehicle, setServiceByVehicle] = useState({})
     const [inspectionByVehicle, setInspectionByVehicle] = useState({})
@@ -106,10 +107,10 @@ export default function Vehicles({vehicles, setVehicles, companies, selectedSear
     useEffect(() => {
         const findBy = (type) => {
             return vehicles
-                .map(veh => services.services()
+                .map(veh => workshopServices
                     .findIndex(srv => (srv.vehicleId === veh.id && srv.transactionTypes?.includes(type)))
                 )
-                .map(idx => services.services()[idx])
+                .map(idx => workshopServices[idx])
                 .filter(srv => !!srv)
                 .reduce((pv, cv) => {
                     pv[cv.vehicleNo] = cv
@@ -120,7 +121,7 @@ export default function Vehicles({vehicles, setVehicles, companies, selectedSear
         setServiceByVehicle(findBy('SERVICE'))
         setInspectionByVehicle(findBy('INSPECTION'))
 
-    }, [services.services()])
+    }, [workshopServices])
 
     return (
         <Container fluid>

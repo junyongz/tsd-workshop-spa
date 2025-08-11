@@ -6,7 +6,7 @@ import AddSparePartsDialog from '../AddSparePartsDialog';
 import SupplierOrders from '../SupplierOrders';
 import { SupplierOrderContext } from '../SupplierOrderContextProvider';
 import { addDaysToDateStr } from '../../utils/dateUtils';
-import clearAllThen from '../../__mocks__/userEventUtil';
+import { clearAllThen } from '../../__mocks__/userEventUtil';
 
 /** @type {import('../SupplierOrders').Supplier} */
 const suppliers = [ 
@@ -32,10 +32,9 @@ const mockOrders = [
 ];
 
 const todayDateStr = addDaysToDateStr(new Date(), 0)
+const user = userEvent.setup()
 
 test('show dialog to add new parts, and close it', async () => {
-    const user = userEvent.setup()
-
     const setShowDialog = jest.fn()
     const onSaveNewOrders = jest.fn()
 
@@ -66,8 +65,6 @@ test('show dialog to add new parts, and close it', async () => {
 })
 
 test('create a single item order, choose ordered before parts', async () => {
-    const user = userEvent.setup()
-
     const setShowDialog = jest.fn()
     const onSaveNewOrders = jest.fn()
 
@@ -122,8 +119,6 @@ test('create a single item order, choose ordered before parts', async () => {
 })
 
 test('create a single item order, newly order parts', async () => {
-    const user = userEvent.setup()
-
     const setShowDialog = jest.fn()
     const onSaveNewOrders = jest.fn()
 
@@ -166,8 +161,6 @@ test('create a single item order, newly order parts', async () => {
 })
 
 test('create a 2 items order, same supplier', async() => {
-    const user = userEvent.setup()
-
     const setShowDialog = jest.fn()
     const onSaveNewOrders = jest.fn()
 
@@ -234,8 +227,6 @@ test('create a 2 items order, same supplier', async() => {
 })
 
 test('create a 2 items order, from different suppliers, then choose a new supplier', async() => {
-    const user = userEvent.setup()
-
     const setShowDialog = jest.fn()
     const onSaveNewOrders = jest.fn()
 
@@ -307,8 +298,6 @@ test('create a 2 items order, from different suppliers, then choose a new suppli
 })
 
 test('create a 2 items orders, delete 1st, then 2nd one should be the only one', async() => {
-    const user = userEvent.setup()
-
     const setShowDialog = jest.fn()
     const onSaveNewOrders = jest.fn()
 
@@ -365,8 +354,6 @@ test('create a 2 items orders, delete 1st, then 2nd one should be the only one',
 })
 
 test('edit existing order, not allow to add and change value', async() => {
-    const user = userEvent.setup()
-
     const setShowDialog = jest.fn()
     const onSaveNewOrders = jest.fn()
 

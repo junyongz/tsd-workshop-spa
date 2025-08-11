@@ -21,7 +21,7 @@
  * @property {number} supplierName on-the-fly calculated against the suppliers
  * @property {string} status either ACTIVE or DEPLETED
  * @property {number} remaining on-the-fly calculated against spare part usages
- * @property {SupplierOrder[]} [selectedSpareParts] selected spare part in the dialog, must be an array
+ * @property {SupplierOrder[]} [selectedSpareParts] selected spare part in the service related dialog, must be an array
  */
 
 class SupplierOrders {

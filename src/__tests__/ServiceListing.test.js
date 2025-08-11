@@ -9,7 +9,7 @@ import { SupplierOrderContext } from '../suppliers/SupplierOrderContextProvider'
 import ServiceListing from '../ServiceListing';
 import SupplierOrders from '../suppliers/SupplierOrders';
 import { addDaysToDateStr } from '../utils/dateUtils';
-import clearAllThen from '../__mocks__/userEventUtil';
+import { clearAllThen } from '../__mocks__/userEventUtil';
 
 
 jest.mock('../services/ServiceNoteTakingDialog', () => ({isShow, onSaveNote}) => 

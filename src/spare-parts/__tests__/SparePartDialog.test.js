@@ -33,7 +33,7 @@ global.fetch = jest.fn()
 global.alert = jest.fn()
 afterEach(() => {
     jest.clearAllMocks()
-    jest.resetAllMocks()
+    jest.restoreAllMocks()
 })
 
 test('add new parts with supplier and photo, but failed to save media', async () => {

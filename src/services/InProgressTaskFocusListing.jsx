@@ -180,7 +180,7 @@ function InProgressTaskFocusListing({suppliers, taskTemplates, onNewServiceCreat
                 <Col xs="6">
                 <h4>
                     $ {((v.sparePartUsages?.reduce((acc, curr) =>  acc + (curr.quantity * curr.soldPrice), 0) || 0) +
-                        (v.tasks?.reduce((acc, curr) => acc + (curr.quotedPrice || 0), 0) || 0)).toFixed(2)}
+                        (v.tasks?.reduce((acc, curr) => acc + curr.quotedPrice, 0) || 0)).toFixed(2)}
                 </h4>
                 </Col>
                 <Col xs="6" className='text-end'><Tools /> {v.sparePartsCount} <Foreman /> {v.workmanshipTasksCount}</Col>
@@ -258,7 +258,10 @@ function InProgressTaskFocusListing({suppliers, taskTemplates, onNewServiceCreat
                       return <ListGroupItem key={vvv.id} onClick={() => setSelectedSparePart(vvv)} role='button'>
                         <Row>
                           <Col xs="12" lg="2" className='fw-lighter'><Calendar /> {vvv.usageDate}</Col>
-                          <Col xs="12" lg="4" className='fw-semibold'>{ order.itemCode && !order.partName.includes(order.itemCode) && <span className='text-secondary'>{order.itemCode}&nbsp;</span> }<span>{order.partName}</span> <div className="d-none d-lg-block"><OrderTooltip order={order} supplier={supplier} /></div></Col>
+                          <Col xs="12" lg="4" className='fw-semibold'>{ order.itemCode && !order.partName.includes(order.itemCode) && 
+                            <span className='text-secondary'>{order.itemCode}&nbsp;</span> }<span>{order.partName}</span> 
+                            <div className="d-none d-lg-block"><OrderTooltip order={order} supplier={supplier} /></div>
+                          </Col>
                           <Col xs="6" lg="4" className='text-lg-end'>
                           {vvv.quantity > 0 && vvv.soldPrice && `${vvv.quantity} ${order.unit} @ $${vvv.soldPrice?.toFixed(2)}`} 
                           <div><span className="text-secondary">original: ${order.unitPrice?.toFixed(2)} {vvv.margin > 0 && <><i className="bi bi-arrow-up"></i>{vvv.margin}%</>}</span></div>  

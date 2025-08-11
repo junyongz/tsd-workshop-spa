@@ -29,14 +29,13 @@ const transactions = [
         tasks: []
     },
     {id: 10003, startDate: '2022-01-01', vehicleId: 20003, vehicleNo: "J 34", mileageKm: 3100,
-        sparePartUsages: [{id: 990003, orderId: 2000, quantity: 2, usageDate: '2022-01-03'}],
-        tasks: []
+        sparePartUsages: [{id: 990003, orderId: 2000, quantity: 2, usageDate: '2022-01-03'}]
     }
 ]
 
 const newTransactions = () => {
     return [...transactions].map((t, i) => {
-        return {...t, sparePartUsages: [...transactions[i].sparePartUsages], tasks: [...transactions[i].tasks]}
+        return {...t, sparePartUsages: [...transactions[i].sparePartUsages], tasks: transactions[i].tasks && [...transactions[i].tasks]}
     })
 }
 

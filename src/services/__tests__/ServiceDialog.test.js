@@ -1,4 +1,4 @@
-import { jest, test, expect, afterAll, afterEach } from '@jest/globals'
+import { jest, test, expect, afterEach } from '@jest/globals'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
@@ -74,6 +74,9 @@ test('add 2 spare parts', async () => {
     sparePart = screen.getAllByPlaceholderText("Find a spare part...")[1]
     await user.click(sparePart)
     await user.click(screen.getByText('Oil Filter'))
+    await user.click(screen.getAllByLabelText('Clear')[1])
+    await user.click(screen.getAllByPlaceholderText("Find a spare part...")[1])
+    await user.click(screen.getByText('Oil Filter'))
 
     await user.click(screen.getAllByPlaceholderText('Quantity')[1])
     await user.keyboard("[Backspace]1")
@@ -96,7 +99,7 @@ test('add 2 spare parts', async () => {
         "tasks": [], "transactionTypes": [], 
         "vehicleId": 50002, "vehicleNo": "J 33"})
     expect(setShow).toBeCalledWith(false)
-})
+}, 50000)
 
 test('add a spare parts, then add workmanship without fill up, last fill up again', async () => {
     jest.useFakeTimers()

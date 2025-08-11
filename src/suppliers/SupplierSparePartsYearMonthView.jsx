@@ -148,7 +148,7 @@ function SupplierSparePartsYearMonthView({suppliers, backToOrders}) {
                                                                 <Col xs="12" lg="2" className="fw-lighter">{order.itemCode} </Col>
                                                                 <Col xs="12" lg="6" className="fw-semibold">{order.partName} </Col>
                                                                 <Col xs="6" lg="2" className='text-lg-end'>{order.quantity > 0 && order.unitPrice && `${order.quantity} ${order.unit} @ $${order.unitPrice?.toFixed(2)}`}</Col>
-                                                                <Col xs="6" lg="2" className='text-end fw-semibold'>$ {(order.quantity * order.unitPrice).toFixed(2) || 0}</Col>
+                                                                <Col xs="6" lg="2" className='text-end fw-semibold'>$ {(order.quantity && order.unitPrice && (order.quantity * order.unitPrice).toFixed(2)) || 0}</Col>
                                                             </Row>
                                                         </ListGroupItem>)}
                                                         <ListGroupItem>

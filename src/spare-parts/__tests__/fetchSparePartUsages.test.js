@@ -8,7 +8,7 @@ afterEach(() => {
     jest.restoreAllMocks()
 })
 
-test('error to fetch vehicle', async () => {
+test('error to fetch spare parts', async () => {
     global.fetch.mockRejectedValueOnce('failed to call api')
 
     const setSparePartUsages = jest.fn()

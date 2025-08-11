@@ -1,12 +1,16 @@
-import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { test, expect, jest, afterEach } from '@jest/globals'
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+
+import { BrowserRouter, useNavigate } from 'react-router-dom';
+
 import { WorkshopServicesProvider } from '../services/ServiceContextProvider';
 import { SupplierOrderContext } from '../suppliers/SupplierOrderContextProvider';
 import ServiceListing from '../ServiceListing';
 import SupplierOrders from '../suppliers/SupplierOrders';
 import { addDaysToDateStr } from '../utils/dateUtils';
-import { BrowserRouter, useNavigate } from 'react-router-dom';
+import clearAllThen from '../__mocks__/userEventUtil';
+
 
 jest.mock('../services/ServiceNoteTakingDialog', () => ({isShow, onSaveNote}) => 
     <div>
@@ -264,10 +268,12 @@ test('listing no search options, then add search option', async () => {
     expect(screen.queryAllByRole('listitem', {name: 'service type: inspection', current: true})).toHaveLength(0)
     expect(screen.queryAllByRole('listitem', {name: 'service type: tyre', current: true})).toHaveLength(1)
 
+    // so re-render later on, this consider exactly the same
+    const searchOptions = [{name: 'J 23'}]
     // add vehicle no for searching
     rerender(<WorkshopServicesProvider initialServices={[...lotTransactions]}>
         <SupplierOrderContext value={new SupplierOrders([...orders], jest.fn())}>
-            <ServiceListing selectedSearchOptions={[{name: 'J 23'}]} 
+            <ServiceListing selectedSearchOptions={searchOptions} 
                 setTotalFilteredServices={setTotalFilteredServices}
                 suppliers={[...suppliers]} setLoading={setLoading} />
         </SupplierOrderContext>
@@ -280,7 +286,7 @@ test('listing no search options, then add search option', async () => {
     // add date to search items
     rerender(<WorkshopServicesProvider initialServices={[...lotTransactions]}>
         <SupplierOrderContext value={new SupplierOrders([...orders], jest.fn())}>
-            <ServiceListing selectedSearchOptions={[{name: 'J 23'}]}
+            <ServiceListing selectedSearchOptions={searchOptions}
                 selectedSearchDate='2022-03-03'
                 setTotalFilteredServices={setTotalFilteredServices}
                 suppliers={[...suppliers]} setLoading={setLoading} />
@@ -574,9 +580,16 @@ test('view the completed service, migrate item to spare part usage', async () =>
         })
     })
     .mockResolvedValueOnce({
-        ok: true,
+        ok: true, // POST /api/spare-part-utilizations
         json: () => Promise.resolve(
             {id: 990009, "vehicleId":20002, "vehicleNo":"J 33", "usageDate":"2022-01-09",
+                "orderId":1002, "serviceId":10002, "quantity":1, "soldPrice":289.8, "migDataIndex":9800001}
+        )
+    })
+    .mockResolvedValueOnce({
+        ok: true, // POST /api/spare-part-utilizations
+        json: () => Promise.resolve(
+            {id: 990010, "vehicleId":20002, "vehicleNo":"J 33", "usageDate":"2022-01-09",
                 "orderId":1002, "serviceId":10002, "quantity":1, "soldPrice":289.8, "migDataIndex":9800001}
         )
     })
@@ -599,8 +612,12 @@ test('view the completed service, migrate item to spare part usage', async () =>
 
     render(<WorkshopServicesProvider initialServices={initialServices}>
         <SupplierOrderContext value={
-            new SupplierOrders([{id: 1002, supplierId: 60001, itemCode: '1000', 
-                partName: 'Brake adjuster 40001', quantity: 5, unit: 'pc', unitPrice: 289.8, status: 'ACTIVE', notes: 'depleting soon'}], jest.fn())}>
+            new SupplierOrders([
+                {id: 1002, supplierId: 60001, itemCode: '1000', 
+                    partName: 'Brake adjuster 40001', quantity: 5, unit: 'pc', unitPrice: 289.8, status: 'ACTIVE', notes: 'depleting soon'},
+                {id: 1003, supplierId: 60001, itemCode: '2000', 
+                    partName: 'Proper Water X Pipe', quantity: 20, unit: 'feet', unitPrice: 2.9, status: 'ACTIVE', notes: 'generic usage'}
+            ], jest.fn())}>
             <ServiceListing selectedSearchOptions={[]} 
                 setTotalFilteredServices={setTotalFilteredServices}
                 refreshSparePartUsages={() => Promise.resolve([])}
@@ -640,6 +657,21 @@ test('view the completed service, migrate item to spare part usage', async () =>
     // no longer have migrated item
     expect(screen.queryByLabelText('migrate item Brake adjuster from L')).not.toBeInTheDocument()
     expect(screen.getByText(/Brake adjuster 40001/)).toBeInTheDocument()
+
+    // migrate another one
+    await user.click(screen.queryByLabelText('migrate item Water pipe'))
+    await user.click(screen.queryByPlaceholderText('Find a spare part...'))
+    await user.click(screen.queryByRole('option', {name: 'Proper Water X Pipe'}))
+    await user.click(screen.queryByPlaceholderText('Quantity'))
+    await user.keyboard(clearAllThen('10'))
+    await user.click(screen.queryByPlaceholderText('Price $'))
+    await user.keyboard(clearAllThen('4'))
+
+
+    await user.click(screen.getByText('Go'))
+    await waitFor(() => expect(global.fetch).lastCalledWith("http://localhost:8080/api/spare-part-utilizations", 
+        {"body": "{\"vehicleId\":20002,\"vehicleNo\":\"J 33\",\"usageDate\":\"2022-01-10\",\"orderId\":1003,\"serviceId\":10002,\"quantity\":\"10\",\"soldPrice\":\"4\",\"migDataIndex\":9800003}", 
+            "headers": {"Content-type": "application/json"}, "method": "POST"}))
 })
 
 // fixed the bug whereby 'add new' -> close -> 'add new' -> click 'Workmanship' -> blank screen

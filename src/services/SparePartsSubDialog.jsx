@@ -67,7 +67,7 @@ export default function SparePartsSubDialog({
                             labelKey="partName"
                             options={orders.list().filter(mo => remainingQuantity(mo, sparePartUsages) > 0).filter(mo => mo.status === 'ACTIVE')}
                             onChange={(opts) => afterChooseSparePart(opts, i)}
-                            selected={v.selectedSpareParts || []}
+                            selected={v.selectedSpareParts}
                             placeholder="Find a spare part..."
                             renderMenuItemChildren={(order) => {
                                 const supplier = suppliers.find(s => s.id === order.supplierId)
@@ -97,7 +97,7 @@ export default function SparePartsSubDialog({
                         </InputGroup>
                     </Col>
                     <Col xs="6" xl="1" className="mb-3 mb-xl-0">
-                        <FormLabel className="fs-5 text-end"><span>$&nbsp;{(v?.quantity * v?.unitPrice * (1 + (sparePartsMargin || 0)/100)).toFixed(2) || 0}</span></FormLabel>
+                        <FormLabel className="fs-5 text-end"><span>$&nbsp;{(v.quantity && v.unitPrice && (v.quantity * v.unitPrice * (1 + (sparePartsMargin || 0)/100)).toFixed(2)) || 0}</span></FormLabel>
                     </Col>
                     {!migration && <Col xs="6" xl="1" className="text-end">
                     <Button variant="danger" className="fs-5" aria-label={`delete spare part ${i}`} onClick={() => removeItem(i)}><Trash /></Button>

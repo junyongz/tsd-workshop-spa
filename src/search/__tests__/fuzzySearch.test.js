@@ -1,11 +1,11 @@
-import { afterAll, expect, test, jest } from '@jest/globals'
+import { expect, test, jest, afterEach } from '@jest/globals'
+import { waitFor } from '@testing-library/react'
 
 import { applyFilterOnOrders, applyFilterOnServices, doFilterServices } from '../fuzzySearch'
 import SupplierOrders from '../../suppliers/SupplierOrders'
 import ServiceTransactions from '../../ServiceTransactions'
-import { waitFor } from '@testing-library/react'
 
-afterAll(() => jest.clearAllMocks())
+afterEach(() => jest.clearAllMocks())
 
 test('1 search option, only vehicle match', () => {
     expect(applyFilterOnServices([{name: 'J 1000'}], undefined, 

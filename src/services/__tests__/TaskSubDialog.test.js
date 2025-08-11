@@ -1,8 +1,9 @@
 import { jest, test, expect, afterAll } from '@jest/globals'
 import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import TaskSubDialog from '../TaskSubDialog'
 import { useState } from 'react'
+
+import TaskSubDialog from '../TaskSubDialog'
 
 const taskTemplates = [
     {id: 540001, workmanshipTask: 'Adjust brake', component: {componentName: 'Parking Brake', subsystem: 'Braking'}, 

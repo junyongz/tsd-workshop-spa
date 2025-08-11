@@ -1,12 +1,15 @@
-import { render, screen, waitFor } from '@testing-library/react';
 import {jest, test, expect, afterEach} from '@jest/globals'
-import YearMonthView from '../YearMonthView';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+
 import { useNavigate } from 'react-router-dom';
+
+import YearMonthView from '../YearMonthView';
+
 import { WorkshopServicesProvider } from '../ServiceContextProvider';
 import { SupplierOrderContext } from '../../suppliers/SupplierOrderContextProvider';
 import SupplierOrders from '../../suppliers/SupplierOrders';
 import { months3EngChars } from '../../utils/dateUtils';
-import userEvent from '@testing-library/user-event';
 
 jest.mock('../OrderTooltip', () => ({ order, supplier }) => (
   <div>OrderTooltip for {order.id} from {supplier?.supplierName}</div>

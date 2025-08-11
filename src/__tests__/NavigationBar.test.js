@@ -2,9 +2,9 @@ import { test, expect, jest } from '@jest/globals'
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import NavigationBar from '../NavigationBar';
-
 import { useNavigate, useLocation } from 'react-router-dom';
+
+import NavigationBar from '../NavigationBar';
 
 afterAll(() => jest.clearAllMocks())
 

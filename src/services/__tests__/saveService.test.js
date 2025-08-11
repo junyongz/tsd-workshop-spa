@@ -1,10 +1,10 @@
-import { test, expect, jest, afterAll } from '@jest/globals'
+import { test, expect, jest, afterEach } from '@jest/globals'
 import { waitFor } from '@testing-library/react'
 import saveService from '../saveService'
 
 global.fetch = jest.fn()
 
-afterAll(() => jest.clearAllMocks())
+afterEach(() => jest.clearAllMocks())
 
 test('save a new transction', async () => {
     global.fetch.mockResolvedValueOnce({

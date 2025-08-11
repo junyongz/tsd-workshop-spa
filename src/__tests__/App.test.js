@@ -1,8 +1,10 @@
+import { test, expect, jest, afterAll } from '@jest/globals'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { test, expect, jest, afterAll } from '@jest/globals'
-import App from '../App';
+
 import { BrowserRouter, useLocation } from 'react-router-dom';
+
+import App from '../App';
 import { ServiceContext } from '../services/ServiceContextProvider';
 import { SupplierOrderContext } from '../suppliers/SupplierOrderContextProvider';
 import ServiceTransactions from '../ServiceTransactions';

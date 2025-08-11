@@ -1,10 +1,10 @@
-import { test, expect, jest, afterAll } from '@jest/globals'
-import autoRefreshWorker from '../autoRefreshWorker'
+import { test, expect, jest, afterEach } from '@jest/globals'
 import { waitFor } from '@testing-library/react'
+import autoRefreshWorker from '../autoRefreshWorker'
 
 global.fetch = jest.fn()
 
-afterAll(() => jest.clearAllMocks())
+afterEach(() => jest.clearAllMocks())
 
 test('refresh nothing', async () => {
     const dbTableStats = [

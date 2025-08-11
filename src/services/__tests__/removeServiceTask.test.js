@@ -1,11 +1,11 @@
-import { test, expect, jest, afterAll } from '@jest/globals'
+import { test, expect, jest, afterEach } from '@jest/globals'
 import { waitFor } from '@testing-library/react'
 
 import removeServiceTask from '../removeServiceTask'
 
 global.fetch = jest.fn()
 
-afterAll(() => jest.clearAllMocks())
+afterEach(() => jest.clearAllMocks())
 
 // https://developer.mozilla.org/en-US/docs/Web/API/Response/text
 // text() will always return as string

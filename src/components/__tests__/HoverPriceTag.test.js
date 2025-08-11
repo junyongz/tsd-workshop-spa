@@ -1,6 +1,7 @@
+import { test, expect, jest } from '@jest/globals'
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { test, expect, jest } from '@jest/globals'
+
 import HoverPriceTag from '../HoverPriceTag';
 
 test('move in and move out', async () => {

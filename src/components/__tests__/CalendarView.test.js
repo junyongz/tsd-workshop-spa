@@ -1,12 +1,13 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { test, expect, jest, afterEach } from '@jest/globals'
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { test, expect, jest, afterAll } from '@jest/globals'
+
 import CalendarView from '../CalendarView';
 import { addDaysToDate } from '../../utils/dateUtils';
 
 window.matchMedia = jest.fn()
 
-afterAll(() => jest.clearAllMocks())
+afterEach(() => jest.clearAllMocks())
 
 test('calendar navigation, no events, bigger screen', async () => {
     window.matchMedia.mockReturnValue({ matches: true })

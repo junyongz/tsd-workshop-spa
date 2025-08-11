@@ -1,4 +1,4 @@
-import { test, expect, jest, afterAll } from '@jest/globals'
+import { test, expect, jest, afterEach } from '@jest/globals'
 import ServiceTransactions from '../ServiceTransactions';
 
 const services = [
@@ -17,7 +17,7 @@ const newTransactions = () => {
     })
 }
 
-afterAll(() => jest.clearAllMocks())
+afterEach(() => jest.clearAllMocks())
 
 test('brand new empty transactions', () => {
     const dispatch = jest.fn()

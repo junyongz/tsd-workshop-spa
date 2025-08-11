@@ -1,4 +1,4 @@
-import { jest, test, expect, afterAll } from '@jest/globals';
+import { jest, test, expect } from '@jest/globals';
 import fetchCompanies from '../fetchCompanies';
 import { waitFor } from '@testing-library/react';
 

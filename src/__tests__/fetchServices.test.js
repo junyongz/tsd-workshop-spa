@@ -1,7 +1,8 @@
 import { test, expect, jest, afterAll, afterEach } from '@jest/globals'
+import { waitFor } from '@testing-library/react'
+
 import fetchServices, { fetchFewPagesServices } from '../fetchServices'
 import ServiceTransactions from '../ServiceTransactions'
-import { waitFor } from '@testing-library/react'
 
 global.fetch = jest.fn()
 

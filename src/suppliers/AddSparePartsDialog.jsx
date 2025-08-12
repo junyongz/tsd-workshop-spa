@@ -23,6 +23,7 @@ function AddSparePartsDialog({isShow, setShowDialog, existingOrder, suppliers, s
 
     const formRef = useRef()
     const [validated, setValidated] = useState(false)
+    const [deliveryOrderOptional, setDeliveryOrderOptional] = useState(false)
 
     const [isPending, startTransition] = useTransition();
 
@@ -32,7 +33,9 @@ function AddSparePartsDialog({isShow, setShowDialog, existingOrder, suppliers, s
      * @type {[import("./SupplierOrders").SupplierOrder[], React.SetStateAction<import("./SupplierOrders").SupplierOrder[]>]}
      */
     const [items, setItems] = useState(existingOrder || [defaultItem])
-    const editing = items && items[0]?.deliveryOrderNo
+    const editing = items && !!items[0]?.deliveryOrderNo
+    const hasPendingDO = items.some(it => 
+        it.deliveryOrderNo?.startsWith('PENDING-DO-') && it.deliveryOrderNo?.endsWith(it.id))
 
     const [selectedSupplier, setSelectedSupplier] = useState([])
 
@@ -44,6 +47,7 @@ function AddSparePartsDialog({isShow, setShowDialog, existingOrder, suppliers, s
         setShowDialog(false)
         setSelectedSupplier([])
         setValidated(false)
+        setDeliveryOrderOptional(false)
     }
 
     const clone = () => {
@@ -70,7 +74,7 @@ function AddSparePartsDialog({isShow, setShowDialog, existingOrder, suppliers, s
         const invoiceDate = nativeForm.querySelector('[name="invoiceDate"]')
         const deliveryOrderNo = nativeForm.querySelector('[name="deliveryOrderNo"]')
 
-        const payload = items.filter(v => !v.disabled).map((v, i) => {
+        const payload = items.filter(v => !v.disabled || hasPendingDO).map((v, i) => {
                 return {
                     id: v.id,
                     invoiceDate: invoiceDate.value,
@@ -233,7 +237,7 @@ function AddSparePartsDialog({isShow, setShowDialog, existingOrder, suppliers, s
                             <Col xs={{span: 6, order: 1}} lg={{span: 3, order: 0}} className="mb-2">
                                 <InputGroup>
                                     <InputGroup.Text><Calendar /></InputGroup.Text>
-                                    <Form.Control required type="date" name="invoiceDate"
+                                    <Form.Control key={items[0]?.rid}required type="date" name="invoiceDate"
                                         placeholder="Key in Invoice Date" 
                                         defaultValue={items[0]?.invoiceDate} disabled={editing}></Form.Control>
                                 </InputGroup>
@@ -257,7 +261,8 @@ function AddSparePartsDialog({isShow, setShowDialog, existingOrder, suppliers, s
                             <Col xs={{span: 6, order: 2}} lg={{span: 4, order: 2}} className="text-end">
                                 <InputGroup>
                                     <InputGroup.Text><i className="bi bi-file-earmark-spreadsheet"></i></InputGroup.Text>
-                                    <Form.Control type="text" required name="deliveryOrderNo" placeholder="Key in DO. #" defaultValue={items[0]?.deliveryOrderNo} disabled={editing}></Form.Control>
+                                    <Form.Control key={items[0]?.rid} type="text" required={!deliveryOrderOptional} name="deliveryOrderNo" placeholder="Key in DO. #" defaultValue={items[0]?.deliveryOrderNo} disabled={editing && !hasPendingDO}></Form.Control>
+                                    <InputGroup.Text><i className="bi bi-hourglass-split"></i><Form.Check type="checkbox" name="pendingDO" disabled={editing} aria-label="Pending DO/Invoice" onClick={() => setDeliveryOrderOptional(!deliveryOrderOptional)}/></InputGroup.Text>
                                 </InputGroup>
                             </Col>
                         </Row>

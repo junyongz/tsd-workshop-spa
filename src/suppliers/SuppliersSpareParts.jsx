@@ -249,6 +249,7 @@ function SuppliersSpareParts({setTotalFilteredOrders,
                     setShowDialog={setShowDialog}
                     suppliers={suppliers}
                     existingOrder={existingOrder}
+                    setExistingOrder={setExistingOrder}
                     onSaveNewOrders={onSaveNewOrders}
                     sparePartUsages={sparePartUsages}
                 ></AddSparePartsDialog>

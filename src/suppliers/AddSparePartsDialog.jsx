@@ -7,6 +7,8 @@ import PromptDeletionIcon from "../components/PromptDeletionIcon";
 import { useSupplierOrders } from "./SupplierOrderContextProvider";
 import generateUniqueId from "../utils/randomUtils";
 
+const defaultItem = {rid: generateUniqueId(), itemCode: '', partName: 'Choose one ...', quantity: 0, unit: 'pc', unitPrice: 0, selectedItemCode: [], selectedSparePart: []};
+
 /**
  * 
  * @param {Object} props
@@ -18,7 +20,7 @@ import generateUniqueId from "../utils/randomUtils";
  * @param {Function} props.onSaveNewOrders
  * @returns 
  */
-function AddSparePartsDialog({isShow, setShowDialog, existingOrder, suppliers, sparePartUsages, onSaveNewOrders}) {
+function AddSparePartsDialog({isShow, setShowDialog, existingOrder, setExistingOrder, suppliers, sparePartUsages, onSaveNewOrders}) {
     const supplierOrders = useSupplierOrders()
 
     const formRef = useRef()
@@ -26,8 +28,6 @@ function AddSparePartsDialog({isShow, setShowDialog, existingOrder, suppliers, s
     const [deliveryOrderOptional, setDeliveryOrderOptional] = useState(false)
 
     const [isPending, startTransition] = useTransition();
-
-    const defaultItem = {rid: generateUniqueId(), itemCode: '', partName: 'Choose one ...', quantity: 0, unit: 'pc', unitPrice: 0, selectedItemCode: [], selectedSparePart: []};
 
     /**
      * @type {[import("./SupplierOrders").SupplierOrder[], React.SetStateAction<import("./SupplierOrders").SupplierOrder[]>]}
@@ -40,6 +40,7 @@ function AddSparePartsDialog({isShow, setShowDialog, existingOrder, suppliers, s
     const [selectedSupplier, setSelectedSupplier] = useState([])
 
     const dialogOpened = () => {
+        setItems(existingOrder?.length > 0 || [defaultItem])
     }
 
     const handleClose = () => {
@@ -48,6 +49,7 @@ function AddSparePartsDialog({isShow, setShowDialog, existingOrder, suppliers, s
         setSelectedSupplier([])
         setValidated(false)
         setDeliveryOrderOptional(false)
+        setExistingOrder([])
     }
 
     const clone = () => {

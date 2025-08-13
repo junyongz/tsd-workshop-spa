@@ -1,5 +1,5 @@
 import { jest, test, expect } from '@jest/globals'
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import AddSparePartsDialog from '../AddSparePartsDialog';
@@ -37,9 +37,11 @@ const user = userEvent.setup()
 test('show dialog to add new parts, and close it', async () => {
     const setShowDialog = jest.fn()
     const onSaveNewOrders = jest.fn()
+    const setExistingOrder = jest.fn()
 
     render(<SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}>
         <AddSparePartsDialog isShow={true} setShowDialog={setShowDialog} 
+            setExistingOrder={setExistingOrder}
             onSaveNewOrders={onSaveNewOrders} sparePartUsages={[]} suppliers={suppliers}></AddSparePartsDialog>
         </SupplierOrderContext>)
 
@@ -62,14 +64,17 @@ test('show dialog to add new parts, and close it', async () => {
     expect(setShowDialog).not.toBeCalled()
     await user.click(screen.getByLabelText('Close'))
     expect(setShowDialog).toBeCalledWith(false)
+    expect(setExistingOrder).toBeCalledWith([])
 })
 
 test('create a single item order, choose ordered before parts', async () => {
     const setShowDialog = jest.fn()
     const onSaveNewOrders = jest.fn()
+    const setExistingOrder = jest.fn()
 
     render(<SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}>
         <AddSparePartsDialog isShow={true} setShowDialog={setShowDialog} 
+            setExistingOrder={setExistingOrder}
             onSaveNewOrders={onSaveNewOrders} sparePartUsages={[]} suppliers={suppliers}></AddSparePartsDialog>
         </SupplierOrderContext>)
 
@@ -121,9 +126,11 @@ test('create a single item order, choose ordered before parts', async () => {
 test('create a single item order, newly order parts', async () => {
     const setShowDialog = jest.fn()
     const onSaveNewOrders = jest.fn()
+    const setExistingOrder = jest.fn()
 
     render(<SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}>
         <AddSparePartsDialog isShow={true} setShowDialog={setShowDialog} 
+            setExistingOrder={setExistingOrder}
             onSaveNewOrders={onSaveNewOrders} sparePartUsages={[]} suppliers={suppliers}></AddSparePartsDialog>
         </SupplierOrderContext>)
 
@@ -158,14 +165,19 @@ test('create a single item order, newly order parts', async () => {
         "itemCode": "06690A", "notes": undefined, 
         "partName": "Air Filter 6642", "quantity": 5, "sparePartId": undefined, 
         "supplierId": 2001, "totalPrice": 525, "unit": "set", "unitPrice": 105}], expect.anything())
+
+    onSaveNewOrders.mock.calls[0][1]()
+    expect(setExistingOrder).toBeCalledWith([])
 })
 
 test('create a 2 items order, same supplier', async() => {
     const setShowDialog = jest.fn()
     const onSaveNewOrders = jest.fn()
+    const setExistingOrder = jest.fn()
 
     render(<SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}>
         <AddSparePartsDialog isShow={true} setShowDialog={setShowDialog} 
+            setExistingOrder={setExistingOrder}
             onSaveNewOrders={onSaveNewOrders} sparePartUsages={[]} suppliers={suppliers}></AddSparePartsDialog>
         </SupplierOrderContext>)
 
@@ -224,14 +236,17 @@ test('create a 2 items order, same supplier', async() => {
 
     onSaveNewOrders.mock.calls[0][1]()
     expect(setShowDialog).toBeCalledWith(false)
+    expect(setExistingOrder).toBeCalledWith([])
 })
 
 test('create a 2 items order, but pending actual DO', async() => {
     const setShowDialog = jest.fn()
     const onSaveNewOrders = jest.fn()
+    const setExistingOrder = jest.fn()
 
     render(<SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}>
         <AddSparePartsDialog isShow={true} setShowDialog={setShowDialog} 
+            setExistingOrder={setExistingOrder}
             onSaveNewOrders={onSaveNewOrders} sparePartUsages={[]} suppliers={suppliers}></AddSparePartsDialog>
         </SupplierOrderContext>)
 
@@ -291,14 +306,17 @@ test('create a 2 items order, but pending actual DO', async() => {
 
     onSaveNewOrders.mock.calls[0][1]()
     expect(setShowDialog).toBeCalledWith(false)
+    expect(setExistingOrder).toBeCalledWith([])
 })
 
 test('create a 2 items order, from different suppliers, then choose a new supplier', async() => {
     const setShowDialog = jest.fn()
     const onSaveNewOrders = jest.fn()
+    const setExistingOrder = jest.fn()
 
     render(<SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}>
         <AddSparePartsDialog isShow={true} setShowDialog={setShowDialog} 
+            setExistingOrder={setExistingOrder}
             onSaveNewOrders={onSaveNewOrders} sparePartUsages={[]} suppliers={suppliers}></AddSparePartsDialog>
         </SupplierOrderContext>)
 
@@ -362,14 +380,17 @@ test('create a 2 items order, from different suppliers, then choose a new suppli
 
     onSaveNewOrders.mock.calls[0][1]()
     expect(setShowDialog).toBeCalledWith(false)
+    expect(setExistingOrder).toBeCalledWith([])
 })
 
 test('create a 2 items orders, delete 1st, then 2nd one should be the only one', async() => {
     const setShowDialog = jest.fn()
     const onSaveNewOrders = jest.fn()
+    const setExistingOrder = jest.fn()
 
     render(<SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}>
         <AddSparePartsDialog isShow={true} setShowDialog={setShowDialog} 
+            setExistingOrder={setExistingOrder}
             onSaveNewOrders={onSaveNewOrders} sparePartUsages={[]} suppliers={suppliers}></AddSparePartsDialog>
         </SupplierOrderContext>)
 
@@ -423,6 +444,7 @@ test('create a 2 items orders, delete 1st, then 2nd one should be the only one',
 test('edit existing order, not allow to add and change value', async() => {
     const setShowDialog = jest.fn()
     const onSaveNewOrders = jest.fn()
+    const setExistingOrder = jest.fn()
 
     render(<SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}>
         <AddSparePartsDialog isShow={true} setShowDialog={setShowDialog} 
@@ -435,6 +457,7 @@ test('edit existing order, not allow to add and change value', async() => {
             "itemCode": undefined, "notes": "hi", "partName": "Engine Oil", 
             "quantity": 200, "sparePartId": undefined, "supplierId": 2002, 
             "totalPrice": 1939.9999999999998, "unit": "pc", "unitPrice": 9.7}]}
+            setExistingOrder={setExistingOrder}
             onSaveNewOrders={onSaveNewOrders} sparePartUsages={[
                 {id: 990001, orderId: 20001 , quantity: 5}
             ]} suppliers={suppliers}></AddSparePartsDialog>
@@ -471,11 +494,13 @@ test('edit existing order, not allow to add and change value', async() => {
 
     onSaveNewOrders.mock.calls[0][1]()
     expect(setShowDialog).toBeCalledWith(false)
+    expect(setExistingOrder).toBeCalledWith([])
 })
 
 test('edit existing order, all used up, after clone, DO number empty', async() => {
     const setShowDialog = jest.fn()
     const onSaveNewOrders = jest.fn()
+    const setExistingOrder = jest.fn()
 
     render(<SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}>
         <AddSparePartsDialog isShow={true} setShowDialog={setShowDialog} 
@@ -484,6 +509,7 @@ test('edit existing order, all used up, after clone, DO number empty', async() =
             "itemCode": "07411", "notes": "hello world", "partName": "Brake Pads Yz", 
             "quantity": 8, "sparePartId": 900001, "supplierId": 2002, 
             "totalPrice": 2000, "unit": "pc", "unitPrice": 250}]}
+            setExistingOrder={setExistingOrder}
             onSaveNewOrders={onSaveNewOrders} sparePartUsages={[
                 {id: 990001, orderId: 20001 , quantity: 8}
             ]} suppliers={suppliers}></AddSparePartsDialog>
@@ -505,6 +531,7 @@ test('edit existing order, all used up, after clone, DO number empty', async() =
 test('edit existing order, only non-usage allow to be submitted', async() => {
     const setShowDialog = jest.fn()
     const onSaveNewOrders = jest.fn()
+    const setExistingOrder = jest.fn()
 
     render(<SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}>
         <AddSparePartsDialog isShow={true} setShowDialog={setShowDialog} 
@@ -517,6 +544,7 @@ test('edit existing order, only non-usage allow to be submitted', async() => {
             "itemCode": undefined, "notes": "hi", "partName": "Engine Oil", 
             "quantity": 200, "sparePartId": undefined, "supplierId": 2002, 
             "totalPrice": 1939.9999999999998, "unit": "pc", "unitPrice": 9.7}]}
+            setExistingOrder={setExistingOrder}
             onSaveNewOrders={onSaveNewOrders} sparePartUsages={[
                 {id: 990001, orderId: 20001 , quantity: 5}
             ]} suppliers={suppliers}></AddSparePartsDialog>
@@ -538,11 +566,15 @@ test('edit existing order, only non-usage allow to be submitted', async() => {
             "partName": "Engine Oil", "quantity": 220, "sparePartId": undefined, 
             "supplierId": 2002, "totalPrice": 2134, "unit": "pc", "unitPrice": 9.7}], 
             expect.anything())
+    
+    onSaveNewOrders.mock.calls[0][1]()
+    expect(setExistingOrder).toBeCalledWith([])
 })
 
 test('edit existing order, with pending DO items', async() => {
     const setShowDialog = jest.fn()
     const onSaveNewOrders = jest.fn()
+    const setExistingOrder = jest.fn()
 
     render(<SupplierOrderContext value={new SupplierOrders(mockOrders, jest.fn())}>
         <AddSparePartsDialog isShow={true} setShowDialog={setShowDialog} 
@@ -555,6 +587,7 @@ test('edit existing order, with pending DO items', async() => {
             "itemCode": undefined, "notes": "hi", "partName": "Engine Oil", 
             "quantity": 200, "sparePartId": undefined, "supplierId": 2002, 
             "totalPrice": 1939.9999999999998, "unit": "pc", "unitPrice": 9.7}]}
+            setExistingOrder={setExistingOrder}
             onSaveNewOrders={onSaveNewOrders} sparePartUsages={[
                 {id: 990001, orderId: 20001 , quantity: 5}
             ]} suppliers={suppliers}></AddSparePartsDialog>
@@ -584,4 +617,5 @@ test('edit existing order, with pending DO items', async() => {
 
     onSaveNewOrders.mock.calls[0][1]()
     expect(setShowDialog).toBeCalledWith(false)
+    expect(setExistingOrder).toBeCalledWith([])
 })

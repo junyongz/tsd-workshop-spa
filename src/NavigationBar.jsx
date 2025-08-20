@@ -49,7 +49,7 @@ export default function NavigationBar({
             <Navbar.Collapse>
                 <Nav variant="underline" defaultActiveKey={location.pathname === '/' ? 'home' : location.pathname.substring(1)}>
                     <Dropdown as={ButtonGroup}>
-                    <Nav.Item><Nav.Link eventKey="home" aria-label="Home" onClick={() => navigate("/")}><Services /> {!((selectedSearchOptions?.length > 0 || selectedSearchDate) && totalFilteredServices > 0) && <span>Services</span> } {(selectedSearchOptions?.length > 0 || selectedSearchDate) && totalFilteredServices > 0 && <Badge pill>{totalFilteredServices}</Badge>}</Nav.Link></Nav.Item>
+                    <Nav.Item><Nav.Link eventKey="services" aria-label="Home" onClick={() => navigate("/services")}><Services /> {!((selectedSearchOptions?.length > 0 || selectedSearchDate) && totalFilteredServices > 0) && <span>Services</span> } {(selectedSearchOptions?.length > 0 || selectedSearchDate) && totalFilteredServices > 0 && <Badge pill>{totalFilteredServices}</Badge>}</Nav.Link></Nav.Item>
                     <Dropdown.Toggle aria-label="more for services" as={NavLink} ></Dropdown.Toggle>
                     <Dropdown.Menu>
                         <NavDropdown.Item eventKey={'task'} aria-label="Tasks" onClick={() => navigate("/workmanships")}><Foreman /> Workmanship</NavDropdown.Item>

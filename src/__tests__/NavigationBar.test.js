@@ -30,7 +30,7 @@ test('render navigation bar', async () => {
     expect(useNavigate()).lastCalledWith('/spare-parts')
 
     await user.click(screen.getByRole('button', {name: 'Home'}))
-    expect(useNavigate()).lastCalledWith('/')
+    expect(useNavigate()).lastCalledWith('/services')
 
     await user.click(screen.getByRole('button', {name: 'more for services'}))
     await user.click(screen.getByRole('button', {name: 'Tasks'}))

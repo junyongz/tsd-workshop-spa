@@ -54,6 +54,9 @@ jest.mock('../NavigationBar', () => ({filterServices, selectedSearchOptions,
         <span data-testid="clear-filter-date-action" onClick={() => clearFilterDate()}></span>
     </div>
 )
+
+jest.mock('../Dashboard', () => () => <div>I am dashboard</div>)
+
 jest.useFakeTimers()
 global.fetch = jest.fn()
 

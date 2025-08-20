@@ -26,6 +26,7 @@ import SchedulingCalendarView from './schedule/SchedulingCalendarView';
 import YearMonthView from './services/YearMonthView';
 import { useService } from './services/ServiceContextProvider';
 import { useSupplierOrders } from './suppliers/SupplierOrderContextProvider';
+import Dashboard from './Dashboard';
 
 /**
  * @typedef SearchOption search option in navigation bar, other page use it for filtering
@@ -266,7 +267,8 @@ function App() {
             totalSpareParts}}
           ></NavigationBar>
         <Routes>
-          <Route exact path="/" element={
+          <Route exact path="/" element={<Dashboard companies={companies} />} />
+          <Route exact path="/services" element={
             <ServiceListing
               setTotalFilteredServices={setTotalFilteredServices}
               vehicles={vehicles}

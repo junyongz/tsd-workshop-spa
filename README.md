@@ -9,18 +9,18 @@
 5. One glance view of all vehicle and repair cost by month
 6. One glance view of all supplers' orders by month
 7. Truck listing, and maintenance too
-
-## Work In-Progress
-
-1. Add new to choose existing date or vehicle (auto, DONE)
-2. Edit button (just delete, DONE)
-3. Customer listing
-4. Supplier listing
-5. Spare part search (need clean up, DONE)
-6. Search by 'Or' condition, eg. multiple days, car and spare parts together (only or condition, DONE)
-7. Access right
-8. Search pill badge holders (autocomplete, DONE)
-9. Exception handling
+5. Charts
+   - Graph 1
+     - Weekly number of services
+     - List past 4 weeks of services
+     - Past week of services by type
+   - Graph 2
+     - Daily completed services vs daily pending services
+   - Graph 3
+     - Daily used parts cost
+   - Graph 4
+     - Internal services
+     - External services
 
 ## Bigger plan
 

@@ -11,8 +11,10 @@ window.matchMedia = jest.fn()
 
 afterEach(() => jest.clearAllMocks())
 
-test('render empty dashboard', async () => {
-    window.matchMedia.mockReturnValue({matches: true})
+test('render empty in 1080px', async () => {
+    window.matchMedia
+        .mockReturnValueOnce({matches: false})
+        .mockReturnValueOnce({matches: true})
 
     global.fetch.mockResolvedValue({
         ok: true,
@@ -23,6 +25,24 @@ test('render empty dashboard', async () => {
     const todayDate = new Date()
 
     await waitFor(() => expect(global.fetch).lastCalledWith(`http://localhost:8080/api/transaction-stats?fromDate=${addDaysToDateStr(todayDate, -30)}&toDate=${addDaysToDateStr(todayDate, 0)}`))
+    expect(screen.queryAllByRole('application')).toHaveLength(4)
+    expect(screen.getAllByRole('application')[0]).toHaveAttribute('width', '960')
+})
+
+test('render empty in 1920px', async () => {
+    window.matchMedia.mockReturnValueOnce({matches: true})
+
+    global.fetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve([])
+    })
+    render(<Dashboard></Dashboard>)
+
+    const todayDate = new Date()
+
+    await waitFor(() => expect(global.fetch).lastCalledWith(`http://localhost:8080/api/transaction-stats?fromDate=${addDaysToDateStr(todayDate, -30)}&toDate=${addDaysToDateStr(todayDate, 0)}`))
+    expect(screen.queryAllByRole('application')).toHaveLength(4)
+    expect(screen.getAllByRole('application')[1]).toHaveAttribute('width', '680')
 })
 
 test('render some data', async() => {
@@ -101,4 +121,6 @@ test('render some data', async() => {
 
     await user.click(screen.getByLabelText('for today date'))
     await waitFor(() => expect(global.fetch).nthCalledWith(4, `http://localhost:8080/api/transaction-stats?fromDate=${addDaysToDateStr(todayDate, -10)}&toDate=${addDaysToDateStr(todayDate, 0)}`))
+
+    expect(screen.getAllByRole('application')[3]).toHaveAttribute('width', '380')
 })

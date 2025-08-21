@@ -44,8 +44,11 @@ export default function Dashboard() {
         }
 
         const settingResponsivePageNum = () => {
-            if (window.matchMedia('(min-width: 992px)').matches) {
+            if (window.matchMedia('(min-width: 1200px)').matches) {
                 setChartWidth(680)
+            }
+            else if (window.matchMedia('(min-width: 992px)').matches) {
+                setChartWidth(960)
             }
             else {
                 setChartWidth(380)
@@ -60,7 +63,7 @@ export default function Dashboard() {
     return (
         <Container fluid>
             <Row className="mb-3">
-                <Col xs="12" xl="4" className="mb-1 mb-xl-0">
+                <Col xs="12" lg="12" xl="4" className="mb-1 mb-xl-0">
                     <InputGroup>
                         <InputGroup.Text><Company /></InputGroup.Text>
                         <FloatingLabel label="Choose a company">
@@ -71,14 +74,14 @@ export default function Dashboard() {
                         </FloatingLabel>
                     </InputGroup>
                 </Col>
-                <Col xs="12" xl="4" className="mb-1 mb-xl-0">
+                <Col xs="12" lg="6" xl="4" className="mb-1 mb-xl-0">
                     <InputGroup>
                         <FloatingLabel label="From Date">
                         <Form.Control aria-label="change from date" type="date" name="fromDate" max={toDate} onChange={(e) => setFromDate(e.target.value)} value={fromDate} ></Form.Control>
                         </FloatingLabel>
                     </InputGroup>
                 </Col>
-                <Col xs="12" xl="4" className="mb-1 mb-xl-0">
+                <Col xs="12" lg="6" xl="4" className="mb-1 mb-xl-0">
                     <InputGroup>
                         <FloatingLabel label="To Date">
                         <Form.Control aria-label="change to date" type="date" name="toDate" min={fromDate} max={addDaysToDateStr(todayDate, 0)} onChange={(e) => setToDate(e.target.value)} value={toDate} ></Form.Control>

@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react"
-import { Container, ListGroup, ListGroupItem, Row, Col, Button, Badge, Nav, Offcanvas, ButtonGroup } from "react-bootstrap"
+import React, { useEffect, useRef, useState } from "react"
+import { Container, ListGroup, ListGroupItem, Row, Col, Button, Badge, Nav, Offcanvas, ButtonGroup, Modal } from "react-bootstrap"
 import { chunkArray } from "../utils/arrayUtils"
 import AddSparePartsDialog from "./AddSparePartsDialog"
 import SparePartsUsageDialog from "./SparePartsUsageDialog"
@@ -13,6 +13,8 @@ import ResponsivePagination from "../components/ResponsivePagination"
 import PromptDeletionIcon from "../components/PromptDeletionIcon"
 import { applyFilterOnOrders } from "../search/fuzzySearch"
 import { useSupplierOrders } from "./SupplierOrderContextProvider"
+import PhotoGallery from "../components/PhotoGallery"
+import fetchSparePartMedias from "../spare-parts/fetchSparePartMedias"
 
 const apiUrl = process.env.REACT_APP_API_URL
 
@@ -59,7 +61,12 @@ function SuppliersSpareParts({setTotalFilteredOrders,
     const [selectedSupplier, setSelectedSupplier] = useState()
     const [orderedSuppliers, setOrderedSuppliers] = useState()
 
+    const hoverRef = useRef()
+    const [uploadedMedias, setUploadedMedias] = useState([])
+    const [viewingMediaPartName, setViewingMediaPartName] = useState('')
+
     const filteredOrders = applyFilterOnOrders(selectedSearchOptions, selectedSearchDate, supplierOrders.list(), sparePartUsages, selectedSupplier)
+     /** @type {import("./SupplierOrders").SupplierOrder[][]} */
     const chunkedItems = chunkArray(filteredOrders, 80)
     const totalPages = chunkedItems.length;
 
@@ -92,7 +99,20 @@ function SuppliersSpareParts({setTotalFilteredOrders,
             setSelectedSupplier()
         }
     }
+    
+    const loadPartsMedia = (sparePartId, partName) => {
+        clearTimeout(hoverRef.current)
+        hoverRef.current = setTimeout(() => {
+            fetchSparePartMedias(sparePartId)
+                .then(datas => setUploadedMedias(datas.flatMap(res => res.value)))
+                .finally(() => setViewingMediaPartName(partName))
+        }, 600)
+    }
 
+    const unloadPartsMedia = () => {
+        clearTimeout(hoverRef.current)
+    }
+ 
     const onSaveNewOrders = (newOrders, callback) => {
         setLoading(true)
         requestAnimationFrame(() => {
@@ -240,6 +260,8 @@ function SuppliersSpareParts({setTotalFilteredOrders,
             setActivePage(1)
             setTotalFilteredOrders(filteredOrders.length)
         }
+
+        return () => clearTimeout(hoverRef.current)
     }, [selectedSearchOptions, selectedSearchDate, selectedSupplier])
 
     return (
@@ -266,6 +288,13 @@ function SuppliersSpareParts({setTotalFilteredOrders,
                     onSaveNewSparePartUsage={onSaveNewSparePartUsage}
                     onNewVehicleCreated={onNewVehicleCreated}
                 ></SparePartsUsageDialog> }
+                { uploadedMedias.length > 0 && 
+                    <Modal show={true} onHide={() => setUploadedMedias([])}>
+                        <Modal.Header closeButton aria-label={`viewing gallery of ${viewingMediaPartName}`}>{viewingMediaPartName}</Modal.Header>
+                        <Modal.Body>
+                        <PhotoGallery uploadedMedias={uploadedMedias}></PhotoGallery>
+                        </Modal.Body>
+                    </Modal>}
             </Row>
             {!overview && <Row>
                 <Col>
@@ -335,12 +364,12 @@ function SuppliersSpareParts({setTotalFilteredOrders,
                                             <Col><Badge bg="info" pill>{v.itemCode}</Badge></Col>
                                         </Row>
                                         <Row>
-                                            <Col sm="8">{v.partName}</Col>
+                                            <Col sm="8">{v.sparePartId ? <span aria-label={`hover to view photos of part ${v.sparePartId}`} role="button" onMouseEnter={() => loadPartsMedia(v.sparePartId, v.partName)} onMouseLeave={() => unloadPartsMedia()} >{v.partName}</span> : <>{v.partName}</>}</Col>
                                             <Col><Badge>{v.quantity} {v.unit} @ each ${v.unitPrice}</Badge>
                                               {quantityLeft < v.quantity && <Badge bg={quantityLeft === 0 ? 'danger' : 'warning' }>{quantityLeft} left</Badge>}
                                               {v.status === 'DEPLETED' && <Badge bg="danger">Nothing left</Badge>}
                                             </Col>
-                                        </Row>                                    
+                                        </Row>
                                     </Col>
                                     <Col xs="6" md="3"><SparePartNotes order={v} onNoteClick={() => recordNote(v)} sparePartUsages={sparePartUsages}></SparePartNotes></Col>
                                     <Col xs="6" md="1" className="text-end fs-5">

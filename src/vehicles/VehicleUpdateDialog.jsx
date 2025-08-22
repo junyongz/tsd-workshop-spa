@@ -5,6 +5,7 @@ import formatThousandSeparator from "../utils/numberUtils"
 import { maintenanceServiceKm } from "./maintenanceService"
 import { addMonthsToDateStr } from "../utils/dateUtils"
 import { Calendar, Company, Inspection, Insurance, Roadtax, Services, Trailer, Truck } from "../Icons"
+import { useNavigate, useSearchParams } from "react-router-dom"
 
 const apiUrl = process.env.REACT_APP_API_URL
 
@@ -21,6 +22,8 @@ const apiUrl = process.env.REACT_APP_API_URL
 function VehicleUpdateDialog({isShow, setShowDialog, vehicle, setVehicles, companies}) {
     const formRef = useRef()
     const [validated, setValidated] = useState(false)
+    const navigate = useNavigate()
+    const [searchParams] = useSearchParams()
 
     const [selectedCompanies, setSelectedCompanies] = useState([])
     const [differentDueForTrailer, setDifferentDueForTrailer] = useState(false)
@@ -42,6 +45,9 @@ function VehicleUpdateDialog({isShow, setShowDialog, vehicle, setVehicles, compa
         setDifferentDueForTrailer(false)
         setSelectedCompanies([])
         setShowMap(false)
+        if (searchParams.get("id")) {
+            navigate(-1)
+        }
     }
 
     const checkCompanyValidity = (companyInput) => {

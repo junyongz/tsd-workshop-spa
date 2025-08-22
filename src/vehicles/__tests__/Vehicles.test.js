@@ -1,11 +1,12 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { test, expect, jest, afterAll } from '@jest/globals'
+import { test, expect, jest } from '@jest/globals'
 
 import Vehicles from '../Vehicles';
 import { ServiceContext } from '../../services/ServiceContextProvider';
 import ServiceTransactions from '../../ServiceTransactions';
 import { addDaysToDateStr, addMonthsToDateStr } from '../../utils/dateUtils';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 afterEach(() => { 
     jest.clearAllMocks()
@@ -69,6 +70,7 @@ const newVehicles =[
 
 test('render many vehicles', async () => {
     const user = userEvent.setup()
+    useSearchParams.mockReturnValue([{get: () => undefined}, jest.fn()])
 
     const { rerender } = render(<ServiceContext value={new ServiceTransactions(services, jest.fn())}>
             <Vehicles vehicles={vehicles} companies={companies}></Vehicles>
@@ -100,6 +102,7 @@ test('render many vehicles', async () => {
 
 test('filter service due soon', async () => {
     const user = userEvent.setup()
+    useSearchParams.mockReturnValue([{get: () => undefined}, jest.fn()])
 
     const latestServices = [
         {id: 5002, vehicleId: 82003, vehicleNo: "JJ 3", startDate: addDaysToDateStr(new Date(), -5), transactionTypes: ["REPAIR"], mileageKm: 2000},
@@ -130,6 +133,7 @@ test('filter service due soon', async () => {
 
 test('show update dialog for vehicle and update', async () => {
     const user = userEvent.setup()
+    useSearchParams.mockReturnValue([{get: () => undefined}, jest.fn()])
 
     global.fetch.mockResolvedValueOnce({
         ok: true,
@@ -186,6 +190,7 @@ test('show update dialog for vehicle and update', async () => {
 
 test('show update dialog for vehicle and failed to update', async () => {
     const user = userEvent.setup()
+    useSearchParams.mockReturnValue([{get: () => undefined}, jest.fn()])
 
     global.fetch.mockResolvedValueOnce({
         ok: true,
@@ -230,6 +235,7 @@ test('show update dialog for vehicle and failed to update', async () => {
 
 test('trailer different inspection date', async () => {
     const user = userEvent.setup()
+    useSearchParams.mockReturnValue([{get: () => undefined}, jest.fn()])
 
     global.fetch.mockResolvedValueOnce({
         ok: true,
@@ -282,6 +288,7 @@ test('trailer different inspection date', async () => {
 
 test('to load trailer different inspection date', async () => {
     const user = userEvent.setup()
+    useSearchParams.mockReturnValue([{get: () => undefined}, jest.fn()])
 
     global.fetch.mockResolvedValueOnce({
         ok: true,
@@ -317,6 +324,7 @@ test('to load trailer different inspection date', async () => {
 
 test('render lots of vehicles, load more', async () => {
     const user = userEvent.setup()
+    useSearchParams.mockReturnValue([{get: () => undefined}, jest.fn()])
 
     render(<ServiceContext value={new ServiceTransactions(services, jest.fn())}>
             <Vehicles vehicles={newVehicles} companies={companies}></Vehicles>
@@ -348,6 +356,7 @@ test('render lots of vehicles, load more', async () => {
 
 test('render lots of vehicles, load all', async () => {
     const user = userEvent.setup()
+    useSearchParams.mockReturnValue([{get: () => undefined}, jest.fn()])
 
     const { rerender } = render(<ServiceContext value={new ServiceTransactions(services, jest.fn())}>
             <Vehicles vehicles={newVehicles} companies={companies}></Vehicles>
@@ -417,4 +426,20 @@ test('render lots of vehicles, load all', async () => {
     expect(screen.getByRole('textbox', {name: 'latest mileage'})).toHaveValue('28000 KM')
     expect(screen.getByRole('textbox', {name: 'last service'})).toHaveValue('10500 KM @ ' + addMonthsToDateStr(todayDate, 3))
     expect(screen.getByRole('textbox', {name: 'next service'})).toHaveValue('500 KM more to go')
+})
+
+test('render lots of vehicles, and route from somewhere else', async () => {
+    const user = userEvent.setup()
+    useSearchParams.mockReturnValue([{get: () => "82008"}, jest.fn()])
+
+    render(<ServiceContext value={new ServiceTransactions(services, jest.fn())}>
+            <Vehicles vehicles={newVehicles} companies={companies}></Vehicles>
+        </ServiceContext>)
+
+    expect(screen.getByRole('textbox', {name: 'latest mileage'})).toHaveValue('20000 KM')
+    expect(screen.getByRole('textbox', {name: 'last service'})).toHaveValue('1000 KM @ 2005-04-04')
+    expect(screen.getByRole('textbox', {name: 'next service'})).toHaveValue('Do it now!')
+
+    await user.click(screen.getByLabelText('Close'))
+    expect(useNavigate()).toBeCalledWith(-1)
 })

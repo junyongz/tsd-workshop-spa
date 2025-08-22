@@ -316,7 +316,7 @@ function ServiceListing({
             <Card key={v.id} className={'mb-3'}>
               <Card.Header>
                 <Row>
-                  <Col xs="12" lg="2"><h5>{v.vehicleNo}</h5></Col>
+                  <Col xs="12" lg="2"><h5 role="button" onClick={() => navigate(`/vehicles?id=${v.vehicleId}`)} href="#">{v.vehicleNo}</h5></Col>
                   <Col xs="12" lg={{span: 12, order: 5}}><h5 className="text-body-secondary">started since {v.startDate}</h5></Col>
                   <Col xs="6" lg="8" className='mb-2'><TransactionTypes service={v} /></Col>
                   <Col xs="6" lg="2" className='text-end'>

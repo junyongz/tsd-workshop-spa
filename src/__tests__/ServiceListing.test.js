@@ -227,7 +227,7 @@ test('listing no search options, delete one item, and task, delete service, fail
     expect(screen.queryByText('Service started at ' + addDaysToDateStr(new Date(), 0))).toBeInTheDocument()
 
     unmount()
-}, 50000)
+})
 
 test('listing no search options, then add search option', async () => {
     window.matchMedia = jest.fn(() => {return {
@@ -294,6 +294,41 @@ test('listing no search options, then add search option', async () => {
     </WorkshopServicesProvider>)
 
     expect(screen.queryAllByText('Complete Service')).toHaveLength(1)
+
+    unmount()
+})
+
+test('to view vehicle details from listing', async () => {
+    window.matchMedia = jest.fn(() => {return {
+        refCount: 0,
+        addListener: jest.fn(),
+        removeListener: jest.fn(),
+        matches: true,           // Added for completeness, can be adjusted
+        media: '(min-width: 768px)', // Default media query, can be adjusted
+        onchange: null            // Added for completeness
+    }})
+
+    const user = userEvent.setup()
+
+    const setTotalFilteredServices = jest.fn()
+    const setLoading = jest.fn()
+    const initialServices = newTransactions()
+    const { container, unmount } = render(<WorkshopServicesProvider initialServices={initialServices}>
+        <SupplierOrderContext value={new SupplierOrders([...orders], jest.fn())}>
+            <ServiceListing selectedSearchOptions={[]} 
+                setTotalFilteredServices={setTotalFilteredServices}
+                suppliers={[...suppliers]}
+                setLoading={setLoading} />
+        </SupplierOrderContext>
+    </WorkshopServicesProvider>)
+
+    expect(screen.getAllByText('Complete Service')).toHaveLength(3)
+    expect(container.querySelectorAll('.list-group-item')).toHaveLength(3)
+
+    // let's try complete a workshop service
+    await user.click(screen.getByText('J 23'))
+    const navigate = useNavigate()
+    expect(navigate).toBeCalledWith('/vehicles?id=20001')
 
     unmount()
 })

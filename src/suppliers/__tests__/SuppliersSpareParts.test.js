@@ -26,6 +26,9 @@ jest.mock('../SupplierSparePartsYearMonthView', () => ({backToOrders}) =>
 global.fetch = jest.fn();
 global.matchMedia = jest.fn();
 
+jest.useFakeTimers()
+
+/** @type {import('../SupplierOrders').SupplierOrder[]} */
 const mockOrders = [
   {id:1001, invoiceDate:"2023-01-01", supplierId:2000,
     itemCode:"ABC123", partName:"Engine Oil", quantity:10, unit:"ltr", unitPrice:5,
@@ -35,7 +38,7 @@ const mockOrders = [
     deliveryOrderNo:"DO002", status:"ACTIVE"},
   {id:1003, invoiceDate:"2023-01-03", supplierId:2000, sheetName: 'JUL 23',
     itemCode:"DEF456", partName:"Brake Pads", quantity:8, unit:"set", unitPrice:25,
-    deliveryOrderNo:"DO003", status:"ACTIVE"},
+    deliveryOrderNo:"DO003", status:"ACTIVE", sparePartId: 300003},
   {id:1004, invoiceDate:"2023-01-03", supplierId:2000, sheetName: 'JUL 23',
     itemCode:"777888A", partName:"Brake Adjuster", quantity:4, unit: "pc", unitPrice:215,
     deliveryOrderNo:"DO003", status:"ACTIVE"}
@@ -50,6 +53,9 @@ const mockSuppliers = [
 afterEach(() => {
   jest.clearAllMocks()
   jest.restoreAllMocks()
+})
+afterAll(() => {
+  jest.useRealTimers()
 })
 
 let defaultProps;
@@ -90,7 +96,7 @@ test('renders component with no orders', () => {
 });
 
 test('renders multiple orders correctly', async () => {
-  const user = userEvent.setup()
+  const user = userEvent.setup({advanceTimers: jest.advanceTimersByTime})
 
   const container = render(<SupplierOrderProvider initialOrders={mockOrders}>
         <SuppliersSpareParts {...defaultProps} /></SupplierOrderProvider>);
@@ -266,7 +272,7 @@ test('updates filtered orders when selectedSearchOptions change', async () => {
 });
 
 test('displays correct quantities and supplier info for all orders', async () => {
-  const user = userEvent.setup()
+  const user = userEvent.setup({advanceTimers: jest.advanceTimersByTime})
 
   const mockUsages = [
     { id: 110001, orderId: 1001, quantity: 1, usageDate: "2024-01-02", vehicleNo: "JJ 1" },
@@ -321,7 +327,7 @@ test('displays correct quantities and supplier info for all orders', async () =>
 });
 
 test('deplete order and remain 2', async () => {
-  const user = userEvent.setup()
+  const user = userEvent.setup({advanceTimers: jest.advanceTimersByTime})
 
   global.fetch.mockResolvedValueOnce({
     ok: true,
@@ -353,16 +359,16 @@ test('deplete order and remain 2', async () => {
   const consoleError = jest.spyOn(console, 'error')
   await user.click(screen.getByLabelText('deplete order Brake Pads'))
   await waitFor(() => expect(global.fetch).lastCalledWith("http://localhost:8080/api/supplier-spare-parts?op=DEPLETE", 
-    {"body": "[{\"id\":1003,\"invoiceDate\":\"2023-01-03\",\"supplierId\":2000,\"sheetName\":\"JUL 23\",\"itemCode\":\"DEF456\",\"partName\":\"Brake Pads\",\"quantity\":8,\"unit\":\"set\",\"unitPrice\":25,\"deliveryOrderNo\":\"DO003\",\"status\":\"ACTIVE\"}]", 
+    {"body": "[{\"id\":1003,\"invoiceDate\":\"2023-01-03\",\"supplierId\":2000,\"sheetName\":\"JUL 23\",\"itemCode\":\"DEF456\",\"partName\":\"Brake Pads\",\"quantity\":8,\"unit\":\"set\",\"unitPrice\":25,\"deliveryOrderNo\":\"DO003\",\"status\":\"ACTIVE\",\"sparePartId\":300003}]", 
       "headers": {"Content-type": "application/json"}, "method": "POST", "mode": "cors"}))
 
   expect(consoleError).toBeCalledTimes(2)
-  expect(consoleError.mock.calls[0][0]).toEqual("failed to deplete order {\"id\":1003,\"invoiceDate\":\"2023-01-03\",\"supplierId\":2000,\"sheetName\":\"JUL 23\",\"itemCode\":\"DEF456\",\"partName\":\"Brake Pads\",\"quantity\":8,\"unit\":\"set\",\"unitPrice\":25,\"deliveryOrderNo\":\"DO003\",\"status\":\"ACTIVE\"}")
+  expect(consoleError.mock.calls[0][0]).toEqual("failed to deplete order {\"id\":1003,\"invoiceDate\":\"2023-01-03\",\"supplierId\":2000,\"sheetName\":\"JUL 23\",\"itemCode\":\"DEF456\",\"partName\":\"Brake Pads\",\"quantity\":8,\"unit\":\"set\",\"unitPrice\":25,\"deliveryOrderNo\":\"DO003\",\"status\":\"ACTIVE\",\"sparePartId\":300003}")
   expect(consoleError.mock.calls[1][0]).toEqual("failed to update order, response: {\"status\":500,\"code\":\"SPP-001\",\"reason\":\"Database down for 15minutes\"}")
 });
 
 test('show supplier in recent order and name ordering', async () => {
-  const user = userEvent.setup()
+  const user = userEvent.setup({advanceTimers: jest.advanceTimersByTime})
 
   render(
     <SupplierOrderProvider initialOrders={[...mockOrders]}>
@@ -399,7 +405,7 @@ test('show supplier in recent order and name ordering', async () => {
 })
 
 test('overview and un-overview', async () => {
-  const user = userEvent.setup()
+  const user = userEvent.setup({advanceTimers: jest.advanceTimersByTime})
 
   render(
     <SupplierOrderProvider initialOrders={[...mockOrders]}>
@@ -414,4 +420,45 @@ test('overview and un-overview', async () => {
   // go back
   await user.click(screen.getByText('SupplierSparePartsYearMonthView'))
   expect(screen.queryByText('Showing All')).toBeInTheDocument()
+})
+
+test('hover to view photos of the part', async () => {
+  const user = userEvent.setup({advanceTimers: jest.advanceTimersByTime})
+  URL.createObjectURL = jest.fn()
+
+  global.fetch.mockResolvedValueOnce({
+        ok: true, // /api/spare-parts/${sparePartId}/medias
+        json: () => Promise.resolve([{id: 5000, sparePartId: 300003}, {id: 5001, sparePartId: 300003}])
+  }).mockResolvedValueOnce({
+        ok: true, // /api/spare-parts/${sparePartId}/medias/:mediaId/data
+        blob: () => Promise.resolve("")
+  }).mockResolvedValueOnce({
+        ok: true,
+        blob: () => Promise.resolve("")
+  })
+
+  render(
+    <SupplierOrderProvider initialOrders={[...mockOrders]}>
+      <SuppliersSpareParts {...defaultProps} />
+    </SupplierOrderProvider>);
+
+  await user.hover(screen.getByLabelText('hover to view photos of part 300003'))
+  jest.advanceTimersByTime(600)
+
+  await waitFor(() => {
+    expect(global.fetch).nthCalledWith(1, 'http://localhost:8080/api/spare-parts/300003/medias')
+    expect(global.fetch).nthCalledWith(2, 'http://localhost:8080/api/spare-parts/300003/medias/5000/data')
+    expect(global.fetch).nthCalledWith(3, 'http://localhost:8080/api/spare-parts/300003/medias/5001/data')
+  })
+  expect(screen.queryAllByRole('img')).toHaveLength(2)
+
+  await user.click(screen.getByLabelText('Close'))
+  expect(screen.queryAllByRole('img')).toHaveLength(0)
+
+  // hover and unhover, then nothing happen
+  await user.hover(screen.getByLabelText('hover to view photos of part 300003'))
+  await user.unhover(screen.getByLabelText('hover to view photos of part 300003'))
+  jest.advanceTimersByTime(600)
+
+  expect(global.fetch).toBeCalledTimes(3)
 })

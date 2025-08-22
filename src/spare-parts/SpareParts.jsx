@@ -6,6 +6,7 @@ import { Company, Suppliers, Truck } from "../Icons";
 import { clearState } from "../autoRefreshWorker";
 import PhotoGallery from "../components/PhotoGallery";
 import { useSupplierOrders } from "../suppliers/SupplierOrderContextProvider";
+import fetchSparePartMedias from "./fetchSparePartMedias";
 
 /**
  * @typedef {Object} SparePart
@@ -146,18 +147,6 @@ export default function SpareParts({suppliers, selectedSearchOptions, totalSpare
         })
     }
 
-    const fetchSparePartMediaPromise = async (sparePartId) => {
-        return fetch(`${apiUrl}/api/spare-parts/${sparePartId}/medias`)
-                .then(resp => resp.json())
-                .then(medias => 
-                    Promise.allSettled(medias.map(md =>
-                        fetch(`${apiUrl}/api/spare-parts/${sparePartId}/medias/${md.id}/data`)
-                            .then(resp => resp.blob())
-                            .then(blob => { return {...md, dataUrl: URL.createObjectURL(blob) } })
-                    ))
-                )
-    }
-
     useEffect(() => {
         fetch(`${apiUrl}/api/spare-parts`, {
             mode: 'cors',
@@ -181,7 +170,7 @@ export default function SpareParts({suppliers, selectedSearchOptions, totalSpare
                     if (entry.isIntersecting) {
                         const timeoutId = setTimeout(() => {
                             if (entry.isIntersecting) {
-                                fetchSparePartMediaPromise(sparePartId)
+                                fetchSparePartMedias(sparePartId)
                                     .then(datas => {
                                         setUploadedMedias(prev => [...prev, ...datas.flatMap(res => res.value)])
                                     })

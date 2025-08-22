@@ -6,6 +6,7 @@ import VehicleServices from "./VehicleServices";
 import { HandPointer, Inspection, Insurance, Roadtax } from "../Icons";
 import { addMonthsToDate } from "../utils/dateUtils";
 import { useService } from "../services/ServiceContextProvider";
+import { useLocation, useParams, useSearchParams } from "react-router-dom";
 
 /**
  * @typedef {Object} Vehicle
@@ -36,6 +37,8 @@ import { useService } from "../services/ServiceContextProvider";
  */
 export default function Vehicles({vehicles, setVehicles, companies, selectedSearchOptions}) {
     const service = useService()
+    const [searchParams] = useSearchParams()
+    
     const workshopServices = service.services()
 
     const [serviceByVehicle, setServiceByVehicle] = useState({})
@@ -105,11 +108,12 @@ export default function Vehicles({vehicles, setVehicles, companies, selectedSear
                 .filter(veh => !selectedSearchOptions || selectedSearchOptions.length === 0 || selectedSearchOptions.some(sso => sso.name === veh.vehicleNo))
 
     useEffect(() => {
+        const predicate = (srv, vehicleId, type) => 
+            srv.vehicleId === vehicleId && srv.transactionTypes?.includes(type)
+
         const findBy = (type) => {
             return vehicles
-                .map(veh => workshopServices
-                    .findIndex(srv => (srv.vehicleId === veh.id && srv.transactionTypes?.includes(type)))
-                )
+                .map(veh => workshopServices.findIndex(srv => predicate(srv, veh.id, type)))
                 .map(idx => workshopServices[idx])
                 .filter(srv => !!srv)
                 .reduce((pv, cv) => {
@@ -120,6 +124,15 @@ export default function Vehicles({vehicles, setVehicles, companies, selectedSear
 
         setServiceByVehicle(findBy('SERVICE'))
         setInspectionByVehicle(findBy('INSPECTION'))
+
+        if (searchParams.get("id")) {
+            const vehId = parseInt(searchParams.get("id"))
+            setSelectedVehicle({...vehicles.find(v => v.id === parseInt(searchParams.get("id"))), 
+                lastService: workshopServices.find(srv => predicate(srv, vehId, 'SERVICE')), 
+                lastInspection: workshopServices.find(srv => predicate(srv, vehId, 'INSPECTION'))
+            })
+            setShowDialog(true)
+        }
 
     }, [workshopServices])
 

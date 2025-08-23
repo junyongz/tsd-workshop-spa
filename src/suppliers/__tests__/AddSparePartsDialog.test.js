@@ -6,7 +6,7 @@ import AddSparePartsDialog from '../AddSparePartsDialog';
 import SupplierOrders from '../SupplierOrders';
 import { SupplierOrderContext } from '../SupplierOrderContextProvider';
 import { addDaysToDateStr } from '../../utils/dateUtils';
-import { clearAllThen } from '../../__mocks__/userEventUtil';
+import { keyIn } from '../../__mocks__/userEventUtil';
 
 /** @type {import('../SupplierOrders').Supplier} */
 const suppliers = [ 
@@ -17,16 +17,16 @@ const suppliers = [
 
 /** @type {import('../SupplierOrders').SupplierOrder[]} */
 const mockOrders = [
-  {id:1001, invoiceDate: "2023-01-01", supplierId: 2000,
+  {id: 1001, invoiceDate: "2023-01-01", supplierId: 2000,
     itemCode: "00016", partName:"Engine Oil", quantity: 600, unit: "ltr", unitPrice: 9,
     deliveryOrderNo: "DO001", status: "ACTIVE"},
-  {id:1002, invoiceDate: "2023-01-02", supplierId: 2001,
+  {id: 1002, invoiceDate: "2023-01-02", supplierId: 2001,
     itemCode: "06690", partName:"Air Filter", quantity: 5, unit: "pcs", unitPrice: 80,
     deliveryOrderNo: "DO002", status: "ACTIVE"},
-  {id:1003, invoiceDate: "2023-01-03", supplierId: 2000, sheetName: 'JUL 23',
+  {id: 1003, invoiceDate: "2023-01-03", supplierId: 2000, sheetName: 'JUL 23',
     itemCode :"07411", partName:"Brake Pads", quantity: 100, unit:"set", unitPrice: 25,
     deliveryOrderNo: "DO003", status: "ACTIVE"},
-  {id:1004, invoiceDate: "2023-01-03", supplierId: 2001, sheetName: 'JUL 23',
+  {id: 1004, invoiceDate: "2023-01-03", supplierId: 2001, sheetName: 'JUL 23',
     itemCode: "26283", partName: "Hub Bolt", quantity: 40, unit: "pc", unitPrice: 8,
     deliveryOrderNo: "DO003", status: "ACTIVE"}
 ];
@@ -78,14 +78,12 @@ test('create a single item order, choose ordered before parts', async () => {
             onSaveNewOrders={onSaveNewOrders} sparePartUsages={[]} suppliers={suppliers}></AddSparePartsDialog>
         </SupplierOrderContext>)
 
-    await user.click(screen.getByPlaceholderText('Key in Invoice Date'))
-    await user.keyboard(todayDateStr)
+    keyIn(screen.getByPlaceholderText('Key in Invoice Date'), todayDateStr)
 
     await user.click(screen.getByPlaceholderText('Choose a supplier'))
     await user.click(screen.getByText('Mutiara Bintang'))
 
-    await user.click(screen.getByPlaceholderText('Key in DO. #'))
-    await user.keyboard("DO-00002")
+    keyIn(screen.getByPlaceholderText('Key in DO. #'), "DO-00002")
 
     // start to add items
     await user.click(screen.getByPlaceholderText('Key in item code'))
@@ -96,21 +94,25 @@ test('create a single item order, choose ordered before parts', async () => {
     await user.click(screen.getAllByLabelText('Clear')[1])
     // manually key the item code
     await user.click(screen.getByPlaceholderText('Key in item code'))
-    await user.keyboard('06690A')
+    await user.paste('06690A')
 
     // key in quantity
-    await user.click(screen.getByPlaceholderText('Quantity'))
-    await user.keyboard('10')
+    keyIn(screen.getByPlaceholderText('Quantity'), 'A') // anyhow key in
+    expect(screen.queryByText('$ 0')).toBeInTheDocument()
+    keyIn(screen.getByPlaceholderText('Quantity'), '10')
+    expect(screen.queryByText('$ 0')).not.toBeInTheDocument()
+    expect(screen.queryAllByText('$ 800.00')).toHaveLength(2)
 
     // key in unit, although already have the value
     expect(screen.getByPlaceholderText('Unit')).toHaveValue('pcs')
-    await user.click(screen.getByPlaceholderText('Unit'))
-    await user.keyboard(clearAllThen('pc'))
+    keyIn(screen.getByPlaceholderText('Unit'), 'pc')
 
     // Unit price, although already have the value
     expect(screen.getByPlaceholderText('Price $')).toHaveValue(80)
-    await user.click(screen.getByPlaceholderText('Price $'))
-    await user.keyboard(clearAllThen('82'))
+    keyIn(screen.getByPlaceholderText('Price $'), 'A') // anyhow key in
+    expect(screen.queryByText('$ 0')).toBeInTheDocument()
+    keyIn(screen.getByPlaceholderText('Price $'), '82')
+    expect(screen.queryAllByText('$ 820.00')).toHaveLength(2)
 
     // save it
     await user.click(screen.getByLabelText('Save orders'))
@@ -134,30 +136,23 @@ test('create a single item order, newly order parts', async () => {
             onSaveNewOrders={onSaveNewOrders} sparePartUsages={[]} suppliers={suppliers}></AddSparePartsDialog>
         </SupplierOrderContext>)
 
-    await user.click(screen.getByPlaceholderText('Key in Invoice Date'))
-    await user.keyboard(todayDateStr)
+    keyIn(screen.getByPlaceholderText('Key in Invoice Date'), todayDateStr)
 
     await user.click(screen.getByPlaceholderText('Choose a supplier'))
     await user.click(screen.getByText('Mutiara Bintang'))
 
-    await user.click(screen.getByPlaceholderText('Key in DO. #'))
-    await user.keyboard("DO-00002")
+    keyIn(screen.getByPlaceholderText('Key in DO. #'), "DO-00002")
 
     // start to add items
     await user.click(screen.getByPlaceholderText('Key in item code'))
-    await user.keyboard('06690A')
+    await user.paste('06690A')
 
     await user.click(screen.getByPlaceholderText('Find a existing one as template'))
-    await user.keyboard('Air Filter 6642')
+    await user.paste('Air Filter 6642')
 
-    await user.click(screen.getByPlaceholderText('Quantity'))
-    await user.keyboard('5')
-
-    await user.click(screen.getByPlaceholderText('Unit'))
-    await user.keyboard(clearAllThen('set'))
-
-    await user.click(screen.getByPlaceholderText('Price $'))
-    await user.keyboard('105')
+    keyIn(screen.getByPlaceholderText('Quantity'), '5')
+    keyIn(screen.getByPlaceholderText('Unit'), 'set')
+    keyIn(screen.getByPlaceholderText('Price $'), '105')
 
     // save it
     await user.click(screen.getByLabelText('Save orders'))
@@ -181,45 +176,35 @@ test('create a 2 items order, same supplier', async() => {
             onSaveNewOrders={onSaveNewOrders} sparePartUsages={[]} suppliers={suppliers}></AddSparePartsDialog>
         </SupplierOrderContext>)
 
-    await user.click(screen.getByPlaceholderText('Key in Invoice Date'))
-    await user.keyboard(todayDateStr)
+    keyIn(screen.getByPlaceholderText('Key in Invoice Date'), todayDateStr)
 
     await user.click(screen.getByPlaceholderText('Choose a supplier'))
     await user.click(screen.getByText('Aik Han'))
 
-    await user.click(screen.getByPlaceholderText('Key in DO. #'))
-    await user.keyboard("DO-00003")
+    keyIn(screen.getByPlaceholderText('Key in DO. #'), "DO-00003")
 
     // start to add items
     await user.click(screen.getByPlaceholderText('Key in item code'))
-    await user.keyboard('06690A')
+    await user.paste('06690A')
 
     await user.click(screen.getByPlaceholderText('Find a existing one as template'))
-    await user.keyboard('Air Filter 6642')
+    await user.paste('Air Filter 6642')
 
-    await user.click(screen.getByPlaceholderText('Quantity'))
-    await user.keyboard('5')
-
-    await user.click(screen.getByPlaceholderText('Unit'))
-    await user.keyboard(clearAllThen('set'))
-
-    await user.click(screen.getByPlaceholderText('Price $'))
-    await user.keyboard('105')
+    keyIn(screen.getByPlaceholderText('Quantity'), '5')
+    keyIn(screen.getByPlaceholderText('Unit'), 'set')
+    keyIn(screen.getByPlaceholderText('Price $'), '105')
 
     // add item #2
     await user.click(screen.getByLabelText('Add new order'))
 
     await user.click(screen.getAllByPlaceholderText('Key in item code')[1])
-    await user.keyboard('00016-X') // it will get changed later on to 00016
+    await user.paste('00016-X') // it will get changed later on to 00016
 
     await user.click(screen.getAllByPlaceholderText('Find a existing one as template')[1])
     await user.click(screen.getByText('Engine Oil'))
 
-    await user.click(screen.getAllByPlaceholderText('Quantity')[1])
-    await user.keyboard('400')
-
-    await user.click(screen.getAllByPlaceholderText('Price $')[1])
-    await user.keyboard(clearAllThen(9.7))
+    keyIn(screen.getAllByPlaceholderText('Quantity')[1], '400')
+    keyIn(screen.getAllByPlaceholderText('Price $')[1], 9.7)
 
     // save it
     await user.click(screen.getByLabelText('Save orders'))
@@ -250,8 +235,7 @@ test('create a 2 items order, but pending actual DO', async() => {
             onSaveNewOrders={onSaveNewOrders} sparePartUsages={[]} suppliers={suppliers}></AddSparePartsDialog>
         </SupplierOrderContext>)
 
-    await user.click(screen.getByPlaceholderText('Key in Invoice Date'))
-    await user.keyboard(todayDateStr)
+    keyIn(screen.getByPlaceholderText('Key in Invoice Date'), todayDateStr)
 
     await user.click(screen.getByPlaceholderText('Choose a supplier'))
     await user.click(screen.getByText('Aik Han'))
@@ -262,34 +246,26 @@ test('create a 2 items order, but pending actual DO', async() => {
 
     // start to add items
     await user.click(screen.getByPlaceholderText('Key in item code'))
-    await user.keyboard('06690A')
+    await user.paste('06690A')
 
     await user.click(screen.getByPlaceholderText('Find a existing one as template'))
-    await user.keyboard('Air Filter 6642')
+    await user.paste('Air Filter 6642')
 
-    await user.click(screen.getByPlaceholderText('Quantity'))
-    await user.keyboard('5')
-
-    await user.click(screen.getByPlaceholderText('Unit'))
-    await user.keyboard(clearAllThen('set'))
-
-    await user.click(screen.getByPlaceholderText('Price $'))
-    await user.keyboard('105')
+    keyIn(screen.getByPlaceholderText('Quantity'), '5')
+    keyIn(screen.getByPlaceholderText('Unit'), 'set')
+    keyIn(screen.getByPlaceholderText('Price $'), '105')
 
     // add item #2
     await user.click(screen.getByLabelText('Add new order'))
 
     await user.click(screen.getAllByPlaceholderText('Key in item code')[1])
-    await user.keyboard('00016-X') // it will get changed later on to 00016
+    await user.paste('00016-X') // it will get changed later on to 00016
 
     await user.click(screen.getAllByPlaceholderText('Find a existing one as template')[1])
     await user.click(screen.getByText('Engine Oil'))
 
-    await user.click(screen.getAllByPlaceholderText('Quantity')[1])
-    await user.keyboard('400')
-
-    await user.click(screen.getAllByPlaceholderText('Price $')[1])
-    await user.keyboard(clearAllThen(9.7))
+    keyIn(screen.getAllByPlaceholderText('Quantity')[1], '400')
+    keyIn(screen.getAllByPlaceholderText('Price $')[1], 9.7)
 
     // save it
     await user.click(screen.getByLabelText('Save orders'))
@@ -321,45 +297,36 @@ test('create a 2 items order, from different suppliers, then choose a new suppli
         </SupplierOrderContext>)
 
     // let the parts below to choose the supplier
-
-    await user.click(screen.getByPlaceholderText('Key in Invoice Date'))
-    await user.keyboard(todayDateStr)
-
-    await user.click(screen.getByPlaceholderText('Key in DO. #'))
-    await user.keyboard("DO-00003")
+    keyIn(screen.getByPlaceholderText('Key in Invoice Date'), todayDateStr)
+    keyIn(screen.getByPlaceholderText('Key in DO. #'), 'DO-00003')
 
     // start to add items
     await user.click(screen.getByPlaceholderText('Key in item code'))
     await user.click(screen.getByText('07411'))
 
     expect(screen.getByPlaceholderText('Find a existing one as template')).toHaveValue('Brake Pads')
+
     await user.click(screen.getAllByLabelText('Clear')[2])
+    
     await user.click(screen.getByPlaceholderText('Find a existing one as template'))
-    await user.keyboard('Brake Pads Yz')
+    await user.paste('Brake Pads Yz')
 
-    await user.click(screen.getByPlaceholderText('Quantity'))
-    await user.keyboard('8')
-
-    await user.click(screen.getByPlaceholderText('Unit'))
-    await user.keyboard(clearAllThen('pc'))
-
-    await user.click(screen.getByPlaceholderText('Price $'))
-    await user.keyboard(clearAllThen(250))
+    keyIn(screen.getByPlaceholderText('Quantity'), '8')
+    keyIn(screen.getByPlaceholderText('Unit'), 'pc')
+    keyIn(screen.getByPlaceholderText('Price $'), '250')
 
     // add item #2
     await user.click(screen.getByLabelText('Add new order'))
 
+    // expect(screen.getAllByPlaceholderText('Key in item code')).toHaveLength(10)
     await user.click(screen.getAllByPlaceholderText('Key in item code')[1])
-    await user.keyboard('06690')
-
+    await user.paste('06690')
     await user.click(screen.getAllByPlaceholderText('Find a existing one as template')[1])
-    await user.keyboard('Engine Oil')
+    await user.paste('Engine Oil')
 
-    await user.click(screen.getAllByPlaceholderText('Quantity')[1])
-    await user.keyboard('200')
-
-    await user.click(screen.getAllByPlaceholderText('Price $')[1])
-    await user.keyboard(clearAllThen('9.7'))
+    keyIn(screen.getAllByPlaceholderText('Quantity')[1], '200')
+    keyIn(screen.getAllByPlaceholderText('Unit')[1], 'ltr')
+    keyIn(screen.getAllByPlaceholderText('Price $')[1], '9.7')
 
     // finally select a different supplier
     await user.click(screen.getAllByLabelText('Clear')[0])
@@ -376,7 +343,7 @@ test('create a 2 items order, from different suppliers, then choose a new suppli
         {"deliveryOrderNo": "DO-00003", "id": undefined, "invoiceDate": todayDateStr, 
             "itemCode": "06690", "notes": undefined, "partName": "Engine Oil", 
             "quantity": 200, "sparePartId": undefined, "supplierId": 2002, 
-            "totalPrice": 1939.9999999999998, "unit": "pc", "unitPrice": 9.7}], expect.anything())
+            "totalPrice": 1939.9999999999998, "unit": "ltr", "unitPrice": 9.7}], expect.anything())
 
     onSaveNewOrders.mock.calls[0][1]()
     expect(setShowDialog).toBeCalledWith(false)
@@ -394,45 +361,35 @@ test('create a 2 items orders, delete 1st, then 2nd one should be the only one',
             onSaveNewOrders={onSaveNewOrders} sparePartUsages={[]} suppliers={suppliers}></AddSparePartsDialog>
         </SupplierOrderContext>)
 
-    await user.click(screen.getByPlaceholderText('Key in Invoice Date'))
-    await user.keyboard(todayDateStr)
+    keyIn(screen.getByPlaceholderText('Key in Invoice Date'), todayDateStr)
 
     await user.click(screen.getByPlaceholderText('Choose a supplier'))
     await user.click(screen.getByText('Aik Han'))
 
-    await user.click(screen.getByPlaceholderText('Key in DO. #'))
-    await user.keyboard("DO-00003")
+    keyIn(screen.getByPlaceholderText('Key in DO. #'), "DO-00003")
 
     // start to add items
     await user.click(screen.getByPlaceholderText('Key in item code'))
-    await user.keyboard('06690A')
+    await user.paste('06690A')
 
     await user.click(screen.getByPlaceholderText('Find a existing one as template'))
-    await user.keyboard('Air Filter 6642')
+    await user.paste('Air Filter 6642')
 
-    await user.click(screen.getByPlaceholderText('Quantity'))
-    await user.keyboard('5')
-
-    await user.click(screen.getByPlaceholderText('Unit'))
-    await user.keyboard(clearAllThen('set'))
-
-    await user.click(screen.getByPlaceholderText('Price $'))
-    await user.keyboard('105')
+    keyIn(screen.getByPlaceholderText('Quantity'), '5')
+    keyIn(screen.getByPlaceholderText('Unit'), 'set')
+    keyIn(screen.getByPlaceholderText('Price $'), '105')
 
     // add item #2
     await user.click(screen.getByLabelText('Add new order'))
 
     await user.click(screen.getAllByPlaceholderText('Key in item code')[1])
-    await user.keyboard('00016-X') // it will get changed later on to 00016
+    await user.paste('00016-X') // it will get changed later on to 00016
 
     await user.click(screen.getAllByPlaceholderText('Find a existing one as template')[1])
     await user.click(screen.getByText('Engine Oil'))
 
-    await user.click(screen.getAllByPlaceholderText('Quantity')[1])
-    await user.keyboard('400')
-
-    await user.click(screen.getAllByPlaceholderText('Price $')[1])
-    await user.keyboard(clearAllThen(9.7))
+    keyIn(screen.getAllByPlaceholderText('Quantity')[1], '400')
+    keyIn(screen.getAllByPlaceholderText('Price $')[1], '9.7')
 
     // delete the first one
     await user.click(document.querySelectorAll('.bi-trash3')[0])
@@ -473,12 +430,9 @@ test('edit existing order, not allow to add and change value', async() => {
     await user.click(screen.getByLabelText('Clone orders'))
     await waitFor(() => expect(screen.queryByText('Adding New Spare Parts')).toBeInTheDocument())
 
-    //fireEvent.change(screen.getByPlaceholderText('Key in Invoice Date'), todayDateStr)
-    await user.click(screen.getByPlaceholderText('Key in Invoice Date'))
-    await user.keyboard(todayDateStr) // weird, this is not working
+    keyIn(screen.getByPlaceholderText('Key in Invoice Date'), todayDateStr)
 
-    await user.click(screen.getByPlaceholderText('Key in DO. #'))
-    await user.keyboard(clearAllThen('DO-00004'))
+    keyIn(screen.getByPlaceholderText('Key in DO. #'), 'DO-00004')
 
     await user.click(screen.getByLabelText('Save orders'))
     // console.log(Array.from(document.querySelector('form').elements).map(v => v.name + ' ' + v.validationMessage))
@@ -556,8 +510,7 @@ test('edit existing order, only non-usage allow to be submitted', async() => {
     expect(screen.getAllByPlaceholderText('Key in item code')[1]).toBeEnabled()
     expect(screen.getByLabelText('Add new order')).toBeDisabled()
 
-    await user.click(screen.getAllByPlaceholderText('Quantity')[1])
-    await user.keyboard(clearAllThen('220'))
+    keyIn(screen.getAllByPlaceholderText('Quantity')[1], '220')
 
     await user.click(screen.getByLabelText('Save orders'))
     expect(onSaveNewOrders).toBeCalledWith([
@@ -600,8 +553,7 @@ test('edit existing order, with pending DO items', async() => {
     expect(screen.getByLabelText('Add new order')).toBeDisabled()
     expect(screen.getByLabelText('Pending DO/Invoice')).toBeDisabled()
 
-    await user.click(screen.getByPlaceholderText('Key in DO. #'))
-    await user.keyboard(clearAllThen("DO-99110000"))
+    keyIn(screen.getByPlaceholderText('Key in DO. #'), "DO-99110000")
 
     await user.click(screen.getByLabelText('Save orders'))
     expect(onSaveNewOrders).toBeCalledWith([

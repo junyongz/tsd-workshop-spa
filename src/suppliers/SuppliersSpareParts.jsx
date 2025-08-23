@@ -8,7 +8,7 @@ import NoteTakingDialog from "./NoteTakingDialog"
 import { clearState } from "../autoRefreshWorker"
 import SparePartNotes from "./SparePartNotes"
 import SupplierSparePartsYearMonthView from "./SupplierSparePartsYearMonthView"
-import { Calendar, EmptyBox, Notes, Suppliers, Tools, Truck } from "../Icons"
+import { Calendar, Camera, EmptyBox, Notes, Suppliers, Tools, Truck } from "../Icons"
 import ResponsivePagination from "../components/ResponsivePagination"
 import PromptDeletionIcon from "../components/PromptDeletionIcon"
 import { applyFilterOnOrders } from "../search/fuzzySearch"
@@ -364,7 +364,7 @@ function SuppliersSpareParts({setTotalFilteredOrders,
                                             <Col><Badge bg="info" pill>{v.itemCode}</Badge></Col>
                                         </Row>
                                         <Row>
-                                            <Col sm="8">{v.sparePartId ? <span aria-label={`hover to view photos of part ${v.sparePartId}`} role="button" onMouseEnter={() => loadPartsMedia(v.sparePartId, v.partName)} onMouseLeave={() => unloadPartsMedia()} >{v.partName}</span> : <>{v.partName}</>}</Col>
+                                            <Col sm="8">{v.sparePartId ? <span aria-label={`hover to view photos of part ${v.sparePartId}`} role="button" onMouseEnter={() => loadPartsMedia(v.sparePartId, v.partName)} onMouseLeave={() => unloadPartsMedia()}><Camera /> {v.partName}</span> : <>{v.partName}</>}</Col>
                                             <Col><Badge>{v.quantity} {v.unit} @ each ${v.unitPrice}</Badge>
                                               {quantityLeft < v.quantity && <Badge bg={quantityLeft === 0 ? 'danger' : 'warning' }>{quantityLeft} left</Badge>}
                                               {v.status === 'DEPLETED' && <Badge bg="danger">Nothing left</Badge>}

@@ -7,7 +7,7 @@ import PromptDeletionIcon from "../components/PromptDeletionIcon";
 import { useSupplierOrders } from "./SupplierOrderContextProvider";
 import generateUniqueId from "../utils/randomUtils";
 
-const defaultItem = {rid: generateUniqueId(), itemCode: '', partName: 'Choose one ...', quantity: 0, unit: 'pc', unitPrice: 0, selectedItemCode: [], selectedSparePart: []};
+const defaultItem = {itemCode: '', partName: 'Choose one ...', quantity: 0, unit: 'pc', unitPrice: 0, selectedItemCode: [], selectedSparePart: []};
 
 /**
  * 
@@ -32,7 +32,7 @@ function AddSparePartsDialog({isShow, setShowDialog, existingOrder, setExistingO
     /**
      * @type {[import("./SupplierOrders").SupplierOrder[], React.SetStateAction<import("./SupplierOrders").SupplierOrder[]>]}
      */
-    const [items, setItems] = useState(existingOrder || [defaultItem])
+    const [items, setItems] = useState(existingOrder || [{...defaultItem, rid: generateUniqueId()}])
     const editing = items && !!items[0]?.deliveryOrderNo
     const hasPendingDO = items.some(it => 
         it.deliveryOrderNo?.startsWith('PENDING-DO-') && it.deliveryOrderNo?.endsWith(it.id))
@@ -40,11 +40,11 @@ function AddSparePartsDialog({isShow, setShowDialog, existingOrder, setExistingO
     const [selectedSupplier, setSelectedSupplier] = useState([])
 
     const dialogOpened = () => {
-        setItems(existingOrder?.length > 0 || [defaultItem])
+        setItems(existingOrder?.length > 0 || [{...defaultItem, rid: generateUniqueId()}])
     }
 
     const handleClose = () => {
-        setItems([defaultItem])
+        setItems([{...defaultItem, rid: generateUniqueId()}])
         setShowDialog(false)
         setSelectedSupplier([])
         setValidated(false)
@@ -102,7 +102,7 @@ function AddSparePartsDialog({isShow, setShowDialog, existingOrder, setExistingO
     const addNewItem = () => {
         setValidated(false)
         setItems(prev => {
-            return [...prev, defaultItem]
+            return [...prev, {...defaultItem, rid: generateUniqueId()}]
         })
     }
 

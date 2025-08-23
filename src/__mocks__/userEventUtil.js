@@ -11,9 +11,32 @@ export function clearAllThen(key) {
 
 /**
  * 
+ * @param {import("@testing-library/user-event").UserEvent} user 
+ * @param {string} keys 
+ * @returns {string}
+ */
+export function clearAllAndPaste(user, keys) {
+    user.keyboard('{Control>}A{/Control}')
+    user.paste(keys)
+}
+
+/**
+ * 
  * @param {Element|Node} elem 
  * @param {string|number} value 
  */
 export function keyIn(elem, value) {
     fireEvent.change(elem, { target: { value: value } })
+}
+
+/**
+ * 
+ * @param {Element|Node} elem 
+ */
+export function clickOtherPlace(elem) {
+    fireEvent.blur(elem)
+}
+
+export function clickToFocus(elem) {
+    fireEvent.focus(elem)
 }

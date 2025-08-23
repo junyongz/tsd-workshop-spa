@@ -72,33 +72,33 @@ test('add new parts with supplier and photo, but failed to save media', async ()
     expect(screen.getByPlaceholderText('OE No').validity.valueMissing).toBeTruthy()
 
     await user.click(screen.getByPlaceholderText('OE No'))
-    await user.keyboard('11220000')
+    await user.paste('11220000')
 
     await user.click(screen.getByPlaceholderText('Part Name'))
-    await user.keyboard('Air Tank')
+    await user.paste('Air Tank')
 
     await user.click(screen.getByPlaceholderText('Description'))
-    await user.keyboard('Air Tank for storing air from compressor')
+    await user.paste('Air Tank for storing air from compressor')
 
     // OEM
     await user.click(screen.getByRole('button', {name: 'button to add OEM'}))
     await user.click(screen.getByRole('textbox', {name: 'name for oem 0'}))
-    await user.keyboard('TSO')
+    await user.paste('TSO')
     await user.click(screen.getByRole('textbox', {name: 'url for oem 0'}))
-    await user.keyboard('http://tso.com/1122000/air-tank')
+    await user.paste('http://tso.com/1122000/air-tank')
 
     // TRUCK
     await user.click(screen.getByRole('button', {name: 'button to add compatible truck'}))
     await user.click(screen.getByRole('textbox', {name: 'truck make 0'}))
-    await user.keyboard('Hino')
+    await user.paste('Hino')
     await user.click(screen.getByRole('textbox', {name: 'truck model 0'}))
-    await user.keyboard('700')
+    await user.paste('700')
 
     // supplier tab
     await user.click(screen.getByRole('tab', {name: 'Suppliers'}))
     // find from order
     await user.click(screen.getByPlaceholderText('How about start with an order'))
-    await user.keyboard('Air Tank')
+    await user.paste('Air Tank')
     await user.click(screen.getByRole('option', {name: 'Air Tank (2005-01-01) - Han Seng'}))
 
     // go to gallery
@@ -165,19 +165,19 @@ test('add new parts with supplier and photo', async () => {
     render(<SupplierOrderContext value={mockOrders}><SparePartWrapper /></SupplierOrderContext>)
 
     await user.click(screen.getByPlaceholderText('OE No'))
-    await user.keyboard('11220000')
+    await user.paste('11220000')
 
     await user.click(screen.getByPlaceholderText('Part Name'))
-    await user.keyboard('Air Tank')
+    await user.paste('Air Tank')
 
     await user.click(screen.getByPlaceholderText('Description'))
-    await user.keyboard('Air Tank for storing air from compressor')
+    await user.paste('Air Tank for storing air from compressor')
 
     // supplier tab
     await user.click(screen.getByRole('tab', {name: 'Suppliers'}))
     // find from order
     await user.click(screen.getByPlaceholderText('How about start with an order'))
-    await user.keyboard('Air Tank')
+    await user.paste('Air Tank')
     await user.click(screen.getByRole('option', {name: 'Air Tank (2005-01-01) - Han Seng'}))
 
     // go to gallery
@@ -229,13 +229,13 @@ test('add new parts without any supplier', async () => {
     render(<SupplierOrderContext value={mockOrders}><SparePartWrapper /></SupplierOrderContext>)
 
     await user.click(screen.getByPlaceholderText('OE No'))
-    await user.keyboard('11220000')
+    await user.paste('11220000')
 
     await user.click(screen.getByPlaceholderText('Part Name'))
-    await user.keyboard('Air Tank')
+    await user.paste('Air Tank')
 
     await user.click(screen.getByPlaceholderText('Description'))
-    await user.keyboard('Air Tank for storing air from compressor')
+    await user.paste('Air Tank for storing air from compressor')
 
     await user.click(screen.getByRole('button', {name: 'Save'}))
     expect(global.alert).toBeCalledWith('Sorry, no suppliers added')
@@ -255,7 +255,7 @@ test('add new parts without any supplier', async () => {
     // supplier tab
     await user.click(screen.getByRole('tab', {name: 'Suppliers 1'}))
     await user.click(screen.getByPlaceholderText('How about start with an order'))
-    await user.keyboard('Air Tank')
+    await user.paste('Air Tank')
     await user.click(screen.getByRole('option', {name: 'Air Tank (2005-02-09) - Kok Song'}))
     expect(screen.queryAllByRole('listitem')).toHaveLength(1)
 
@@ -311,49 +311,49 @@ test('add spare part with many orders, remove supplier and add photo', async () 
     render(<SupplierOrderContext value={mockOrders}><SparePartWrapper /></SupplierOrderContext>)
 
     await user.click(screen.getByPlaceholderText('OE No'))
-    await user.keyboard('11220000')
+    await user.paste('11220000')
 
     await user.click(screen.getByPlaceholderText('Part Name'))
-    await user.keyboard('Air Tank')
+    await user.paste('Air Tank')
 
     await user.click(screen.getByPlaceholderText('Description'))
-    await user.keyboard('Air Tank for storing air from compressor')
+    await user.paste('Air Tank for storing air from compressor')
 
     // supplier tab
     await user.click(screen.getByRole('tab', {name: 'Suppliers'}))
     // find from order
     await user.click(screen.getByPlaceholderText('How about start with an order'))
-    await user.keyboard('Air Tank')
+    await user.paste('Air Tank')
     await user.click(screen.getByRole('option', {name: 'Air Tank (2005-01-01) - Han Seng'}))
     expect(screen.queryAllByRole('listitem')).toHaveLength(1)
 
     await user.click(screen.getByPlaceholderText('How about start with an order'))
-    await user.keyboard('Air Tank')
+    await user.paste('Air Tank')
     await user.click(screen.getByRole('option', {name: 'Air Tank (2005-01-02) - Han Seng'}))
     expect(screen.queryAllByRole('listitem')).toHaveLength(2)
 
     await user.click(screen.getByPlaceholderText('How about start with an order'))
-    await user.keyboard('Air Tank')
+    await user.paste('Air Tank')
     await user.click(screen.getByRole('option', {name: 'Air Tank (2005-02-03) - Han Seng'}))
     expect(screen.queryAllByRole('listitem')).toHaveLength(3)
 
     await user.click(screen.getByPlaceholderText('How about start with an order'))
-    await user.keyboard('Air Tank')
+    await user.paste('Air Tank')
     await user.click(screen.getByRole('option', {name: 'Air Tank (2005-02-04) - Han Seng'}))
     expect(screen.queryAllByRole('listitem')).toHaveLength(4)
 
     await user.click(screen.getByPlaceholderText('How about start with an order'))
-    await user.keyboard('Air Tank')
+    await user.paste('Air Tank')
     await user.click(screen.getByRole('option', {name: 'Air Tank (2005-01-03) - Han Seng'}))
     expect(screen.queryAllByRole('listitem')).toHaveLength(5)
 
     await user.click(screen.getByPlaceholderText('How about start with an order'))    
-    await user.keyboard('Air Tank')
+    await user.paste('Air Tank')
     await user.click(screen.getByRole('option', {name: 'Air Tank (2005-01-05) - Han Seng'}))
     expect(screen.queryAllByRole('listitem')).toHaveLength(6)
 
     await user.click(screen.getByPlaceholderText('How about start with an order'))    
-    await user.keyboard('Air Tank')
+    await user.paste('Air Tank')
     await user.click(screen.getByRole('option', {name: 'Air Tank (2005-01-06) - Han Seng'}))
     expect(screen.queryAllByRole('listitem')).toHaveLength(6)
 
@@ -362,7 +362,7 @@ test('add spare part with many orders, remove supplier and add photo', async () 
     expect(screen.queryAllByRole('listitem')).toHaveLength(7)
 
     await user.click(screen.getByPlaceholderText('How about start with an order'))
-    await user.keyboard('Air Tank')
+    await user.paste('Air Tank')
     await user.click(screen.getByRole('option', {name: 'Air Tank (2005-02-09) - Kok Song'}))
     // go to another new supplier
     expect(screen.queryAllByRole('listitem')).toHaveLength(1)
@@ -425,13 +425,13 @@ test('add spare part with many orders through suppliers order box', async () => 
     render(<SupplierOrderContext value={mockOrders}><SparePartWrapper /></SupplierOrderContext>)
 
     await user.click(screen.getByPlaceholderText('OE No'))
-    await user.keyboard('11220000')
+    await user.paste('11220000')
 
     await user.click(screen.getByPlaceholderText('Part Name'))
-    await user.keyboard('Air Tank')
+    await user.paste('Air Tank')
 
     await user.click(screen.getByPlaceholderText('Description'))
-    await user.keyboard('Air Tank for storing air from compressor')
+    await user.paste('Air Tank for storing air from compressor')
 
     // supplier tab
     await user.click(screen.getByRole('tab', {name: 'Suppliers'}))
@@ -440,7 +440,7 @@ test('add spare part with many orders through suppliers order box', async () => 
     await user.click(screen.getByText('Han Seng'))
 
     await user.click(screen.getByPlaceholderText('Find a spare part from orders'))
-    await user.keyboard('Air Tank')
+    await user.paste('Air Tank')
     await user.click(screen.getByRole('option', {name: 'Air Tank (2005-01-01)'}))
     expect(screen.queryAllByRole('listitem')).toHaveLength(1)
 
@@ -448,32 +448,32 @@ test('add spare part with many orders through suppliers order box', async () => 
     expect(screen.queryByPlaceholderText('Find a spare part from orders')).not.toBeInTheDocument()
 
     await user.click(screen.getByRole('combobox', {name: 'find the order from the supplier'}))
-    await user.keyboard('Air Tank')
+    await user.paste('Air Tank')
     await user.click(screen.getByRole('option', {name: 'Air Tank (2005-01-02)'}))
     expect(screen.queryAllByRole('listitem')).toHaveLength(2)
 
     await user.click(screen.getByRole('combobox', {name: 'find the order from the supplier'}))
-    await user.keyboard('Air Tank')
+    await user.paste('Air Tank')
     await user.click(screen.getByRole('option', {name: 'Air Tank (2005-02-03)'}))
     expect(screen.queryAllByRole('listitem')).toHaveLength(3)
 
     await user.click(screen.getByRole('combobox', {name: 'find the order from the supplier'}))
-    await user.keyboard('Air Tank')
+    await user.paste('Air Tank')
     await user.click(screen.getByRole('option', {name: 'Air Tank (2005-02-04)'}))
     expect(screen.queryAllByRole('listitem')).toHaveLength(4)
 
     await user.click(screen.getByRole('combobox', {name: 'find the order from the supplier'}))
-    await user.keyboard('Air Tank')
+    await user.paste('Air Tank')
     await user.click(screen.getByRole('option', {name: 'Air Tank (2005-01-03)'}))
     expect(screen.queryAllByRole('listitem')).toHaveLength(5)
 
     await user.click(screen.getByRole('combobox', {name: 'find the order from the supplier'}))
-    await user.keyboard('Air Tank')
+    await user.paste('Air Tank')
     await user.click(screen.getByRole('option', {name: 'Air Tank (2005-01-05)'}))
     expect(screen.queryAllByRole('listitem')).toHaveLength(6)
 
     await user.click(screen.getByRole('combobox', {name: 'find the order from the supplier'}))
-    await user.keyboard('Air Tank')
+    await user.paste('Air Tank')
     await user.click(screen.getByRole('option', {name: 'Air Tank (2005-01-06)'}))
     expect(screen.queryAllByRole('listitem')).toHaveLength(6)
 
